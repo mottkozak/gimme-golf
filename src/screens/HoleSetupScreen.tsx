@@ -1,0 +1,152 @@
+import { PERSONAL_CARDS, PUBLIC_CARDS } from '../data/cards.ts'
+import { createDealtHoleCardsState, createEmptyHoleCardsState } from '../logic/dealCards.ts'
+import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
+import type { HoleTag } from '../types/cards.ts'
+import type { ScreenProps } from './types.ts'
+
+function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const currentHole = roundState.holes[roundState.currentHoleIndex]
+  const isLastHole = roundState.currentHoleIndex === roundState.holes.length - 1
+
+  const setPar = (nextPar: number) => {
+    onUpdateRoundState((currentState) => {
+      const holes = [...currentState.holes]
+      holes[currentState.currentHoleIndex] = {
+        ...holes[currentState.currentHoleIndex],
+        par: normalizePar(nextPar),
+      }
+
+      const holeCards = [...currentState.holeCards]
+      holeCards[currentState.currentHoleIndex] = createEmptyHoleCardsState(
+        currentState.players,
+        holes[currentState.currentHoleIndex].holeNumber,
+      )
+
+      return {
+        ...currentState,
+        holes,
+        holeCards,
+      }
+    })
+  }
+
+  const setHoleTag = (tag: HoleTag) => {
+    onUpdateRoundState((currentState) => {
+      const holes = [...currentState.holes]
+      const hole = holes[currentState.currentHoleIndex]
+
+      holes[currentState.currentHoleIndex] = {
+        ...hole,
+        tags: toggleHoleTag(hole.tags, tag),
+      }
+
+      const holeCards = [...currentState.holeCards]
+      holeCards[currentState.currentHoleIndex] = createEmptyHoleCardsState(
+        currentState.players,
+        holes[currentState.currentHoleIndex].holeNumber,
+      )
+
+      return {
+        ...currentState,
+        holes,
+        holeCards,
+      }
+    })
+  }
+
+  const dealCardsForCurrentHole = () => {
+    onUpdateRoundState((currentState) => {
+      const currentHoleIndex = currentState.currentHoleIndex
+      const hole = currentState.holes[currentHoleIndex]
+
+      const holeCards = [...currentState.holeCards]
+      holeCards[currentHoleIndex] = createDealtHoleCardsState(
+        currentState.players,
+        hole,
+        currentState.config,
+        PERSONAL_CARDS,
+        PUBLIC_CARDS,
+      )
+
+      const holeResults = [...currentState.holeResults]
+      holeResults[currentHoleIndex] = {
+        ...holeResults[currentHoleIndex],
+        strokesByPlayerId: Object.fromEntries(
+          currentState.players.map((player) => [player.id, null]),
+        ),
+        missionStatusByPlayerId: Object.fromEntries(
+          currentState.players.map((player) => [player.id, 'pending']),
+        ),
+        publicPointDeltaByPlayerId: Object.fromEntries(
+          currentState.players.map((player) => [player.id, 0]),
+        ),
+        publicCardResolutionsByCardId: {},
+        publicCardResolutionNotes: 'Pending public card resolution.',
+      }
+
+      return {
+        ...currentState,
+        holeCards,
+        holeResults,
+      }
+    })
+
+    onNavigate('holePlay')
+  }
+
+  return (
+    <section className="screen stack-sm">
+      <header className="screen__header">
+        <h2>Hole Setup</h2>
+        <p className="muted">
+          Hole {currentHole.holeNumber} of {roundState.holes.length} {isLastHole ? '(Final Hole)' : ''}
+        </p>
+      </header>
+
+      <section className="panel stack-xs">
+        <div className="row-between">
+          <strong>Confirm Hole Details</strong>
+          <span className="chip">Par {currentHole.par}</span>
+        </div>
+
+        <div className="button-row">
+          {[3, 4, 5, 6].map((par) => (
+            <button
+              key={par}
+              type="button"
+              className={currentHole.par === par ? 'button-primary' : ''}
+              onClick={() => setPar(par)}
+            >
+              Par {par}
+            </button>
+          ))}
+        </div>
+
+        <div className="stack-xs">
+          <span className="label">Hole Tags</span>
+          <div className="tag-grid">
+            {HOLE_TAG_OPTIONS.map((option) => {
+              const isActive = currentHole.tags.includes(option.tag)
+              return (
+                <button
+                  key={option.tag}
+                  type="button"
+                  className={`tag-pill ${isActive ? 'active' : ''}`}
+                  onClick={() => setHoleTag(option.tag)}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <button type="button" className="button-primary" onClick={dealCardsForCurrentHole}>
+          Deal Cards For Hole {currentHole.holeNumber}
+        </button>
+      </section>
+    </section>
+  )
+}
+
+export default HoleSetupScreen
