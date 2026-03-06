@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import type { PersonalCard } from '../types/cards.ts'
 import type {
   MissionStatus,
   PublicCardResolutionState,
@@ -31,9 +33,25 @@ function isResolutionComplete(resolution: PublicCardResolutionState): boolean {
 }
 
 function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const [activeCardPreview, setActiveCardPreview] = useState<{
+    playerName: string
+    card: PersonalCard
+  } | null>(null)
+
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveCardPreview(null)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const currentResolutions = normalizePublicCardResolutions(
     currentHoleCards.publicCards,
@@ -162,8 +180,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
   const setStrokes = (playerId: string, value: string) => {
     onUpdateRoundState((currentState) => {
-      const parsedValue = Number(value)
-      const nextStrokes = Number.isFinite(parsedValue) ? Math.max(1, Math.round(parsedValue)) : null
+      const normalizedValue = value.trim()
+      const parsedValue = Number(normalizedValue)
+      const nextStrokes =
+        normalizedValue === ''
+          ? null
+          : Number.isFinite(parsedValue)
+            ? Math.max(1, Math.round(parsedValue))
+            : null
 
       const holeResults = [...currentState.holeResults]
       const holeResultState = holeResults[currentState.currentHoleIndex]
@@ -241,7 +265,22 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             <article key={player.id} className="panel inset stack-xs">
               <div className="row-between">
                 <strong>{player.name}</strong>
-                <span className="chip">{selectedCard ? `Card: ${selectedCard.code}` : 'No card'}</span>
+                {selectedCard ? (
+                  <button
+                    type="button"
+                    className="chip chip-button"
+                    onClick={() =>
+                      setActiveCardPreview({
+                        playerName: player.name,
+                        card: selectedCard,
+                      })
+                    }
+                  >
+                    Card: {selectedCard.code}
+                  </button>
+                ) : (
+                  <span className="chip">No card</span>
+                )}
               </div>
 
               <p className="muted">
@@ -253,11 +292,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               <label className="field field--inline">
                 <span className="label">Strokes</span>
                 <input
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min={1}
+                  pattern="[0-9]*"
                   value={strokes ?? ''}
                   onChange={(event) => setStrokes(player.id, event.target.value)}
+                  onFocus={(event) => event.currentTarget.select()}
                 />
               </label>
 
@@ -420,6 +460,38 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           </p>
         )}
       </section>
+
+      {activeCardPreview && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => setActiveCardPreview(null)}
+        >
+          <section
+            className="panel modal-card stack-xs"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="personal-card-preview-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="row-between">
+              <h3 id="personal-card-preview-title">{activeCardPreview.card.name}</h3>
+              <button type="button" onClick={() => setActiveCardPreview(null)}>
+                Close
+              </button>
+            </div>
+            <p className="muted">
+              {activeCardPreview.playerName} | {activeCardPreview.card.code}
+            </p>
+            <p>{activeCardPreview.card.description}</p>
+            <p className="muted">{activeCardPreview.card.rulesText}</p>
+            <p>
+              Reward: {activeCardPreview.card.points > 0 ? '+' : ''}
+              {activeCardPreview.card.points} points on success
+            </p>
+          </section>
+        </div>
+      )}
     </section>
   )
 }

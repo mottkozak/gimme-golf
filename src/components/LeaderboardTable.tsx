@@ -1,11 +1,30 @@
+import type { LeaderboardSortMode } from '../logic/leaderboard.ts'
 import type { LeaderboardEntry } from '../types/game.ts'
 
 interface LeaderboardTableProps {
   title: string
   rows: LeaderboardEntry[]
+  sortMode?: LeaderboardSortMode
+  onSortChange?: (sortMode: LeaderboardSortMode) => void
 }
 
-function LeaderboardTable({ title, rows }: LeaderboardTableProps) {
+function LeaderboardTable({ title, rows, sortMode, onSortChange }: LeaderboardTableProps) {
+  const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
+    if (!onSortChange) {
+      return <span>{label}</span>
+    }
+
+    return (
+      <button
+        type="button"
+        className={`table-sort-button ${sortMode === mode ? 'active' : ''}`}
+        onClick={() => onSortChange(mode)}
+      >
+        {label}
+      </button>
+    )
+  }
+
   return (
     <div className="panel stack-xs">
       <div className="row-between">
@@ -18,9 +37,9 @@ function LeaderboardTable({ title, rows }: LeaderboardTableProps) {
             <tr>
               <th>Rank</th>
               <th>Player</th>
-              <th>Real</th>
-              <th>Points</th>
-              <th>Adjusted</th>
+              <th>{renderSortButton('Real', 'realScore')}</th>
+              <th>{renderSortButton('Points', 'gamePoints')}</th>
+              <th>{renderSortButton('Adjusted', 'adjustedScore')}</th>
             </tr>
           </thead>
           <tbody>

@@ -103,7 +103,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
             {currentHoleCards.publicCards.map((card) => (
               <PublicCardView key={card.id} card={card} />
             ))}
-            <p className="muted">Chaos/Prop resolution is not part of Phase 6.</p>
+            <p className="muted">Public Chaos/Prop cards are resolved on the Hole Results screen.</p>
           </section>
 
           <section className="panel stack-xs">

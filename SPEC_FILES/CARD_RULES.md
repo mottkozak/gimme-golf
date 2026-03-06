@@ -4,6 +4,10 @@
 - common
 - skill
 - risk
+- curse
+- style
+- hybrid
+- novelty
 - chaos
 - prop
 
@@ -13,6 +17,10 @@ Categories:
 - common = 1 point
 - skill = 2 points
 - risk = 3 points
+- curse = usually 2-3 points with a restriction
+- style = usually 1-3 points with social/group validation
+- hybrid = usually 2-3 points tied to group outcomes
+- novelty = usually 3-4 points for unusual actions plus score threshold
 
 ## Public card rules
 Chaos and Prop cards are public cards that apply at the hole level.

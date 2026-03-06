@@ -1,6 +1,22 @@
-export type CardType = 'common' | 'skill' | 'risk' | 'chaos' | 'prop'
+export type CardType =
+  | 'common'
+  | 'skill'
+  | 'risk'
+  | 'curse'
+  | 'style'
+  | 'hybrid'
+  | 'novelty'
+  | 'chaos'
+  | 'prop'
 
-export type PersonalCardType = 'common' | 'skill' | 'risk'
+export type PersonalCardType =
+  | 'common'
+  | 'skill'
+  | 'risk'
+  | 'curse'
+  | 'style'
+  | 'hybrid'
+  | 'novelty'
 
 export type PublicCardType = 'chaos' | 'prop'
 

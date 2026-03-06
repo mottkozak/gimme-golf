@@ -1,6 +1,14 @@
 import type { CardBase, HoleTag, PersonalCard, PublicCard } from '../types/cards.ts'
 
-const PERSONAL_CARD_TYPES = new Set<PersonalCard['cardType']>(['common', 'skill', 'risk'])
+const PERSONAL_CARD_TYPES = new Set<PersonalCard['cardType']>([
+  'common',
+  'skill',
+  'risk',
+  'curse',
+  'style',
+  'hybrid',
+  'novelty',
+])
 const PUBLIC_CARD_TYPES = new Set<PublicCard['cardType']>(['chaos', 'prop'])
 
 function hasRequiredTags(requiredTags: HoleTag[], activeTags: HoleTag[]): boolean {

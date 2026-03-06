@@ -5,13 +5,22 @@ import type {
   PublicCard,
   GimmeGolfCard,
 } from '../types/cards.ts'
+import {
+  EXPANSION_DECK_COUNTS,
+  EXPANSION_PERSONAL_CARDS,
+  EXPANSION_PUBLIC_CARDS,
+} from './expansionCards.ts'
 
 export const TARGET_DECK_COUNTS = {
-  common: 18,
-  skill: 18,
-  risk: 18,
-  chaos: 18,
-  prop: 18,
+  common: 40,
+  skill: 40,
+  risk: 40,
+  chaos: 40,
+  prop: 40,
+  curse: 15,
+  style: 15,
+  hybrid: 10,
+  novelty: 30,
 } as const
 
 const ALL_PARS = [3, 4, 5]
@@ -1060,8 +1069,13 @@ const PROP_CARDS: PublicCard[] = [
   }),
 ]
 
-export const PERSONAL_CARDS: PersonalCard[] = [...COMMON_CARDS, ...SKILL_CARDS, ...RISK_CARDS]
-export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS]
+export const PERSONAL_CARDS: PersonalCard[] = [
+  ...COMMON_CARDS,
+  ...SKILL_CARDS,
+  ...RISK_CARDS,
+  ...EXPANSION_PERSONAL_CARDS,
+]
+export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS, ...EXPANSION_PUBLIC_CARDS]
 export const ALL_CARDS: GimmeGolfCard[] = [...PERSONAL_CARDS, ...PUBLIC_CARDS]
 
 export const CARD_DECK: DeckCollection = {
@@ -1071,11 +1085,15 @@ export const CARD_DECK: DeckCollection = {
 }
 
 export const ACTUAL_DECK_COUNTS = {
-  common: COMMON_CARDS.length,
-  skill: SKILL_CARDS.length,
-  risk: RISK_CARDS.length,
-  chaos: CHAOS_CARDS.length,
-  prop: PROP_CARDS.length,
+  common: COMMON_CARDS.length + EXPANSION_DECK_COUNTS.common,
+  skill: SKILL_CARDS.length + EXPANSION_DECK_COUNTS.skill,
+  risk: RISK_CARDS.length + EXPANSION_DECK_COUNTS.risk,
+  chaos: CHAOS_CARDS.length + EXPANSION_DECK_COUNTS.chaos,
+  prop: PROP_CARDS.length + EXPANSION_DECK_COUNTS.prop,
+  curse: EXPANSION_DECK_COUNTS.curse,
+  style: EXPANSION_DECK_COUNTS.style,
+  hybrid: EXPANSION_DECK_COUNTS.hybrid,
+  novelty: EXPANSION_DECK_COUNTS.novelty,
 } as const
 
-export const CARD_DATA_VERSION = 'phase5-full-90-v1'
+export const CARD_DATA_VERSION = 'phase5-expansion-pack-270-v1'

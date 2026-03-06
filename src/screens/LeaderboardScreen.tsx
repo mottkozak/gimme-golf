@@ -1,21 +1,48 @@
-import HoleRecap from '../components/HoleRecap.tsx'
+import { useState } from 'react'
+import HoleRecapTable from '../components/HoleRecapTable.tsx'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
-import { buildLeaderboardEntries } from '../logic/leaderboard.ts'
+import { buildLeaderboardEntries, type LeaderboardSortMode } from '../logic/leaderboard.ts'
 import { calculatePlayerHoleGamePoints } from '../logic/scoring.ts'
 import type { ScreenProps } from './types.ts'
 
 function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const [sortMode, setSortMode] = useState<LeaderboardSortMode>('adjustedScore')
   const leaderboardRows = buildLeaderboardEntries(
     roundState.players,
     roundState.totalsByPlayerId,
-    'adjustedScore',
+    sortMode,
   )
-  const leader = leaderboardRows[0] ?? null
 
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const isLastHole = roundState.currentHoleIndex === roundState.holes.length - 1
+  const holeRecapRows = [...roundState.players]
+    .map((player) => ({
+      playerId: player.id,
+      playerName: player.name,
+      strokes: currentResult.strokesByPlayerId[player.id],
+      missionStatus: currentResult.missionStatusByPlayerId[player.id],
+      holePoints: calculatePlayerHoleGamePoints(player.id, currentHoleCards, currentResult),
+    }))
+    .sort((rowA, rowB) => {
+      const strokesA = rowA.strokes
+      const strokesB = rowB.strokes
+
+      if (typeof strokesA === 'number' && typeof strokesB === 'number' && strokesA !== strokesB) {
+        return strokesA - strokesB
+      }
+
+      if (typeof strokesA === 'number' && typeof strokesB !== 'number') {
+        return -1
+      }
+
+      if (typeof strokesA !== 'number' && typeof strokesB === 'number') {
+        return 1
+      }
+
+      return rowB.holePoints - rowA.holePoints
+    })
 
   const progressRound = () => {
     if (isLastHole) {
@@ -37,34 +64,13 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         <p className="muted">Hole {currentHole.holeNumber} complete. Review standings and continue.</p>
       </header>
 
-      <section className="panel stack-xs">
-        <strong>Hole {currentHole.holeNumber} Personal Card Points</strong>
-        {roundState.players.map((player) => {
-          const points = calculatePlayerHoleGamePoints(player.id, currentHoleCards, currentResult)
-
-          return (
-            <div key={player.id} className="row-between">
-              <span>{player.name}</span>
-              <span>
-                {points > 0 ? '+' : ''}
-                {points} pts
-              </span>
-            </div>
-          )
-        })}
-      </section>
-
-      <HoleRecap hole={currentHole} result={currentResult} players={roundState.players} />
-
-      <section className="panel stack-xs">
-        <strong>Current Leader</strong>
-        <p>
-          <strong>{leader?.playerName ?? '-'}</strong>{' '}
-          {leader ? `(Adjusted ${leader.adjustedScore})` : ''}
-        </p>
-      </section>
-
-      <LeaderboardTable title="Leaderboard" rows={leaderboardRows} />
+      <LeaderboardTable
+        title="Leaderboard"
+        rows={leaderboardRows}
+        sortMode={sortMode}
+        onSortChange={setSortMode}
+      />
+      <HoleRecapTable title={`Hole ${currentHole.holeNumber} Recap`} rows={holeRecapRows} />
 
       <section className="panel stack-xs">
         <button type="button" className="button-primary" onClick={progressRound}>
