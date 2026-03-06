@@ -4,21 +4,17 @@ import { buildLeaderboardEntries, getLeaderboardLeader } from '../logic/leaderbo
 import type { ScreenProps } from './types.ts'
 
 function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
-  const adjustedRows = buildLeaderboardEntries(
+  const leaderboardRows = buildLeaderboardEntries(
     roundState.players,
     roundState.totalsByPlayerId,
     'adjustedScore',
   )
   const realRows = buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, 'realScore')
-  const pointsRows = buildLeaderboardEntries(
-    roundState.players,
-    roundState.totalsByPlayerId,
-    'gamePoints',
-  )
+  const pointsRows = buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, 'gamePoints')
 
   const realWinner = getLeaderboardLeader(realRows, 'realScore')
   const pointsWinner = getLeaderboardLeader(pointsRows, 'gamePoints')
-  const adjustedWinner = getLeaderboardLeader(adjustedRows, 'adjustedScore')
+  const adjustedWinner = getLeaderboardLeader(leaderboardRows, 'adjustedScore')
 
   return (
     <section className="screen stack-sm">
@@ -48,9 +44,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
         </article>
       </section>
 
-      <LeaderboardTable title="Final Real Score Leaderboard" rows={realRows} />
-      <LeaderboardTable title="Final Game Points Leaderboard" rows={pointsRows} />
-      <LeaderboardTable title="Final Adjusted Score Leaderboard" rows={adjustedRows} />
+      <LeaderboardTable title="Leaderboard" rows={leaderboardRows} />
 
       <section className="panel stack-xs">
         <h3>Per-Hole Summary</h3>

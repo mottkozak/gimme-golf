@@ -1,4 +1,4 @@
-# SideQuest Golf - Card Rules
+# GIMME GOLF - Card Rules
 
 ## Card types
 - common

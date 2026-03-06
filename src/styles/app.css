@@ -63,6 +63,7 @@ h3 {
 
 main {
   display: block;
+  flex: 1;
 }
 
 .app-shell {
@@ -76,8 +77,6 @@ main {
 }
 
 .app-shell__header,
-.screen-nav,
-.footer-controls,
 .panel,
 .screen {
   width: 100%;
@@ -85,22 +84,9 @@ main {
 
 .app-shell__header {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-}
-
-.eyebrow {
-  color: var(--text-secondary);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.76rem;
-}
-
-.screen-nav {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.45rem;
 }
 
 .button-primary {
@@ -123,6 +109,10 @@ main {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.home-screen {
+  justify-content: center;
 }
 
 .screen__header {

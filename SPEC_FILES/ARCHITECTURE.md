@@ -1,4 +1,4 @@
-# SideQuest Golf - Architecture
+# GIMME GOLF - Architecture
 
 ## Preferred structure
 src/

@@ -1,4 +1,4 @@
-# SideQuest Golf
+# GIMME GOLF
 
 Mobile-first React + TypeScript + Vite web app for running a golf side game alongside a real round.
 

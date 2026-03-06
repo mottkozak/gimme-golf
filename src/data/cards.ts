@@ -3,7 +3,7 @@ import type {
   HoleTag,
   PersonalCard,
   PublicCard,
-  SideQuestCard,
+  GimmeGolfCard,
 } from '../types/cards.ts'
 
 export const TARGET_DECK_COUNTS = {
@@ -1062,7 +1062,7 @@ const PROP_CARDS: PublicCard[] = [
 
 export const PERSONAL_CARDS: PersonalCard[] = [...COMMON_CARDS, ...SKILL_CARDS, ...RISK_CARDS]
 export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS]
-export const ALL_CARDS: SideQuestCard[] = [...PERSONAL_CARDS, ...PUBLIC_CARDS]
+export const ALL_CARDS: GimmeGolfCard[] = [...PERSONAL_CARDS, ...PUBLIC_CARDS]
 
 export const CARD_DECK: DeckCollection = {
   personal: PERSONAL_CARDS,

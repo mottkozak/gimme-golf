@@ -40,10 +40,10 @@ export interface PublicCard extends CardBase {
   difficulty: 'neutral'
 }
 
-export type SideQuestCard = PersonalCard | PublicCard
+export type GimmeGolfCard = PersonalCard | PublicCard
 
 export interface DeckCollection {
   personal: PersonalCard[]
   public: PublicCard[]
-  all: SideQuestCard[]
+  all: GimmeGolfCard[]
 }

@@ -5,8 +5,6 @@ export interface ScreenProps {
   roundState: RoundState
   hasSavedRound: boolean
   onNavigate: (screen: AppScreen) => void
-  onNext: () => void
-  onBack: () => void
   onResumeSavedRound: () => void
   onResetRound: () => void
   onAbandonRound: () => void

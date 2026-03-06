@@ -1,67 +1,29 @@
-import PlayerCard from '../components/PlayerCard.tsx'
+import { createNewRoundState } from '../logic/roundLifecycle.ts'
 import type { ScreenProps } from './types.ts'
 
 function HomeScreen({
-  roundState,
-  hasSavedRound,
   onNavigate,
-  onResumeSavedRound,
-  onResetRound,
-  onAbandonRound,
+  onUpdateRoundState,
 }: ScreenProps) {
-  const currentHole = roundState.holes[roundState.currentHoleIndex]
+  const startRound = () => {
+    onUpdateRoundState(() => createNewRoundState())
+    onNavigate('roundSetup')
+  }
 
   return (
-    <section className="screen">
+    <section className="screen home-screen">
       <header className="screen__header">
-        <h1>SideQuest Golf</h1>
-        <p className="muted">Mobile-first round companion with local round persistence.</p>
+        <h2>GIMME GOLF</h2>
+        <p className="muted">Start a round and configure everything in a quick mobile flow.</p>
       </header>
 
-      <section className="panel">
-        <div className="row-between">
-          <strong>Round Snapshot</strong>
-          <span className="chip">Hole {currentHole.holeNumber}</span>
-        </div>
-        <p>
-          {roundState.players.length} golfers, {roundState.config.holeCount} holes,{' '}
-          {roundState.config.courseStyle} setup.
-        </p>
-        <div className="button-row">
-          <button onClick={() => onNavigate('roundSetup')}>Round Setup</button>
-          <button onClick={() => onNavigate('leaderboard')}>Latest Recap</button>
-          <button className="button-primary" onClick={() => onNavigate('holeSetup')}>
-            Start Hole Flow
-          </button>
-        </div>
-
-        <div className="button-row">
-          {hasSavedRound && (
-            <button type="button" onClick={onResumeSavedRound}>
-              Resume Round
-            </button>
-          )}
-          <button type="button" onClick={onResetRound}>
-            Reset Round
-          </button>
-          <button type="button" className="button-danger" onClick={onAbandonRound}>
-            Abandon Round
-          </button>
-        </div>
-
+      <section className="panel stack-xs">
         <p className="muted">
-          {hasSavedRound
-            ? 'A saved round is available in local storage.'
-            : 'No saved round yet. Changes save automatically once you edit setup or hole data.'}
+          Set your hole count, course style, golfers, and game options, then begin hole-by-hole play.
         </p>
-      </section>
-
-      <section className="stack-sm">
-        {roundState.players.map((player) => {
-          const totals = roundState.totalsByPlayerId[player.id]
-
-          return <PlayerCard key={player.id} player={player} totals={totals} />
-        })}
+        <button type="button" className="button-primary" onClick={startRound}>
+          Start Round
+        </button>
       </section>
     </section>
   )

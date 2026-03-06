@@ -1,4 +1,3 @@
-import HoleSetupCard from '../components/HoleSetupCard.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
 import ToggleRow from '../components/ToggleRow.tsx'
 import {
@@ -8,9 +7,7 @@ import {
   MAX_GOLFERS,
   MIN_GOLFERS,
   normalizeExpectedScore,
-  normalizePar,
   resizeHoles,
-  toggleHoleTag,
   type RoundSetupDraft,
 } from '../logic/roundSetup.ts'
 import type { CourseStyle, HoleCount, Player } from '../types/game.ts'
@@ -21,8 +18,8 @@ function createDraftId(position: number): string {
   return `player-${position}-${timestamp}`
 }
 
-function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
-  const { config, holes, players } = roundState
+function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const { config, players } = roundState
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
     onUpdateRoundState((currentState) => {
@@ -65,34 +62,6 @@ function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
         holes: applyCourseStyle(draft.holes, draft.config.holeCount, courseStyle),
       }
     })
-  }
-
-  const setHolePar = (holeNumber: number, par: number) => {
-    updateSetup((draft) => ({
-      ...draft,
-      holes: draft.holes.map((hole) =>
-        hole.holeNumber === holeNumber
-          ? {
-              ...hole,
-              par: normalizePar(par),
-            }
-          : hole,
-      ),
-    }))
-  }
-
-  const setHoleTag = (holeNumber: number, tag: Parameters<typeof toggleHoleTag>[1]) => {
-    updateSetup((draft) => ({
-      ...draft,
-      holes: draft.holes.map((hole) =>
-        hole.holeNumber === holeNumber
-          ? {
-              ...hole,
-              tags: toggleHoleTag(hole.tags, tag),
-            }
-          : hole,
-      ),
-    }))
   }
 
   const addPlayer = () => {
@@ -183,12 +152,20 @@ function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
     }))
   }
 
+  const beginRound = () => {
+    onUpdateRoundState((currentState) => ({
+      ...currentState,
+      currentHoleIndex: 0,
+    }))
+    onNavigate('holeSetup')
+  }
+
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
         <h2>Round Setup</h2>
         <p className="muted">
-          Configure holes, players, and game options before starting the round.
+          Pick the round format, add golfers, and choose game options before hole 1.
         </p>
       </header>
 
@@ -233,13 +210,6 @@ function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
             >
               Standard
             </button>
-            <button
-              type="button"
-              className={config.courseStyle === 'custom' ? 'button-primary' : ''}
-              onClick={() => setCourseStyle('custom')}
-            >
-              Custom
-            </button>
           </div>
         </div>
       </section>
@@ -272,22 +242,6 @@ function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
         <button type="button" onClick={addPlayer} disabled={players.length >= MAX_GOLFERS}>
           Add Golfer
         </button>
-      </section>
-
-      <section className="panel stack-xs">
-        <h3>Hole Pars & Tags</h3>
-        <p className="muted">Edit each hole par and optional tags.</p>
-
-        <div className="hole-list">
-          {holes.map((hole) => (
-            <HoleSetupCard
-              key={hole.holeNumber}
-              hole={hole}
-              onUpdatePar={(par) => setHolePar(hole.holeNumber, par)}
-              onToggleTag={(tag) => setHoleTag(hole.holeNumber, tag)}
-            />
-          ))}
-        </div>
       </section>
 
       <section className="panel stack-xs">
@@ -333,6 +287,12 @@ function RoundSetupScreen({ roundState, onUpdateRoundState }: ScreenProps) {
           checked={config.toggles.enablePropCards}
           onChange={() => setToggle('enablePropCards')}
         />
+      </section>
+
+      <section className="panel stack-xs">
+        <button type="button" className="button-primary" onClick={beginRound}>
+          Begin Round
+        </button>
       </section>
     </section>
   )

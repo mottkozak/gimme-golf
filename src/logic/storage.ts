@@ -1,6 +1,6 @@
 import type { RoundState } from '../types/game.ts'
 
-const ACTIVE_ROUND_STORAGE_KEY = 'sidequest-golf-active-round-v1'
+const ACTIVE_ROUND_STORAGE_KEY = 'gimme-golf-active-round-v1'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
