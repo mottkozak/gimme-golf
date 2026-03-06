@@ -10,6 +10,7 @@ import {
   EXPANSION_PERSONAL_CARDS,
   EXPANSION_PUBLIC_CARDS,
 } from './expansionCards.ts'
+import { getPackIdForCardType } from './cardPacks.ts'
 
 export const TARGET_DECK_COUNTS = {
   common: 40,
@@ -58,6 +59,7 @@ interface PublicCardInput {
 function personalCard(input: PersonalCardInput): PersonalCard {
   return {
     ...input,
+    packId: getPackIdForCardType(input.cardType),
     requiredTags: input.requiredTags ?? [],
     excludedTags: input.excludedTags ?? [],
     isPublic: false,
@@ -67,6 +69,7 @@ function personalCard(input: PersonalCardInput): PersonalCard {
 function publicCard(input: PublicCardInput): PublicCard {
   return {
     ...input,
+    packId: getPackIdForCardType(input.cardType),
     difficulty: 'neutral',
     requiredTags: input.requiredTags ?? [],
     excludedTags: input.excludedTags ?? [],

@@ -1,5 +1,10 @@
+import { useState } from 'react'
+import CardPackToggleRow from '../components/CardPackToggleRow.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
 import ToggleRow from '../components/ToggleRow.tsx'
+import { CARD_PACKS, CARD_PACKS_BY_ID } from '../data/cardPacks.ts'
+import { isPackUnlocked } from '../logic/entitlements.ts'
+import { toggleEnabledPack } from '../logic/roundConfig.ts'
 import {
   applyCourseStyle,
   applyRoundSetupDraft,
@@ -10,6 +15,7 @@ import {
   resizeHoles,
   type RoundSetupDraft,
 } from '../logic/roundSetup.ts'
+import type { CardPackId } from '../types/cards.ts'
 import type { CourseStyle, HoleCount, Player } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
 
@@ -19,6 +25,7 @@ function createDraftId(position: number): string {
 }
 
 function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const [activePackInfoId, setActivePackInfoId] = useState<CardPackId | null>(null)
   const { config, players } = roundState
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
@@ -125,15 +132,25 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     }))
   }
 
-  const setToggle = (toggle: 'dynamicDifficulty' | 'enableChaosCards' | 'enablePropCards') => {
+  const setDynamicDifficulty = (checked: boolean) => {
     updateSetup((draft) => ({
       ...draft,
       config: {
         ...draft.config,
         toggles: {
           ...draft.config.toggles,
-          [toggle]: !draft.config.toggles[toggle],
+          dynamicDifficulty: checked,
         },
+      },
+    }))
+  }
+
+  const setPackEnabled = (packId: CardPackId, enabled: boolean) => {
+    updateSetup((draft) => ({
+      ...draft,
+      config: {
+        ...draft.config,
+        enabledPackIds: toggleEnabledPack(draft.config.enabledPackIds, packId, enabled),
       },
     }))
   }
@@ -159,6 +176,8 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     }))
     onNavigate('holeSetup')
   }
+
+  const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] : null
 
   return (
     <section className="screen stack-sm">
@@ -245,13 +264,31 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       </section>
 
       <section className="panel stack-xs">
+        <h3>Card Packs</h3>
+        <p className="muted">Enable the game modes you want in this round.</p>
+
+        <div className="stack-xs">
+          {CARD_PACKS.map((pack) => (
+            <CardPackToggleRow
+              key={pack.id}
+              pack={pack}
+              enabled={config.enabledPackIds.includes(pack.id)}
+              unlocked={isPackUnlocked(pack.id, pack.premiumTier)}
+              onToggle={(enabled) => setPackEnabled(pack.id, enabled)}
+              onOpenInfo={() => setActivePackInfoId(pack.id)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="panel stack-xs">
         <h3>Game Options</h3>
 
         <ToggleRow
           label="Dynamic Difficulty"
           description="Weight challenge difficulty by expected score."
           checked={config.toggles.dynamicDifficulty}
-          onChange={() => setToggle('dynamicDifficulty')}
+          onChange={setDynamicDifficulty}
         />
 
         <section className="stack-xs">
@@ -273,20 +310,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             </button>
           </div>
         </section>
-
-        <ToggleRow
-          label="Chaos Cards"
-          description="Enable optional public chaos cards."
-          checked={config.toggles.enableChaosCards}
-          onChange={() => setToggle('enableChaosCards')}
-        />
-
-        <ToggleRow
-          label="Prop Cards"
-          description="Enable optional prediction prop cards."
-          checked={config.toggles.enablePropCards}
-          onChange={() => setToggle('enablePropCards')}
-        />
       </section>
 
       <section className="panel stack-xs">
@@ -294,6 +317,44 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           Begin Round
         </button>
       </section>
+
+      {activePackInfo && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => setActivePackInfoId(null)}
+        >
+          <section
+            className="panel modal-card stack-xs"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pack-info-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="row-between">
+              <h3 id="pack-info-title">{activePackInfo.name}</h3>
+              <button type="button" onClick={() => setActivePackInfoId(null)}>
+                Close
+              </button>
+            </div>
+
+            <p>{activePackInfo.longDescription}</p>
+            <p className="muted">Includes: {activePackInfo.includesLabel}</p>
+            <p className="muted">Best for: {activePackInfo.bestForLabel}</p>
+            <div className="stack-xs">
+              {activePackInfo.gameplayNotes.map((note) => (
+                <p key={note} className="muted">
+                  - {note}
+                </p>
+              ))}
+            </div>
+            <p className="muted">
+              Premium-ready: {activePackInfo.isPremium ? 'Yes' : 'No'}
+              {activePackInfo.premiumTier ? ` (${activePackInfo.premiumTier})` : ''}
+            </p>
+          </section>
+        </div>
+      )}
     </section>
   )
 }

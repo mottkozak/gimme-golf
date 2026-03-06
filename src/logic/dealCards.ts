@@ -1,6 +1,7 @@
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type { HoleCardsState, HoleDefinition, Player, RoundConfig } from '../types/game.ts'
 import {
+  filterCardsByEnabledPacks,
   filterPersonalCardsForHole,
   filterPublicCardsForHole,
 } from './filterCards.ts'
@@ -171,7 +172,8 @@ export function dealPersonalCardsForHole(
   roundConfig: RoundConfig,
   deck: PersonalCard[],
 ): Record<string, PersonalCard[]> {
-  const eligibleDeck = filterPersonalCardsForHole(deck, hole.par, hole.tags)
+  const packFilteredDeck = filterCardsByEnabledPacks(deck, roundConfig.enabledPackIds)
+  const eligibleDeck = filterPersonalCardsForHole(packFilteredDeck, hole.par, hole.tags)
   const drawCount = getPersonalDrawCount(roundConfig)
 
   return Object.fromEntries(
@@ -194,17 +196,18 @@ export function dealPublicCardsForHole(
   roundConfig: RoundConfig,
   deck: PublicCard[],
 ): PublicCard[] {
-  const filteredDeck = filterPublicCardsForHole(deck, hole.par, hole.tags)
+  const packFilteredDeck = filterCardsByEnabledPacks(deck, roundConfig.enabledPackIds)
+  const filteredDeck = filterPublicCardsForHole(packFilteredDeck, hole.par, hole.tags)
   const cards: PublicCard[] = []
 
-  if (roundConfig.toggles.enableChaosCards) {
+  if (roundConfig.enabledPackIds.includes('chaos')) {
     const chaosCard = filteredDeck.find((card) => card.cardType === 'chaos')
     if (chaosCard) {
       cards.push(chaosCard)
     }
   }
 
-  if (roundConfig.toggles.enablePropCards) {
+  if (roundConfig.enabledPackIds.includes('props')) {
     const propCard = filteredDeck.find((card) => card.cardType === 'prop')
     if (propCard) {
       cards.push(propCard)

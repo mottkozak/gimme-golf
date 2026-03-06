@@ -6,6 +6,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
+}
+
 function isRoundStateLike(value: unknown): value is RoundState {
   if (!isRecord(value)) {
     return false
@@ -32,7 +36,8 @@ function isRoundStateLike(value: unknown): value is RoundState {
     typeof config.toggles.drawTwoPickOne === 'boolean' &&
     typeof config.toggles.autoAssignOne === 'boolean' &&
     typeof config.toggles.enableChaosCards === 'boolean' &&
-    typeof config.toggles.enablePropCards === 'boolean'
+    typeof config.toggles.enablePropCards === 'boolean' &&
+    (config.enabledPackIds === undefined || isStringArray(config.enabledPackIds))
   )
 }
 

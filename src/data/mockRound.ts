@@ -5,6 +5,7 @@ import {
 } from '../logic/dealCards.ts'
 import { createDefaultHoles } from '../logic/roundSetup.ts'
 import { createPlayerTotals } from '../logic/scoring.ts'
+import { getDefaultEnabledPackIds } from './cardPacks.ts'
 import type { HoleTag } from '../types/cards.ts'
 import type {
   HoleCardsState,
@@ -19,6 +20,7 @@ import { PERSONAL_CARDS, PUBLIC_CARDS } from './cards.ts'
 const MOCK_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
+  enabledPackIds: getDefaultEnabledPackIds(),
   toggles: {
     dynamicDifficulty: true,
     drawTwoPickOne: true,

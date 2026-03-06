@@ -8,15 +8,23 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
 
-  const allPlayersHaveSelection = roundState.players.every((player) => {
+  const playersRequiringSelection = isDrawTwoPickOne
+    ? roundState.players.filter((player) => {
+        const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+        return dealtCards.length > 0
+      })
+    : []
+
+  const allPlayersHaveSelection = playersRequiringSelection.every((player) => {
     const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
     return typeof selectedCardId === 'string' && selectedCardId.length > 0
   })
 
-  const hasAnyCardsDealt = roundState.players.some((player) => {
+  const hasAnyPersonalCardsDealt = roundState.players.some((player) => {
     const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
     return dealtCards.length > 0
   })
+  const hasAnyCardsDealt = hasAnyPersonalCardsDealt || currentHoleCards.publicCards.length > 0
 
   const selectCard = (playerId: string, cardId: string) => {
     onUpdateRoundState((currentState) => {
@@ -85,6 +93,10 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                         )}
                       </div>
                     ))}
+
+                    {dealtCards.length === 0 && (
+                      <p className="muted">No personal cards available from enabled packs.</p>
+                    )}
                   </div>
 
                   {!isDrawTwoPickOne && (
@@ -116,7 +128,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               Continue To Hole Results
             </button>
             {!allPlayersHaveSelection && (
-              <p className="muted">Each golfer must have one selected personal card.</p>
+              <p className="muted">Select one personal card for each golfer who was dealt cards.</p>
             )}
           </section>
         </>

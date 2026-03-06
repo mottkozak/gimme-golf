@@ -1,4 +1,5 @@
 import type { HoleCardsState, HoleResultState, Player, PlayerTotals, RoundState } from '../types/game.ts'
+import { normalizeRoundConfig } from './roundConfig.ts'
 
 export function calculateAdjustedScore(realScore: number, gamePoints: number): number {
   return realScore - gamePoints
@@ -103,9 +104,11 @@ function normalizeHoleResults(
 
 export function recalculateRoundTotals(roundState: RoundState): RoundState {
   const normalizedHoleResults = normalizeHoleResults(roundState.players, roundState.holeResults)
+  const normalizedConfig = normalizeRoundConfig(roundState.config)
 
   return {
     ...roundState,
+    config: normalizedConfig,
     holeResults: normalizedHoleResults,
     totalsByPlayerId: calculateRoundTotalsByPlayerId(
       roundState.players,

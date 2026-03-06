@@ -1,4 +1,4 @@
-import type { HoleTag, PersonalCard, PublicCard } from './cards.ts'
+import type { CardPackId, HoleTag, PersonalCard, PublicCard } from './cards.ts'
 
 export type HoleCount = 9 | 18
 
@@ -15,6 +15,7 @@ export interface RoundToggles {
 export interface RoundConfig {
   holeCount: HoleCount
   courseStyle: CourseStyle
+  enabledPackIds: CardPackId[]
   toggles: RoundToggles
 }
 

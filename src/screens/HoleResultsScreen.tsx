@@ -230,8 +230,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const isHoleDataReady = roundState.players.every((player) => {
     const strokes = currentResult.strokesByPlayerId[player.id]
     const missionStatus = currentResult.missionStatusByPlayerId[player.id]
+    const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+    const requiresMissionResolution = dealtCards.length > 0
 
-    return typeof strokes === 'number' && isResolvedMissionStatus(missionStatus)
+    return (
+      typeof strokes === 'number' &&
+      (!requiresMissionResolution || isResolvedMissionStatus(missionStatus))
+    )
   })
 
   const arePublicCardsResolved = currentHoleCards.publicCards.every((card) =>
@@ -260,6 +265,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           )
           const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
+          const hasPersonalCard = Boolean(selectedCard)
 
           return (
             <article key={player.id} className="panel inset stack-xs">
@@ -301,22 +307,26 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 />
               </label>
 
-              <div className="button-row">
-                <button
-                  type="button"
-                  className={missionStatus === 'success' ? 'button-primary' : ''}
-                  onClick={() => setMissionStatus(player.id, 'success')}
-                >
-                  Challenge: Yes
-                </button>
-                <button
-                  type="button"
-                  className={missionStatus === 'failed' ? 'button-primary' : ''}
-                  onClick={() => setMissionStatus(player.id, 'failed')}
-                >
-                  Challenge: No
-                </button>
-              </div>
+              {hasPersonalCard ? (
+                <div className="button-row">
+                  <button
+                    type="button"
+                    className={missionStatus === 'success' ? 'button-primary' : ''}
+                    onClick={() => setMissionStatus(player.id, 'success')}
+                  >
+                    Challenge: Yes
+                  </button>
+                  <button
+                    type="button"
+                    className={missionStatus === 'failed' ? 'button-primary' : ''}
+                    onClick={() => setMissionStatus(player.id, 'failed')}
+                  >
+                    Challenge: No
+                  </button>
+                </div>
+              ) : (
+                <p className="muted">No personal challenge to resolve for this golfer.</p>
+              )}
             </article>
           )
         })}

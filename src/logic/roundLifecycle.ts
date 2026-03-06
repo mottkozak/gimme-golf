@@ -1,10 +1,12 @@
 import type { Player, RoundConfig, RoundState } from '../types/game.ts'
+import { getDefaultEnabledPackIds } from '../data/cardPacks.ts'
 import { applyRoundSetupDraft, DEFAULT_EXPECTED_SCORE } from './roundSetup.ts'
 import { createPlayerTotals } from './scoring.ts'
 
 const DEFAULT_ROUND_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
+  enabledPackIds: getDefaultEnabledPackIds(),
   toggles: {
     dynamicDifficulty: true,
     drawTwoPickOne: true,

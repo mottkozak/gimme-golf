@@ -1,4 +1,4 @@
-import type { CardBase, HoleTag, PersonalCard, PublicCard } from '../types/cards.ts'
+import type { CardBase, CardPackId, HoleTag, PersonalCard, PublicCard } from '../types/cards.ts'
 
 const PERSONAL_CARD_TYPES = new Set<PersonalCard['cardType']>([
   'common',
@@ -36,6 +36,18 @@ function preferTagMatchedCards<T extends Pick<CardBase, 'requiredTags'>>(
   )
 
   return tagMatched.length > 0 ? tagMatched : cards
+}
+
+export function filterCardsByEnabledPacks<T extends Pick<CardBase, 'packId'>>(
+  cards: T[],
+  enabledPackIds: CardPackId[],
+): T[] {
+  if (enabledPackIds.length === 0) {
+    return []
+  }
+
+  const enabledPackSet = new Set(enabledPackIds)
+  return cards.filter((card) => enabledPackSet.has(card.packId))
 }
 
 export function filterEligibleCardsByHoleContext<

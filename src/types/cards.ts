@@ -1,3 +1,5 @@
+export type CardPackId = 'classic' | 'chaos' | 'props' | 'curse' | 'style' | 'novelty' | 'hybrid'
+
 export type CardType =
   | 'common'
   | 'skill'
@@ -35,6 +37,7 @@ export interface CardBase {
   name: string
   description: string
   cardType: CardType
+  packId: CardPackId
   points: number
   eligiblePars: number[]
   requiredTags: HoleTag[]

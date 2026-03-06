@@ -10,6 +10,7 @@ import type {
   RoundState,
 } from '../types/game.ts'
 import { createEmptyHoleCardsState } from './dealCards.ts'
+import { normalizeRoundConfig } from './roundConfig.ts'
 import { createPlayerTotals } from './scoring.ts'
 
 const STANDARD_FRONT_NINE_PARS = [4, 4, 3, 5, 4, 4, 3, 5, 4] as const
@@ -117,19 +118,6 @@ export function applyCourseStyle(
   })
 }
 
-function normalizeDealMode(config: RoundConfig): RoundConfig {
-  const autoAssignOne = config.toggles.autoAssignOne
-
-  return {
-    ...config,
-    toggles: {
-      ...config.toggles,
-      drawTwoPickOne: !autoAssignOne,
-      autoAssignOne,
-    },
-  }
-}
-
 function ensurePlayers(players: Player[]): Player[] {
   const limited = players.slice(0, MAX_GOLFERS)
 
@@ -189,7 +177,7 @@ export function applyRoundSetupDraft(
   currentState: RoundState,
   setupDraft: RoundSetupDraft,
 ): RoundState {
-  const config = normalizeDealMode(setupDraft.config)
+  const config = normalizeRoundConfig(setupDraft.config)
   const players = ensurePlayers(setupDraft.players)
   const holes = ensureHoles(config, setupDraft.holes)
 
