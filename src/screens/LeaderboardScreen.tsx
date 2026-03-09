@@ -1,7 +1,11 @@
 import { ICONS } from '../app/icons.ts'
 import { useMemo, useState } from 'react'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
-import { buildHoleRecapData, formatWinnerSummary } from '../logic/holeRecap.ts'
+import {
+  buildHoleRecapData,
+  formatWinnerSummary,
+  type HoleRecapPlayerRow,
+} from '../logic/holeRecap.ts'
 import { buildLeaderboardEntries, type LeaderboardSortMode } from '../logic/leaderboard.ts'
 import type { PlayerTotals } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
@@ -29,6 +33,38 @@ function formatSignedPoints(value: number): string {
   return `${value > 0 ? '+' : ''}${value}`
 }
 
+function getPointDriverTone(value: number): 'positive' | 'negative' | 'neutral' {
+  if (value > 0) {
+    return 'positive'
+  }
+
+  if (value < 0) {
+    return 'negative'
+  }
+
+  return 'neutral'
+}
+
+function buildPointDrivers(row: HoleRecapPlayerRow): Array<{
+  label: string
+  value: number
+  tone: 'positive' | 'negative' | 'neutral'
+}> {
+  const drivers = [
+    { label: 'Card', value: row.baseCardPoints },
+    { label: 'Featured', value: row.featuredBonusPoints },
+    { label: 'Momentum', value: row.momentumBonusPoints },
+    { label: 'Public', value: row.publicBonusPoints },
+    { label: 'Rivalry', value: row.rivalryBonus },
+    { label: 'Hole Total', value: row.holePoints },
+  ]
+
+  return drivers.map((driver) => ({
+    ...driver,
+    tone: getPointDriverTone(driver.value),
+  }))
+}
+
 function getMissionStatusClass(missionStatus: 'pending' | 'success' | 'failed'): string {
   if (missionStatus === 'success') {
     return 'status-pill status-success'
@@ -42,11 +78,19 @@ function getMissionStatusClass(missionStatus: 'pending' | 'success' | 'failed'):
 }
 
 function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
-  const recapData = buildHoleRecapData(roundState)
+  const recapData = useMemo(() => buildHoleRecapData(roundState), [roundState])
   const isLastHole = roundState.currentHoleIndex === roundState.holes.length - 1
   const isPowerUpsMode = recapData.gameMode === 'powerUps'
   const [roundSortMode, setRoundSortMode] = useState<LeaderboardSortMode>('adjustedScore')
   const [holeSortMode, setHoleSortMode] = useState<LeaderboardSortMode>('adjustedScore')
+  const momentumJumpCount = recapData.playerRows.filter((row) => row.momentumTierJumped).length
+  const publicSwingCount = recapData.publicCardRecapItems.reduce(
+    (total, item) => total + item.impactRows.length,
+    0,
+  )
+  const strongestHoleGain = [...recapData.playerRows].sort(
+    (rowA, rowB) => rowB.holePoints - rowA.holePoints,
+  )[0]
 
   const roundLeaderboardRows = useMemo(
     () => buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, roundSortMode),
@@ -107,6 +151,24 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             <p>Current best adjusted total</p>
           </article>
         </div>
+      </section>
+
+      <section className="panel recap-section stack-xs">
+        <div className="row-between">
+          <h3>Why This Hole Moved</h3>
+          <span className="chip">Highlights</span>
+        </div>
+        <p className="muted">{recapData.highlightLine}</p>
+        {!isPowerUpsMode && strongestHoleGain && (
+          <p className="muted">
+            Best hole gain: {strongestHoleGain.playerName} ({formatSignedPoints(strongestHoleGain.holePoints)}).
+          </p>
+        )}
+        {!isPowerUpsMode && (
+          <p className="muted">
+            Momentum jumps: {momentumJumpCount} | Public-card swings: {publicSwingCount}
+          </p>
+        )}
       </section>
 
       {recapData.featuredHoleRecap && (
@@ -187,6 +249,16 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     ? `${row.selectedCardCode}: ${row.selectedCardName}`
                     : 'No personal card selected'}
                 </p>
+                <section className="recap-driver-grid">
+                  {buildPointDrivers(row).map((driver) => (
+                    <div key={`${row.playerId}-${driver.label}`} className="recap-driver-cell">
+                      <span className="label">{driver.label}</span>
+                      <strong className={`recap-driver-value recap-driver-value--${driver.tone}`}>
+                        {formatSignedPoints(driver.value)}
+                      </strong>
+                    </div>
+                  ))}
+                </section>
                 <div className="recap-metrics recap-metrics--totals">
                   {row.baseCardPoints !== 0 && (
                     <span className="recap-pill recap-pill--bonus">

@@ -2,7 +2,12 @@
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { applyFeaturedMissionPoints, assignFeaturedHolesForRound, resolveRivalryWinner } from './featuredHoles.ts'
+import {
+  applyFeaturedMissionPoints,
+  assignFeaturedHolesForRound,
+  getFeaturedHoleTargetCount,
+  resolveRivalryWinner,
+} from './featuredHoles.ts'
 import type { HoleDefinition } from '../types/game.ts'
 
 test('applyFeaturedMissionPoints applies jackpot and double-points bonuses', () => {
@@ -51,4 +56,39 @@ test('assignFeaturedHolesForRound keeps manual picks or falls back to auto when 
   assert.equal(preserved[0].featuredHoleType, 'chaos')
   assert.equal(preserved.filter((hole) => hole.featuredHoleType !== null).length, 1)
   assert.ok(autoFallback.some((hole) => hole.featuredHoleType !== null))
+})
+
+test('assignFeaturedHolesForRound clears assignments when featured holes are disabled', () => {
+  const holes: HoleDefinition[] = Array.from({ length: 9 }, (_, index) => ({
+    holeNumber: index + 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: index === 2 ? 'chaos' : null,
+  }))
+
+  const disabled = assignFeaturedHolesForRound(holes, {
+    enabled: false,
+    frequency: 'high',
+    assignmentMode: 'auto',
+  })
+
+  assert.equal(disabled.every((hole) => hole.featuredHoleType === null), true)
+})
+
+test('assignFeaturedHolesForRound auto mode assigns configured target count', () => {
+  const holes: HoleDefinition[] = Array.from({ length: 9 }, (_, index) => ({
+    holeNumber: index + 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }))
+
+  const assigned = assignFeaturedHolesForRound(holes, {
+    enabled: true,
+    frequency: 'high',
+    assignmentMode: 'auto',
+  })
+  const assignedCount = assigned.filter((hole) => hole.featuredHoleType !== null).length
+
+  assert.equal(assignedCount, getFeaturedHoleTargetCount(9, 'high'))
 })

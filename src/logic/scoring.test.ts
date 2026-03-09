@@ -4,7 +4,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { PersonalCard } from '../types/cards.ts'
 import type { HoleCardsState, HoleDefinition, HoleResultState, Player } from '../types/game.ts'
-import { calculatePlayerHolePointBreakdown, calculateRoundTotalsByPlayerId } from './scoring.ts'
+import {
+  calculatePlayerHolePointBreakdown,
+  calculateRoundTotalsByPlayerId,
+  clearRoundTotalsCache,
+} from './scoring.ts'
 
 function createPersonalCard(input: {
   id: string
@@ -122,4 +126,43 @@ test('calculateRoundTotalsByPlayerId applies featured, momentum, and public delt
   assert.equal(holeTwoBreakdown.momentumBonus, 1)
   assert.equal(holeTwoBreakdown.streakBefore, 2)
   assert.equal(holeTwoBreakdown.featuredBonusPoints, 0)
+})
+
+test('calculateRoundTotalsByPlayerId reuses cached totals for identical references', () => {
+  clearRoundTotalsCache()
+
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const holes: HoleDefinition[] = [
+    {
+      holeNumber: 1,
+      par: 4,
+      tags: [],
+      featuredHoleType: null,
+    },
+  ]
+  const card = createPersonalCard({ id: 'card-cache', code: 'CC', name: 'Cache Card', points: 1 })
+  const holeCards: HoleCardsState[] = [
+    {
+      holeNumber: 1,
+      dealtPersonalCardsByPlayerId: { p1: [card] },
+      selectedCardIdByPlayerId: { p1: card.id },
+      personalCardOfferByPlayerId: { p1: { safeCardId: card.id, hardCardId: null } },
+      publicCards: [],
+    },
+  ]
+  const holeResults: HoleResultState[] = [
+    {
+      holeNumber: 1,
+      strokesByPlayerId: { p1: 4 },
+      missionStatusByPlayerId: { p1: 'success' },
+      publicPointDeltaByPlayerId: { p1: 0 },
+      publicCardResolutionsByCardId: {},
+      publicCardResolutionNotes: '',
+    },
+  ]
+
+  const first = calculateRoundTotalsByPlayerId(players, holes, holeCards, holeResults, true)
+  const second = calculateRoundTotalsByPlayerId(players, holes, holeCards, holeResults, true)
+
+  assert.strictEqual(first, second)
 })

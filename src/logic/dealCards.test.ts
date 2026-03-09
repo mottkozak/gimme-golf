@@ -4,7 +4,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type { HoleDefinition, Player, RoundConfig } from '../types/game.ts'
-import { dealPersonalCardsForHole, dealPublicCardsForHole } from './dealCards.ts'
+import {
+  buildDeckMemoryFromHoleCards,
+  createEmptyHoleCardsState,
+  dealPersonalCardsForHole,
+  dealPublicCardsForHole,
+} from './dealCards.ts'
 
 function createPersonalCard(input: {
   id: string
@@ -120,4 +125,76 @@ test('dealPublicCardsForHole avoids used public card ids when fresh options exis
 
   assert.equal(cards.length, 1)
   assert.equal(cards[0]?.id, freshChaos.id)
+})
+
+test('dealPersonalCardsForHole honors round-level memory built from prior holes', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const hole: HoleDefinition = {
+    holeNumber: 2,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const usedCard = createPersonalCard({ id: 'used-round-memory', code: 'RM1', points: 1 })
+  const freshCard = createPersonalCard({ id: 'fresh-round-memory', code: 'RM2', points: 2 })
+  const priorHoleCards = createEmptyHoleCardsState(players, 1)
+  priorHoleCards.dealtPersonalCardsByPlayerId.p1 = [usedCard]
+
+  const roundDeckMemory = buildDeckMemoryFromHoleCards([priorHoleCards])
+  const deal = dealPersonalCardsForHole(
+    players,
+    hole,
+    BASE_ROUND_CONFIG,
+    [usedCard, freshCard],
+    roundDeckMemory,
+  )
+
+  assert.equal(deal.dealtPersonalCardsByPlayerId.p1[0]?.id, freshCard.id)
+})
+
+test('dealPersonalCardsForHole uses weighted randomness across valid candidates', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const hole: HoleDefinition = {
+    holeNumber: 3,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const candidateA = createPersonalCard({ id: 'weighted-a', code: 'WA', points: 1 })
+  const candidateB = createPersonalCard({ id: 'weighted-b', code: 'WB', points: 1 })
+
+  const originalRandom = Math.random
+
+  try {
+    Math.random = () => 0
+    const lowRollDeal = dealPersonalCardsForHole(
+      players,
+      hole,
+      BASE_ROUND_CONFIG,
+      [candidateA, candidateB],
+      {
+        usedPersonalCardIds: [],
+        usedPublicCardIds: [],
+      },
+    )
+
+    Math.random = () => 0.999999
+    const highRollDeal = dealPersonalCardsForHole(
+      players,
+      hole,
+      BASE_ROUND_CONFIG,
+      [candidateA, candidateB],
+      {
+        usedPersonalCardIds: [],
+        usedPublicCardIds: [],
+      },
+    )
+
+    assert.notEqual(
+      lowRollDeal.dealtPersonalCardsByPlayerId.p1[0]?.id,
+      highRollDeal.dealtPersonalCardsByPlayerId.p1[0]?.id,
+    )
+  } finally {
+    Math.random = originalRandom
+  }
 })

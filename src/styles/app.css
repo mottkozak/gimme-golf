@@ -242,6 +242,14 @@ main {
   gap: var(--space-4);
 }
 
+.round-setup-screen .setup-step {
+  gap: var(--space-3);
+}
+
+.round-setup-screen .setup-step .muted {
+  max-width: 64ch;
+}
+
 .setup-step {
   border-top: 3px solid color-mix(in srgb, var(--accent) 36%, transparent);
 }
@@ -674,6 +682,45 @@ main {
   font-weight: 600;
 }
 
+.recap-driver-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.recap-driver-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.46rem 0.52rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+}
+
+.recap-driver-cell .label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.recap-driver-value {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.recap-driver-value--positive {
+  color: var(--text-success);
+}
+
+.recap-driver-value--negative {
+  color: var(--text-danger);
+}
+
+.recap-driver-value--neutral {
+  color: var(--text-secondary);
+}
+
 .recap-next {
   margin-top: var(--space-1);
 }
@@ -1068,16 +1115,26 @@ main {
   border-top: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
+.hole-results-player-card > .row-between {
+  align-items: flex-start;
+}
+
 .hole-results-screen {
   gap: var(--space-4);
 }
 
 .hole-results-entry-panel {
   border-top: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  gap: var(--space-3);
 }
 
 .public-resolution-panel {
   border-top: 3px solid color-mix(in srgb, var(--info) 48%, transparent);
+  gap: var(--space-3);
+}
+
+.public-resolution-panel > .panel.inset {
+  border-style: solid;
 }
 
 .hole-results-next {
@@ -1159,6 +1216,10 @@ main {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .recap-driver-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1249,6 +1310,7 @@ main {
   .summary-stat,
   .award-row,
   .recap-item,
+  .recap-driver-cell,
   .hole-summary-player-row,
   .challenge-card,
   .public-card,

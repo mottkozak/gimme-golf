@@ -14,15 +14,12 @@ import {
   buildHolePointBreakdownsByPlayerId,
   createEmptyHolePointBreakdown,
 } from './streaks.ts'
-import { normalizePublicCardResolutions, resolvePublicCardPointDeltas } from './publicCardResolution.ts'
-
-type CanonicalPublicMode =
-  | 'yes_no_triggered'
-  | 'vote_target_player'
-  | 'choose_one_of_two_effects'
-  | 'leader_selects_target'
-  | 'trailing_player_selects_target'
-  | 'pick_affected_players'
+import {
+  getPublicCardResolutionMode,
+  normalizePublicCardResolutions,
+  resolvePublicCardPointDeltas,
+  type CanonicalPublicResolutionMode,
+} from './publicCardResolution.ts'
 
 const MOMENTUM_TIER_RANK: Record<MomentumTier, number> = {
   none: 0,
@@ -115,17 +112,22 @@ export interface FeaturedHoleRecap {
   leaderboardImpact: boolean
 }
 
-function normalizePublicMode(mode: PublicCardResolutionState['mode']): CanonicalPublicMode {
-  switch (mode) {
-    case 'yesNoTriggered':
-      return 'yes_no_triggered'
-    case 'winningPlayer':
-      return 'leader_selects_target'
-    case 'affectedPlayers':
-      return 'pick_affected_players'
-    default:
-      return mode
-  }
+interface HoleRecapCacheEntry {
+  playersRef: RoundState['players']
+  holesRef: RoundState['holes']
+  holeCardsRef: RoundState['holeCards']
+  holePowerUpsRef: RoundState['holePowerUps']
+  holeResultsRef: RoundState['holeResults']
+  totalsByPlayerIdRef: RoundState['totalsByPlayerId']
+  configRef: RoundState['config']
+  currentHoleIndex: number
+  recapData: HoleRecapData
+}
+
+let holeRecapCache: HoleRecapCacheEntry | null = null
+
+export function clearHoleRecapDataCache(): void {
+  holeRecapCache = null
 }
 
 function formatPoints(points: number): string {
@@ -242,7 +244,7 @@ function getMajorityVoteWinnerId(
   return sorted[0]?.[0] ?? null
 }
 
-function getPublicModeLabel(mode: CanonicalPublicMode): string {
+function getPublicModeLabel(mode: CanonicalPublicResolutionMode): string {
   switch (mode) {
     case 'yes_no_triggered':
       return 'Yes/No Trigger'
@@ -271,7 +273,7 @@ function summarizePublicCardResolution(
     return 'Not triggered.'
   }
 
-  const mode = normalizePublicMode(resolution.mode)
+  const mode = getPublicCardResolutionMode(card, resolution)
 
   if (mode === 'yes_no_triggered') {
     return `Triggered for all players (${formatPoints(card.points)} each).`
@@ -337,7 +339,7 @@ function buildPublicCardRecapItems(roundState: RoundState): PublicCardRecapItem[
       (largest, row) => Math.max(largest, Math.abs(row.delta)),
       0,
     )
-    const mode = normalizePublicMode(resolution.mode)
+    const mode = getPublicCardResolutionMode(card, resolution)
 
     return {
       cardId: card.id,
@@ -603,7 +605,7 @@ function createHighlightLine(
   return 'Hole complete'
 }
 
-export function buildHoleRecapData(roundState: RoundState): HoleRecapData {
+function computeHoleRecapData(roundState: RoundState): HoleRecapData {
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const momentumEnabled = roundState.config.toggles.momentumBonuses
@@ -718,6 +720,40 @@ export function buildHoleRecapData(roundState: RoundState): HoleRecapData {
     bestRealScoreHoleWinners,
     leaderSnapshot,
   }
+}
+
+export function buildHoleRecapData(roundState: RoundState): HoleRecapData {
+  const cached =
+    holeRecapCache &&
+    holeRecapCache.playersRef === roundState.players &&
+    holeRecapCache.holesRef === roundState.holes &&
+    holeRecapCache.holeCardsRef === roundState.holeCards &&
+    holeRecapCache.holePowerUpsRef === roundState.holePowerUps &&
+    holeRecapCache.holeResultsRef === roundState.holeResults &&
+    holeRecapCache.totalsByPlayerIdRef === roundState.totalsByPlayerId &&
+    holeRecapCache.configRef === roundState.config &&
+    holeRecapCache.currentHoleIndex === roundState.currentHoleIndex
+      ? holeRecapCache
+      : null
+
+  if (cached) {
+    return cached.recapData
+  }
+
+  const recapData = computeHoleRecapData(roundState)
+  holeRecapCache = {
+    playersRef: roundState.players,
+    holesRef: roundState.holes,
+    holeCardsRef: roundState.holeCards,
+    holePowerUpsRef: roundState.holePowerUps,
+    holeResultsRef: roundState.holeResults,
+    totalsByPlayerIdRef: roundState.totalsByPlayerId,
+    configRef: roundState.config,
+    currentHoleIndex: roundState.currentHoleIndex,
+    recapData,
+  }
+
+  return recapData
 }
 
 export function formatWinnerSummary(summary: HoleWinnerSummary): string {

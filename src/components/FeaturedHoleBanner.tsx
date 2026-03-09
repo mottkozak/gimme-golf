@@ -28,6 +28,9 @@ function FeaturedHoleBanner({ featuredHoleType, compact = false }: FeaturedHoleB
         <span className="chip">This hole only</span>
         <span className="chip">Game points only</span>
       </div>
+      <p className="muted">
+        Featured-hole effects are applied automatically during deal and scoring for this hole.
+      </p>
       {!compact && (
         <>
           <p className="muted">{featuredHole.longDescription}</p>

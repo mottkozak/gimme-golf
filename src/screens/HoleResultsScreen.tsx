@@ -5,50 +5,20 @@ import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type {
   MissionStatus,
   PublicCardResolutionState,
-  PublicResolutionMode,
 } from '../types/game.ts'
 import {
   buildPublicResolutionNotes,
+  getPublicCardResolutionMode,
+  getPublicResolutionGuidance,
+  getPublicResolutionInputRequirements,
   isPublicCardResolutionComplete,
-  normalizePublicResolutionMode,
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
 import { getAssignedPowerUp } from '../logic/powerUps.ts'
 import type { ScreenProps } from './types.ts'
 
-type CanonicalPublicResolutionMode =
-  | 'yes_no_triggered'
-  | 'vote_target_player'
-  | 'choose_one_of_two_effects'
-  | 'leader_selects_target'
-  | 'trailing_player_selects_target'
-  | 'pick_affected_players'
-
-const RESOLUTION_MODE_LABELS: Record<CanonicalPublicResolutionMode, string> = {
-  yes_no_triggered: 'Yes / No Trigger',
-  vote_target_player: 'Target Vote',
-  choose_one_of_two_effects: 'Choose Effect',
-  leader_selects_target: 'Leader Chooses Target',
-  trailing_player_selects_target: 'Trailing Chooses Target',
-  pick_affected_players: 'Pick Affected Players',
-}
-
-const RESOLUTION_MODE_GUIDANCE: Record<CanonicalPublicResolutionMode, string> = {
-  yes_no_triggered: 'Mark whether this public card triggered on the hole.',
-  vote_target_player: 'Set a target player for the table vote result.',
-  choose_one_of_two_effects: 'Pick the effect outcome, then confirm any required targets.',
-  leader_selects_target: 'Select the player chosen by the current leaderboard leader.',
-  trailing_player_selects_target: 'Select the player chosen by the current trailing golfer.',
-  pick_affected_players: 'Select each golfer affected by this card.',
-}
-
-const QUICK_STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
-const NINE_PLUS_STROKE_VALUE = 9
-
-function normalizeMode(mode: PublicResolutionMode): CanonicalPublicResolutionMode {
-  return normalizePublicResolutionMode(mode) as CanonicalPublicResolutionMode
-}
+const QUICK_STROKE_OFFSETS = [-2, -1, 0, 1, 2, 3] as const
 
 function isResolvedMissionStatus(status: MissionStatus): boolean {
   return status === 'success' || status === 'failed'
@@ -66,6 +36,16 @@ function parseStrokeInput(rawValue: string): number | null {
   }
 
   return Math.round(parsed)
+}
+
+function buildQuickStrokeOptions(par: number): number[] {
+  return Array.from(
+    new Set(
+      QUICK_STROKE_OFFSETS
+        .map((offset) => par + offset)
+        .filter((strokeOption) => strokeOption > 0),
+    ),
+  )
 }
 
 function sortPlayersByGamePoints(
@@ -110,18 +90,6 @@ function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
   )
 }
 
-function getSelectedEffectOption(
-  card: PublicCard,
-  resolution: PublicCardResolutionState,
-): EffectOption | null {
-  const effectOptions = getEffectOptions(card)
-  return (
-    effectOptions.find((effect) => effect.id === resolution.selectedEffectOptionId) ??
-    effectOptions[0] ??
-    null
-  )
-}
-
 function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activeCardPreview, setActiveCardPreview] = useState<{
     playerName: string
@@ -154,7 +122,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     card: PublicCard,
     resolution: PublicCardResolutionState,
   ): PublicCardResolutionState => {
-    const normalizedMode = normalizeMode(card.interaction?.mode ?? resolution.mode)
+    const normalizedMode = getPublicCardResolutionMode(card, resolution)
     const baseResolution: PublicCardResolutionState = {
       ...resolution,
       mode: normalizedMode,
@@ -493,6 +461,11 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             ? 'Enter strokes and confirm each player power-up status.'
             : 'Enter strokes, challenge success, and resolve public cards manually.'}
         </p>
+        {!isPowerUpsMode && roundState.config.toggles.momentumBonuses && (
+          <p className="muted">
+            Momentum is on: Completed challenges can add automatic streak bonus points.
+          </p>
+        )}
       </header>
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
@@ -513,7 +486,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
           const hasPersonalCard = Boolean(selectedCard)
-          const isNinePlusSelected = typeof strokes === 'number' && strokes >= NINE_PLUS_STROKE_VALUE
+          const quickStrokeOptions = buildQuickStrokeOptions(currentHole.par)
 
           return (
             <article key={player.id} className="panel inset stack-xs hole-results-player-card">
@@ -587,7 +560,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </button>
                 </div>
                 <div className="button-row hole-results-strokes-row">
-                  {QUICK_STROKE_OPTIONS.map((strokeOption) => {
+                  {quickStrokeOptions.map((strokeOption) => {
                     const isSelected = strokes === strokeOption
 
                     return (
@@ -604,35 +577,18 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       </button>
                     )
                   })}
-                  <button
-                    type="button"
-                    className={`hole-results-stroke-button ${isNinePlusSelected ? 'button-primary' : ''}`}
-                    onClick={() =>
-                      setStrokes(player.id, isNinePlusSelected ? null : NINE_PLUS_STROKE_VALUE)
-                    }
-                    aria-pressed={isNinePlusSelected}
-                  >
-                    9+
-                  </button>
                 </div>
                 <label className="field field--inline">
                   <span className="label">Manual</span>
                   <input
-                    key={`${currentHole.holeNumber}-${player.id}-${strokes ?? 'none'}`}
-                    type="text"
+                    type="number"
                     inputMode="numeric"
-                    defaultValue={typeof strokes === 'number' ? String(strokes) : ''}
+                    min={1}
+                    step={1}
+                    value={typeof strokes === 'number' ? String(strokes) : ''}
                     placeholder="Enter strokes"
                     onChange={(event) => {
-                      event.target.value = event.target.value.replace(/[^\d]/g, '')
-                    }}
-                    onBlur={(event) => {
                       const parsedStrokes = parseStrokeInput(event.target.value)
-                      if (parsedStrokes === null) {
-                        event.target.value = typeof strokes === 'number' ? String(strokes) : ''
-                        return
-                      }
-
                       setStrokes(player.id, parsedStrokes)
                     }}
                     onKeyDown={(event) => {
@@ -651,25 +607,23 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       {!isPowerUpsMode && currentHoleCards.publicCards.length > 0 && (
         <section className="panel stack-xs public-resolution-panel">
           <h3>Public Card Resolution</h3>
-          <p className="muted">Resolve each card with a guided flow based on that card rule.</p>
+          <p className="muted">
+            Resolve each card in order. Only the required choices for that card will appear.
+          </p>
+          <p className="muted">
+            Tip: set Triggered/Not Triggered first, then complete any target/effect choices.
+          </p>
 
           {currentHoleCards.publicCards.map((card) => {
             const resolution = currentResolutions[card.id]
-            const normalizedMode = normalizeMode(card.interaction?.mode ?? resolution.mode)
+            const normalizedMode = getPublicCardResolutionMode(card, resolution)
             const guidedResolution: PublicCardResolutionState = {
               ...resolution,
               mode: normalizedMode,
             }
-            const selectedEffectOption = getSelectedEffectOption(card, guidedResolution)
-            const requiresTargetSelection =
-              normalizedMode === 'leader_selects_target' ||
-              normalizedMode === 'trailing_player_selects_target' ||
-              (normalizedMode === 'choose_one_of_two_effects' &&
-                selectedEffectOption?.targetScope === 'target')
-            const requiresAffectedSelection =
-              normalizedMode === 'pick_affected_players' ||
-              (normalizedMode === 'choose_one_of_two_effects' &&
-                selectedEffectOption?.targetScope === 'affected')
+            const guidance = getPublicResolutionGuidance(card, normalizedMode)
+            const requirements = getPublicResolutionInputRequirements(card, guidedResolution)
+            const hasMultiplePlayers = roundState.players.length > 1
             const voteTargets = roundState.players.map(
               (player) => guidedResolution.targetPlayerIdByVoterId[player.id] ?? null,
             )
@@ -692,9 +646,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 <p className="muted">{card.description}</p>
                 <p className="muted">{card.rulesText}</p>
                 <p className="muted">
-                  <strong>Resolution:</strong> {RESOLUTION_MODE_LABELS[normalizedMode]}.
+                  <strong>{guidance.title}</strong>
                 </p>
-                <p className="muted">{RESOLUTION_MODE_GUIDANCE[normalizedMode]}</p>
+                <p className="muted">{guidance.triggerHelp}</p>
 
                 <div className="button-row">
                   <button
@@ -713,9 +667,11 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </button>
                 </div>
 
-                {guidedResolution.triggered && normalizedMode === 'vote_target_player' && (
+                <p className="muted">{guidance.triggerPrompt}</p>
+
+                {guidedResolution.triggered && requirements.requiresVoteTarget && hasMultiplePlayers && (
                   <div className="stack-xs">
-                    <span className="label">Vote Target</span>
+                    <span className="label">{guidance.voteTargetLabel}</span>
                     <div className="button-row row-wrap">
                       {roundState.players.map((player) => (
                         <button
@@ -734,9 +690,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {guidedResolution.triggered && normalizedMode === 'choose_one_of_two_effects' && (
+                {guidedResolution.triggered && requirements.requiresVoteTarget && !hasMultiplePlayers && (
+                  <p className="muted">{guidance.autoResolvedHint}</p>
+                )}
+
+                {guidedResolution.triggered && requirements.requiresEffectChoice && (
                   <div className="stack-xs">
-                    <span className="label">Effect Choice</span>
+                    <span className="label">{guidance.effectChoiceLabel}</span>
                     <div className="button-row">
                       {getEffectOptions(card).map((effectOption) => (
                         <button
@@ -756,9 +716,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {guidedResolution.triggered && requiresTargetSelection && (
+                {guidedResolution.triggered && requirements.requiresTargetSelection && hasMultiplePlayers && (
                   <div className="stack-xs">
-                    <span className="label">Select Target Player</span>
+                    <span className="label">{guidance.targetLabel}</span>
                     <div className="button-row row-wrap">
                       {roundState.players.map((player) => (
                         <button
@@ -776,9 +736,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {guidedResolution.triggered && requiresAffectedSelection && (
+                {guidedResolution.triggered && requirements.requiresTargetSelection && !hasMultiplePlayers && (
+                  <p className="muted">{guidance.autoResolvedHint}</p>
+                )}
+
+                {guidedResolution.triggered && requirements.requiresAffectedSelection && hasMultiplePlayers && (
                   <div className="stack-xs">
-                    <span className="label">Pick Affected Players</span>
+                    <span className="label">{guidance.affectedLabel}</span>
                     <div className="button-row row-wrap">
                       {roundState.players.map((player) => {
                         const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
@@ -796,6 +760,10 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       })}
                     </div>
                   </div>
+                )}
+
+                {guidedResolution.triggered && requirements.requiresAffectedSelection && !hasMultiplePlayers && (
+                  <p className="muted">{guidance.autoResolvedHint}</p>
                 )}
 
                 {!isPublicCardResolutionComplete(card, guidedResolution, playerIds) && (

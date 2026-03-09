@@ -388,6 +388,22 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </div>
       </section>
 
+      {config.selectedPresetId === 'powerUps' && (
+        <section className="panel stack-xs setup-step">
+          <h3 className="step-title">
+            <img className="step-title__icon" src={ICONS.holePlay} alt="" aria-hidden="true" />
+            Power Ups Mode
+          </h3>
+          <p className="muted">
+            Lightweight standalone mode: no card packs, no public-card resolution, and no featured
+            holes.
+          </p>
+          <p className="muted">
+            Each golfer receives one random power-up per hole and can use it once before scoring.
+          </p>
+        </section>
+      )}
+
       {isCustomPreset && (
         <>
           <section className="panel stack-xs setup-step">
@@ -448,6 +464,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               checked={config.toggles.momentumBonuses}
               onChange={setMomentumBonuses}
             />
+            {config.toggles.momentumBonuses && (
+              <p className="muted">
+                Momentum is automatic: consecutive Completed results increase bonus tiers over time.
+              </p>
+            )}
 
             <section className="stack-xs">
               <span className="label">Personal Card Mode</span>
@@ -501,14 +522,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                 Target featured holes this round: {featuredHoleTargetCount}
               </p>
               <p className="muted">Auto spacing tries to keep featured holes spread out.</p>
-            </section>
-
-            <section className="stack-xs">
-              <span className="label">Assignment Mode</span>
-              <p className="muted">
-                Auto Assign is currently enabled. Manual featured-hole assignment returns when the
-                editor ships.
-              </p>
             </section>
 
             {config.featuredHoles.enabled && (

@@ -15,7 +15,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
 
-  const playersRequiringSelection = isDrawTwoPickOne
+  const playersRequiringSelection = isDrawTwoPickOne && !isNoMercyHole
     ? roundState.players.filter((player) => {
         const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
         return dealtCards.length > 0
@@ -60,6 +60,9 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     onUpdateRoundState((currentState) => {
       const holePowerUps = [...currentState.holePowerUps]
       const currentHolePowerUpState = holePowerUps[currentState.currentHoleIndex]
+      if (!currentHolePowerUpState) {
+        return currentState
+      }
 
       holePowerUps[currentState.currentHoleIndex] = {
         ...currentHolePowerUpState,
@@ -195,15 +198,15 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                             selected={selectedCardId === card.id}
                             offerKind={offerKind}
                           />
-                        {isDrawTwoPickOne && !isNoMercyHole && (
-                          <button
-                            type="button"
-                            className={selectedCardId === card.id ? 'button-primary' : ''}
-                            onClick={() => selectCard(player.id, card.id)}
-                          >
-                            {selectedCardId === card.id ? 'Selected' : 'Choose This Card'}
-                          </button>
-                        )}
+                          {isDrawTwoPickOne && !isNoMercyHole && (
+                            <button
+                              type="button"
+                              className={selectedCardId === card.id ? 'button-primary' : ''}
+                              onClick={() => selectCard(player.id, card.id)}
+                            >
+                              {selectedCardId === card.id ? 'Selected' : 'Choose This Card'}
+                            </button>
+                          )}
                         </div>
                       )
                     })}

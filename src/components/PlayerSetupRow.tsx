@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { normalizeExpectedScore } from '../logic/roundSetup.ts'
 import type { Player } from '../types/game.ts'
 
 interface PlayerSetupRowProps {
@@ -18,6 +20,11 @@ function PlayerSetupRow({
   onRemove,
 }: PlayerSetupRowProps) {
   const fallbackName = `Golfer ${position}`
+
+  const [expectedScoreInput, setExpectedScoreInput] = useState(() =>
+    String(player.expectedScore18),
+  )
+
   const parseExpectedScore = (rawValue: string): number | null => {
     const digitsOnly = rawValue.replace(/[^\d]/g, '')
     if (!digitsOnly) {
@@ -59,21 +66,22 @@ function PlayerSetupRow({
       <label className="field">
         <span className="label">Expected 18-hole score</span>
         <input
-          key={`${player.id}-${player.expectedScore18}`}
           type="text"
           inputMode="numeric"
-          defaultValue={String(player.expectedScore18)}
+          value={expectedScoreInput}
           onChange={(event) => {
-            event.target.value = event.target.value.replace(/[^\d]/g, '')
+            setExpectedScoreInput(event.target.value.replace(/[^\d]/g, ''))
           }}
           onBlur={(event) => {
             const parsedScore = parseExpectedScore(event.target.value)
             if (parsedScore === null) {
-              event.target.value = String(player.expectedScore18)
+              setExpectedScoreInput(String(player.expectedScore18))
               return
             }
 
-            onUpdateExpectedScore(parsedScore)
+            const normalizedScore = normalizeExpectedScore(parsedScore)
+            onUpdateExpectedScore(normalizedScore)
+            setExpectedScoreInput(String(normalizedScore))
           }}
           onFocus={(event) => event.currentTarget.select()}
           onKeyDown={(event) => {

@@ -6,26 +6,37 @@ function HomeScreen({
   hasSavedRound,
   onNavigate,
   onResumeSavedRound,
+  onResetRound,
   onAbandonRound,
 }: ScreenProps) {
-  const beginRoundSetup = () => {
-    onNavigate('roundSetup')
-  }
-
   const continueRound = () => {
     onResumeSavedRound()
   }
 
   const startNewRound = () => {
-    const shouldReplaceSavedRound = window.confirm(
-      'Start a new round and replace your saved progress?',
+    if (hasSavedRound) {
+      const shouldReplaceSavedRound = window.confirm(
+        'A saved round exists. Start a new round and replace current progress?',
+      )
+      if (!shouldReplaceSavedRound) {
+        return
+      }
+
+      onResetRound()
+    }
+
+    onNavigate('roundSetup')
+  }
+
+  const abandonRound = () => {
+    const shouldAbandonRound = window.confirm(
+      'Abandon the saved round? This permanently clears local round progress.',
     )
-    if (!shouldReplaceSavedRound) {
+    if (!shouldAbandonRound) {
       return
     }
 
     onAbandonRound()
-    onNavigate('roundSetup')
   }
 
   return (
@@ -61,11 +72,14 @@ function HomeScreen({
               <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
               Start New Round
             </button>
+            <button type="button" onClick={abandonRound}>
+              Abandon Round
+            </button>
           </>
         ) : (
-          <button type="button" className="button-primary" onClick={beginRoundSetup}>
+          <button type="button" className="button-primary" onClick={startNewRound}>
             <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
-            Begin Round
+            Start New Round
           </button>
         )}
       </section>

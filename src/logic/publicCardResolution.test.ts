@@ -4,13 +4,21 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { PublicCard } from '../types/cards.ts'
 import type { Player, PublicCardResolutionState } from '../types/game.ts'
-import { normalizePublicCardResolutions, resolvePublicCardPointDeltas } from './publicCardResolution.ts'
+import {
+  getDefaultPublicResolutionMode,
+  getPublicResolutionInputRequirements,
+  normalizePublicCardResolutions,
+  resolvePublicCardPointDeltas,
+} from './publicCardResolution.ts'
 
 function createPublicCard(input: {
   id: string
   code: string
   name: string
   points: number
+  cardType?: PublicCard['cardType']
+  description?: string
+  rulesText?: string
   mode?: NonNullable<PublicCard['interaction']>['mode']
   effectOptions?: NonNullable<PublicCard['interaction']>['effectOptions']
 }): PublicCard {
@@ -18,16 +26,16 @@ function createPublicCard(input: {
     id: input.id,
     code: input.code,
     name: input.name,
-    description: input.name,
-    cardType: 'chaos',
-    packId: 'chaos',
+    description: input.description ?? input.name,
+    cardType: input.cardType ?? 'chaos',
+    packId: input.cardType === 'prop' ? 'props' : 'chaos',
     points: input.points,
     eligiblePars: [3, 4, 5],
     requiredTags: [],
     excludedTags: [],
     difficulty: 'neutral',
     isPublic: true,
-    rulesText: input.name,
+    rulesText: input.rulesText ?? input.name,
     interaction: input.mode
       ? {
           mode: input.mode,
@@ -36,6 +44,77 @@ function createPublicCard(input: {
       : undefined,
   }
 }
+
+test('getDefaultPublicResolutionMode infers vote target for player-pick props', () => {
+  const card = createPublicCard({
+    id: 'prop-pick',
+    code: 'PRP-PICK',
+    name: 'Birdie Player Pick',
+    description: 'Pick one player most likely to make birdie.',
+    rulesText: 'Choose one active golfer before play. Correct pick earns +3.',
+    cardType: 'prop',
+    points: 3,
+  })
+
+  assert.equal(getDefaultPublicResolutionMode(card), 'vote_target_player')
+})
+
+test('getDefaultPublicResolutionMode defaults zero-point chaos cards to trigger-only', () => {
+  const card = createPublicCard({
+    id: 'chaos-rules-only',
+    code: 'CHA-RULE',
+    name: 'Lone Wolf',
+    description: 'Only one player may score mission points.',
+    rulesText: 'Manual lockout effect; only first successful player receives mission points.',
+    cardType: 'chaos',
+    points: 0,
+  })
+
+  assert.equal(getDefaultPublicResolutionMode(card), 'yes_no_triggered')
+})
+
+test('getPublicResolutionInputRequirements only asks for required fields', () => {
+  const chooseCard = createPublicCard({
+    id: 'choose-card',
+    code: 'CHOOSE',
+    name: 'Choose Card',
+    points: 0,
+    cardType: 'chaos',
+    mode: 'choose_one_of_two_effects',
+    effectOptions: [
+      {
+        id: 'all-plus',
+        label: '+1 all',
+        pointsDelta: 1,
+        targetScope: 'all',
+      },
+      {
+        id: 'target-minus',
+        label: '-2 target',
+        pointsDelta: -2,
+        targetScope: 'target',
+      },
+    ],
+  })
+  const resolution: PublicCardResolutionState = {
+    cardId: chooseCard.id,
+    mode: 'choose_one_of_two_effects',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: 'target-minus',
+  }
+
+  const requirements = getPublicResolutionInputRequirements(chooseCard, resolution)
+
+  assert.deepEqual(requirements, {
+    requiresVoteTarget: false,
+    requiresEffectChoice: true,
+    requiresTargetSelection: true,
+    requiresAffectedSelection: false,
+  })
+})
 
 test('normalizePublicCardResolutions prefers interaction mode over stale saved mode', () => {
   const card = createPublicCard({

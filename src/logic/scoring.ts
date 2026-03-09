@@ -15,6 +15,21 @@ import {
   type HolePointBreakdown,
 } from './streaks.ts'
 
+interface RoundTotalsCacheEntry {
+  playersRef: Player[]
+  holesRef: RoundState['holes']
+  holeCardsRef: HoleCardsState[]
+  holeResultsRef: HoleResultState[]
+  momentumEnabled: boolean
+  totalsByPlayerId: Record<string, PlayerTotals>
+}
+
+let roundTotalsCache: RoundTotalsCacheEntry | null = null
+
+export function clearRoundTotalsCache(): void {
+  roundTotalsCache = null
+}
+
 export function calculateAdjustedScore(realScore: number, gamePoints: number): number {
   return realScore - gamePoints
 }
@@ -108,6 +123,20 @@ export function calculateRoundTotalsByPlayerId(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): Record<string, PlayerTotals> {
+  const cached =
+    roundTotalsCache &&
+    roundTotalsCache.playersRef === players &&
+    roundTotalsCache.holesRef === holes &&
+    roundTotalsCache.holeCardsRef === holeCards &&
+    roundTotalsCache.holeResultsRef === holeResults &&
+    roundTotalsCache.momentumEnabled === momentumEnabled
+      ? roundTotalsCache
+      : null
+
+  if (cached) {
+    return cached.totalsByPlayerId
+  }
+
   const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
     players,
     holes,
@@ -116,7 +145,7 @@ export function calculateRoundTotalsByPlayerId(
     momentumEnabled,
   )
 
-  return Object.fromEntries(
+  const totalsByPlayerId = Object.fromEntries(
     players.map((player) => {
       const realScore = calculatePlayerRealScore(player.id, holeResults)
       const gamePoints = (breakdownsByPlayerId[player.id] ?? []).reduce(
@@ -127,6 +156,17 @@ export function calculateRoundTotalsByPlayerId(
       return [player.id, createPlayerTotals(realScore, gamePoints)]
     }),
   )
+
+  roundTotalsCache = {
+    playersRef: players,
+    holesRef: holes,
+    holeCardsRef: holeCards,
+    holeResultsRef: holeResults,
+    momentumEnabled,
+    totalsByPlayerId,
+  }
+
+  return totalsByPlayerId
 }
 
 function normalizeHoleResults(

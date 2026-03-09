@@ -83,3 +83,84 @@ test('buildHolePointBreakdownsByPlayerId reuses cache for identical input refere
 
   assert.notStrictEqual(second, third)
 })
+
+test('buildHolePointBreakdownsByPlayerId applies momentum streaks and resets on failure', () => {
+  clearHolePointBreakdownCache()
+
+  const players: Player[] = [
+    { id: 'p1', name: 'Alex', expectedScore18: 90 },
+    { id: 'p2', name: 'Blair', expectedScore18: 90 },
+  ]
+  const holes: HoleDefinition[] = [
+    {
+      holeNumber: 1,
+      par: 4,
+      tags: [],
+      featuredHoleType: null,
+    },
+    {
+      holeNumber: 2,
+      par: 4,
+      tags: [],
+      featuredHoleType: null,
+    },
+  ]
+  const holeOneCard = createPersonalCard({ id: 'card-1', code: 'C1', name: 'Card 1', points: 2 })
+  const holeTwoCard = createPersonalCard({ id: 'card-2', code: 'C2', name: 'Card 2', points: 2 })
+  const holeCards: HoleCardsState[] = [
+    {
+      holeNumber: 1,
+      dealtPersonalCardsByPlayerId: { p1: [holeOneCard], p2: [] },
+      selectedCardIdByPlayerId: { p1: holeOneCard.id, p2: null },
+      personalCardOfferByPlayerId: {
+        p1: { safeCardId: holeOneCard.id, hardCardId: null },
+        p2: { safeCardId: null, hardCardId: null },
+      },
+      publicCards: [],
+    },
+    {
+      holeNumber: 2,
+      dealtPersonalCardsByPlayerId: { p1: [holeTwoCard], p2: [] },
+      selectedCardIdByPlayerId: { p1: holeTwoCard.id, p2: null },
+      personalCardOfferByPlayerId: {
+        p1: { safeCardId: holeTwoCard.id, hardCardId: null },
+        p2: { safeCardId: null, hardCardId: null },
+      },
+      publicCards: [],
+    },
+  ]
+  const holeResults: HoleResultState[] = [
+    {
+      holeNumber: 1,
+      strokesByPlayerId: { p1: 4, p2: 5 },
+      missionStatusByPlayerId: { p1: 'success', p2: 'pending' },
+      publicPointDeltaByPlayerId: { p1: 0, p2: 0 },
+      publicCardResolutionsByCardId: {},
+      publicCardResolutionNotes: '',
+    },
+    {
+      holeNumber: 2,
+      strokesByPlayerId: { p1: 5, p2: 5 },
+      missionStatusByPlayerId: { p1: 'failed', p2: 'pending' },
+      publicPointDeltaByPlayerId: { p1: 0, p2: 0 },
+      publicCardResolutionsByCardId: {},
+      publicCardResolutionNotes: '',
+    },
+  ]
+
+  const breakdowns = buildHolePointBreakdownsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    true,
+  )
+  const holeOne = breakdowns.p1[0]
+  const holeTwo = breakdowns.p1[1]
+
+  assert.equal(holeOne.streakBefore, 0)
+  assert.equal(holeOne.streakAfter, 2)
+  assert.equal(holeOne.shieldApplied, true)
+  assert.equal(holeTwo.streakBefore, 2)
+  assert.equal(holeTwo.streakAfter, 0)
+})

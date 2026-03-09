@@ -8,6 +8,14 @@ import type {
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
+export type CanonicalPublicResolutionMode =
+  | 'yes_no_triggered'
+  | 'vote_target_player'
+  | 'choose_one_of_two_effects'
+  | 'leader_selects_target'
+  | 'trailing_player_selects_target'
+  | 'pick_affected_players'
+
 function includesAnyKeyword(value: string, keywords: string[]): boolean {
   const normalized = value.toLowerCase()
   return keywords.some((keyword) => normalized.includes(keyword))
@@ -25,6 +33,19 @@ function normalizeResolutionMode(mode: PublicResolutionMode): PublicResolutionMo
 
 export function normalizePublicResolutionMode(mode: PublicResolutionMode): PublicResolutionMode {
   return normalizeResolutionMode(mode)
+}
+
+function formatSignedPoints(points: number): string {
+  return `${points > 0 ? '+' : ''}${points}`
+}
+
+export function getPublicCardResolutionMode(
+  card: PublicCard,
+  resolution: Pick<PublicCardResolutionState, 'mode'> | null | undefined,
+): CanonicalPublicResolutionMode {
+  return normalizeResolutionMode(
+    card.interaction?.mode ?? resolution?.mode ?? getDefaultPublicResolutionMode(card),
+  ) as CanonicalPublicResolutionMode
 }
 
 function getDefaultEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
@@ -56,29 +77,47 @@ export function getDefaultPublicResolutionMode(card: PublicCard): PublicResoluti
 
   const fullText = `${card.name} ${card.description} ${card.rulesText}`
 
-  if (includesAnyKeyword(fullText, ['vote', 'majority', 'pick who'])) {
-    return 'vote_target_player'
-  }
-
-  if (includesAnyKeyword(fullText, ['choose one', 'one of two', 'either'])) {
+  if (includesAnyKeyword(fullText, ['one of two', 'either'])) {
     return 'choose_one_of_two_effects'
   }
 
-  if (card.cardType === 'chaos') {
-    return 'pick_affected_players'
+  if (includesAnyKeyword(fullText, ['trailing golfer chooses', 'trailing player chooses'])) {
+    return 'trailing_player_selects_target'
   }
 
-  const winnerKeywords = ['pick', 'leader', 'closest', 'winner']
-
-  if (includesAnyKeyword(fullText, winnerKeywords)) {
+  if (includesAnyKeyword(fullText, ['leader chooses', 'leader picks', 'leader selects'])) {
     return 'leader_selects_target'
+  }
+
+  if (
+    includesAnyKeyword(fullText, [
+      'vote',
+      'majority',
+      'pick who',
+      'player pick',
+      'pick any active player',
+      'pick one player',
+      'choose one active golfer',
+      'longest drive',
+      'closest to pin',
+    ])
+  ) {
+    return 'vote_target_player'
+  }
+
+  if (card.points === 0) {
+    return 'yes_no_triggered'
+  }
+
+  if (card.cardType === 'prop' || card.cardType === 'chaos') {
+    return 'pick_affected_players'
   }
 
   return 'yes_no_triggered'
 }
 
 export function createDefaultPublicCardResolution(card: PublicCard): PublicCardResolutionState {
-  const defaultMode = getDefaultPublicResolutionMode(card)
+  const defaultMode = getPublicCardResolutionMode(card, null)
   const defaultEffectId =
     defaultMode === 'choose_one_of_two_effects' ? getEffectOptions(card)[0]?.id ?? null : null
 
@@ -102,9 +141,7 @@ export function normalizePublicCardResolutions(
       const defaultResolution = createDefaultPublicCardResolution(card)
       const existingResolution = resolutionsByCardId?.[card.id]
       if (existingResolution) {
-        const normalizedMode = normalizeResolutionMode(
-          card.interaction?.mode ?? existingResolution.mode,
-        )
+        const normalizedMode = getPublicCardResolutionMode(card, existingResolution)
         const normalizedSelectedEffectOptionId =
           normalizedMode === 'choose_one_of_two_effects'
             ? existingResolution.selectedEffectOptionId ?? defaultResolution.selectedEffectOptionId
@@ -127,6 +164,165 @@ export function normalizePublicCardResolutions(
   )
 }
 
+export interface PublicResolutionInputRequirements {
+  requiresVoteTarget: boolean
+  requiresEffectChoice: boolean
+  requiresTargetSelection: boolean
+  requiresAffectedSelection: boolean
+}
+
+export function getPublicResolutionInputRequirements(
+  card: PublicCard,
+  resolution: PublicCardResolutionState,
+): PublicResolutionInputRequirements {
+  const mode = getPublicCardResolutionMode(card, resolution)
+  const baseRequirements: PublicResolutionInputRequirements = {
+    requiresVoteTarget: false,
+    requiresEffectChoice: false,
+    requiresTargetSelection: false,
+    requiresAffectedSelection: false,
+  }
+
+  if (!resolution.triggered) {
+    return baseRequirements
+  }
+
+  if (mode === 'vote_target_player') {
+    return {
+      ...baseRequirements,
+      requiresVoteTarget: true,
+    }
+  }
+
+  if (mode === 'leader_selects_target' || mode === 'trailing_player_selects_target') {
+    return {
+      ...baseRequirements,
+      requiresTargetSelection: true,
+    }
+  }
+
+  if (mode === 'pick_affected_players') {
+    return {
+      ...baseRequirements,
+      requiresAffectedSelection: true,
+    }
+  }
+
+  if (mode === 'choose_one_of_two_effects') {
+    const effectOptions = getEffectOptions(card)
+    const selectedEffect =
+      effectOptions.find((effect) => effect.id === resolution.selectedEffectOptionId) ??
+      effectOptions[0] ??
+      null
+
+    return {
+      ...baseRequirements,
+      requiresEffectChoice: true,
+      requiresTargetSelection: selectedEffect?.targetScope === 'target',
+      requiresAffectedSelection: selectedEffect?.targetScope === 'affected',
+    }
+  }
+
+  return baseRequirements
+}
+
+export interface PublicResolutionGuidance {
+  title: string
+  triggerPrompt: string
+  triggerHelp: string
+  voteTargetLabel: string
+  effectChoiceLabel: string
+  targetLabel: string
+  affectedLabel: string
+  autoResolvedHint: string
+}
+
+export function getPublicResolutionGuidance(
+  card: PublicCard,
+  mode: CanonicalPublicResolutionMode,
+): PublicResolutionGuidance {
+  const signedPoints = formatSignedPoints(card.points)
+
+  if (mode === 'vote_target_player') {
+    return {
+      title: `${card.code} Pick Winner`,
+      triggerPrompt: `Did "${card.name}" happen on this hole?`,
+      triggerHelp: `If yes, pick the winning golfer to receive ${signedPoints}.`,
+      voteTargetLabel: `Who won "${card.name}"?`,
+      effectChoiceLabel: 'Effect',
+      targetLabel: 'Target golfer',
+      affectedLabel: 'Affected golfers',
+      autoResolvedHint: 'Only one golfer in round. Winner auto-selected.',
+    }
+  }
+
+  if (mode === 'choose_one_of_two_effects') {
+    return {
+      title: `${card.code} Choose Outcome`,
+      triggerPrompt: `Did "${card.name}" trigger this hole?`,
+      triggerHelp: 'Pick the exact effect that happened, then set any required target.',
+      voteTargetLabel: 'Vote result',
+      effectChoiceLabel: 'Which effect happened?',
+      targetLabel: 'Who was targeted?',
+      affectedLabel: 'Who was affected?',
+      autoResolvedHint: 'Only one golfer in round. Target auto-selected.',
+    }
+  }
+
+  if (mode === 'leader_selects_target') {
+    return {
+      title: `${card.code} Leader Target`,
+      triggerPrompt: `Did "${card.name}" trigger this hole?`,
+      triggerHelp: `If triggered, choose who the leader targeted for ${signedPoints}.`,
+      voteTargetLabel: 'Vote result',
+      effectChoiceLabel: 'Effect',
+      targetLabel: 'Who did the leader choose?',
+      affectedLabel: 'Affected golfers',
+      autoResolvedHint: 'Only one golfer in round. Target auto-selected.',
+    }
+  }
+
+  if (mode === 'trailing_player_selects_target') {
+    return {
+      title: `${card.code} Trailing Target`,
+      triggerPrompt: `Did "${card.name}" trigger this hole?`,
+      triggerHelp: `If triggered, choose who the trailing golfer targeted for ${signedPoints}.`,
+      voteTargetLabel: 'Vote result',
+      effectChoiceLabel: 'Effect',
+      targetLabel: 'Who did the trailing golfer choose?',
+      affectedLabel: 'Affected golfers',
+      autoResolvedHint: 'Only one golfer in round. Target auto-selected.',
+    }
+  }
+
+  if (mode === 'pick_affected_players') {
+    return {
+      title: `${card.code} Affected Golfers`,
+      triggerPrompt: `Did "${card.name}" trigger this hole?`,
+      triggerHelp: `If triggered, select each golfer who should receive ${signedPoints}.`,
+      voteTargetLabel: 'Vote result',
+      effectChoiceLabel: 'Effect',
+      targetLabel: 'Target golfer',
+      affectedLabel: 'Who was affected?',
+      autoResolvedHint: 'Only one golfer in round. Effect auto-applies to that golfer.',
+    }
+  }
+
+  return {
+    title: `${card.code} Trigger Check`,
+    triggerPrompt: `Did "${card.name}" happen on this hole?`,
+    triggerHelp:
+      card.points === 0
+        ? 'This card is a rules-only modifier. Confirm trigger status only.'
+        : `If triggered, ${signedPoints} applies to all golfers automatically.`,
+    voteTargetLabel: 'Vote result',
+    effectChoiceLabel: 'Effect',
+    targetLabel: 'Target golfer',
+    affectedLabel: 'Affected golfers',
+    autoResolvedHint: 'No extra inputs needed.',
+  }
+}
+
 function hasValidVoteSelection(
   resolution: PublicCardResolutionState,
   playerIds: string[],
@@ -146,7 +342,7 @@ export function isPublicCardResolutionComplete(
     return true
   }
 
-  const normalizedMode = normalizeResolutionMode(resolution.mode)
+  const normalizedMode = getPublicCardResolutionMode(card, resolution)
 
   if (normalizedMode === 'yes_no_triggered') {
     return true
@@ -227,7 +423,7 @@ export function resolvePublicCardPointDeltas(
       continue
     }
 
-    const normalizedMode = normalizeResolutionMode(resolution.mode)
+    const normalizedMode = getPublicCardResolutionMode(card, resolution)
 
     if (normalizedMode === 'yes_no_triggered') {
       for (const player of players) {
@@ -314,7 +510,7 @@ export function buildPublicResolutionNotes(
 
   const noteParts = triggeredCards.map((card) => {
     const resolution = resolutionsByCardId[card.id]
-    const mode = normalizeResolutionMode(resolution.mode)
+    const mode = getPublicCardResolutionMode(card, resolution)
     const effectSuffix =
       mode === 'choose_one_of_two_effects' && resolution.selectedEffectOptionId
         ? ` / ${resolution.selectedEffectOptionId}`

@@ -89,18 +89,21 @@ function createCardPresetSettings(
   options?: {
     momentumBonuses?: boolean
     featuredEnabled?: boolean
+    dynamicDifficulty?: boolean
+    personalCardMode?: 'drawTwoPickOne' | 'autoAssignOne'
   },
 ): GameModePresetSettings {
   const featuredEnabled = options?.featuredEnabled ?? true
+  const personalCardMode = options?.personalCardMode ?? 'drawTwoPickOne'
 
   return {
     gameMode: 'cards',
     enabledPackIds,
     toggles: {
-      dynamicDifficulty: true,
+      dynamicDifficulty: options?.dynamicDifficulty ?? true,
       momentumBonuses: options?.momentumBonuses ?? true,
-      drawTwoPickOne: true,
-      autoAssignOne: false,
+      drawTwoPickOne: personalCardMode === 'drawTwoPickOne',
+      autoAssignOne: personalCardMode === 'autoAssignOne',
     },
     featuredHoles: {
       enabled: featuredEnabled,
@@ -114,9 +117,9 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
   {
     id: 'casual',
     name: 'Casual',
-    shortDescription: 'Quick setup with core missions only.',
+    shortDescription: 'Light onboarding mode with minimal decisions per hole.',
     longDescription:
-      'A clean, low-chaos mode focused on Classic personal missions with Dynamic Difficulty enabled. Designed for easy setup and steady pacing.',
+      'A clean first-run mode focused on Classic missions with auto-assigned cards, no momentum, and no featured holes. Designed for easy onboarding and low tap count.',
     includesLabel: 'Classic cards only',
     bestForLabel: 'First-time groups and relaxed rounds',
     includedFeatureIds: ['classic'],
@@ -126,6 +129,8 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
     settings: createCardPresetSettings(['classic'], 'low', {
       momentumBonuses: false,
       featuredEnabled: false,
+      dynamicDifficulty: false,
+      personalCardMode: 'autoAssignOne',
     }),
   },
   {
