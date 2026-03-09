@@ -20,6 +20,9 @@ import {
   resolvePublicCardPointDeltas,
   type CanonicalPublicResolutionMode,
 } from './publicCardResolution.ts'
+import { formatPlayerNames } from './playerNames.ts'
+import { createRefMemoizedSelector } from './selectors.ts'
+import { resolveMajorityVoteWinnerId } from './votes.ts'
 
 const MOMENTUM_TIER_RANK: Record<MomentumTier, number> = {
   none: 0,
@@ -45,6 +48,7 @@ export interface HoleRecapPlayerRow {
   rivalryBonus: number
   rivalryOpponentPlayerId: string | null
   publicBonusPoints: number
+  balanceCapAdjustment: number
   bonusPoints: number
   holePoints: number
   strokes: number | null
@@ -112,23 +116,17 @@ export interface FeaturedHoleRecap {
   leaderboardImpact: boolean
 }
 
-interface HoleRecapCacheEntry {
-  playersRef: RoundState['players']
-  holesRef: RoundState['holes']
-  holeCardsRef: RoundState['holeCards']
-  holePowerUpsRef: RoundState['holePowerUps']
-  holeResultsRef: RoundState['holeResults']
-  totalsByPlayerIdRef: RoundState['totalsByPlayerId']
-  configRef: RoundState['config']
-  currentHoleIndex: number
-  recapData: HoleRecapData
-}
-
-let holeRecapCache: HoleRecapCacheEntry | null = null
-
-export function clearHoleRecapDataCache(): void {
-  holeRecapCache = null
-}
+type HoleRecapComputationState = Pick<
+  RoundState,
+  | 'players'
+  | 'holes'
+  | 'holeCards'
+  | 'holePowerUps'
+  | 'holeResults'
+  | 'totalsByPlayerId'
+  | 'config'
+  | 'currentHoleIndex'
+>
 
 function formatPoints(points: number): string {
   return `${points > 0 ? '+' : ''}${points}`
@@ -140,18 +138,6 @@ function formatCardTypeLabel(cardType: string | null): string {
   }
 
   return `${cardType.charAt(0).toUpperCase()}${cardType.slice(1)}`
-}
-
-function formatPlayerNames(playerNames: string[]): string {
-  if (playerNames.length <= 1) {
-    return playerNames[0] ?? 'Unknown'
-  }
-
-  if (playerNames.length === 2) {
-    return `${playerNames[0]} & ${playerNames[1]}`
-  }
-
-  return `${playerNames.slice(0, -1).join(', ')} & ${playerNames[playerNames.length - 1]}`
 }
 
 function getPlayerNameById(players: Player[], playerId: string | null): string | null {
@@ -219,31 +205,6 @@ function getBestRealScoreHoleWinners(playerRows: HoleRecapPlayerRow[]): HoleWinn
   }
 }
 
-function getMajorityVoteWinnerId(
-  votesByVoterId: Record<string, string | null>,
-  validPlayerIds: Set<string>,
-): string | null {
-  const counts: Record<string, number> = {}
-
-  for (const votedPlayerId of Object.values(votesByVoterId)) {
-    if (!votedPlayerId || !validPlayerIds.has(votedPlayerId)) {
-      continue
-    }
-
-    counts[votedPlayerId] = (counts[votedPlayerId] ?? 0) + 1
-  }
-
-  const sorted = Object.entries(counts).sort((entryA, entryB) => entryB[1] - entryA[1])
-  const bestVotes = sorted[0]?.[1] ?? 0
-  const ties = sorted.filter((entry) => entry[1] === bestVotes).length
-
-  if (bestVotes === 0 || ties > 1) {
-    return null
-  }
-
-  return sorted[0]?.[0] ?? null
-}
-
 function getPublicModeLabel(mode: CanonicalPublicResolutionMode): string {
   switch (mode) {
     case 'yes_no_triggered':
@@ -280,7 +241,7 @@ function summarizePublicCardResolution(
   }
 
   if (mode === 'vote_target_player') {
-    const winnerId = getMajorityVoteWinnerId(
+    const winnerId = resolveMajorityVoteWinnerId(
       resolution.targetPlayerIdByVoterId,
       new Set(players.map((player) => player.id)),
     )
@@ -313,7 +274,7 @@ function summarizePublicCardResolution(
   return `${effectLabel}.`
 }
 
-function buildPublicCardRecapItems(roundState: RoundState): PublicCardRecapItem[] {
+function buildPublicCardRecapItems(roundState: HoleRecapComputationState): PublicCardRecapItem[] {
   const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const resolutions = normalizePublicCardResolutions(
@@ -605,7 +566,7 @@ function createHighlightLine(
   return 'Hole complete'
 }
 
-function computeHoleRecapData(roundState: RoundState): HoleRecapData {
+function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapData {
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const momentumEnabled = roundState.config.toggles.momentumBonuses
@@ -651,7 +612,13 @@ function computeHoleRecapData(roundState: RoundState): HoleRecapData {
       rivalryBonus: pointBreakdown.rivalryBonus,
       rivalryOpponentPlayerId: pointBreakdown.rivalryOpponentPlayerId,
       publicBonusPoints: pointBreakdown.publicDelta,
-      bonusPoints: pointBreakdown.momentumBonus + pointBreakdown.publicDelta,
+      balanceCapAdjustment: pointBreakdown.balanceCapAdjustment,
+      bonusPoints:
+        pointBreakdown.featuredBonusPoints +
+        pointBreakdown.momentumBonus +
+        pointBreakdown.publicDelta +
+        pointBreakdown.rivalryBonus +
+        pointBreakdown.balanceCapAdjustment,
       holePoints: pointBreakdown.total,
       strokes: currentResult.strokesByPlayerId[player.id] ?? null,
       totalGamePoints: totals?.gamePoints ?? 0,
@@ -722,38 +689,47 @@ function computeHoleRecapData(roundState: RoundState): HoleRecapData {
   }
 }
 
+const holeRecapDataSelector = createRefMemoizedSelector(
+  (
+    players: RoundState['players'],
+    holes: RoundState['holes'],
+    holeCards: RoundState['holeCards'],
+    holePowerUps: RoundState['holePowerUps'],
+    holeResults: RoundState['holeResults'],
+    totalsByPlayerId: RoundState['totalsByPlayerId'],
+    config: RoundState['config'],
+    currentHoleIndex: number,
+  ): HoleRecapData => {
+    const recapState: HoleRecapComputationState = {
+      players,
+      holes,
+      holeCards,
+      holePowerUps,
+      holeResults,
+      totalsByPlayerId,
+      config,
+      currentHoleIndex,
+    }
+
+    return computeHoleRecapData(recapState)
+  },
+)
+
+export function clearHoleRecapDataCache(): void {
+  holeRecapDataSelector.clear()
+}
+
 export function buildHoleRecapData(roundState: RoundState): HoleRecapData {
-  const cached =
-    holeRecapCache &&
-    holeRecapCache.playersRef === roundState.players &&
-    holeRecapCache.holesRef === roundState.holes &&
-    holeRecapCache.holeCardsRef === roundState.holeCards &&
-    holeRecapCache.holePowerUpsRef === roundState.holePowerUps &&
-    holeRecapCache.holeResultsRef === roundState.holeResults &&
-    holeRecapCache.totalsByPlayerIdRef === roundState.totalsByPlayerId &&
-    holeRecapCache.configRef === roundState.config &&
-    holeRecapCache.currentHoleIndex === roundState.currentHoleIndex
-      ? holeRecapCache
-      : null
-
-  if (cached) {
-    return cached.recapData
-  }
-
-  const recapData = computeHoleRecapData(roundState)
-  holeRecapCache = {
-    playersRef: roundState.players,
-    holesRef: roundState.holes,
-    holeCardsRef: roundState.holeCards,
-    holePowerUpsRef: roundState.holePowerUps,
-    holeResultsRef: roundState.holeResults,
-    totalsByPlayerIdRef: roundState.totalsByPlayerId,
-    configRef: roundState.config,
-    currentHoleIndex: roundState.currentHoleIndex,
-    recapData,
-  }
-
-  return recapData
+  return holeRecapDataSelector(
+    roundState.players,
+    roundState.holes,
+    roundState.holeCards,
+    roundState.holePowerUps,
+    roundState.holeResults,
+    roundState.totalsByPlayerId,
+    roundState.config,
+    roundState.currentHoleIndex,
+  )
 }
 
 export function formatWinnerSummary(summary: HoleWinnerSummary): string {

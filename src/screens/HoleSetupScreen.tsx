@@ -102,6 +102,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
           PERSONAL_CARDS,
           PUBLIC_CARDS,
           deckMemoryForDeal,
+          priorHoleCards,
         )
         holePowerUps[currentHoleIndex] = createEmptyHolePowerUpState(
           currentState.players,

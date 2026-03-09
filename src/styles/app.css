@@ -1482,9 +1482,30 @@ main {
     border-width: 2px;
   }
 
+  .status-pill,
+  .recap-pill,
+  .chip {
+    border-width: 2px;
+    font-weight: 700;
+  }
+
   .muted,
   .label,
   .toggle-row__description {
     color: color-mix(in srgb, var(--text-primary) 85%, var(--text-secondary));
+  }
+
+  .hole-results-screen .muted,
+  .hole-recap-screen .muted,
+  .leaderboard-table__cell {
+    color: color-mix(in srgb, var(--text-primary) 90%, var(--text-secondary));
+  }
+}
+
+@media (forced-colors: active) {
+  .status-pill,
+  .recap-pill,
+  .chip {
+    border: 1px solid ButtonText;
   }
 }

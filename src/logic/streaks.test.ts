@@ -164,3 +164,57 @@ test('buildHolePointBreakdownsByPlayerId applies momentum streaks and resets on 
   assert.equal(holeTwo.streakBefore, 2)
   assert.equal(holeTwo.streakAfter, 0)
 })
+
+test('buildHolePointBreakdownsByPlayerId enforces stacked bonus caps and preserves arithmetic invariants', () => {
+  clearHolePointBreakdownCache()
+
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const holes: HoleDefinition[] = [
+    {
+      holeNumber: 1,
+      par: 4,
+      tags: [],
+      featuredHoleType: 'double_points',
+    },
+  ]
+  const highValueCard = createPersonalCard({ id: 'cap-card', code: 'CAP', name: 'Cap Card', points: 5 })
+  const holeCards: HoleCardsState[] = [
+    {
+      holeNumber: 1,
+      dealtPersonalCardsByPlayerId: { p1: [highValueCard] },
+      selectedCardIdByPlayerId: { p1: highValueCard.id },
+      personalCardOfferByPlayerId: { p1: { safeCardId: highValueCard.id, hardCardId: null } },
+      publicCards: [],
+    },
+  ]
+  const holeResults: HoleResultState[] = [
+    {
+      holeNumber: 1,
+      strokesByPlayerId: { p1: 4 },
+      missionStatusByPlayerId: { p1: 'success' },
+      publicPointDeltaByPlayerId: { p1: 10 },
+      publicCardResolutionsByCardId: {},
+      publicCardResolutionNotes: '',
+    },
+  ]
+
+  const breakdowns = buildHolePointBreakdownsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    true,
+  )
+  const holeOne = breakdowns.p1[0]
+  const recomposedTotal =
+    holeOne.baseMissionPoints +
+    holeOne.featuredBonusPoints +
+    holeOne.momentumBonus +
+    holeOne.publicDelta +
+    holeOne.rivalryBonus +
+    holeOne.balanceCapAdjustment
+
+  assert.equal(holeOne.total, recomposedTotal)
+  assert.equal(holeOne.total, 10)
+  assert.equal(holeOne.balanceCapAdjustment < 0, true)
+})

@@ -11,7 +11,7 @@
   --color-bg-white: #ffffff;
   --color-bg-sand: #f4f0e4;
   --color-text-strong: #1a1a1a;
-  --color-text-muted: #5a5a5a;
+  --color-text-muted: #474747;
   --color-green: #0f5132;
   --color-green-deep: #0a3b25;
   --color-green-fresh: #1f6946;
@@ -78,6 +78,19 @@
 
   --motion-fast: 140ms;
   --motion-base: 180ms;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #a8a8a8;
+    --color-text-muted: #323232;
+    --surface-panel: #ffffff;
+    --surface-panel-muted: #f7f5ef;
+    --surface-info: #e7f0ea;
+    --surface-success: #e3f1e8;
+    --surface-warning: #f5ead3;
+    --surface-danger: #f4e2df;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

@@ -97,12 +97,24 @@ export const MOMENTUM_RULES = {
     none: 0,
     heater: 1,
     fire: 2,
-    inferno: 3,
+    inferno: 2,
   } as Record<MomentumTier, number>,
   infernoPostPayoutStreak: 2,
   comebackShield: {
     enabled: true,
     extraSuccessCount: 1,
+  },
+} as const
+
+export const POINT_BALANCE_RULES = {
+  featuredBonusCap: 2,
+  publicPointDeltaCap: {
+    min: -3,
+    max: 3,
+  },
+  stackedBonusCap: {
+    min: -4,
+    max: 5,
   },
 } as const
 

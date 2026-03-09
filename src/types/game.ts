@@ -26,6 +26,7 @@ export interface FeaturedHolesConfig {
   enabled: boolean
   frequency: FeaturedHoleFrequency
   assignmentMode: FeaturedHoleAssignmentMode
+  randomSeed?: number
 }
 
 export interface RoundToggles {
@@ -104,6 +105,17 @@ export interface HoleResultState {
   publicCardResolutionNotes: string
 }
 
+export interface HoleUxMetrics {
+  holeNumber: number
+  startedAtMs: number | null
+  completedAtMs: number | null
+  durationMs: number | null
+  tapsToComplete: number
+  publicResolutionStartedAtMs: number | null
+  publicResolutionCompletedAtMs: number | null
+  publicResolutionDurationMs: number | null
+}
+
 export interface RoundDeckMemory {
   usedPersonalCardIds: string[]
   usedPublicCardIds: string[]
@@ -131,6 +143,7 @@ export interface RoundState {
   holeCards: HoleCardsState[]
   holePowerUps: HolePowerUpState[]
   holeResults: HoleResultState[]
+  holeUxMetrics: HoleUxMetrics[]
   deckMemory: RoundDeckMemory
   totalsByPlayerId: Record<string, PlayerTotals>
 }

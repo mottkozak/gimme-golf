@@ -3,27 +3,12 @@ import HoleSummaryList from '../components/HoleSummaryList.tsx'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
 import { computeRoundAwards } from '../logic/awards.ts'
 import { buildLeaderboardEntries } from '../logic/leaderboard.ts'
+import { formatPlayerNames } from '../logic/playerNames.ts'
 import { getCurrentMomentumStateByPlayerId } from '../logic/streaks.ts'
 import type { LeaderboardEntry } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
 
 const MAJOR_AWARD_IDS = new Set(['mvp', 'mostClutch', 'missionMachine', 'biggestComeback'])
-
-function formatNames(names: string[]): string {
-  if (names.length === 0) {
-    return '-'
-  }
-
-  if (names.length === 1) {
-    return names[0]
-  }
-
-  if (names.length === 2) {
-    return `${names[0]} & ${names[1]}`
-  }
-
-  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
-}
 
 function getLeaderboardWinners(
   rows: LeaderboardEntry[],
@@ -43,7 +28,7 @@ function getLeaderboardWinners(
     .map((row) => row.playerName)
 
   return {
-    names: formatNames(winnerNames),
+    names: formatPlayerNames(winnerNames),
     value: winningValue,
   }
 }
@@ -130,7 +115,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
                 <span className="chip">{award.shortLabel}</span>
               </div>
               <p className="award-winner">
-                {formatNames(award.winners.map((winner) => winner.playerName))}
+                {formatPlayerNames(award.winners.map((winner) => winner.playerName))}
                 {award.isTie ? ' (Tie)' : ''}
               </p>
               <p className="award-explanation">{award.explanation}</p>
@@ -148,7 +133,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
                 <span className="chip">{award.shortLabel}</span>
               </div>
               <p className="award-winner">
-                {formatNames(award.winners.map((winner) => winner.playerName))}
+                {formatPlayerNames(award.winners.map((winner) => winner.playerName))}
                 {award.isTie ? ' (Tie)' : ''}
               </p>
               <p className="award-explanation">{award.explanation}</p>

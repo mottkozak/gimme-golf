@@ -7,8 +7,11 @@ import {
   type HoleRecapPlayerRow,
 } from '../logic/holeRecap.ts'
 import { buildLeaderboardEntries, type LeaderboardSortMode } from '../logic/leaderboard.ts'
+import { getMissionStatusPillClass } from '../logic/missionStatus.ts'
 import type { PlayerTotals } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
+
+type RecapMode = 'quick' | 'deep'
 
 function buildHoleTotalsByPlayerId(
   recapData: ReturnType<typeof buildHoleRecapData>,
@@ -31,6 +34,22 @@ function buildHoleTotalsByPlayerId(
 
 function formatSignedPoints(value: number): string {
   return `${value > 0 ? '+' : ''}${value}`
+}
+
+function formatDuration(ms: number | null): string {
+  if (typeof ms !== 'number') {
+    return 'Pending'
+  }
+
+  const totalSeconds = Math.max(0, Math.round(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  if (minutes === 0) {
+    return `${seconds}s`
+  }
+
+  return `${minutes}m ${seconds}s`
 }
 
 function getPointDriverTone(value: number): 'positive' | 'negative' | 'neutral' {
@@ -56,6 +75,7 @@ function buildPointDrivers(row: HoleRecapPlayerRow): Array<{
     { label: 'Momentum', value: row.momentumBonusPoints },
     { label: 'Public', value: row.publicBonusPoints },
     { label: 'Rivalry', value: row.rivalryBonus },
+    { label: 'Balance Cap', value: row.balanceCapAdjustment },
     { label: 'Hole Total', value: row.holePoints },
   ]
 
@@ -65,24 +85,13 @@ function buildPointDrivers(row: HoleRecapPlayerRow): Array<{
   }))
 }
 
-function getMissionStatusClass(missionStatus: 'pending' | 'success' | 'failed'): string {
-  if (missionStatus === 'success') {
-    return 'status-pill status-success'
-  }
-
-  if (missionStatus === 'failed') {
-    return 'status-pill status-failed'
-  }
-
-  return 'status-pill status-pending'
-}
-
 function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const recapData = useMemo(() => buildHoleRecapData(roundState), [roundState])
   const isLastHole = roundState.currentHoleIndex === roundState.holes.length - 1
   const isPowerUpsMode = recapData.gameMode === 'powerUps'
   const [roundSortMode, setRoundSortMode] = useState<LeaderboardSortMode>('adjustedScore')
   const [holeSortMode, setHoleSortMode] = useState<LeaderboardSortMode>('adjustedScore')
+  const [recapMode, setRecapMode] = useState<RecapMode>('quick')
   const momentumJumpCount = recapData.playerRows.filter((row) => row.momentumTierJumped).length
   const publicSwingCount = recapData.publicCardRecapItems.reduce(
     (total, item) => total + item.impactRows.length,
@@ -91,6 +100,8 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const strongestHoleGain = [...recapData.playerRows].sort(
     (rowA, rowB) => rowB.holePoints - rowA.holePoints,
   )[0]
+  const holeUxMetrics = roundState.holeUxMetrics[roundState.currentHoleIndex]
+  const hasPublicCardsOnHole = roundState.holeCards[roundState.currentHoleIndex].publicCards.length > 0
 
   const roundLeaderboardRows = useMemo(
     () => buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, roundSortMode),
@@ -112,7 +123,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       ...currentState,
       currentHoleIndex: currentState.currentHoleIndex + 1,
     }))
-    onNavigate('holeSetup')
+    onNavigate('holePlay')
   }
 
   return (
@@ -126,8 +137,33 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           <span className="chip">Par {recapData.holePar}</span>
         </div>
         <p className="recap-highlight-label">Top Moment</p>
-        <p className="recap-highlight">{recapData.highlightLine}</p>
+        <p className="recap-highlight" aria-live="polite">{recapData.highlightLine}</p>
       </header>
+
+      <section className="panel stack-xs">
+        <div className="row-between">
+          <h3>Recap Mode</h3>
+          <span className="chip">Between Holes</span>
+        </div>
+        <div className="button-row">
+          <button
+            type="button"
+            className={recapMode === 'quick' ? 'button-primary' : ''}
+            onClick={() => setRecapMode('quick')}
+            aria-pressed={recapMode === 'quick'}
+          >
+            Quick Recap
+          </button>
+          <button
+            type="button"
+            className={recapMode === 'deep' ? 'button-primary' : ''}
+            onClick={() => setRecapMode('deep')}
+            aria-pressed={recapMode === 'deep'}
+          >
+            Deep Breakdown
+          </button>
+        </div>
+      </section>
 
       <section className="panel stack-xs">
         <div className="row-between">
@@ -153,25 +189,55 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         </div>
       </section>
 
+      {recapMode === 'deep' && (
+        <section className="panel recap-section stack-xs">
+          <div className="row-between">
+            <h3>Why This Hole Moved</h3>
+            <span className="chip">Highlights</span>
+          </div>
+          <p className="muted">{recapData.highlightLine}</p>
+          {!isPowerUpsMode && strongestHoleGain && (
+            <p className="muted">
+              Best hole gain: {strongestHoleGain.playerName} ({formatSignedPoints(strongestHoleGain.holePoints)}).
+            </p>
+          )}
+          {!isPowerUpsMode && (
+            <p className="muted">
+              Momentum jumps: {momentumJumpCount} | Public-card swings: {publicSwingCount}
+            </p>
+          )}
+        </section>
+      )}
+
       <section className="panel recap-section stack-xs">
         <div className="row-between">
-          <h3>Why This Hole Moved</h3>
-          <span className="chip">Highlights</span>
+          <h3>UX Instrumentation</h3>
+          <span className="chip">Phase 1</span>
         </div>
-        <p className="muted">{recapData.highlightLine}</p>
-        {!isPowerUpsMode && strongestHoleGain && (
-          <p className="muted">
-            Best hole gain: {strongestHoleGain.playerName} ({formatSignedPoints(strongestHoleGain.holePoints)}).
-          </p>
-        )}
-        {!isPowerUpsMode && (
-          <p className="muted">
-            Momentum jumps: {momentumJumpCount} | Public-card swings: {publicSwingCount}
-          </p>
-        )}
+        <div className="end-summary-grid">
+          <article className="summary-stat">
+            <p className="label">Time Per Hole</p>
+            <strong>{formatDuration(holeUxMetrics?.durationMs ?? null)}</strong>
+            <p>From deal to recap save</p>
+          </article>
+          <article className="summary-stat">
+            <p className="label">Taps To Complete</p>
+            <strong>{holeUxMetrics?.tapsToComplete ?? 0}</strong>
+            <p>Hole play + results actions</p>
+          </article>
+          <article className="summary-stat">
+            <p className="label">Public Resolve Time</p>
+            <strong>
+              {hasPublicCardsOnHole
+                ? formatDuration(holeUxMetrics?.publicResolutionDurationMs ?? null)
+                : 'N/A'}
+            </strong>
+            <p>{hasPublicCardsOnHole ? 'First public action to completion' : 'No public cards'}</p>
+          </article>
+        </div>
       </section>
 
-      {recapData.featuredHoleRecap && (
+      {recapMode === 'deep' && recapData.featuredHoleRecap && (
         <section className="panel featured-hole-recap stack-xs">
           <div className="row-between">
             <h3>Featured Hole Impact</h3>
@@ -193,7 +259,8 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         </section>
       )}
 
-      <section className="panel recap-section stack-xs">
+      {recapMode === 'deep' && (
+        <section className="panel recap-section stack-xs">
         <div className="row-between">
           <h3>{isPowerUpsMode ? 'Power-Up Outcomes' : 'Card & Momentum Outcomes'}</h3>
           <span className="chip">{recapData.playerRows.length} golfers</span>
@@ -214,7 +281,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               <div className="recap-metrics recap-metrics--primary">
                 {row.isHoleWinnerByPoints && <span className="recap-pill badge-winner">Hole Winner</span>}
                 {!isPowerUpsMode && (
-                  <span className={getMissionStatusClass(row.missionStatus)}>{row.missionStatus}</span>
+                  <span className={getMissionStatusPillClass(row.missionStatus)}>{row.missionStatus}</span>
                 )}
                 <span className="recap-pill recap-pill--hole">
                   Hole {formatSignedPoints(row.holePoints)}
@@ -285,6 +352,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       Rivalry {formatSignedPoints(row.rivalryBonus)}
                     </span>
                   )}
+                  {row.balanceCapAdjustment !== 0 && (
+                    <span className="recap-pill">
+                      Balance Cap {formatSignedPoints(row.balanceCapAdjustment)}
+                    </span>
+                  )}
                   {row.momentumTierJumped && (
                     <span className="recap-pill recap-pill--momentum-up">
                       {row.momentumBeforeLabel} to {row.momentumAfterLabel}
@@ -298,9 +370,10 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             )}
           </article>
         ))}
-      </section>
+        </section>
+      )}
 
-      {!isPowerUpsMode && recapData.publicCardRecapItems.length > 0 && (
+      {recapMode === 'deep' && !isPowerUpsMode && recapData.publicCardRecapItems.length > 0 && (
         <section className="panel recap-section stack-xs">
           <div className="row-between">
             <h3>Public Card Swings</h3>
@@ -344,13 +417,15 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         showMomentum={false}
       />
 
-      <LeaderboardTable
-        title="Hole Leaderboard"
-        rows={holeLeaderboardRows}
-        sortMode={holeSortMode}
-        onSortChange={setHoleSortMode}
-        showMomentum={false}
-      />
+      {recapMode === 'deep' && (
+        <LeaderboardTable
+          title="Hole Leaderboard"
+          rows={holeLeaderboardRows}
+          sortMode={holeSortMode}
+          onSortChange={setHoleSortMode}
+          showMomentum={false}
+        />
+      )}
 
       <section className="panel stack-xs recap-next">
         <button type="button" className="button-primary" onClick={progressRound}>

@@ -1,4 +1,5 @@
 import type { GimmeGolfCard, PersonalCard, PublicCard } from '../types/cards.ts'
+import { buildExplicitPublicInteraction } from '../logic/publicInteraction.ts'
 
 function asPersonal(cards: GimmeGolfCard[]): PersonalCard[] {
   return cards.filter((card): card is PersonalCard => card.isPublic === false)
@@ -2748,7 +2749,10 @@ export const EXPANSION_PERSONAL_CARDS: PersonalCard[] = asPersonal([
 export const EXPANSION_PUBLIC_CARDS: PublicCard[] = asPublic([
   ...EXPANSION_CHAOS_CARDS,
   ...EXPANSION_PROP_CARDS,
-])
+]).map((card) => ({
+  ...card,
+  interaction: buildExplicitPublicInteraction(card),
+}))
 
 export const EXPANSION_ALL_CARDS: GimmeGolfCard[] = [
   ...EXPANSION_COMMON_CARDS,

@@ -1,4 +1,5 @@
 import { ICONS } from '../app/icons.ts'
+import { applyQuickRoundDefaults } from '../logic/quickRound.ts'
 import type { ScreenProps } from './types.ts'
 
 function HomeScreen({
@@ -8,6 +9,7 @@ function HomeScreen({
   onResumeSavedRound,
   onResetRound,
   onAbandonRound,
+  onUpdateRoundState,
 }: ScreenProps) {
   const continueRound = () => {
     onResumeSavedRound()
@@ -26,6 +28,20 @@ function HomeScreen({
     }
 
     onNavigate('roundSetup')
+  }
+
+  const startQuickRound = () => {
+    if (hasSavedRound) {
+      const shouldReplaceSavedRound = window.confirm(
+        'A saved round exists. Start a quick round and replace current progress?',
+      )
+      if (!shouldReplaceSavedRound) {
+        return
+      }
+    }
+
+    onUpdateRoundState((currentState) => applyQuickRoundDefaults(currentState))
+    onNavigate('holePlay')
   }
 
   const abandonRound = () => {
@@ -68,19 +84,29 @@ function HomeScreen({
               <img className="button-icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
               Continue Round
             </button>
+            <button type="button" className="button-danger" onClick={startQuickRound}>
+              <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+              Quick Round
+            </button>
             <button type="button" className="button-danger" onClick={startNewRound}>
               <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
-              Start New Round
+              Full Setup
             </button>
             <button type="button" onClick={abandonRound}>
               Abandon Round
             </button>
           </>
         ) : (
-          <button type="button" className="button-primary" onClick={startNewRound}>
-            <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
-            Start New Round
-          </button>
+          <>
+            <button type="button" className="button-primary" onClick={startQuickRound}>
+              <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+              Quick Round
+            </button>
+            <button type="button" onClick={startNewRound}>
+              <img className="button-icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+              Full Setup
+            </button>
+          </>
         )}
       </section>
     </section>

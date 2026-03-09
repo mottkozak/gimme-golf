@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
-import type { PersonalCard, PublicCard } from '../types/cards.ts'
-import type {
-  MissionStatus,
-  PublicCardResolutionState,
-} from '../types/game.ts'
 import {
   buildPublicResolutionNotes,
   getPublicCardResolutionMode,
@@ -16,13 +11,20 @@ import {
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
 import { getAssignedPowerUp } from '../logic/powerUps.ts'
+import {
+  incrementHoleTapCount,
+  markHoleCompletedAt,
+  markPublicResolutionCompletedAt,
+  markPublicResolutionStartedAt,
+} from '../logic/uxMetrics.ts'
+import { isResolvedMissionStatus } from '../logic/missionStatus.ts'
+import type { PersonalCard, PublicCard } from '../types/cards.ts'
+import type { MissionStatus, PublicCardResolutionState, RoundState } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
 
 const QUICK_STROKE_OFFSETS = [-2, -1, 0, 1, 2, 3] as const
 
-function isResolvedMissionStatus(status: MissionStatus): boolean {
-  return status === 'success' || status === 'failed'
-}
+type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
 function parseStrokeInput(rawValue: string): number | null {
   const digitsOnly = rawValue.replace(/[^\d]/g, '')
@@ -68,8 +70,6 @@ function sortPlayersByGamePoints(
   })
 }
 
-type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
-
 function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
   const absolutePoints = Math.max(1, Math.abs(card.points))
   return (
@@ -95,6 +95,8 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     playerName: string
     card: PersonalCard
   } | null>(null)
+  const [missionSectionExpanded, setMissionSectionExpanded] = useState(false)
+  const [publicSectionExpanded, setPublicSectionExpanded] = useState(false)
 
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
@@ -109,6 +111,17 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const leadingPlayerId = rankedPlayersByGamePoints[0]?.id ?? null
   const trailingPlayerId = rankedPlayersByGamePoints[rankedPlayersByGamePoints.length - 1]?.id ?? null
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveCardPreview(null)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   const getSuggestedTargetPlayerId = (pointsDelta: number): string | null => {
     const fallbackPlayerId = roundState.players[0]?.id ?? null
     if (pointsDelta < 0) {
@@ -116,6 +129,33 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     }
 
     return trailingPlayerId ?? fallbackPlayerId
+  }
+
+  const currentResolutions = normalizePublicCardResolutions(
+    currentHoleCards.publicCards,
+    currentResult.publicCardResolutionsByCardId,
+  )
+
+  const updateCurrentHoleWithTap = (
+    updater: (currentState: RoundState) => RoundState,
+    options?: { markPublicStart?: boolean },
+  ) => {
+    onUpdateRoundState((currentState) => {
+      const now = Date.now()
+      const holeIndex = currentState.currentHoleIndex
+      const nextState = updater(currentState)
+
+      let nextHoleUxMetrics = nextState.holeUxMetrics
+      if (options?.markPublicStart) {
+        nextHoleUxMetrics = markPublicResolutionStartedAt(nextHoleUxMetrics, holeIndex, now)
+      }
+      nextHoleUxMetrics = incrementHoleTapCount(nextHoleUxMetrics, holeIndex)
+
+      return {
+        ...nextState,
+        holeUxMetrics: nextHoleUxMetrics,
+      }
+    })
   }
 
   const applyResolutionDefaults = (
@@ -222,28 +262,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     }
   }
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setActiveCardPreview(null)
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
-
-  const currentResolutions = normalizePublicCardResolutions(
-    currentHoleCards.publicCards,
-    currentResult.publicCardResolutionsByCardId,
-  )
-
   const updatePublicResolutions = (
     updater: (
       currentResolutionsByCardId: Record<string, PublicCardResolutionState>,
     ) => Record<string, PublicCardResolutionState>,
   ) => {
-    onUpdateRoundState((currentState) => {
+    updateCurrentHoleWithTap((currentState) => {
       const holeResults = [...currentState.holeResults]
       const currentHoleIndex = currentState.currentHoleIndex
       const holeResultState = holeResults[currentHoleIndex]
@@ -278,7 +302,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         ...currentState,
         holeResults,
       }
-    })
+    }, { markPublicStart: true })
   }
 
   const setCardTriggered = (card: PublicCard, triggered: boolean) => {
@@ -386,7 +410,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   }
 
   const setStrokes = (playerId: string, nextStrokes: number | null) => {
-    onUpdateRoundState((currentState) => {
+    updateCurrentHoleWithTap((currentState) => {
       const holeResults = [...currentState.holeResults]
       const holeResultState = holeResults[currentState.currentHoleIndex]
 
@@ -406,7 +430,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   }
 
   const setMissionStatus = (playerId: string, status: Extract<MissionStatus, 'success' | 'failed'>) => {
-    onUpdateRoundState((currentState) => {
+    updateCurrentHoleWithTap((currentState) => {
       const holeResults = [...currentState.holeResults]
       const holeResultState = holeResults[currentState.currentHoleIndex]
 
@@ -422,6 +446,45 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         ...currentState,
         holeResults,
       }
+    })
+  }
+
+  const onToggleMissionSection = () => {
+    setMissionSectionExpanded((current) => {
+      const nextExpanded = !current
+
+      onUpdateRoundState((currentState) => ({
+        ...currentState,
+        holeUxMetrics: incrementHoleTapCount(
+          currentState.holeUxMetrics,
+          currentState.currentHoleIndex,
+        ),
+      }))
+
+      return nextExpanded
+    })
+  }
+
+  const onTogglePublicSection = () => {
+    setPublicSectionExpanded((current) => {
+      const nextExpanded = !current
+
+      onUpdateRoundState((currentState) => {
+        const now = Date.now()
+        const holeIndex = currentState.currentHoleIndex
+
+        let nextHoleUxMetrics = incrementHoleTapCount(currentState.holeUxMetrics, holeIndex)
+        if (nextExpanded) {
+          nextHoleUxMetrics = markPublicResolutionStartedAt(nextHoleUxMetrics, holeIndex, now)
+        }
+
+        return {
+          ...currentState,
+          holeUxMetrics: nextHoleUxMetrics,
+        }
+      })
+
+      return nextExpanded
     })
   }
 
@@ -449,6 +512,47 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const canContinueToRecap =
     isHoleDataReady && (isPowerUpsMode ? true : arePublicCardsResolved)
 
+  const strokesCompletedCount = roundState.players.filter((player) =>
+    typeof currentResult.strokesByPlayerId[player.id] === 'number',
+  ).length
+
+  const missionRequiredPlayerIds = roundState.players
+    .filter((player) => {
+      const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+      return dealtCards.length > 0
+    })
+    .map((player) => player.id)
+  const missionResolvedCount = missionRequiredPlayerIds.filter((playerId) =>
+    isResolvedMissionStatus(currentResult.missionStatusByPlayerId[playerId]),
+  ).length
+  const hasMissionStep = !isPowerUpsMode && missionRequiredPlayerIds.length > 0
+
+  const resolvedPublicCardsCount = currentHoleCards.publicCards.filter((card) =>
+    isPublicCardResolutionComplete(card, currentResolutions[card.id], playerIds),
+  ).length
+
+  const continueToRecap = () => {
+    const now = Date.now()
+
+    onUpdateRoundState((currentState) => {
+      const holeIndex = currentState.currentHoleIndex
+      const hasPublicCards = currentState.holeCards[holeIndex].publicCards.length > 0
+
+      let nextHoleUxMetrics = incrementHoleTapCount(currentState.holeUxMetrics, holeIndex)
+      if (!isPowerUpsMode && hasPublicCards) {
+        nextHoleUxMetrics = markPublicResolutionCompletedAt(nextHoleUxMetrics, holeIndex, now)
+      }
+      nextHoleUxMetrics = markHoleCompletedAt(nextHoleUxMetrics, holeIndex, now)
+
+      return {
+        ...currentState,
+        holeUxMetrics: nextHoleUxMetrics,
+      }
+    })
+
+    onNavigate('leaderboard')
+  }
+
   return (
     <section className="screen stack-sm hole-results-screen">
       <header className="screen__header">
@@ -457,23 +561,18 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           <h2>Hole Results</h2>
         </div>
         <p className="muted">
-          {isPowerUpsMode
-            ? 'Enter strokes and confirm each player power-up status.'
-            : 'Enter strokes, challenge success, and resolve public cards manually.'}
+          Required-first flow: finish strokes first, then expand challenge and public-card resolution.
         </p>
-        {!isPowerUpsMode && roundState.config.toggles.momentumBonuses && (
-          <p className="muted">
-            Momentum is on: Completed challenges can add automatic streak bonus points.
-          </p>
-        )}
       </header>
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
       <section className="panel stack-xs hole-results-entry-panel">
         <div className="row-between">
-          <strong>Hole {currentHole.holeNumber}</strong>
-          <span className="chip">Par {currentHole.par}</span>
+          <strong>Step 1: Strokes (Required)</strong>
+          <span className="chip">
+            {strokesCompletedCount}/{roundState.players.length} entered
+          </span>
         </div>
 
         {roundState.players.map((player) => {
@@ -483,9 +582,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           )
           const assignedPowerUp = getAssignedPowerUp(currentHolePowerUps, player.id)
           const powerUpUsed = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
-          const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
-          const hasPersonalCard = Boolean(selectedCard)
           const quickStrokeOptions = buildQuickStrokeOptions(currentHole.par)
 
           return (
@@ -503,7 +600,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       })
                     }
                   >
-                    Card: {selectedCard.code}
+                    {selectedCard.code} - {selectedCard.name}
                   </button>
                 ) : (
                   <span className="chip">{isPowerUpsMode ? 'Power Ups Mode' : 'No card'}</span>
@@ -516,37 +613,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     ? `${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
                     : 'No power-up assigned for this golfer.'
                   : selectedCard
-                  ? `${selectedCard.name} (${selectedCard.points} pts on success)`
-                  : 'No personal card selected for this golfer.'}
+                    ? `${selectedCard.name} (${selectedCard.points} pts on success)`
+                    : 'No personal card selected for this golfer.'}
               </p>
-
-              {isPowerUpsMode ? (
-                <p className="muted">
-                  Power Up: <strong>{powerUpUsed ? 'Used' : 'Unused'}</strong>
-                </p>
-              ) : hasPersonalCard ? (
-                <section className="stack-xs">
-                  <span className="label">Challenge</span>
-                  <div className="button-row hole-results-mission-row">
-                    <button
-                      type="button"
-                      className={missionStatus === 'success' ? 'button-primary' : ''}
-                      onClick={() => setMissionStatus(player.id, 'success')}
-                    >
-                      Completed
-                    </button>
-                    <button
-                      type="button"
-                      className={missionStatus === 'failed' ? 'button-primary' : ''}
-                      onClick={() => setMissionStatus(player.id, 'failed')}
-                    >
-                      Failed
-                    </button>
-                  </div>
-                </section>
-              ) : (
-                <p className="muted">No personal challenge to resolve for this golfer.</p>
-              )}
 
               <section className="stack-xs">
                 <div className="row-between">
@@ -604,191 +673,288 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         })}
       </section>
 
+      {hasMissionStep && (
+        <section className="panel stack-xs">
+          <div className="row-between">
+            <strong>Step 2: Challenge Results (Required For Dealt Cards)</strong>
+            <button
+              type="button"
+              className={missionSectionExpanded ? 'button-primary' : ''}
+              onClick={onToggleMissionSection}
+              aria-expanded={missionSectionExpanded}
+              aria-controls="mission-resolution-section"
+            >
+              {missionSectionExpanded ? 'Hide' : 'Expand'}
+            </button>
+          </div>
+          <p className="muted">
+            {missionResolvedCount}/{missionRequiredPlayerIds.length} golfers resolved.
+          </p>
+
+          {missionSectionExpanded && (
+            <section
+              id="mission-resolution-section"
+              className="stack-xs"
+              role="region"
+              aria-label="Mission resolution"
+            >
+              {roundState.players.map((player) => {
+                const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
+                const selectedCard = (currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []).find(
+                  (card) => card.id === selectedCardId,
+                )
+                const missionStatus = currentResult.missionStatusByPlayerId[player.id]
+
+                if (!selectedCard) {
+                  return (
+                    <article key={player.id} className="panel inset stack-xs">
+                      <div className="row-between">
+                        <strong>{player.name}</strong>
+                        <span className="chip">No challenge</span>
+                      </div>
+                      <p className="muted">No personal challenge to resolve for this golfer.</p>
+                    </article>
+                  )
+                }
+
+                return (
+                  <article key={player.id} className="panel inset stack-xs">
+                    <div className="row-between">
+                      <strong>{player.name}</strong>
+                      <span className="chip">
+                        {selectedCard.code} - {selectedCard.name}
+                      </span>
+                    </div>
+                    <div className="button-row hole-results-mission-row">
+                      <button
+                        type="button"
+                        className={missionStatus === 'success' ? 'button-primary' : ''}
+                        onClick={() => setMissionStatus(player.id, 'success')}
+                      >
+                        Completed
+                      </button>
+                      <button
+                        type="button"
+                        className={missionStatus === 'failed' ? 'button-primary' : ''}
+                        onClick={() => setMissionStatus(player.id, 'failed')}
+                      >
+                        Failed
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </section>
+          )}
+        </section>
+      )}
+
       {!isPowerUpsMode && currentHoleCards.publicCards.length > 0 && (
         <section className="panel stack-xs public-resolution-panel">
-          <h3>Public Card Resolution</h3>
-          <p className="muted">
-            Resolve each card in order. Only the required choices for that card will appear.
-          </p>
-          <p className="muted">
-            Tip: set Triggered/Not Triggered first, then complete any target/effect choices.
-          </p>
-
-          {currentHoleCards.publicCards.map((card) => {
-            const resolution = currentResolutions[card.id]
-            const normalizedMode = getPublicCardResolutionMode(card, resolution)
-            const guidedResolution: PublicCardResolutionState = {
-              ...resolution,
-              mode: normalizedMode,
-            }
-            const guidance = getPublicResolutionGuidance(card, normalizedMode)
-            const requirements = getPublicResolutionInputRequirements(card, guidedResolution)
-            const hasMultiplePlayers = roundState.players.length > 1
-            const voteTargets = roundState.players.map(
-              (player) => guidedResolution.targetPlayerIdByVoterId[player.id] ?? null,
-            )
-            const unanimousVoteTargetPlayerId =
-              voteTargets.length > 0 &&
-              voteTargets[0] &&
-              voteTargets.every((targetPlayerId) => targetPlayerId === voteTargets[0])
-                ? voteTargets[0]
-                : null
-
-            return (
-              <article key={card.id} className="panel inset stack-xs">
-                <div className="row-between">
-                  <strong>{card.name}</strong>
-                  <span className="chip">
-                    {card.cardType.toUpperCase()} {card.points > 0 ? '+' : ''}
-                    {card.points}
-                  </span>
-                </div>
-                <p className="muted">{card.description}</p>
-                <p className="muted">{card.rulesText}</p>
-                <p className="muted">
-                  <strong>{guidance.title}</strong>
-                </p>
-                <p className="muted">{guidance.triggerHelp}</p>
-
-                <div className="button-row">
-                  <button
-                    type="button"
-                    className={guidedResolution.triggered ? 'button-primary' : ''}
-                    onClick={() => setCardTriggered(card, true)}
-                  >
-                    Triggered
-                  </button>
-                  <button
-                    type="button"
-                    className={!guidedResolution.triggered ? 'button-primary' : ''}
-                    onClick={() => setCardTriggered(card, false)}
-                  >
-                    Not Triggered
-                  </button>
-                </div>
-
-                <p className="muted">{guidance.triggerPrompt}</p>
-
-                {guidedResolution.triggered && requirements.requiresVoteTarget && hasMultiplePlayers && (
-                  <div className="stack-xs">
-                    <span className="label">{guidance.voteTargetLabel}</span>
-                    <div className="button-row row-wrap">
-                      {roundState.players.map((player) => (
-                        <button
-                          key={player.id}
-                          type="button"
-                          className={unanimousVoteTargetPlayerId === player.id ? 'button-primary' : ''}
-                          onClick={() => setUnifiedVoteTarget(card.id, player.id)}
-                        >
-                          {player.name}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="muted">
-                      Quick-set applies the same vote target for all golfers (fast majority capture).
-                    </p>
-                  </div>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresVoteTarget && !hasMultiplePlayers && (
-                  <p className="muted">{guidance.autoResolvedHint}</p>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresEffectChoice && (
-                  <div className="stack-xs">
-                    <span className="label">{guidance.effectChoiceLabel}</span>
-                    <div className="button-row">
-                      {getEffectOptions(card).map((effectOption) => (
-                        <button
-                          key={effectOption.id}
-                          type="button"
-                          className={
-                            guidedResolution.selectedEffectOptionId === effectOption.id
-                              ? 'button-primary'
-                              : ''
-                          }
-                          onClick={() => setSelectedEffectOption(card, effectOption.id)}
-                        >
-                          {effectOption.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresTargetSelection && hasMultiplePlayers && (
-                  <div className="stack-xs">
-                    <span className="label">{guidance.targetLabel}</span>
-                    <div className="button-row row-wrap">
-                      {roundState.players.map((player) => (
-                        <button
-                          key={player.id}
-                          type="button"
-                          className={
-                            guidedResolution.winningPlayerId === player.id ? 'button-primary' : ''
-                          }
-                          onClick={() => setCardWinner(card.id, player.id)}
-                        >
-                          {player.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresTargetSelection && !hasMultiplePlayers && (
-                  <p className="muted">{guidance.autoResolvedHint}</p>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresAffectedSelection && hasMultiplePlayers && (
-                  <div className="stack-xs">
-                    <span className="label">{guidance.affectedLabel}</span>
-                    <div className="button-row row-wrap">
-                      {roundState.players.map((player) => {
-                        const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
-
-                        return (
-                          <button
-                            key={player.id}
-                            type="button"
-                            className={isAffected ? 'button-primary' : ''}
-                            onClick={() => toggleAffectedPlayer(card.id, player.id)}
-                          >
-                            {player.name}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {guidedResolution.triggered && requirements.requiresAffectedSelection && !hasMultiplePlayers && (
-                  <p className="muted">{guidance.autoResolvedHint}</p>
-                )}
-
-                {!isPublicCardResolutionComplete(card, guidedResolution, playerIds) && (
-                  <p className="muted">Complete selection for this public card before continuing.</p>
-                )}
-              </article>
-            )
-          })}
-
-          <div className="panel inset stack-xs">
-            <strong>Public Point Delta Preview</strong>
-            {roundState.players.map((player) => {
-              const delta = currentResult.publicPointDeltaByPlayerId[player.id] ?? 0
-              return (
-                <div key={player.id} className="row-between">
-                  <span>{player.name}</span>
-                  <span>
-                    {delta > 0 ? '+' : ''}
-                    {delta}
-                  </span>
-                </div>
-              )
-            })}
-            <p className="muted">{currentResult.publicCardResolutionNotes}</p>
+          <div className="row-between">
+            <strong>Step 3: Public Card Resolution (Required)</strong>
+            <button
+              type="button"
+              className={publicSectionExpanded ? 'button-primary' : ''}
+              onClick={onTogglePublicSection}
+              aria-expanded={publicSectionExpanded}
+              aria-controls="public-resolution-section"
+            >
+              {publicSectionExpanded ? 'Hide' : 'Expand'}
+            </button>
           </div>
+          <p className="muted">
+            {resolvedPublicCardsCount}/{currentHoleCards.publicCards.length} public cards resolved.
+          </p>
+
+          {publicSectionExpanded && (
+            <section
+              id="public-resolution-section"
+              className="stack-xs"
+              role="region"
+              aria-label="Public card resolution"
+            >
+              <p className="muted">
+                Resolve each card in order. Only required choices for that card will appear.
+              </p>
+
+              {currentHoleCards.publicCards.map((card) => {
+                const resolution = currentResolutions[card.id]
+                const normalizedMode = getPublicCardResolutionMode(card, resolution)
+                const guidedResolution: PublicCardResolutionState = {
+                  ...resolution,
+                  mode: normalizedMode,
+                }
+                const guidance = getPublicResolutionGuidance(card, normalizedMode)
+                const requirements = getPublicResolutionInputRequirements(card, guidedResolution)
+                const hasMultiplePlayers = roundState.players.length > 1
+                const voteTargets = roundState.players.map(
+                  (player) => guidedResolution.targetPlayerIdByVoterId[player.id] ?? null,
+                )
+                const unanimousVoteTargetPlayerId =
+                  voteTargets.length > 0 &&
+                  voteTargets[0] &&
+                  voteTargets.every((targetPlayerId) => targetPlayerId === voteTargets[0])
+                    ? voteTargets[0]
+                    : null
+
+                return (
+                  <article key={card.id} className="panel inset stack-xs">
+                    <div className="row-between">
+                      <strong>{card.name}</strong>
+                      <span className="chip">
+                        {card.cardType.toUpperCase()} {card.points > 0 ? '+' : ''}
+                        {card.points}
+                      </span>
+                    </div>
+                    <p className="muted">{card.description}</p>
+                    <p className="muted">{card.rulesText}</p>
+                    <p className="muted">
+                      <strong>{guidance.title}</strong>
+                    </p>
+                    <p className="muted">{guidance.triggerHelp}</p>
+
+                    <div className="button-row">
+                      <button
+                        type="button"
+                        className={guidedResolution.triggered ? 'button-primary' : ''}
+                        onClick={() => setCardTriggered(card, true)}
+                      >
+                        Triggered
+                      </button>
+                      <button
+                        type="button"
+                        className={!guidedResolution.triggered ? 'button-primary' : ''}
+                        onClick={() => setCardTriggered(card, false)}
+                      >
+                        Not Triggered
+                      </button>
+                    </div>
+
+                    <p className="muted">{guidance.triggerPrompt}</p>
+
+                    {guidedResolution.triggered && requirements.requiresVoteTarget && hasMultiplePlayers && (
+                      <div className="stack-xs">
+                        <span className="label">{guidance.voteTargetLabel}</span>
+                        <div className="button-row row-wrap">
+                          {roundState.players.map((player) => (
+                            <button
+                              key={player.id}
+                              type="button"
+                              className={unanimousVoteTargetPlayerId === player.id ? 'button-primary' : ''}
+                              onClick={() => setUnifiedVoteTarget(card.id, player.id)}
+                            >
+                              {player.name}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="muted">
+                          Quick-set applies the same vote target for all golfers.
+                        </p>
+                      </div>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresVoteTarget && !hasMultiplePlayers && (
+                      <p className="muted">{guidance.autoResolvedHint}</p>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresEffectChoice && (
+                      <div className="stack-xs">
+                        <span className="label">{guidance.effectChoiceLabel}</span>
+                        <div className="button-row">
+                          {getEffectOptions(card).map((effectOption) => (
+                            <button
+                              key={effectOption.id}
+                              type="button"
+                              className={
+                                guidedResolution.selectedEffectOptionId === effectOption.id
+                                  ? 'button-primary'
+                                  : ''
+                              }
+                              onClick={() => setSelectedEffectOption(card, effectOption.id)}
+                            >
+                              {effectOption.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresTargetSelection && hasMultiplePlayers && (
+                      <div className="stack-xs">
+                        <span className="label">{guidance.targetLabel}</span>
+                        <div className="button-row row-wrap">
+                          {roundState.players.map((player) => (
+                            <button
+                              key={player.id}
+                              type="button"
+                              className={
+                                guidedResolution.winningPlayerId === player.id ? 'button-primary' : ''
+                              }
+                              onClick={() => setCardWinner(card.id, player.id)}
+                            >
+                              {player.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresTargetSelection && !hasMultiplePlayers && (
+                      <p className="muted">{guidance.autoResolvedHint}</p>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresAffectedSelection && hasMultiplePlayers && (
+                      <div className="stack-xs">
+                        <span className="label">{guidance.affectedLabel}</span>
+                        <div className="button-row row-wrap">
+                          {roundState.players.map((player) => {
+                            const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
+
+                            return (
+                              <button
+                                key={player.id}
+                                type="button"
+                                className={isAffected ? 'button-primary' : ''}
+                                onClick={() => toggleAffectedPlayer(card.id, player.id)}
+                              >
+                                {player.name}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {guidedResolution.triggered && requirements.requiresAffectedSelection && !hasMultiplePlayers && (
+                      <p className="muted">{guidance.autoResolvedHint}</p>
+                    )}
+
+                    {!isPublicCardResolutionComplete(card, guidedResolution, playerIds) && (
+                      <p className="muted">Complete selection for this public card before continuing.</p>
+                    )}
+                  </article>
+                )
+              })}
+
+              <div className="panel inset stack-xs">
+                <strong>Public Point Delta Preview</strong>
+                {roundState.players.map((player) => {
+                  const delta = currentResult.publicPointDeltaByPlayerId[player.id] ?? 0
+                  return (
+                    <div key={player.id} className="row-between">
+                      <span>{player.name}</span>
+                      <span>
+                        {delta > 0 ? '+' : ''}
+                        {delta}
+                      </span>
+                    </div>
+                  )
+                })}
+                <p className="muted">{currentResult.publicCardResolutionNotes}</p>
+              </div>
+            </section>
+          )}
         </section>
       )}
 
@@ -797,14 +963,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           type="button"
           className="button-primary"
           disabled={!canContinueToRecap}
-          onClick={() => onNavigate('leaderboard')}
+          onClick={continueToRecap}
         >
           <img className="button-icon" src={ICONS.holeRecap} alt="" aria-hidden="true" />
           Save Results And View Hole Recap
         </button>
         {!canContinueToRecap && (
           <p className="muted">
-            Enter strokes/challenge outcome for all golfers and finish public card resolution first.
+            Complete all required stroke, challenge, and public-card inputs before continuing.
           </p>
         )}
       </section>

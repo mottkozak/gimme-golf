@@ -5,6 +5,9 @@ import type {
   PublicCardResolutionState,
   PublicResolutionMode,
 } from '../types/game.ts'
+import { POINT_BALANCE_RULES } from './gameBalance.ts'
+import { buildExplicitPublicInteraction } from './publicInteraction.ts'
+import { resolveMajorityVoteWinnerId } from './votes.ts'
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
@@ -15,11 +18,6 @@ export type CanonicalPublicResolutionMode =
   | 'leader_selects_target'
   | 'trailing_player_selects_target'
   | 'pick_affected_players'
-
-function includesAnyKeyword(value: string, keywords: string[]): boolean {
-  const normalized = value.toLowerCase()
-  return keywords.some((keyword) => normalized.includes(keyword))
-}
 
 function normalizeResolutionMode(mode: PublicResolutionMode): PublicResolutionMode {
   const legacyModeMap: Record<LegacyPublicResolutionMode, PublicResolutionMode> = {
@@ -44,7 +42,7 @@ export function getPublicCardResolutionMode(
   resolution: Pick<PublicCardResolutionState, 'mode'> | null | undefined,
 ): CanonicalPublicResolutionMode {
   return normalizeResolutionMode(
-    card.interaction?.mode ?? resolution?.mode ?? getDefaultPublicResolutionMode(card),
+    buildExplicitPublicInteraction(card).mode ?? resolution?.mode ?? getDefaultPublicResolutionMode(card),
   ) as CanonicalPublicResolutionMode
 }
 
@@ -67,53 +65,12 @@ function getDefaultEffectOptions(card: PublicCard): [EffectOption, EffectOption]
 }
 
 function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
-  return card.interaction?.effectOptions ?? getDefaultEffectOptions(card)
+  const interaction = buildExplicitPublicInteraction(card)
+  return interaction.effectOptions ?? getDefaultEffectOptions(card)
 }
 
 export function getDefaultPublicResolutionMode(card: PublicCard): PublicResolutionMode {
-  if (card.interaction?.mode) {
-    return card.interaction.mode
-  }
-
-  const fullText = `${card.name} ${card.description} ${card.rulesText}`
-
-  if (includesAnyKeyword(fullText, ['one of two', 'either'])) {
-    return 'choose_one_of_two_effects'
-  }
-
-  if (includesAnyKeyword(fullText, ['trailing golfer chooses', 'trailing player chooses'])) {
-    return 'trailing_player_selects_target'
-  }
-
-  if (includesAnyKeyword(fullText, ['leader chooses', 'leader picks', 'leader selects'])) {
-    return 'leader_selects_target'
-  }
-
-  if (
-    includesAnyKeyword(fullText, [
-      'vote',
-      'majority',
-      'pick who',
-      'player pick',
-      'pick any active player',
-      'pick one player',
-      'choose one active golfer',
-      'longest drive',
-      'closest to pin',
-    ])
-  ) {
-    return 'vote_target_player'
-  }
-
-  if (card.points === 0) {
-    return 'yes_no_triggered'
-  }
-
-  if (card.cardType === 'prop' || card.cardType === 'chaos') {
-    return 'pick_affected_players'
-  }
-
-  return 'yes_no_triggered'
+  return buildExplicitPublicInteraction(card).mode
 }
 
 export function createDefaultPublicCardResolution(card: PublicCard): PublicCardResolutionState {
@@ -383,29 +340,8 @@ export function isPublicCardResolutionComplete(
   return resolution.affectedPlayerIds.length > 0
 }
 
-function getMajorityVoteWinnerId(
-  votesByVoterId: Record<string, string | null>,
-  validPlayerIds: Set<string>,
-): string | null {
-  const voteCounts: Record<string, number> = {}
-
-  for (const votedPlayerId of Object.values(votesByVoterId)) {
-    if (!votedPlayerId || !validPlayerIds.has(votedPlayerId)) {
-      continue
-    }
-
-    voteCounts[votedPlayerId] = (voteCounts[votedPlayerId] ?? 0) + 1
-  }
-
-  const rankedVotes = Object.entries(voteCounts).sort((entryA, entryB) => entryB[1] - entryA[1])
-  const topVoteCount = rankedVotes[0]?.[1]
-  const tieCount = rankedVotes.filter(([, count]) => count === topVoteCount).length
-
-  if (!topVoteCount || tieCount > 1) {
-    return null
-  }
-
-  return rankedVotes[0]?.[0] ?? null
+function clamp(value: number, minValue: number, maxValue: number): number {
+  return Math.max(minValue, Math.min(maxValue, value))
 }
 
 export function resolvePublicCardPointDeltas(
@@ -444,7 +380,7 @@ export function resolvePublicCardPointDeltas(
     }
 
     if (normalizedMode === 'vote_target_player') {
-      const votedPlayerId = getMajorityVoteWinnerId(
+      const votedPlayerId = resolveMajorityVoteWinnerId(
         resolution.targetPlayerIdByVoterId ?? {},
         validPlayerIds,
       )
@@ -493,6 +429,14 @@ export function resolvePublicCardPointDeltas(
         }
       }
     }
+  }
+
+  for (const player of players) {
+    pointDeltasByPlayerId[player.id] = clamp(
+      pointDeltasByPlayerId[player.id],
+      POINT_BALANCE_RULES.publicPointDeltaCap.min,
+      POINT_BALANCE_RULES.publicPointDeltaCap.max,
+    )
   }
 
   return pointDeltasByPlayerId

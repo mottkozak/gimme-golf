@@ -1,8 +1,37 @@
-import { normalizeEnabledPackIds } from '../data/cardPacks.ts'
+import { CARD_PACKS, CARD_PACKS_BY_ID, normalizeEnabledPackIds } from '../data/cardPacks.ts'
+import { isPackUnlocked } from './entitlements.ts'
 import { normalizeFeaturedHolesConfig } from './featuredHoles.ts'
 import { normalizePresetConfig } from './gameModePresets.ts'
 import type { CardPackId } from '../types/cards.ts'
 import type { RoundConfig } from '../types/game.ts'
+
+function isPackIdUnlocked(packId: CardPackId): boolean {
+  const pack = CARD_PACKS_BY_ID[packId]
+  return isPackUnlocked(pack.id, pack.premiumTier)
+}
+
+function getDefaultUnlockedPackIds(): CardPackId[] {
+  const defaultPackIds = CARD_PACKS
+    .filter((pack) => pack.isEnabledByDefault)
+    .map((pack) => pack.id)
+    .filter(isPackIdUnlocked)
+
+  if (defaultPackIds.length > 0) {
+    return normalizeEnabledPackIds(defaultPackIds)
+  }
+
+  return ['classic']
+}
+
+function filterEnabledPackIdsForEntitlements(enabledPackIds: CardPackId[]): CardPackId[] {
+  const unlockedPackIds = enabledPackIds.filter(isPackIdUnlocked)
+
+  if (unlockedPackIds.length > 0) {
+    return normalizeEnabledPackIds(unlockedPackIds)
+  }
+
+  return getDefaultUnlockedPackIds()
+}
 
 export function toggleEnabledPack(
   enabledPackIds: CardPackId[],
@@ -17,14 +46,15 @@ export function toggleEnabledPack(
     nextSet.delete(packId)
   }
 
-  return normalizeEnabledPackIds(Array.from(nextSet))
+  return filterEnabledPackIdsForEntitlements(normalizeEnabledPackIds(Array.from(nextSet)))
 }
 
 export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
   const presetConfig = normalizePresetConfig(config)
   const gameMode = presetConfig.gameMode === 'powerUps' ? 'powerUps' : 'cards'
-  const enabledPackIds =
-    gameMode === 'powerUps' ? [] : normalizeEnabledPackIds(presetConfig.enabledPackIds)
+  const enabledPackIds = gameMode === 'powerUps'
+    ? []
+    : filterEnabledPackIdsForEntitlements(normalizeEnabledPackIds(presetConfig.enabledPackIds))
   const autoAssignOne = Boolean(presetConfig.toggles.autoAssignOne)
   const momentumBonuses =
     typeof presetConfig.toggles.momentumBonuses === 'boolean'

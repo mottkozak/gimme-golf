@@ -11,6 +11,7 @@ import {
   EXPANSION_PUBLIC_CARDS,
 } from './expansionCards.ts'
 import { getPackIdForCardType } from './cardPacks.ts'
+import { buildExplicitPublicInteraction } from '../logic/publicInteraction.ts'
 
 export const TARGET_DECK_COUNTS = {
   common: 40,
@@ -75,7 +76,7 @@ function publicCard(input: PublicCardInput): PublicCard {
     requiredTags: input.requiredTags ?? [],
     excludedTags: input.excludedTags ?? [],
     isPublic: true,
-    interaction: input.interaction,
+    interaction: buildExplicitPublicInteraction(input),
   }
 }
 
@@ -1112,7 +1113,12 @@ export const PERSONAL_CARDS: PersonalCard[] = [
   ...RISK_CARDS,
   ...EXPANSION_PERSONAL_CARDS,
 ]
-export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS, ...EXPANSION_PUBLIC_CARDS]
+const EXPLICIT_EXPANSION_PUBLIC_CARDS: PublicCard[] = EXPANSION_PUBLIC_CARDS.map((card) => ({
+  ...card,
+  interaction: buildExplicitPublicInteraction(card),
+}))
+
+export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS, ...EXPLICIT_EXPANSION_PUBLIC_CARDS]
 export const ALL_CARDS: GimmeGolfCard[] = [...PERSONAL_CARDS, ...PUBLIC_CARDS]
 
 export const CARD_DECK: DeckCollection = {

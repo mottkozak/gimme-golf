@@ -2,6 +2,7 @@
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { PUBLIC_CARDS } from '../data/cards.ts'
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type { HoleDefinition, Player, RoundConfig } from '../types/game.ts'
 import {
@@ -194,6 +195,82 @@ test('dealPersonalCardsForHole uses weighted randomness across valid candidates'
       lowRollDeal.dealtPersonalCardsByPlayerId.p1[0]?.id,
       highRollDeal.dealtPersonalCardsByPlayerId.p1[0]?.id,
     )
+  } finally {
+    Math.random = originalRandom
+  }
+})
+
+test('PUBLIC_CARDS expose explicit interaction metadata for every public card', () => {
+  assert.equal(PUBLIC_CARDS.length > 0, true)
+
+  for (const card of PUBLIC_CARDS) {
+    assert.equal(Boolean(card.interaction?.mode), true, `Missing interaction mode for ${card.code}`)
+  }
+})
+
+test('dealPersonalCardsForHole applies per-player recent-window anti-repeat controls', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const hole: HoleDefinition = {
+    holeNumber: 5,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const repeatedCard = createPersonalCard({ id: 'repeat-me', code: 'RP1', points: 1 })
+  const alternateCard = createPersonalCard({ id: 'alt-card', code: 'RP2', points: 2 })
+  const priorHoleCards = [
+    createEmptyHoleCardsState(players, 1),
+    createEmptyHoleCardsState(players, 2),
+    createEmptyHoleCardsState(players, 3),
+  ]
+
+  for (const prior of priorHoleCards) {
+    prior.dealtPersonalCardsByPlayerId.p1 = [repeatedCard]
+  }
+
+  const deal = dealPersonalCardsForHole(
+    players,
+    hole,
+    BASE_ROUND_CONFIG,
+    [repeatedCard, alternateCard],
+    buildDeckMemoryFromHoleCards(priorHoleCards),
+    priorHoleCards,
+  )
+
+  assert.equal(deal.dealtPersonalCardsByPlayerId.p1[0]?.id, alternateCard.id)
+})
+
+test('dealPublicCardsForHole prefers cards outside the recent window when deck memory is exhausted', () => {
+  const hole: HoleDefinition = {
+    holeNumber: 6,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const recentChaos = createPublicCard({ id: 'chaos-recent', code: 'CR1' })
+  const olderChaos = createPublicCard({ id: 'chaos-old', code: 'CO1' })
+  const priorHoleCards = [
+    createEmptyHoleCardsState([{ id: 'p1', name: 'Alex', expectedScore18: 90 }], 1),
+    createEmptyHoleCardsState([{ id: 'p1', name: 'Alex', expectedScore18: 90 }], 2),
+    createEmptyHoleCardsState([{ id: 'p1', name: 'Alex', expectedScore18: 90 }], 3),
+    createEmptyHoleCardsState([{ id: 'p1', name: 'Alex', expectedScore18: 90 }], 4),
+  ]
+  priorHoleCards[0].publicCards = [olderChaos]
+  priorHoleCards[3].publicCards = [recentChaos]
+
+  const originalRandom = Math.random
+
+  try {
+    Math.random = () => 0
+    const dealt = dealPublicCardsForHole(
+      hole,
+      BASE_ROUND_CONFIG,
+      [recentChaos, olderChaos],
+      buildDeckMemoryFromHoleCards(priorHoleCards),
+      priorHoleCards,
+    )
+
+    assert.equal(dealt[0]?.id, olderChaos.id)
   } finally {
     Math.random = originalRandom
   }

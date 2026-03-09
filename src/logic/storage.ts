@@ -34,7 +34,8 @@ function isFeaturedHolesConfigLike(value: unknown): boolean {
   return (
     typeof value.enabled === 'boolean' &&
     (value.frequency === 'low' || value.frequency === 'normal' || value.frequency === 'high') &&
-    (value.assignmentMode === 'auto' || value.assignmentMode === 'manual')
+    (value.assignmentMode === 'auto' || value.assignmentMode === 'manual') &&
+    (typeof value.randomSeed === 'number' || typeof value.randomSeed === 'undefined')
   )
 }
 
@@ -72,6 +73,7 @@ function isRoundStateLike(value: unknown): value is RoundState {
     Array.isArray(value.holeCards) &&
     (value.holePowerUps === undefined || Array.isArray(value.holePowerUps)) &&
     Array.isArray(value.holeResults) &&
+    (value.holeUxMetrics === undefined || Array.isArray(value.holeUxMetrics)) &&
     (value.deckMemory === undefined || isDeckMemoryLike(value.deckMemory)) &&
     isRecord(value.totalsByPlayerId) &&
     typeof value.currentHoleIndex === 'number' &&

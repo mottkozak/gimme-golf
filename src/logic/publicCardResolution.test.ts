@@ -7,6 +7,7 @@ import type { Player, PublicCardResolutionState } from '../types/game.ts'
 import {
   getDefaultPublicResolutionMode,
   getPublicResolutionInputRequirements,
+  isPublicCardResolutionComplete,
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from './publicCardResolution.ts'
@@ -45,13 +46,11 @@ function createPublicCard(input: {
   }
 }
 
-test('getDefaultPublicResolutionMode infers vote target for player-pick props', () => {
+test('getDefaultPublicResolutionMode uses explicit metadata fallback map for player-pick cards', () => {
   const card = createPublicCard({
     id: 'prop-pick',
-    code: 'PRP-PICK',
+    code: 'PRP-013',
     name: 'Birdie Player Pick',
-    description: 'Pick one player most likely to make birdie.',
-    rulesText: 'Choose one active golfer before play. Correct pick earns +3.',
     cardType: 'prop',
     points: 3,
   })
@@ -64,8 +63,6 @@ test('getDefaultPublicResolutionMode defaults zero-point chaos cards to trigger-
     id: 'chaos-rules-only',
     code: 'CHA-RULE',
     name: 'Lone Wolf',
-    description: 'Only one player may score mission points.',
-    rulesText: 'Manual lockout effect; only first successful player receives mission points.',
     cardType: 'chaos',
     points: 0,
   })
@@ -139,6 +136,142 @@ test('normalizePublicCardResolutions prefers interaction mode over stale saved m
   assert.equal(normalized[card.id].mode, 'vote_target_player')
 })
 
+test('isPublicCardResolutionComplete validates completeness for every canonical mode', () => {
+  const playerIds = ['p1', 'p2']
+
+  const yesNoCard = createPublicCard({ id: 'm1', code: 'M1', name: 'YesNo', points: 1, mode: 'yes_no_triggered' })
+  const yesNoResolution: PublicCardResolutionState = {
+    cardId: yesNoCard.id,
+    mode: 'yes_no_triggered',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: null,
+  }
+  assert.equal(isPublicCardResolutionComplete(yesNoCard, yesNoResolution, playerIds), true)
+
+  const voteCard = createPublicCard({ id: 'm2', code: 'M2', name: 'Vote', points: 1, mode: 'vote_target_player' })
+  const voteIncomplete: PublicCardResolutionState = {
+    cardId: voteCard.id,
+    mode: 'vote_target_player',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: { p1: 'p2' },
+    selectedEffectOptionId: null,
+  }
+  const voteComplete: PublicCardResolutionState = {
+    ...voteIncomplete,
+    targetPlayerIdByVoterId: { p1: 'p2', p2: 'p2' },
+  }
+  assert.equal(isPublicCardResolutionComplete(voteCard, voteIncomplete, playerIds), false)
+  assert.equal(isPublicCardResolutionComplete(voteCard, voteComplete, playerIds), true)
+
+  const leaderCard = createPublicCard({ id: 'm3', code: 'M3', name: 'Leader', points: 1, mode: 'leader_selects_target' })
+  const leaderIncomplete: PublicCardResolutionState = {
+    cardId: leaderCard.id,
+    mode: 'leader_selects_target',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: null,
+  }
+  const leaderComplete: PublicCardResolutionState = {
+    ...leaderIncomplete,
+    winningPlayerId: 'p1',
+  }
+  assert.equal(isPublicCardResolutionComplete(leaderCard, leaderIncomplete, playerIds), false)
+  assert.equal(isPublicCardResolutionComplete(leaderCard, leaderComplete, playerIds), true)
+
+  const affectedCard = createPublicCard({ id: 'm4', code: 'M4', name: 'Affected', points: 1, mode: 'pick_affected_players' })
+  const affectedIncomplete: PublicCardResolutionState = {
+    cardId: affectedCard.id,
+    mode: 'pick_affected_players',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: null,
+  }
+  const affectedComplete: PublicCardResolutionState = {
+    ...affectedIncomplete,
+    affectedPlayerIds: ['p2'],
+  }
+  assert.equal(isPublicCardResolutionComplete(affectedCard, affectedIncomplete, playerIds), false)
+  assert.equal(isPublicCardResolutionComplete(affectedCard, affectedComplete, playerIds), true)
+
+  const chooseTargetCard = createPublicCard({
+    id: 'm5',
+    code: 'M5',
+    name: 'Choose',
+    points: 0,
+    mode: 'choose_one_of_two_effects',
+    effectOptions: [
+      {
+        id: 'target-plus',
+        label: '+2 target',
+        pointsDelta: 2,
+        targetScope: 'target',
+      },
+      {
+        id: 'all-minus',
+        label: '-1 all',
+        pointsDelta: -1,
+        targetScope: 'all',
+      },
+    ],
+  })
+  const chooseTargetIncomplete: PublicCardResolutionState = {
+    cardId: chooseTargetCard.id,
+    mode: 'choose_one_of_two_effects',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: 'target-plus',
+  }
+  const chooseTargetComplete: PublicCardResolutionState = {
+    ...chooseTargetIncomplete,
+    winningPlayerId: 'p1',
+  }
+  assert.equal(isPublicCardResolutionComplete(chooseTargetCard, chooseTargetIncomplete, playerIds), false)
+  assert.equal(isPublicCardResolutionComplete(chooseTargetCard, chooseTargetComplete, playerIds), true)
+
+  const chooseAllCard = createPublicCard({
+    id: 'm6',
+    code: 'M6',
+    name: 'ChooseAll',
+    points: 0,
+    mode: 'choose_one_of_two_effects',
+    effectOptions: [
+      {
+        id: 'all-plus',
+        label: '+1 all',
+        pointsDelta: 1,
+        targetScope: 'all',
+      },
+      {
+        id: 'affected-minus',
+        label: '-1 affected',
+        pointsDelta: -1,
+        targetScope: 'affected',
+      },
+    ],
+  })
+  const chooseAllResolution: PublicCardResolutionState = {
+    cardId: chooseAllCard.id,
+    mode: 'choose_one_of_two_effects',
+    triggered: true,
+    winningPlayerId: null,
+    affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: 'all-plus',
+  }
+  assert.equal(isPublicCardResolutionComplete(chooseAllCard, chooseAllResolution, playerIds), true)
+})
+
 test('resolvePublicCardPointDeltas handles vote and selected effect targeting', () => {
   const players: Player[] = [
     { id: 'p1', name: 'Alex', expectedScore18: 90 },
@@ -205,4 +338,51 @@ test('resolvePublicCardPointDeltas handles vote and selected effect targeting', 
     p2: 2,
     p3: 3,
   })
+})
+
+test('resolvePublicCardPointDeltas enforces per-player public cap', () => {
+  const players: Player[] = [
+    { id: 'p1', name: 'Alex', expectedScore18: 90 },
+    { id: 'p2', name: 'Blair', expectedScore18: 90 },
+  ]
+  const cardA = createPublicCard({
+    id: 'pub-a',
+    code: 'PUB-A',
+    name: 'A',
+    points: 3,
+    mode: 'pick_affected_players',
+  })
+  const cardB = createPublicCard({
+    id: 'pub-b',
+    code: 'PUB-B',
+    name: 'B',
+    points: 3,
+    mode: 'pick_affected_players',
+  })
+
+  const resolutions: Record<string, PublicCardResolutionState> = {
+    [cardA.id]: {
+      cardId: cardA.id,
+      mode: 'pick_affected_players',
+      triggered: true,
+      winningPlayerId: null,
+      affectedPlayerIds: ['p1'],
+      targetPlayerIdByVoterId: {},
+      selectedEffectOptionId: null,
+    },
+    [cardB.id]: {
+      cardId: cardB.id,
+      mode: 'pick_affected_players',
+      triggered: true,
+      winningPlayerId: null,
+      affectedPlayerIds: ['p1'],
+      targetPlayerIdByVoterId: {},
+      selectedEffectOptionId: null,
+    },
+  }
+
+  const deltas = resolvePublicCardPointDeltas(players, [cardA, cardB], resolutions)
+
+  assert.equal(deltas.p1, 3)
+  assert.equal(deltas.p2, 0)
 })

@@ -1,6 +1,8 @@
 import type { AppScreen } from '../app/router.tsx'
 import type { RoundState } from '../types/game.ts'
 
+export type RoundStateUpdater = (currentState: RoundState) => RoundState
+
 export interface ScreenProps {
   roundState: RoundState
   hasSavedRound: boolean
@@ -8,7 +10,5 @@ export interface ScreenProps {
   onResumeSavedRound: () => void
   onResetRound: () => void
   onAbandonRound: () => void
-  onUpdateRoundState: (
-    updater: (currentState: RoundState) => RoundState,
-  ) => void
+  onUpdateRoundState: (updater: RoundStateUpdater) => void
 }

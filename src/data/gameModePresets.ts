@@ -33,6 +33,7 @@ export interface GameModePresetSettings {
     enabled: boolean
     frequency: FeaturedHoleFrequency
     assignmentMode: FeaturedHoleAssignmentMode
+    randomSeed: number
   }
 }
 
@@ -109,6 +110,7 @@ function createCardPresetSettings(
       enabled: featuredEnabled,
       frequency,
       assignmentMode: 'auto',
+      randomSeed: 0,
     },
   }
 }
@@ -203,6 +205,7 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
         enabled: false,
         frequency: 'low',
         assignmentMode: 'auto',
+        randomSeed: 0,
       },
     },
   },

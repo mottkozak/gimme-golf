@@ -8,11 +8,13 @@ import type {
   HoleDefinition,
   Player,
 } from '../types/game.ts'
+import { POINT_BALANCE_RULES } from './gameBalance.ts'
 
 export const DEFAULT_FEATURED_HOLES_CONFIG: FeaturedHolesConfig = {
   enabled: true,
   frequency: 'normal',
   assignmentMode: 'auto',
+  randomSeed: 0,
 }
 
 export const FEATURED_HOLE_BALANCE = {
@@ -46,6 +48,47 @@ export const FEATURED_HOLE_BALANCE = {
 const VALID_FEATURED_FREQUENCIES: FeaturedHoleFrequency[] = ['low', 'normal', 'high']
 const VALID_FEATURED_ASSIGNMENT_MODES: FeaturedHoleAssignmentMode[] = ['auto', 'manual']
 const VALID_FEATURED_HOLE_TYPES = new Set<FeaturedHoleType>(FEATURED_HOLE_TYPE_SEQUENCE)
+
+const FEATURED_HOLE_RANDOM_SEED_MAX = 2_147_483_647
+
+export function createFeaturedHolesRandomSeed(): number {
+  return Math.max(1, Math.floor(Math.random() * FEATURED_HOLE_RANDOM_SEED_MAX))
+}
+
+function normalizeFeaturedHolesRandomSeed(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return createFeaturedHolesRandomSeed()
+  }
+
+  const normalized = Math.abs(Math.round(value))
+  if (normalized === 0) {
+    return createFeaturedHolesRandomSeed()
+  }
+
+  return normalized
+}
+
+function createSeededRandom(seed: number): () => number {
+  let state = (seed >>> 0) || 1
+  return () => {
+    state = (1664525 * state + 1013904223) >>> 0
+    return state / 2 ** 32
+  }
+}
+
+function createFeaturedHoleTypePool(seed: number): FeaturedHoleType[] {
+  const random = createSeededRandom(seed)
+  const pool = [...FEATURED_HOLE_TYPE_SEQUENCE]
+
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1))
+    const temp = pool[index]
+    pool[index] = pool[swapIndex]
+    pool[swapIndex] = temp
+  }
+
+  return pool
+}
 
 function isFeaturedHoleFrequency(value: unknown): value is FeaturedHoleFrequency {
   return VALID_FEATURED_FREQUENCIES.includes(value as FeaturedHoleFrequency)
@@ -182,6 +225,7 @@ function createSpacedFeaturedHoleIndexes(
 function autoAssignFeaturedHoles(
   holes: HoleDefinition[],
   frequency: FeaturedHoleFrequency,
+  randomSeed: number,
 ): HoleDefinition[] {
   const normalizedHoleCount: HoleCount = holes.length === 18 ? 18 : 9
   const targetCount = getFeaturedHoleTargetCount(normalizedHoleCount, frequency)
@@ -192,12 +236,13 @@ function autoAssignFeaturedHoles(
     targetCount,
     preferredGap,
   )
+  const typePool = createFeaturedHoleTypePool(randomSeed)
 
   return holes.map((hole, holeIndex) => {
     const selectedPosition = selectedIndexes.indexOf(holeIndex)
     const featuredHoleType =
       selectedPosition >= 0
-        ? FEATURED_HOLE_TYPE_SEQUENCE[selectedPosition % FEATURED_HOLE_TYPE_SEQUENCE.length]
+        ? typePool[selectedPosition % typePool.length]
         : null
 
     return {
@@ -230,7 +275,11 @@ export function assignFeaturedHolesForRound(
     }
   }
 
-  return autoAssignFeaturedHoles(holes, config.frequency)
+  return autoAssignFeaturedHoles(
+    holes,
+    config.frequency,
+    normalizeFeaturedHolesRandomSeed(config.randomSeed),
+  )
 }
 
 export interface FeaturedMissionPointsResult {
@@ -250,16 +299,21 @@ export function applyFeaturedMissionPoints(
   }
 
   if (featuredHoleType === 'jackpot') {
+    const featuredBonusPoints = Math.min(1, POINT_BALANCE_RULES.featuredBonusCap)
     return {
-      missionPoints: baseMissionPoints + 1,
-      featuredBonusPoints: 1,
+      missionPoints: baseMissionPoints + featuredBonusPoints,
+      featuredBonusPoints,
     }
   }
 
   if (featuredHoleType === 'double_points') {
+    const featuredBonusPoints = Math.min(
+      baseMissionPoints,
+      POINT_BALANCE_RULES.featuredBonusCap,
+    )
     return {
-      missionPoints: baseMissionPoints * 2,
-      featuredBonusPoints: baseMissionPoints,
+      missionPoints: baseMissionPoints + featuredBonusPoints,
+      featuredBonusPoints,
     }
   }
 
@@ -371,5 +425,6 @@ export function normalizeFeaturedHolesConfig(
     assignmentMode: isFeaturedHoleAssignmentMode(inputConfig?.assignmentMode)
       ? inputConfig.assignmentMode
       : DEFAULT_FEATURED_HOLES_CONFIG.assignmentMode,
+    randomSeed: normalizeFeaturedHolesRandomSeed(inputConfig?.randomSeed),
   }
 }

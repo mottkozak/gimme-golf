@@ -11,6 +11,7 @@ import {
   getMomentumTierForStreak,
   getMomentumTierLabel,
   MOMENTUM_RULES,
+  POINT_BALANCE_RULES,
   type MomentumTier,
 } from './gameBalance.ts'
 import {
@@ -19,6 +20,7 @@ import {
   getRivalryPair,
   resolveRivalryWinner,
 } from './featuredHoles.ts'
+import { createRefMemoizedSelector } from './selectors.ts'
 
 export interface HolePointBreakdown {
   missionPoints: number
@@ -31,6 +33,7 @@ export interface HolePointBreakdown {
   rivalryOpponentPlayerId: string | null
   rivalryWon: boolean | null
   publicDelta: number
+  balanceCapAdjustment: number
   total: number
   selectedCardId: string | null
   selectedCardCode: string | null
@@ -87,6 +90,7 @@ export function createEmptyHolePointBreakdown(): HolePointBreakdown {
     rivalryOpponentPlayerId: null,
     rivalryWon: null,
     publicDelta: 0,
+    balanceCapAdjustment: 0,
     total: 0,
     selectedCardId: null,
     selectedCardCode: null,
@@ -102,19 +106,8 @@ export function createEmptyHolePointBreakdown(): HolePointBreakdown {
   }
 }
 
-interface HoleBreakdownCacheEntry {
-  playersRef: Player[]
-  holesRef: HoleDefinition[]
-  holeCardsRef: HoleCardsState[]
-  holeResultsRef: HoleResultState[]
-  momentumEnabled: boolean
-  breakdownsByPlayerId: Record<string, HolePointBreakdown[]>
-}
-
-let holeBreakdownCache: HoleBreakdownCacheEntry | null = null
-
 export function clearHolePointBreakdownCache(): void {
-  holeBreakdownCache = null
+  holePointBreakdownsByPlayerIdSelector.clear()
 }
 
 function getLowestGamePointTotal(gamePointsByPlayerId: Record<string, number>): number {
@@ -122,6 +115,10 @@ function getLowestGamePointTotal(gamePointsByPlayerId: Record<string, number>): 
     (lowest, total) => Math.min(lowest, total),
     Number.POSITIVE_INFINITY,
   )
+}
+
+function clamp(value: number, minValue: number, maxValue: number): number {
+  return Math.max(minValue, Math.min(maxValue, value))
 }
 
 function computeHolePointBreakdownsByPlayerId(
@@ -201,6 +198,7 @@ function computeHolePointBreakdownsByPlayerId(
         rivalryOpponentPlayerId: null,
         rivalryWon: null,
         publicDelta,
+        balanceCapAdjustment: 0,
         total,
         selectedCardId: selectedCard?.id ?? null,
         selectedCardCode: selectedCard?.code ?? null,
@@ -256,6 +254,29 @@ function computeHolePointBreakdownsByPlayerId(
     }
 
     for (const player of players) {
+      const playerBreakdown = breakdownsByPlayerId[player.id]?.[holeIndex]
+      if (!playerBreakdown) {
+        continue
+      }
+
+      const rawStackedBonus =
+        playerBreakdown.featuredBonusPoints +
+        playerBreakdown.momentumBonus +
+        playerBreakdown.publicDelta +
+        playerBreakdown.rivalryBonus
+      const clampedStackedBonus = clamp(
+        rawStackedBonus,
+        POINT_BALANCE_RULES.stackedBonusCap.min,
+        POINT_BALANCE_RULES.stackedBonusCap.max,
+      )
+      const balanceCapAdjustment = clampedStackedBonus - rawStackedBonus
+
+      playerBreakdown.balanceCapAdjustment = balanceCapAdjustment
+      playerBreakdown.total = playerBreakdown.baseMissionPoints + clampedStackedBonus
+      pendingTotalsByPlayerId[player.id] = playerBreakdown.total
+    }
+
+    for (const player of players) {
       gamePointsBeforeHoleByPlayerId[player.id] += pendingTotalsByPlayerId[player.id] ?? 0
     }
   }
@@ -270,39 +291,31 @@ export function buildHolePointBreakdownsByPlayerId(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): Record<string, HolePointBreakdown[]> {
-  const cached =
-    holeBreakdownCache &&
-    holeBreakdownCache.playersRef === players &&
-    holeBreakdownCache.holesRef === holes &&
-    holeBreakdownCache.holeCardsRef === holeCards &&
-    holeBreakdownCache.holeResultsRef === holeResults &&
-    holeBreakdownCache.momentumEnabled === momentumEnabled
-      ? holeBreakdownCache
-      : null
-
-  if (cached) {
-    return cached.breakdownsByPlayerId
-  }
-
-  const breakdownsByPlayerId = computeHolePointBreakdownsByPlayerId(
+  return holePointBreakdownsByPlayerIdSelector(
     players,
     holes,
     holeCards,
     holeResults,
     momentumEnabled,
   )
-
-  holeBreakdownCache = {
-    playersRef: players,
-    holesRef: holes,
-    holeCardsRef: holeCards,
-    holeResultsRef: holeResults,
-    momentumEnabled,
-    breakdownsByPlayerId,
-  }
-
-  return breakdownsByPlayerId
 }
+
+const holePointBreakdownsByPlayerIdSelector = createRefMemoizedSelector(
+  (
+    players: Player[],
+    holes: HoleDefinition[],
+    holeCards: HoleCardsState[],
+    holeResults: HoleResultState[],
+    momentumEnabled: boolean,
+  ) =>
+    computeHolePointBreakdownsByPlayerId(
+      players,
+      holes,
+      holeCards,
+      holeResults,
+      momentumEnabled,
+    ),
+)
 
 export function getPlayerHolePointBreakdown(
   playerId: string,

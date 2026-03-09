@@ -15,6 +15,7 @@ import { buildEmptyHolePowerUpStates } from './powerUps.ts'
 import { assignFeaturedHolesForRound, normalizeFeaturedHoleType } from './featuredHoles.ts'
 import { normalizeRoundConfig } from './roundConfig.ts'
 import { createPlayerTotals } from './scoring.ts'
+import { buildHoleUxMetrics } from './uxMetrics.ts'
 
 const STANDARD_FRONT_NINE_PARS = [4, 4, 3, 5, 4, 4, 3, 5, 4] as const
 const STANDARD_BACK_NINE_PARS = [4, 5, 3, 4, 4, 3, 5, 4, 4] as const
@@ -206,6 +207,7 @@ export function applyRoundSetupDraft(
     holeCards: buildHoleCards(players, holes),
     holePowerUps: buildHolePowerUps(players, holes),
     holeResults: buildHoleResults(players, holes),
+    holeUxMetrics: buildHoleUxMetrics(holes),
     deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: buildTotalsByPlayerId(players, currentState.totalsByPlayerId),
   }

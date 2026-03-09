@@ -16,8 +16,8 @@ test('applyFeaturedMissionPoints applies jackpot and double-points bonuses', () 
     featuredBonusPoints: 1,
   })
   assert.deepEqual(applyFeaturedMissionPoints(3, 'double_points'), {
-    missionPoints: 6,
-    featuredBonusPoints: 3,
+    missionPoints: 5,
+    featuredBonusPoints: 2,
   })
 })
 
@@ -46,11 +46,13 @@ test('assignFeaturedHolesForRound keeps manual picks or falls back to auto when 
     enabled: true,
     frequency: 'normal',
     assignmentMode: 'manual',
+    randomSeed: 7,
   })
   const autoFallback = assignFeaturedHolesForRound(holes, {
     enabled: true,
     frequency: 'normal',
     assignmentMode: 'manual',
+    randomSeed: 7,
   })
 
   assert.equal(preserved[0].featuredHoleType, 'chaos')
@@ -70,6 +72,7 @@ test('assignFeaturedHolesForRound clears assignments when featured holes are dis
     enabled: false,
     frequency: 'high',
     assignmentMode: 'auto',
+    randomSeed: 7,
   })
 
   assert.equal(disabled.every((hole) => hole.featuredHoleType === null), true)
@@ -87,8 +90,46 @@ test('assignFeaturedHolesForRound auto mode assigns configured target count', ()
     enabled: true,
     frequency: 'high',
     assignmentMode: 'auto',
+    randomSeed: 7,
   })
   const assignedCount = assigned.filter((hole) => hole.featuredHoleType !== null).length
 
   assert.equal(assignedCount, getFeaturedHoleTargetCount(9, 'high'))
+})
+
+test('assignFeaturedHolesForRound randomizes featured-hole types in a seed-controlled way', () => {
+  const holes: HoleDefinition[] = Array.from({ length: 9 }, (_, index) => ({
+    holeNumber: index + 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }))
+
+  const seedA = assignFeaturedHolesForRound(holes, {
+    enabled: true,
+    frequency: 'high',
+    assignmentMode: 'auto',
+    randomSeed: 101,
+  })
+  const seedARepeat = assignFeaturedHolesForRound(holes, {
+    enabled: true,
+    frequency: 'high',
+    assignmentMode: 'auto',
+    randomSeed: 101,
+  })
+  const seedB = assignFeaturedHolesForRound(holes, {
+    enabled: true,
+    frequency: 'high',
+    assignmentMode: 'auto',
+    randomSeed: 202,
+  })
+
+  assert.deepEqual(
+    seedA.map((hole) => hole.featuredHoleType),
+    seedARepeat.map((hole) => hole.featuredHoleType),
+  )
+  assert.notDeepEqual(
+    seedA.map((hole) => hole.featuredHoleType),
+    seedB.map((hole) => hole.featuredHoleType),
+  )
 })

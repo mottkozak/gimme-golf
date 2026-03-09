@@ -3,6 +3,7 @@ import {
   buildHolePointBreakdownsByPlayerId,
   createEmptyHolePointBreakdown,
 } from '../logic/streaks.ts'
+import { getMissionStatusPillClass } from '../logic/missionStatus.ts'
 import type { GameMode, HoleCardsState, HoleDefinition, HoleResultState, Player } from '../types/game.ts'
 
 interface HoleSummaryListProps {
@@ -12,18 +13,6 @@ interface HoleSummaryListProps {
   holeResults: HoleResultState[]
   momentumEnabled: boolean
   gameMode: GameMode
-}
-
-function getMissionStatusClass(missionStatus: HoleResultState['missionStatusByPlayerId'][string]): string {
-  if (missionStatus === 'success') {
-    return 'status-pill status-success'
-  }
-
-  if (missionStatus === 'failed') {
-    return 'status-pill status-failed'
-  }
-
-  return 'status-pill status-pending'
 }
 
 function formatSignedPoints(value: number): string {
@@ -83,6 +72,9 @@ function HoleSummaryList({
                   pointBreakdown.publicDelta !== 0
                     ? `public ${formatSignedPoints(pointBreakdown.publicDelta)}`
                     : null,
+                  pointBreakdown.balanceCapAdjustment !== 0
+                    ? `balance cap ${formatSignedPoints(pointBreakdown.balanceCapAdjustment)}`
+                    : null,
                 ].filter((part): part is string => Boolean(part))
 
                 return (
@@ -91,7 +83,7 @@ function HoleSummaryList({
                     <div className="recap-metrics">
                       <span>{typeof strokes === 'number' ? `${strokes} strokes` : 'No score'}</span>
                       {!isPowerUpsMode && (
-                        <span className={getMissionStatusClass(missionStatus)}>{missionStatus}</span>
+                        <span className={getMissionStatusPillClass(missionStatus)}>{missionStatus}</span>
                       )}
                       {isPowerUpsMode ? (
                         <span>Power-Ups mode</span>

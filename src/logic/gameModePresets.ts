@@ -22,6 +22,7 @@ function clonePresetSettings(settings: GameModePresetSettings): GameModePresetSe
       enabled: settings.featuredHoles.enabled,
       frequency: settings.featuredHoles.frequency,
       assignmentMode: settings.featuredHoles.assignmentMode,
+      randomSeed: settings.featuredHoles.randomSeed,
     },
   }
 }

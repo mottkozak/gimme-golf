@@ -1,19 +1,36 @@
-import { ICONS } from '../app/icons.ts'
+import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
-import { getAssignedPowerUp } from '../logic/powerUps.ts'
+import { createEmptyHoleCardsState } from '../logic/dealCards.ts'
+import { prepareCurrentHoleForPlay } from '../logic/holeFlow.ts'
+import { getAssignedPowerUp, createEmptyHolePowerUpState } from '../logic/powerUps.ts'
+import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
+import { incrementHoleTapCount } from '../logic/uxMetrics.ts'
+import type { RoundState } from '../types/game.ts'
+import type { HoleTag } from '../types/cards.ts'
 import type { ScreenProps } from './types.ts'
 
 function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
-  const currentHole = roundState.holes[roundState.currentHoleIndex]
-  const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
-  const currentHolePowerUps = roundState.holePowerUps[roundState.currentHoleIndex]
+  const currentHoleIndex = roundState.currentHoleIndex
+  const currentHole = roundState.holes[currentHoleIndex]
+  const currentHoleCards = roundState.holeCards[currentHoleIndex]
+  const currentHolePowerUps = roundState.holePowerUps[currentHoleIndex]
   const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
   const isNoMercyHole = currentHole.featuredHoleType === 'no_mercy'
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
+
+  const hasAnyPersonalCardsDealt = roundState.players.some((player) => {
+    const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+    return dealtCards.length > 0
+  })
+  const hasAnyCardsDealt = hasAnyPersonalCardsDealt || currentHoleCards.publicCards.length > 0
+  const hasAnyPowerUpsDealt = roundState.players.some((player) =>
+    Boolean(currentHolePowerUps?.assignedPowerUpIdByPlayerId[player.id]),
+  )
+  const isHolePrepared = isPowerUpsMode ? hasAnyPowerUpsDealt : hasAnyCardsDealt
 
   const playersRequiringSelection = isDrawTwoPickOne && !isNoMercyHole
     ? roundState.players.filter((player) => {
@@ -27,17 +44,85 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     return typeof selectedCardId === 'string' && selectedCardId.length > 0
   })
 
-  const hasAnyPersonalCardsDealt = roundState.players.some((player) => {
-    const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
-    return dealtCards.length > 0
-  })
-  const hasAnyCardsDealt = hasAnyPersonalCardsDealt || currentHoleCards.publicCards.length > 0
-  const hasAnyPowerUpsDealt = roundState.players.some((player) => {
-    return Boolean(currentHolePowerUps?.assignedPowerUpIdByPlayerId[player.id])
-  })
+  const updateCurrentHole = (updater: (currentState: RoundState) => RoundState) => {
+    onUpdateRoundState((currentState) => {
+      const nextState = updater(currentState)
+
+      return {
+        ...nextState,
+        holeUxMetrics: incrementHoleTapCount(nextState.holeUxMetrics, currentState.currentHoleIndex),
+      }
+    })
+  }
+
+  const setPar = (nextPar: number) => {
+    updateCurrentHole((currentState) => {
+      const holes = [...currentState.holes]
+      const updatedHole = {
+        ...holes[currentState.currentHoleIndex],
+        par: normalizePar(nextPar),
+      }
+      holes[currentState.currentHoleIndex] = updatedHole
+
+      const holeCards = [...currentState.holeCards]
+      holeCards[currentState.currentHoleIndex] = createEmptyHoleCardsState(
+        currentState.players,
+        updatedHole.holeNumber,
+      )
+
+      const holePowerUps = [...currentState.holePowerUps]
+      holePowerUps[currentState.currentHoleIndex] = createEmptyHolePowerUpState(
+        currentState.players,
+        updatedHole.holeNumber,
+      )
+
+      return {
+        ...currentState,
+        holes,
+        holeCards,
+        holePowerUps,
+      }
+    })
+  }
+
+  const setHoleTag = (tag: HoleTag) => {
+    updateCurrentHole((currentState) => {
+      const holes = [...currentState.holes]
+      const hole = holes[currentState.currentHoleIndex]
+
+      const updatedHole = {
+        ...hole,
+        tags: toggleHoleTag(hole.tags, tag),
+      }
+      holes[currentState.currentHoleIndex] = updatedHole
+
+      const holeCards = [...currentState.holeCards]
+      holeCards[currentState.currentHoleIndex] = createEmptyHoleCardsState(
+        currentState.players,
+        updatedHole.holeNumber,
+      )
+
+      const holePowerUps = [...currentState.holePowerUps]
+      holePowerUps[currentState.currentHoleIndex] = createEmptyHolePowerUpState(
+        currentState.players,
+        updatedHole.holeNumber,
+      )
+
+      return {
+        ...currentState,
+        holes,
+        holeCards,
+        holePowerUps,
+      }
+    })
+  }
+
+  const dealForCurrentHole = () => {
+    updateCurrentHole((currentState) => prepareCurrentHoleForPlay(currentState))
+  }
 
   const selectCard = (playerId: string, cardId: string) => {
-    onUpdateRoundState((currentState) => {
+    updateCurrentHole((currentState) => {
       const holeCards = [...currentState.holeCards]
       const holeCardState = holeCards[currentState.currentHoleIndex]
 
@@ -57,7 +142,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   }
 
   const markPowerUpUsed = (playerId: string) => {
-    onUpdateRoundState((currentState) => {
+    updateCurrentHole((currentState) => {
       const holePowerUps = [...currentState.holePowerUps]
       const currentHolePowerUpState = holePowerUps[currentState.currentHoleIndex]
       if (!currentHolePowerUpState) {
@@ -79,6 +164,14 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     })
   }
 
+  const continueToResults = () => {
+    onUpdateRoundState((currentState) => ({
+      ...currentState,
+      holeUxMetrics: incrementHoleTapCount(currentState.holeUxMetrics, currentState.currentHoleIndex),
+    }))
+    onNavigate('holeResults')
+  }
+
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
@@ -98,25 +191,65 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
-      {isPowerUpsMode && !hasAnyPowerUpsDealt && (
+      {!isHolePrepared && (
         <section className="panel stack-xs">
-          <p className="muted">No power-ups dealt for this hole yet.</p>
-          <button type="button" onClick={() => onNavigate('holeSetup')}>
-            Back To Hole Setup
+          <div className="row-between">
+            <strong>Hole Setup</strong>
+            <span className="chip">Par {currentHole.par}</span>
+          </div>
+          <p className="muted">Confirm the hole details, then deal once to start play.</p>
+
+          <div className="stack-xs">
+            <span className="label">Par</span>
+            <div className="button-row">
+              {[3, 4, 5, 6].map((par) => (
+                <button
+                  key={par}
+                  type="button"
+                  className={currentHole.par === par ? 'button-primary' : ''}
+                  onClick={() => setPar(par)}
+                >
+                  Par {par}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="stack-xs">
+            <span className="label">Hole Tags</span>
+            <div className="tag-grid">
+              {HOLE_TAG_OPTIONS.map((option) => {
+                const isActive = currentHole.tags.includes(option.tag)
+                return (
+                  <button
+                    key={option.tag}
+                    type="button"
+                    className={`tag-pill ${isActive ? 'active' : ''}`}
+                    onClick={() => setHoleTag(option.tag)}
+                  >
+                    <img
+                      className="tag-pill__icon"
+                      src={HOLE_TAG_ICON_BY_TAG[option.tag]}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <button type="button" className="button-primary" onClick={dealForCurrentHole}>
+            <img className="button-icon" src={ICONS.dealCards} alt="" aria-hidden="true" />
+            {isPowerUpsMode
+              ? `Deal Power Ups For Hole ${currentHole.holeNumber}`
+              : `Deal Cards For Hole ${currentHole.holeNumber}`}
           </button>
         </section>
       )}
 
-      {!isPowerUpsMode && !hasAnyCardsDealt && (
-        <section className="panel stack-xs">
-          <p className="muted">No cards dealt for this hole yet.</p>
-          <button type="button" onClick={() => onNavigate('holeSetup')}>
-            Back To Hole Setup
-          </button>
-        </section>
-      )}
-
-      {isPowerUpsMode && hasAnyPowerUpsDealt && (
+      {isPowerUpsMode && isHolePrepared && (
         <>
           <section className="stack-sm">
             {roundState.players.map((player) => {
@@ -146,13 +279,10 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
           <section className="panel stack-xs">
             <p className="muted">
-              Declare your power-up before using it. Unused power-ups expire at the end of this hole.
+              Declare your power-up before using it. Unused power-ups expire at the end of this
+              hole.
             </p>
-            <button
-              type="button"
-              className="button-primary"
-              onClick={() => onNavigate('holeResults')}
-            >
+            <button type="button" className="button-primary" onClick={continueToResults}>
               <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
               Continue To Hole Results
             </button>
@@ -160,19 +290,22 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
         </>
       )}
 
-      {!isPowerUpsMode && hasAnyCardsDealt && (
+      {!isPowerUpsMode && isHolePrepared && (
         <>
           <section className="stack-sm">
             {roundState.players.map((player) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
               const offerState = currentHoleCards.personalCardOfferByPlayerId[player.id]
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
+              const selectedCard = dealtCards.find((card) => card.id === selectedCardId) ?? null
 
               return (
                 <article key={player.id} className="panel stack-xs">
                   <div className="row-between">
                     <strong>{player.name}</strong>
-                    <span className="chip">Selected: {selectedCardId ?? 'None'}</span>
+                    <span className="chip">
+                      Selected: {selectedCard ? `${selectedCard.code} - ${selectedCard.name}` : 'None'}
+                    </span>
                   </div>
                   {isDrawTwoPickOne && !isNoMercyHole && (
                     <p className="muted">
@@ -245,7 +378,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               type="button"
               className="button-primary"
               disabled={!allPlayersHaveSelection}
-              onClick={() => onNavigate('holeResults')}
+              onClick={continueToResults}
             >
               <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
               Continue To Hole Results

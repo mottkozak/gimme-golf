@@ -38,6 +38,7 @@ function CardPackToggleRow({
         type="button"
         className={enabled ? 'button-primary' : ''}
         disabled={!unlocked}
+        aria-pressed={enabled}
         onClick={() => onToggle(!enabled)}
       >
         {unlocked ? (enabled ? 'On' : 'Off') : 'Locked'}

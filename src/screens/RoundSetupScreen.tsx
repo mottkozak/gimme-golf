@@ -14,6 +14,7 @@ import { FEATURED_HOLES_BY_ID } from '../data/featuredHoles.ts'
 import { isPackUnlocked } from '../logic/entitlements.ts'
 import { getFeaturedHoleTargetCount } from '../logic/featuredHoles.ts'
 import { applyGameModePreset } from '../logic/gameModePresets.ts'
+import { applyQuickRoundDefaults } from '../logic/quickRound.ts'
 import { toggleEnabledPack } from '../logic/roundConfig.ts'
 import {
   applyCourseStyle,
@@ -43,6 +44,7 @@ function createDraftId(position: number): string {
 function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activePackInfoId, setActivePackInfoId] = useState<CardPackId | null>(null)
   const [activePresetInfoId, setActivePresetInfoId] = useState<GameModePresetId | null>(null)
+  const [advancedVisible, setAdvancedVisible] = useState(false)
   const { config, players } = roundState
   const isCustomPreset = config.selectedPresetId === 'custom'
 
@@ -262,7 +264,12 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       },
       currentHoleIndex: 0,
     }))
-    onNavigate('holeSetup')
+    onNavigate('holePlay')
+  }
+
+  const startQuickRound = () => {
+    onUpdateRoundState((currentState) => applyQuickRoundDefaults(currentState))
+    onNavigate('holePlay')
   }
 
   const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] : null
@@ -281,9 +288,27 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           <h2>Round Setup</h2>
         </div>
         <p className="muted">
-          Choose basics, add golfers, pick a game mode preset, then start the round.
+          Quick Round gets you playing immediately. Use Advanced only when you need deeper tuning.
         </p>
       </header>
+
+      <section className="panel stack-xs setup-step">
+        <div className="row-between">
+          <h3 className="step-title">
+            <img className="step-title__icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+            Quick Round
+          </h3>
+          <span className="chip">Recommended</span>
+        </div>
+        <p className="muted">
+          One tap start with Casual defaults: 9 holes, standard course, auto-assigned cards, no
+          featured holes.
+        </p>
+        <button type="button" className="button-primary" onClick={startQuickRound}>
+          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+          Start Quick Round
+        </button>
+      </section>
 
       <section className="panel stack-xs setup-step setup-step--basics">
         <h3 className="step-title">
@@ -407,153 +432,180 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       {isCustomPreset && (
         <>
           <section className="panel stack-xs setup-step">
-            <h3 className="step-title">
-              <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-              4. Custom Mode
-            </h3>
-            <p className="muted">Customize this round only.</p>
-
-            <label className="field">
-              <span className="label">Custom Mode Name</span>
-              <input
-                type="text"
-                value={config.customModeName}
-                onChange={(event) => setCustomModeName(event.target.value)}
-                placeholder="My Custom Mode"
-              />
-            </label>
-          </section>
-
-          <section className="panel stack-xs setup-step">
-            <h3 className="step-title">
-              <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-              Card Packs
-            </h3>
-            <p className="muted">Enable the game modes you want in this round.</p>
-
-            <div className="stack-xs">
-              {CARD_PACKS.map((pack) => (
-                <CardPackToggleRow
-                  key={pack.id}
-                  pack={pack}
-                  enabled={config.enabledPackIds.includes(pack.id)}
-                  unlocked={isPackUnlocked(pack.id, pack.premiumTier)}
-                  onToggle={(enabled) => setPackEnabled(pack.id, enabled)}
-                  onOpenInfo={() => setActivePackInfoId(pack.id)}
-                />
-              ))}
+            <div className="row-between">
+              <h3 className="step-title">
+                <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+                4. Advanced
+              </h3>
+              <button
+                type="button"
+                className={advancedVisible ? 'button-primary' : ''}
+                onClick={() => setAdvancedVisible((current) => !current)}
+                aria-expanded={advancedVisible}
+                aria-controls="advanced-setup-options"
+              >
+                {advancedVisible ? 'Hide Advanced' : 'Show Advanced'}
+              </button>
             </div>
+            <p className="muted">
+              Custom pack selection and fine-grained toggles are hidden by default to keep setup
+              fast.
+            </p>
           </section>
 
-          <section className="panel stack-xs setup-step">
-            <h3 className="step-title">
-              <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
-              Game Options
-            </h3>
+          {advancedVisible && (
+            <div id="advanced-setup-options" className="stack-xs" role="region" aria-label="Advanced setup options">
+              <section className="panel stack-xs setup-step">
+                <h3 className="step-title">
+                  <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+                  Custom Mode
+                </h3>
+                <p className="muted">Customize this round only.</p>
 
-            <ToggleRow
-              label="Dynamic Difficulty"
-              description="Weight challenge difficulty by expected score."
-              checked={config.toggles.dynamicDifficulty}
-              onChange={setDynamicDifficulty}
-            />
+                <label className="field">
+                  <span className="label">Custom Mode Name</span>
+                  <input
+                    type="text"
+                    value={config.customModeName}
+                    onChange={(event) => setCustomModeName(event.target.value)}
+                    placeholder="My Custom Mode"
+                  />
+                </label>
+              </section>
 
-            <ToggleRow
-              label="Momentum Bonuses"
-              description="Award streak bonuses for consecutive personal card success."
-              checked={config.toggles.momentumBonuses}
-              onChange={setMomentumBonuses}
-            />
-            {config.toggles.momentumBonuses && (
-              <p className="muted">
-                Momentum is automatic: consecutive Completed results increase bonus tiers over time.
-              </p>
-            )}
+              <section className="panel stack-xs setup-step">
+                <h3 className="step-title">
+                  <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+                  Card Packs
+                </h3>
+                <p className="muted">Enable the game modes you want in this round.</p>
 
-            <section className="stack-xs">
-              <span className="label">Personal Card Mode</span>
-              <div className="button-row">
-                <button
-                  type="button"
-                  className={config.toggles.drawTwoPickOne ? 'button-primary' : ''}
-                  onClick={() => setDealMode('drawTwoPickOne')}
-                >
-                  Draw 2 Pick 1
-                </button>
-                <button
-                  type="button"
-                  className={config.toggles.autoAssignOne ? 'button-primary' : ''}
-                  onClick={() => setDealMode('autoAssignOne')}
-                >
-                  Auto-Assign 1
-                </button>
-              </div>
-            </section>
-          </section>
+                <div className="stack-xs">
+                  {CARD_PACKS.map((pack) => (
+                    <CardPackToggleRow
+                      key={pack.id}
+                      pack={pack}
+                      enabled={config.enabledPackIds.includes(pack.id)}
+                      unlocked={isPackUnlocked(pack.id, pack.premiumTier)}
+                      onToggle={(enabled) => setPackEnabled(pack.id, enabled)}
+                      onOpenInfo={() => setActivePackInfoId(pack.id)}
+                    />
+                  ))}
+                </div>
+              </section>
 
-          <section className="panel stack-xs setup-step">
-            <h3 className="step-title">
-              <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
-              Featured Holes
-            </h3>
+              <section className="panel stack-xs setup-step">
+                <h3 className="step-title">
+                  <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+                  Game Options
+                </h3>
 
-            <ToggleRow
-              label="Enable Featured Holes"
-              description="Add occasional special hole modifiers for pacing and excitement."
-              checked={config.featuredHoles.enabled}
-              onChange={setFeaturedHolesEnabled}
-            />
+                <ToggleRow
+                  label="Dynamic Difficulty"
+                  description="Weight challenge difficulty by expected score."
+                  checked={config.toggles.dynamicDifficulty}
+                  onChange={setDynamicDifficulty}
+                />
 
-            <section className="stack-xs">
-              <span className="label">Frequency</span>
-              <div className="button-row">
-                {(['low', 'normal', 'high'] as const).map((frequency) => (
-                  <button
-                    key={frequency}
-                    type="button"
-                    className={config.featuredHoles.frequency === frequency ? 'button-primary' : ''}
-                    onClick={() => setFeaturedHolesFrequency(frequency)}
-                  >
-                    {frequency === 'low' ? 'Low' : frequency === 'normal' ? 'Normal' : 'High'}
-                  </button>
-                ))}
-              </div>
-              <p className="muted">
-                Target featured holes this round: {featuredHoleTargetCount}
-              </p>
-              <p className="muted">Auto spacing tries to keep featured holes spread out.</p>
-            </section>
+                <ToggleRow
+                  label="Momentum Bonuses"
+                  description="Award streak bonuses for consecutive personal card success."
+                  checked={config.toggles.momentumBonuses}
+                  onChange={setMomentumBonuses}
+                />
+                {config.toggles.momentumBonuses && (
+                  <p className="muted">
+                    Momentum is automatic: consecutive Completed results increase bonus tiers over
+                    time.
+                  </p>
+                )}
 
-            {config.featuredHoles.enabled && (
-              <section className="stack-xs">
-                <span className="label">Current Featured Holes</span>
-                {featuredHoles.length > 0 ? (
-                  <div className="stack-xs">
-                    {featuredHoles.map((hole) => {
-                      const featuredHoleType = hole.featuredHoleType
-                      if (!featuredHoleType) {
-                        return null
-                      }
-
-                      const featuredHole = FEATURED_HOLES_BY_ID[featuredHoleType]
-
-                      return (
-                        <div key={hole.holeNumber} className="featured-hole-preview-row">
-                          <div className="row-between">
-                            <strong>Hole {hole.holeNumber}</strong>
-                            <span className="chip featured-hole-chip">{featuredHole.name}</span>
-                          </div>
-                          <p className="muted">{featuredHole.quickRule}</p>
-                        </div>
-                      )
-                    })}
+                <section className="stack-xs">
+                  <span className="label">Personal Card Mode</span>
+                  <div className="button-row">
+                    <button
+                      type="button"
+                      className={config.toggles.drawTwoPickOne ? 'button-primary' : ''}
+                      onClick={() => setDealMode('drawTwoPickOne')}
+                    >
+                      Draw 2 Pick 1
+                    </button>
+                    <button
+                      type="button"
+                      className={config.toggles.autoAssignOne ? 'button-primary' : ''}
+                      onClick={() => setDealMode('autoAssignOne')}
+                    >
+                      Auto-Assign 1
+                    </button>
                   </div>
-                ) : (
-                  <p className="muted">No featured holes assigned for current settings.</p>
+                </section>
+              </section>
+
+              <section className="panel stack-xs setup-step">
+                <h3 className="step-title">
+                  <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
+                  Featured Holes
+                </h3>
+
+                <ToggleRow
+                  label="Enable Featured Holes"
+                  description="Add occasional special hole modifiers for pacing and excitement."
+                  checked={config.featuredHoles.enabled}
+                  onChange={setFeaturedHolesEnabled}
+                />
+
+                <section className="stack-xs">
+                  <span className="label">Frequency</span>
+                  <div className="button-row">
+                    {(['low', 'normal', 'high'] as const).map((frequency) => (
+                      <button
+                        key={frequency}
+                        type="button"
+                        className={config.featuredHoles.frequency === frequency ? 'button-primary' : ''}
+                        onClick={() => setFeaturedHolesFrequency(frequency)}
+                      >
+                        {frequency === 'low' ? 'Low' : frequency === 'normal' ? 'Normal' : 'High'}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="muted">
+                    Target featured holes this round: {featuredHoleTargetCount}
+                  </p>
+                  <p className="muted">Auto spacing tries to keep featured holes spread out.</p>
+                </section>
+
+                {config.featuredHoles.enabled && (
+                  <section className="stack-xs">
+                    <span className="label">Current Featured Holes</span>
+                    {featuredHoles.length > 0 ? (
+                      <div className="stack-xs">
+                        {featuredHoles.map((hole) => {
+                          const featuredHoleType = hole.featuredHoleType
+                          if (!featuredHoleType) {
+                            return null
+                          }
+
+                          const featuredHole = FEATURED_HOLES_BY_ID[featuredHoleType]
+
+                          return (
+                            <div key={hole.holeNumber} className="featured-hole-preview-row">
+                              <div className="row-between">
+                                <strong>Hole {hole.holeNumber}</strong>
+                                <span className="chip featured-hole-chip">{featuredHole.name}</span>
+                              </div>
+                              <p className="muted">{featuredHole.quickRule}</p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className="muted">No featured holes assigned for current settings.</p>
+                    )}
+                  </section>
                 )}
               </section>
-            )}
-          </section>
+            </div>
+          )}
         </>
       )}
 

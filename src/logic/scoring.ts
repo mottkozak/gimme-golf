@@ -2,6 +2,7 @@ import type {
   HoleCardsState,
   HolePowerUpState,
   HoleResultState,
+  HoleUxMetrics,
   Player,
   PlayerTotals,
   RoundState,
@@ -14,20 +15,11 @@ import {
   createEmptyHolePointBreakdown,
   type HolePointBreakdown,
 } from './streaks.ts'
-
-interface RoundTotalsCacheEntry {
-  playersRef: Player[]
-  holesRef: RoundState['holes']
-  holeCardsRef: HoleCardsState[]
-  holeResultsRef: HoleResultState[]
-  momentumEnabled: boolean
-  totalsByPlayerId: Record<string, PlayerTotals>
-}
-
-let roundTotalsCache: RoundTotalsCacheEntry | null = null
+import { buildHoleUxMetrics } from './uxMetrics.ts'
+import { createRefMemoizedSelector } from './selectors.ts'
 
 export function clearRoundTotalsCache(): void {
-  roundTotalsCache = null
+  roundTotalsByPlayerIdSelector.clear()
 }
 
 export function calculateAdjustedScore(realScore: number, gamePoints: number): number {
@@ -62,26 +54,6 @@ export function calculatePlayerHolePointBreakdown(
   return breakdownsByPlayerId[playerId]?.[holeIndex] ?? createEmptyHolePointBreakdown()
 }
 
-export function calculatePlayerHoleGamePoints(
-  playerId: string,
-  holeIndex: number,
-  players: Player[],
-  holes: RoundState['holes'],
-  holeCards: HoleCardsState[],
-  holeResults: HoleResultState[],
-  momentumEnabled: boolean,
-): number {
-  return calculatePlayerHolePointBreakdown(
-    playerId,
-    holeIndex,
-    players,
-    holes,
-    holeCards,
-    holeResults,
-    momentumEnabled,
-  ).total
-}
-
 export function calculatePlayerRealScore(
   playerId: string,
   holeResults: HoleResultState[],
@@ -97,24 +69,35 @@ export function calculatePlayerRealScore(
   }, 0)
 }
 
-export function calculatePlayerGamePoints(
-  playerId: string,
-  players: Player[],
-  holes: RoundState['holes'],
-  holeCards: HoleCardsState[],
-  holeResults: HoleResultState[],
-  momentumEnabled: boolean,
-): number {
-  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
-    players,
-    holes,
-    holeCards,
-    holeResults,
-    momentumEnabled,
-  )
+const roundTotalsByPlayerIdSelector = createRefMemoizedSelector(
+  (
+    players: Player[],
+    holes: RoundState['holes'],
+    holeCards: HoleCardsState[],
+    holeResults: HoleResultState[],
+    momentumEnabled: boolean,
+  ): Record<string, PlayerTotals> => {
+    const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
+      players,
+      holes,
+      holeCards,
+      holeResults,
+      momentumEnabled,
+    )
 
-  return (breakdownsByPlayerId[playerId] ?? []).reduce((total, breakdown) => total + breakdown.total, 0)
-}
+    return Object.fromEntries(
+      players.map((player) => {
+        const realScore = calculatePlayerRealScore(player.id, holeResults)
+        const gamePoints = (breakdownsByPlayerId[player.id] ?? []).reduce(
+          (total, breakdown) => total + breakdown.total,
+          0,
+        )
+
+        return [player.id, createPlayerTotals(realScore, gamePoints)]
+      }),
+    )
+  },
+)
 
 export function calculateRoundTotalsByPlayerId(
   players: Player[],
@@ -123,50 +106,13 @@ export function calculateRoundTotalsByPlayerId(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): Record<string, PlayerTotals> {
-  const cached =
-    roundTotalsCache &&
-    roundTotalsCache.playersRef === players &&
-    roundTotalsCache.holesRef === holes &&
-    roundTotalsCache.holeCardsRef === holeCards &&
-    roundTotalsCache.holeResultsRef === holeResults &&
-    roundTotalsCache.momentumEnabled === momentumEnabled
-      ? roundTotalsCache
-      : null
-
-  if (cached) {
-    return cached.totalsByPlayerId
-  }
-
-  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
+  return roundTotalsByPlayerIdSelector(
     players,
     holes,
     holeCards,
     holeResults,
     momentumEnabled,
   )
-
-  const totalsByPlayerId = Object.fromEntries(
-    players.map((player) => {
-      const realScore = calculatePlayerRealScore(player.id, holeResults)
-      const gamePoints = (breakdownsByPlayerId[player.id] ?? []).reduce(
-        (total, breakdown) => total + breakdown.total,
-        0,
-      )
-
-      return [player.id, createPlayerTotals(realScore, gamePoints)]
-    }),
-  )
-
-  roundTotalsCache = {
-    playersRef: players,
-    holesRef: holes,
-    holeCardsRef: holeCards,
-    holeResultsRef: holeResults,
-    momentumEnabled,
-    totalsByPlayerId,
-  }
-
-  return totalsByPlayerId
 }
 
 function normalizeHoleResults(
@@ -235,6 +181,13 @@ function normalizeHolePowerUps(
   })
 }
 
+function normalizeHoleUxMetrics(
+  holes: RoundState['holes'],
+  holeUxMetrics: HoleUxMetrics[] | undefined,
+): HoleUxMetrics[] {
+  return buildHoleUxMetrics(holes, holeUxMetrics)
+}
+
 export function recalculateRoundTotals(roundState: RoundState): RoundState {
   const normalizedHoleResults = normalizeHoleResults(roundState.players, roundState.holeResults)
   const normalizedHoleCards = normalizeHoleCards(roundState.players, roundState.holeCards)
@@ -242,6 +195,10 @@ export function recalculateRoundTotals(roundState: RoundState): RoundState {
     roundState.players,
     roundState.holes,
     roundState.holePowerUps,
+  )
+  const normalizedHoleUxMetrics = normalizeHoleUxMetrics(
+    roundState.holes,
+    roundState.holeUxMetrics,
   )
   const normalizedConfig = normalizeRoundConfig(roundState.config)
   const momentumEnabled = normalizedConfig.toggles.momentumBonuses
@@ -253,6 +210,7 @@ export function recalculateRoundTotals(roundState: RoundState): RoundState {
     holeCards: normalizedHoleCards,
     holePowerUps: normalizedHolePowerUps,
     holeResults: normalizedHoleResults,
+    holeUxMetrics: normalizedHoleUxMetrics,
     deckMemory: normalizedDeckMemory,
     totalsByPlayerId: calculateRoundTotalsByPlayerId(
       roundState.players,
