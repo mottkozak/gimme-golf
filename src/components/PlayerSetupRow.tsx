@@ -35,20 +35,20 @@ function PlayerSetupRow({
   }
 
   return (
-    <article className="panel inset stack-xs">
-      <div className="row-between">
-        <strong>Golfer {position}</strong>
+    <article className="panel inset stack-xs setup-player-card">
+      <header className="row-between setup-row-wrap setup-player-card__header">
+        <strong className="setup-player-card__title">Golfer {position}</strong>
         {canRemove ? (
-          <button type="button" className="button-danger" onClick={onRemove}>
+          <button type="button" className="setup-player-card__remove" onClick={onRemove}>
             Remove
           </button>
         ) : (
-          <span className="chip">Required</span>
+          <span className="chip setup-player-card__required">Required</span>
         )}
-      </div>
+      </header>
 
-      <label className="field">
-        <span className="label">Name</span>
+      <label className="field setup-player-field">
+        <span className="label setup-player-field__label">Name</span>
         <input
           type="text"
           value={player.name}
@@ -63,8 +63,8 @@ function PlayerSetupRow({
         />
       </label>
 
-      <label className="field">
-        <span className="label">Expected 18-hole score</span>
+      <label className="field setup-player-field">
+        <span className="label setup-player-field__label">Expected 18-hole score</span>
         <input
           type="text"
           inputMode="numeric"

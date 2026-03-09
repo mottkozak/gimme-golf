@@ -29,7 +29,7 @@ function GameModePresetRow({
       }}
     >
       <div className="preset-row__details">
-        <div className="row-between">
+        <div className="row-between preset-row__top">
           <div className="preset-row__title">
             <img
               className="preset-row__icon"
@@ -38,8 +38,6 @@ function GameModePresetRow({
               aria-hidden="true"
             />
             <strong>{preset.name}</strong>
-            {preset.badgeLabel && <span className="chip">{preset.badgeLabel}</span>}
-            {selected && <span className="chip">Active</span>}
           </div>
           <button
             type="button"
@@ -52,6 +50,11 @@ function GameModePresetRow({
           >
             i
           </button>
+        </div>
+        <p className="muted preset-row__description">{preset.shortDescription}</p>
+        <div className="preset-row__chips">
+          {preset.badgeLabel && <span className="chip preset-row__chip">{preset.badgeLabel}</span>}
+          {selected && <span className="chip preset-row__chip preset-row__chip--active">Active</span>}
         </div>
       </div>
     </article>

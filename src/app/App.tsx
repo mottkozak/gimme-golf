@@ -92,8 +92,8 @@ function App() {
           alt="GIMME GOLF"
         />
         {appState.activeScreen !== 'home' && (
-          <span className="chip">
-            Hole {currentHole?.holeNumber ?? 1} / {appState.roundState.config.holeCount}
+          <span className="chip app-shell__progress-chip">
+            Hole {currentHole?.holeNumber ?? 1} of {appState.roundState.config.holeCount}
           </span>
         )}
       </header>

@@ -43,6 +43,20 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
     return typeof selectedCardId === 'string' && selectedCardId.length > 0
   })
+  const readyPlayersCount = playersRequiringSelection.filter((player) => {
+    const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
+    return typeof selectedCardId === 'string' && selectedCardId.length > 0
+  }).length
+  const canSelectCards = isDrawTwoPickOne && !isNoMercyHole
+  const readinessSummary =
+    playersRequiringSelection.length > 0
+      ? `${readyPlayersCount} / ${playersRequiringSelection.length} golfers ready`
+      : 'All golfers ready'
+  const missionHelperCopy = canSelectCards
+    ? 'Pick one mission per golfer.'
+    : isNoMercyHole
+      ? 'No Mercy active. Harder missions were forced this hole.'
+      : 'Missions are auto-assigned for this hole.'
 
   const updateCurrentHole = (updater: (currentState: RoundState) => RoundState) => {
     onUpdateRoundState((currentState) => {
@@ -173,8 +187,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   }
 
   return (
-    <section className="screen stack-sm">
-      <header className="screen__header">
+    <section className="screen stack-sm hole-play-screen">
+      <header className="screen__header hole-play-header">
         <div className="screen-title">
           <img
             className="screen-title__icon"
@@ -192,39 +206,38 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
       {!isHolePrepared && (
-        <section className="panel stack-xs">
-          <div className="row-between">
-            <strong>Hole Setup</strong>
-            <span className="chip">Par {currentHole.par}</span>
-          </div>
-          <p className="muted">Confirm the hole details, then deal once to start play.</p>
-
-          <div className="stack-xs">
-            <span className="label">Par</span>
-            <div className="button-row">
+        <section className="panel stack-xs hole-setup-card">
+          <div className="hole-setup-control-group">
+            <span className="label hole-setup-label">Par (confirm)</span>
+            <div className="segmented-control segmented-control--four" role="group" aria-label="Par selection">
               {[3, 4, 5, 6].map((par) => (
                 <button
                   key={par}
                   type="button"
-                  className={currentHole.par === par ? 'button-primary' : ''}
+                  className={`segmented-control__button ${
+                    currentHole.par === par ? 'segmented-control__button--active' : ''
+                  }`}
                   onClick={() => setPar(par)}
                 >
-                  Par {par}
+                  {par}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="stack-xs">
-            <span className="label">Hole Tags</span>
-            <div className="tag-grid">
+          <div className="hole-setup-control-group">
+            <span className="label hole-setup-label hole-setup-label--optional">Course Tags (optional)</span>
+            {currentHole.tags.length === 0 && (
+              <p className="muted hole-setup-tags-empty">No tags selected</p>
+            )}
+            <div className="tag-grid hole-setup-tag-grid">
               {HOLE_TAG_OPTIONS.map((option) => {
                 const isActive = currentHole.tags.includes(option.tag)
                 return (
                   <button
                     key={option.tag}
                     type="button"
-                    className={`tag-pill ${isActive ? 'active' : ''}`}
+                    className={`tag-pill hole-setup-tag-pill ${isActive ? 'active' : ''}`}
                     onClick={() => setHoleTag(option.tag)}
                   >
                     <img
@@ -240,11 +253,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
             </div>
           </div>
 
-          <button type="button" className="button-primary" onClick={dealForCurrentHole}>
-            <img className="button-icon" src={ICONS.dealCards} alt="" aria-hidden="true" />
-            {isPowerUpsMode
-              ? `Deal Power Ups For Hole ${currentHole.holeNumber}`
-              : `Deal Cards For Hole ${currentHole.holeNumber}`}
+          <button type="button" className="button-primary hole-setup-deal-button" onClick={dealForCurrentHole}>
+            {isPowerUpsMode ? 'Deal Power Ups' : 'Deal Cards'}
           </button>
         </section>
       )}
@@ -292,28 +302,28 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
       {!isPowerUpsMode && isHolePrepared && (
         <>
-          <section className="stack-sm">
+          <p className="muted hole-cards-helper">{missionHelperCopy}</p>
+
+          <section className="stack-sm hole-draft-list">
             {roundState.players.map((player) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
               const offerState = currentHoleCards.personalCardOfferByPlayerId[player.id]
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
-              const selectedCard = dealtCards.find((card) => card.id === selectedCardId) ?? null
+              const isPlayerReady =
+                typeof selectedCardId === 'string' && selectedCardId.length > 0
 
               return (
-                <article key={player.id} className="panel stack-xs">
-                  <div className="row-between">
+                <article key={player.id} className="panel stack-xs hole-draft-player">
+                  <header className="row-between setup-row-wrap">
                     <strong>{player.name}</strong>
-                    <span className="chip">
-                      Selected: {selectedCard ? `${selectedCard.code} - ${selectedCard.name}` : 'None'}
-                    </span>
-                  </div>
-                  {isDrawTwoPickOne && !isNoMercyHole && (
-                    <p className="muted">
-                      Choose between a safer option and a higher-upside hard option.
-                    </p>
-                  )}
+                    {canSelectCards && (
+                      <span className={`status-pill ${isPlayerReady ? 'status-success' : 'status-pending'}`}>
+                        {isPlayerReady ? 'Ready' : 'Pending'}
+                      </span>
+                    )}
+                  </header>
 
-                  <div className="stack-xs">
+                  <div className="stack-xs hole-draft-options">
                     {dealtCards.map((card) => {
                       const offerKind =
                         offerState?.safeCardId === card.id && offerState?.hardCardId === null
@@ -325,22 +335,15 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                               : undefined
 
                       return (
-                        <div key={card.id} className="stack-xs">
-                          <ChallengeCardView
-                            card={card}
-                            selected={selectedCardId === card.id}
-                            offerKind={offerKind}
-                          />
-                          {isDrawTwoPickOne && !isNoMercyHole && (
-                            <button
-                              type="button"
-                              className={selectedCardId === card.id ? 'button-primary' : ''}
-                              onClick={() => selectCard(player.id, card.id)}
-                            >
-                              {selectedCardId === card.id ? 'Selected' : 'Choose This Card'}
-                            </button>
-                          )}
-                        </div>
+                        <ChallengeCardView
+                          key={card.id}
+                          card={card}
+                          selected={selectedCardId === card.id}
+                          offerKind={offerKind}
+                          onSelect={
+                            canSelectCards ? () => selectCard(player.id, card.id) : undefined
+                          }
+                        />
                       )
                     })}
 
@@ -348,43 +351,43 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                       <p className="muted">No personal cards available from enabled packs.</p>
                     )}
                   </div>
-
-                  {!isDrawTwoPickOne && (
-                    <p className="muted">Auto-assign mode enabled. Card assigned automatically.</p>
-                  )}
-                  {isNoMercyHole && (
-                    <p className="muted">
-                      No Mercy active. Safer option removed and a harder card was forced.
-                    </p>
-                  )}
                 </article>
               )
             })}
           </section>
 
-          <section className="stack-xs">
-            <h3>Public Cards (Preview Only)</h3>
+          <section className="panel stack-xs hole-public-preview">
+            <div className="row-between setup-row-wrap">
+              <h3>Public Cards</h3>
+              <span className="chip">{currentHoleCards.publicCards.length}</span>
+            </div>
             {currentHoleCards.publicCards.length === 0 && (
-              <p className="panel muted">No public cards enabled for this round.</p>
+              <p className="muted">No public cards for this hole.</p>
             )}
-            {currentHoleCards.publicCards.map((card) => (
-              <PublicCardView key={card.id} card={card} />
-            ))}
-            <p className="muted">Public Chaos/Prop cards are resolved on the Hole Results screen.</p>
+            {currentHoleCards.publicCards.length > 0 && (
+              <>
+                <div className="stack-xs hole-public-preview__list">
+                  {currentHoleCards.publicCards.map((card) => (
+                    <PublicCardView key={card.id} card={card} />
+                  ))}
+                </div>
+                <p className="muted hole-public-preview__helper">Preview only. Resolve on Hole Results.</p>
+              </>
+            )}
           </section>
 
-          <section className="panel stack-xs">
+          <section className="panel stack-xs hole-cards-footer">
+            <p className="value hole-cards-footer__readiness">{readinessSummary}</p>
             <button
               type="button"
-              className="button-primary"
+              className="button-primary hole-cards-footer__cta"
               disabled={!allPlayersHaveSelection}
               onClick={continueToResults}
             >
-              <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
-              Continue To Hole Results
+              Continue
             </button>
             {!allPlayersHaveSelection && (
-              <p className="muted">Select one personal card for each golfer who was dealt cards.</p>
+              <p className="muted">Pick one mission for each golfer to continue.</p>
             )}
           </section>
         </>

@@ -4,18 +4,26 @@ interface PublicCardViewProps {
   card: PublicCard
 }
 
+function toLabel(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 function PublicCardView({ card }: PublicCardViewProps) {
   return (
-    <article className="panel public-card">
-      <header className="row-between">
+    <article className="panel public-card public-card--compact">
+      <header className="row-between setup-row-wrap public-card__header">
         <strong>{card.name}</strong>
-        <span className="chip">{card.cardType.toUpperCase()}</span>
+        <div className="button-row">
+          <span className="chip">{toLabel(card.cardType)}</span>
+          {card.points !== 0 && (
+            <span className="chip">
+              {card.points >= 0 ? '+' : ''}
+              {card.points} pts
+            </span>
+          )}
+        </div>
       </header>
-      <p>{card.description}</p>
-      <div className="row-between">
-        <span>Manual resolve ({card.interaction?.mode.replaceAll('_', ' ')})</span>
-        <span>{card.points >= 0 ? '+' : ''}{card.points} pts</span>
-      </div>
+      <p className="public-card__description">{card.description}</p>
     </article>
   )
 }

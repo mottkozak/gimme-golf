@@ -165,12 +165,12 @@ strong {
 
 .challenge-card > header strong,
 .public-card > header strong {
-  font-family: var(--font-display);
-  font-size: 1.22rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  color: var(--accent-strong);
-  line-height: 1.08;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.002em;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+  line-height: 1.22;
 }
 
 main {
@@ -209,6 +209,14 @@ main {
   height: 44px;
 }
 
+.app-shell__progress-chip {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+  font-family: var(--font-numeric);
+  font-weight: 700;
+}
+
 .button-primary {
   border-color: var(--accent-strong);
   background: var(--accent);
@@ -240,22 +248,93 @@ main {
 
 .round-setup-screen {
   gap: var(--space-4);
+  padding-bottom: var(--space-5);
 }
 
 .round-setup-screen .setup-step {
   gap: var(--space-3);
+  padding: var(--space-3);
 }
 
 .round-setup-screen .setup-step .muted {
-  max-width: 64ch;
+  max-width: 60ch;
+}
+
+.round-setup-header {
+  gap: var(--space-1);
+}
+
+.round-setup-header__support {
+  max-width: 36ch;
+}
+
+.setup-quick-card {
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
+  background:
+    linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.setup-quick-card__chip {
+  border-color: color-mix(in srgb, var(--accent) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-panel));
+}
+
+.setup-quick-summary {
+  font-family: var(--font-numeric);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.setup-quick-card__cta {
+  width: 100%;
+}
+
+.setup-advanced-divider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  padding: 0.1rem var(--space-1) var(--space-2);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border-subtle));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border-subtle));
+}
+
+.setup-advanced-divider .label {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.setup-advanced-divider .muted {
+  font-size: 0.87rem;
 }
 
 .setup-step {
-  border-top: 3px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 36%, transparent);
 }
 
 .setup-step > h3 {
   letter-spacing: 0.01em;
+}
+
+.setup-step__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.setup-step__support {
+  max-width: 56ch;
+}
+
+.setup-step__count-chip {
+  font-family: var(--font-numeric);
 }
 
 .setup-step--basics {
@@ -270,9 +349,144 @@ main {
   border-top-color: color-mix(in srgb, var(--accent) 62%, transparent);
 }
 
+.setup-step--advanced {
+  border-top-color: color-mix(in srgb, var(--warning) 50%, transparent);
+}
+
+.setup-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+}
+
+.setup-control-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.segmented-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.32rem;
+  padding: 0.28rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-inset) 74%, var(--bg-panel));
+}
+
+.segmented-control--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.segmented-control--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.segmented-control__button {
+  min-height: 46px;
+  padding: 0.52rem 0.6rem;
+  border-color: transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+  font-weight: 700;
+}
+
+.segmented-control__button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border-subtle));
+  background: color-mix(in srgb, var(--bg-panel) 85%, var(--bg-inset));
+}
+
+.segmented-control__button--active {
+  border-color: var(--accent-strong);
+  background: var(--accent);
+  color: var(--text-on-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 55%, transparent);
+}
+
+.segmented-control__button--active:hover:not(:disabled) {
+  border-color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent) 86%, var(--accent-strong));
+}
+
+.setup-player-list {
+  gap: var(--space-3);
+}
+
+.setup-player-card {
+  border-color: color-mix(in srgb, var(--border-subtle) 86%, var(--accent) 14%);
+  background: color-mix(in srgb, var(--bg-panel) 92%, var(--bg-inset));
+}
+
+.setup-player-card__header {
+  align-items: flex-start;
+}
+
+.setup-player-card__title {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.setup-player-card__remove {
+  min-height: 36px;
+  border-radius: 999px;
+  padding: 0.3rem 0.66rem;
+  border-color: color-mix(in srgb, var(--danger) 44%, var(--border-subtle));
+  background: var(--bg-panel);
+  color: var(--text-danger);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.setup-player-card__remove:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 68%, var(--border-subtle));
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-panel));
+}
+
+.setup-player-card__required {
+  font-size: 0.72rem;
+}
+
+.setup-player-field {
+  gap: 0.24rem;
+}
+
+.setup-player-field__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+
+.round-setup-add-player {
+  width: 100%;
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--border-subtle));
+  background: var(--bg-panel);
+  color: var(--accent-strong);
+}
+
+.round-setup-add-player:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+}
+
+.round-setup-mode-list {
+  gap: 0.58rem;
+}
+
+.setup-advanced-toggle {
+  min-height: 44px;
+  padding: 0.46rem 0.84rem;
+  white-space: nowrap;
+}
+
+.setup-advanced-stack {
+  gap: var(--space-3);
+}
+
 .setup-cta {
   position: sticky;
-  bottom: var(--space-3);
+  bottom: var(--space-2);
   z-index: 5;
   border-width: 2px;
   border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
@@ -283,10 +497,260 @@ main {
       color-mix(in srgb, var(--bg-panel) 92%, transparent)
     ),
     var(--bg-panel);
+  gap: var(--space-2);
+}
+
+.setup-cta__support {
+  font-size: 0.84rem;
+}
+
+.setup-cta__button {
+  width: 100%;
+  min-height: 56px;
+}
+
+.hole-play-screen {
+  gap: var(--space-3);
+}
+
+.hole-play-header {
+  gap: var(--space-1);
+}
+
+.hole-cards-helper {
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: calc(var(--space-1) * -1);
+}
+
+.hole-draft-list {
+  gap: var(--space-3);
+}
+
+.hole-draft-player {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.hole-draft-options {
+  gap: 0.55rem;
+}
+
+.hole-public-preview {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.hole-public-preview > h3,
+.hole-public-preview .row-between > h3 {
+  font-size: 1rem;
+}
+
+.hole-public-preview__list {
+  gap: 0.55rem;
+}
+
+.hole-public-preview__helper {
+  font-size: 0.82rem;
+}
+
+.hole-cards-footer {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.hole-cards-footer__readiness {
+  font-size: 0.98rem;
+}
+
+.hole-cards-footer__cta {
+  width: 100%;
+  min-height: 58px;
+}
+
+.hole-setup-card {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.hole-setup-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.hole-setup-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.hole-setup-label--optional {
+  color: color-mix(in srgb, var(--text-secondary) 85%, var(--accent-strong));
+}
+
+.hole-setup-card .segmented-control {
+  padding: 0.24rem;
+  gap: 0.28rem;
+}
+
+.hole-setup-card .segmented-control__button {
+  min-height: 44px;
+  padding: 0.5rem;
+  font-size: 0.98rem;
+}
+
+.hole-setup-tag-grid {
+  gap: 0.38rem;
+}
+
+.hole-setup-tag-pill {
+  min-height: 36px;
+  padding: 0.25rem 0.58rem;
+  border-color: color-mix(in srgb, var(--border-subtle) 92%, var(--accent) 8%);
+  background: color-mix(in srgb, var(--bg-inset) 64%, var(--bg-panel));
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.hole-setup-tag-pill .tag-pill__icon {
+  width: 0.92rem;
+  height: 0.92rem;
+  opacity: 0.82;
+  filter: saturate(0.82);
+}
+
+.hole-setup-tag-pill.active {
+  border-color: color-mix(in srgb, var(--accent) 68%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 20%, var(--bg-panel));
+  color: var(--accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 48%, transparent);
+}
+
+.hole-setup-tag-pill.active .tag-pill__icon {
+  opacity: 1;
+  filter: saturate(1.12);
+}
+
+.hole-setup-tags-empty {
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+.hole-setup-deal-button {
+  width: 100%;
+  min-height: 60px;
+  padding: 0.88rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .home-screen {
+  justify-content: flex-start;
+  gap: var(--space-4);
+}
+
+.home-screen__header {
+  gap: var(--space-1);
+}
+
+.home-screen__header > p {
+  color: var(--text-secondary);
+}
+
+.home-screen__support {
+  max-width: 34ch;
+}
+
+.home-resume-card {
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.home-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+}
+
+.home-section-head .label {
+  color: color-mix(in srgb, var(--accent-strong) 64%, var(--text-secondary));
+}
+
+.home-progress {
+  font-family: var(--font-numeric);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.home-metadata {
+  line-height: 1.34;
+}
+
+.home-start-card {
+  border-color: color-mix(in srgb, var(--border-subtle) 85%, var(--accent) 15%);
+  background: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-inset));
+}
+
+.home-start-card--focus {
+  border-color: color-mix(in srgb, var(--accent) 46%, var(--border-subtle));
+}
+
+.home-danger-zone {
+  border-color: color-mix(in srgb, var(--danger) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-danger) 42%, var(--bg-panel));
+}
+
+.home-danger-zone__label {
+  color: var(--text-danger);
+}
+
+.home-action-button {
+  width: 100%;
+  min-height: 58px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
+  gap: 0.24rem;
+  text-align: left;
+}
+
+.home-action-button--secondary {
+  background: var(--bg-panel);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.home-action-button--secondary:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+  background: color-mix(in srgb, var(--bg-panel) 92%, var(--bg-inset));
+}
+
+.home-action-label {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.home-action-helper {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-secondary);
+}
+
+.home-action-button--primary .home-action-helper {
+  color: color-mix(in srgb, var(--text-on-primary) 82%, transparent);
 }
 
 .screen__header {
@@ -300,11 +764,12 @@ main {
 }
 
 .hole-recap-screen {
-  gap: var(--space-4);
+  gap: var(--space-3);
+  padding-bottom: calc(var(--space-5) + 4.25rem);
 }
 
 .recap-header {
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .recap-highlight-label {
@@ -316,20 +781,94 @@ main {
 }
 
 .recap-highlight {
-  padding: 1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+  font-weight: 700;
+  font-size: 1.24rem;
+  line-height: 1.28;
+}
+
+.recap-hero {
+  border-color: color-mix(in srgb, var(--accent) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      color-mix(in srgb, var(--bg-panel) 86%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.recap-hero__headline {
+  margin-top: -0.15rem;
+}
+
+.recap-hero__sub {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+}
+
+.recap-why-card {
+  gap: var(--space-2);
+}
+
+.recap-why-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.recap-why-list__item {
+  padding-left: 0.7rem;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  font-size: 0.9rem;
+  line-height: 1.36;
+}
+
+.recap-outcome-grid {
+  gap: var(--space-2);
+}
+
+.recap-outcome-card {
+  border-color: color-mix(in srgb, var(--border-subtle) 78%, var(--accent) 18%);
+}
+
+.recap-breakdown-toggle {
+  border-top: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.recap-breakdown-toggle > button {
+  width: 100%;
+}
+
+.recap-next {
+  margin-top: 0;
+}
+
+.recap-next--sticky {
+  position: sticky;
+  bottom: var(--space-2);
+  z-index: 6;
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
   border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-subtle));
-  border-radius: var(--radius-sm);
   background:
     linear-gradient(
       120deg,
       color-mix(in srgb, var(--accent) 10%, transparent),
-      color-mix(in srgb, var(--bg-panel) 80%, transparent)
+      color-mix(in srgb, var(--bg-panel) 88%, transparent)
     ),
-    var(--surface-elevated);
-  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+    var(--bg-panel);
+}
+
+.recap-next--sticky > button {
+  width: 100%;
+  min-height: 58px;
+  font-size: 1rem;
   font-weight: 700;
-  font-size: 1.04rem;
-  line-height: 1.35;
 }
 
 .featured-hole-banner {
@@ -410,6 +949,11 @@ main {
   align-items: center;
 }
 
+.setup-row-wrap {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -476,10 +1020,10 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: var(--space-3);
+  padding: 0.68rem 0.76rem;
   background: var(--bg-panel);
 }
 
@@ -491,18 +1035,21 @@ main {
 }
 
 .preset-row--selected {
-  border-color: color-mix(in srgb, var(--accent) 60%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--accent) 68%, var(--border-subtle));
   background:
     linear-gradient(
       130deg,
-      color-mix(in srgb, var(--accent) 8%, transparent),
+      color-mix(in srgb, var(--accent) 10%, transparent),
       color-mix(in srgb, var(--bg-panel) 92%, transparent)
     ),
     var(--bg-panel);
-  box-shadow: var(--shadow-soft);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 34%, transparent),
+    var(--shadow-soft);
 }
 
 .preset-row {
+  align-items: flex-start;
   cursor: pointer;
   transition:
     border-color var(--motion-fast) ease,
@@ -524,7 +1071,7 @@ main {
 .pack-row__details {
   display: flex;
   flex-direction: column;
-  gap: 0.32rem;
+  gap: 0.35rem;
   flex: 1;
 }
 
@@ -535,6 +1082,16 @@ main {
   gap: var(--space-2);
 }
 
+.preset-row__title {
+  flex-wrap: wrap;
+}
+
+.preset-row__title strong {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .preset-row__icon {
   width: 1.05rem;
   height: 1.05rem;
@@ -542,12 +1099,49 @@ main {
   border-radius: 0.2rem;
 }
 
+.preset-row__top {
+  align-items: flex-start;
+}
+
+.preset-row__description {
+  margin-left: calc(1.05rem + var(--space-2));
+}
+
+.preset-row__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-left: calc(1.05rem + var(--space-2));
+}
+
+.preset-row__chip {
+  font-size: 0.71rem;
+  padding: 0.16rem 0.46rem;
+}
+
+.preset-row__chip--active {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-panel));
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
 .pack-row__info-button,
 .preset-row__info-button {
-  min-height: 42px;
-  min-width: 42px;
+  min-height: 38px;
+  min-width: 38px;
   border-radius: 999px;
   padding: 0;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.preset-row__info-button {
+  border-color: color-mix(in srgb, var(--border-subtle) 85%, var(--accent) 15%);
+}
+
+.preset-row__info-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
+  color: var(--accent-strong);
 }
 
 .preset-feature-row {
@@ -721,8 +1315,57 @@ main {
   color: var(--text-secondary);
 }
 
-.recap-next {
-  margin-top: var(--space-1);
+.recap-player-summary {
+  padding: 0;
+  overflow: hidden;
+}
+
+.recap-player-summary[open] {
+  border-color: color-mix(in srgb, var(--accent) 56%, var(--border-subtle));
+}
+
+.recap-player-summary__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.72rem;
+}
+
+.recap-player-summary__summary::-webkit-details-marker {
+  display: none;
+}
+
+.recap-player-summary__name {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.recap-player-summary__chips {
+  gap: 0.36rem;
+}
+
+.recap-player-summary__details {
+  border-top: 1px dashed color-mix(in srgb, var(--border-subtle) 72%, transparent);
+  padding: 0.66rem 0.72rem 0.72rem;
+}
+
+.recap-public-impact {
+  border-color: color-mix(in srgb, var(--info) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--surface-info) 16%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.recap-public-impact__item {
+  border-color: color-mix(in srgb, var(--info) 45%, var(--border-subtle));
 }
 
 .badge-success {
@@ -855,8 +1498,31 @@ main {
 
 .challenge-card,
 .public-card {
-  border-top: 2px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  border: 1px solid var(--border-subtle);
   background: var(--bg-panel);
+}
+
+.challenge-card {
+  gap: 0.55rem;
+}
+
+.challenge-card--selectable {
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.challenge-card--selectable:hover {
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+  background: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-inset));
+}
+
+.challenge-card--selectable:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border-subtle));
 }
 
 .challenge-card.selected {
@@ -870,16 +1536,65 @@ main {
     color-mix(in srgb, var(--bg-panel) 86%, var(--bg-inset));
 }
 
+.challenge-card__meta {
+  gap: 0.34rem;
+  justify-content: flex-end;
+}
+
+.challenge-card__points-chip {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+}
+
+.challenge-card__selected-chip {
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-panel));
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.challenge-card__description {
+  margin: 0;
+  line-height: 1.34;
+}
+
+.challenge-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.challenge-card__offer-chip--safe {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
+}
+
+.challenge-card__offer-chip--hard {
+  border-color: color-mix(in srgb, var(--warning) 58%, var(--border-subtle));
+}
+
+.challenge-card__offer-chip--single {
+  border-color: color-mix(in srgb, var(--text-secondary) 46%, var(--border-subtle));
+}
+
 .challenge-card.offer-safe {
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+  border-color: var(--border-subtle);
 }
 
 .challenge-card.offer-hard {
-  border-color: color-mix(in srgb, var(--danger) 58%, var(--border-subtle));
+  border-color: var(--border-subtle);
 }
 
 .challenge-card.offer-single {
-  border-color: color-mix(in srgb, var(--text-secondary) 42%, var(--border-subtle));
+  border-color: var(--border-subtle);
+}
+
+.public-card--compact {
+  gap: 0.45rem;
+}
+
+.public-card__description {
+  margin: 0;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--text-secondary));
 }
 
 .power-up-card {
@@ -984,6 +1699,120 @@ main {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-2);
+}
+
+.end-round-screen {
+  gap: var(--space-3);
+  padding-bottom: calc(var(--space-5) + 4.8rem);
+}
+
+.end-round-screen > .panel {
+  padding: var(--space-3);
+}
+
+.end-round-header {
+  gap: var(--space-1);
+}
+
+.end-round-hero {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
+  background:
+    linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      color-mix(in srgb, var(--bg-panel) 88%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.end-round-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 6vw, 1.95rem);
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.end-round-hero__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.end-round-hero__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  padding: 0.52rem 0.58rem;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 88%, transparent);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-panel) 94%, var(--bg-inset));
+}
+
+.end-round-hero__metric > strong {
+  font-family: var(--font-numeric);
+  font-size: 1.18rem;
+}
+
+.end-round-results__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.end-round-results__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 0.54rem 0.62rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-inset));
+}
+
+.end-round-results__label {
+  font-size: 0.81rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.end-round-results__value {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  text-align: right;
+}
+
+.end-round-disclosure__summary {
+  list-style: none;
+  cursor: pointer;
+  align-items: center;
+}
+
+.end-round-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.end-round-awards details,
+.end-round-holes details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.award-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(230px, 84%);
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scroll-snap-type: x proximity;
+}
+
+.award-carousel > .award-row {
+  scroll-snap-align: start;
 }
 
 .summary-stat {
@@ -1110,27 +1939,220 @@ main {
   background: color-mix(in srgb, var(--bg-inset) 82%, var(--bg-panel));
 }
 
-.hole-results-player-card {
-  gap: var(--space-3);
-  border-top: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
+.hole-scorecard-list {
+  gap: var(--space-2);
 }
 
-.hole-results-player-card > .row-between {
-  align-items: flex-start;
+.hole-scorecard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.hole-scorecard__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.56rem;
+  padding: 0.72rem 0.78rem;
+}
+
+.hole-scorecard__summary::-webkit-details-marker {
+  display: none;
+}
+
+.hole-scorecard__quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.56rem;
+}
+
+.hole-scorecard__quick-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  min-height: 32px;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+}
+
+.hole-scorecard__quick-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.hole-scorecard__quick-points,
+.hole-scorecard__detail-points {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+}
+
+.hole-scorecard__details {
+  border-top: 1px dashed color-mix(in srgb, var(--border-subtle) 72%, transparent);
+  padding: 0.68rem 0.78rem 0.78rem;
+}
+
+.hole-scorecard__detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+  padding: 0.46rem 0.52rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-panel) 92%, var(--bg-inset));
+}
+
+.end-cta-bar {
+  position: sticky;
+  bottom: var(--space-2);
+  z-index: 8;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--bg-panel) 90%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.end-cta-bar button {
+  min-height: 52px;
+}
+
+.score-positive {
+  color: var(--text-success);
+}
+
+.score-negative {
+  color: var(--text-danger);
+}
+
+.score-neutral {
+  color: var(--text-secondary);
+}
+
+@media (min-width: 420px) {
+  .end-cta-bar {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .hole-results-screen {
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.hole-results-header {
+  gap: var(--space-1);
+}
+
+.hole-results-header__title-row {
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.hole-results-progress-chip {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+}
+
+.hole-results-stepper {
+  padding: var(--space-3);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border-subtle));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      color-mix(in srgb, var(--bg-panel) 90%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.hole-results-stepper__list {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.hole-results-stepper__item {
+  display: flex;
+  align-items: center;
+  gap: 0.58rem;
+  padding: 0.4rem 0.48rem;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-inset) 84%, var(--bg-panel));
+}
+
+.hole-results-stepper__item--complete {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+}
+
+.hole-results-stepper__index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.48rem;
+  height: 1.48rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--info) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-info) 72%, var(--bg-panel));
+  color: var(--text-info);
+  font-family: var(--font-numeric);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hole-results-stepper__item--complete .hole-results-stepper__index {
+  border-color: var(--accent-strong);
+  background: var(--accent);
+  color: var(--text-on-primary);
+}
+
+.hole-results-stepper__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.hole-results-stepper__label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.hole-results-stepper__detail {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.hole-results-entry-panel,
+.hole-results-step-panel,
+.public-resolution-panel,
+.hole-results-next {
+  padding: var(--space-3);
+  gap: var(--space-2);
 }
 
 .hole-results-entry-panel {
-  border-top: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
-  gap: var(--space-3);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 44%, transparent);
+}
+
+.hole-results-step-panel {
+  border-top: 2px solid color-mix(in srgb, var(--warning) 48%, transparent);
 }
 
 .public-resolution-panel {
-  border-top: 3px solid color-mix(in srgb, var(--info) 48%, transparent);
-  gap: var(--space-3);
+  border-top: 2px solid color-mix(in srgb, var(--info) 50%, transparent);
 }
 
 .public-resolution-panel > .panel.inset {
@@ -1138,40 +2160,170 @@ main {
 }
 
 .hole-results-next {
-  border-top: 3px solid color-mix(in srgb, var(--warning) 48%, transparent);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
-.hole-results-mission-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.hole-results-step-header {
+  align-items: flex-start;
+}
+
+.hole-results-step-header > strong {
+  font-family: var(--font-ui);
+  font-size: 1.04rem;
+  letter-spacing: 0.002em;
+  line-height: 1.2;
+}
+
+.hole-results-step-actions {
+  align-items: flex-start;
+}
+
+.hole-results-step-actions .muted {
+  font-size: 0.85rem;
+  line-height: 1.32;
+}
+
+.hole-results-step-actions > button {
+  min-height: 42px;
+  padding: 0.48rem 0.76rem;
+  font-size: 0.88rem;
+}
+
+.hole-results-resolution-list {
+  gap: 0.58rem;
+}
+
+.hole-results-resolution-card {
+  padding: 0.78rem 0.84rem;
+  gap: 0.48rem;
+  border-color: color-mix(in srgb, var(--border-subtle) 84%, var(--accent) 14%);
+}
+
+.hole-results-player-card {
   gap: var(--space-2);
+  padding: 0.82rem 0.88rem;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
-.hole-results-mission-row button {
-  min-height: 56px;
+.hole-results-player-card > .row-between {
+  align-items: flex-start;
+}
+
+.hole-results-player-card > .muted {
+  font-size: 0.84rem;
+  line-height: 1.32;
 }
 
 .hole-results-strokes-row {
   flex-wrap: nowrap;
+  gap: 0.45rem;
   overflow-x: auto;
-  padding-bottom: 0.2rem;
+  padding-bottom: 0.16rem;
 }
 
 .hole-results-stroke-button {
-  min-width: 54px;
-  min-height: 54px;
+  min-width: 52px;
+  min-height: 52px;
   padding: 0;
   border-radius: 999px;
   flex: 0 0 auto;
   font-family: var(--font-numeric);
-  font-size: 1.08rem;
-  font-weight: 600;
+  font-size: 1.03rem;
+  font-weight: 700;
 }
 
 .hole-results-stroke-button.button-primary {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 75%, transparent),
     0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.hole-results-manual-toggle {
+  align-self: flex-start;
+}
+
+.hole-results-manual-entry {
+  padding: 0.48rem 0.56rem;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--bg-inset) 75%, var(--bg-panel));
+}
+
+.hole-results-manual-field {
+  align-items: center;
+}
+
+.hole-results-manual-field .label {
+  font-size: 0.73rem;
+}
+
+.hole-results-manual-field input {
+  width: 5.8rem;
+  min-height: 42px;
+  text-align: center;
+  font-family: var(--font-numeric);
+}
+
+.hole-results-reset-button {
+  min-height: 32px;
+  padding: 0.16rem 0.56rem;
+  font-size: 0.74rem;
+}
+
+.hole-results-mission-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+  padding: 0.24rem;
+}
+
+.hole-results-mission-row .segmented-control__button {
+  min-height: 46px;
+}
+
+.hole-results-public-card {
+  padding: 0.82rem 0.88rem;
+  gap: 0.52rem;
+}
+
+.hole-results-public-meta {
+  gap: 0.35rem;
+}
+
+.hole-results-public-meta .chip {
+  font-size: 0.72rem;
+}
+
+.hole-results-public-field {
+  gap: 0.34rem;
+}
+
+.hole-results-public-field .label {
+  font-size: 0.74rem;
+}
+
+.hole-results-public-field .muted {
+  font-size: 0.84rem;
+}
+
+.hole-results-public-summary {
+  gap: 0.36rem;
+}
+
+.hole-results-public-summary-row {
+  font-family: var(--font-numeric);
+  font-size: 0.96rem;
+}
+
+.hole-results-next__summary > strong {
+  font-size: 0.93rem;
+}
+
+.hole-results-next__button {
+  width: 100%;
+  min-height: 60px;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .modal-backdrop {
@@ -1284,6 +2436,181 @@ main {
     box-shadow: var(--shadow-card);
   }
 
+  .home-screen__header > p {
+    color: var(--text-secondary);
+  }
+
+  .home-resume-card {
+    border-color: color-mix(in srgb, var(--accent) 74%, var(--color-border));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 16%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      var(--surface-elevated);
+    box-shadow: var(--glow-accent);
+  }
+
+  .home-section-head .label {
+    color: color-mix(in srgb, var(--accent) 68%, #ffffff);
+  }
+
+  .home-start-card {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .home-start-card--focus {
+    border-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
+  }
+
+  .home-danger-zone {
+    border-color: color-mix(in srgb, var(--danger) 70%, var(--color-border));
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+  }
+
+  .home-action-button--secondary {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .home-action-button--secondary:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .home-action-helper {
+    color: var(--text-secondary);
+  }
+
+  .app-shell__progress-chip {
+    border-color: color-mix(in srgb, var(--accent) 70%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--text-primary);
+  }
+
+  .setup-quick-card {
+    border-color: color-mix(in srgb, var(--accent) 80%, var(--color-border));
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--accent) 18%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      var(--surface-elevated);
+    box-shadow: var(--glow-accent);
+  }
+
+  .setup-quick-card__chip {
+    border-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--text-primary);
+  }
+
+  .setup-advanced-divider {
+    border-top-color: color-mix(in srgb, var(--accent) 48%, var(--color-border));
+    border-bottom-color: color-mix(in srgb, var(--accent) 42%, var(--color-border));
+  }
+
+  .segmented-control {
+    background: color-mix(in srgb, var(--surface-panel) 78%, var(--surface-elevated));
+    border-color: var(--color-border);
+  }
+
+  .segmented-control__button {
+    color: var(--text-primary);
+  }
+
+  .segmented-control__button:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .segmented-control__button--active,
+  .segmented-control__button--active:hover:not(:disabled) {
+    border-color: var(--accent-strong);
+    background: var(--accent);
+    color: #0b0b0b;
+  }
+
+  .setup-player-card {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .setup-player-card__remove {
+    border-color: color-mix(in srgb, var(--danger) 74%, var(--color-border));
+    background: transparent;
+    color: #ffc2bc;
+  }
+
+  .setup-player-card__remove:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--danger) 88%, var(--color-border));
+    background: color-mix(in srgb, var(--danger) 20%, transparent);
+  }
+
+  .round-setup-add-player {
+    background: var(--surface-elevated);
+    border-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
+    color: var(--text-primary);
+  }
+
+  .round-setup-add-player:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 86%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  .preset-row__chip--active {
+    border-color: color-mix(in srgb, var(--accent) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--text-primary);
+  }
+
+  .preset-row__info-button {
+    border-color: color-mix(in srgb, var(--color-border) 90%, transparent);
+    color: var(--text-secondary);
+  }
+
+  .hole-setup-card .segmented-control {
+    background: color-mix(in srgb, var(--surface-panel) 80%, var(--surface-elevated));
+    border-color: var(--color-border);
+  }
+
+  .hole-setup-card .segmented-control__button {
+    color: var(--text-primary);
+  }
+
+  .hole-setup-card .segmented-control__button:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 62%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  .hole-setup-card .segmented-control__button--active,
+  .hole-setup-card .segmented-control__button--active:hover:not(:disabled) {
+    border-color: var(--accent-strong);
+    background: var(--accent);
+    color: #0b0b0b;
+  }
+
+  .hole-setup-tag-pill {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    color: var(--text-secondary);
+  }
+
+  .hole-setup-tag-pill.active {
+    border-color: color-mix(in srgb, var(--accent) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--text-primary);
+    box-shadow: var(--glow-accent);
+  }
+
+  .hole-setup-tags-empty {
+    color: var(--text-muted);
+  }
+
   .setup-step {
     border-top-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
   }
@@ -1347,12 +2674,23 @@ main {
     box-shadow: var(--glow-accent);
   }
 
-  .challenge-card.offer-hard {
-    border-color: color-mix(in srgb, var(--danger) 72%, var(--color-border));
+  .challenge-card--selectable:hover {
+    border-color: color-mix(in srgb, var(--accent) 64%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
-  .challenge-card.offer-hard.selected {
-    box-shadow: var(--glow-danger);
+  .challenge-card__selected-chip {
+    border-color: color-mix(in srgb, var(--accent) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--text-primary);
+  }
+
+  .challenge-card__offer-chip--safe {
+    border-color: color-mix(in srgb, var(--accent) 70%, var(--color-border));
+  }
+
+  .challenge-card__offer-chip--hard {
+    border-color: color-mix(in srgb, var(--warning) 70%, var(--color-border));
   }
 
   .power-up-card {
@@ -1365,7 +2703,41 @@ main {
       var(--surface-elevated);
   }
 
+  .hole-results-progress-chip {
+    border-color: color-mix(in srgb, var(--accent) 75%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--text-primary);
+  }
+
+  .hole-results-stepper,
+  .hole-results-stepper__item,
+  .hole-results-manual-entry,
+  .hole-results-resolution-card,
+  .hole-results-public-card,
+  .hole-results-public-summary {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .hole-results-stepper__item--complete {
+    border-color: color-mix(in srgb, var(--accent) 78%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+
+  .hole-results-stepper__index {
+    border-color: color-mix(in srgb, var(--info) 72%, var(--color-border));
+    background: color-mix(in srgb, var(--info) 20%, transparent);
+    color: var(--text-primary);
+  }
+
+  .hole-results-stepper__item--complete .hole-results-stepper__index {
+    border-color: color-mix(in srgb, var(--accent) 82%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 82%, transparent);
+    color: #0b0b0b;
+  }
+
   .hole-results-entry-panel,
+  .hole-results-step-panel,
   .public-resolution-panel,
   .hole-results-next {
     border-top-color: color-mix(in srgb, var(--accent) 68%, var(--color-border));
@@ -1383,17 +2755,103 @@ main {
     color: #f6dd8b;
   }
 
-  .recap-highlight {
-    border-color: color-mix(in srgb, var(--accent) 58%, var(--color-border));
+  .end-round-hero {
+    border-color: color-mix(in srgb, var(--accent) 78%, var(--color-border));
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--accent) 20%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      var(--surface-elevated);
+    box-shadow: var(--glow-accent);
+  }
+
+  .end-round-hero__title,
+  .end-round-hero__metric > strong {
+    color: var(--text-primary);
+  }
+
+  .end-round-hero__metric,
+  .end-round-results__row,
+  .hole-scorecard__quick-item,
+  .hole-scorecard__detail-row,
+  .award-carousel > .award-row {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .hole-scorecard {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .end-cta-bar {
+    border-color: color-mix(in srgb, var(--accent) 75%, var(--color-border));
     background:
       linear-gradient(
         120deg,
         color-mix(in srgb, var(--accent) 15%, transparent),
-        color-mix(in srgb, var(--surface-elevated) 85%, transparent)
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
       ),
       var(--surface-elevated);
-    color: var(--text-primary);
+  }
+
+  .score-positive {
+    color: #99f0ad;
+  }
+
+  .score-negative {
+    color: #ffb5ad;
+  }
+
+  .recap-hero {
+    border-color: color-mix(in srgb, var(--accent) 74%, var(--color-border));
+    background:
+      linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--accent) 18%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      var(--surface-elevated);
     box-shadow: var(--glow-accent);
+  }
+
+  .recap-hero__sub,
+  .recap-highlight {
+    color: var(--text-primary);
+  }
+
+  .recap-next--sticky {
+    border-color: color-mix(in srgb, var(--accent) 75%, var(--color-border));
+    background:
+      linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--accent) 14%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      var(--surface-elevated);
+  }
+
+  .recap-player-summary,
+  .recap-public-impact__item {
+    border-color: var(--color-border);
+    background: var(--surface-elevated);
+  }
+
+  .recap-player-summary[open] {
+    border-color: color-mix(in srgb, var(--accent) 78%, var(--color-border));
+  }
+
+  .recap-public-impact {
+    border-color: color-mix(in srgb, var(--info) 78%, var(--color-border));
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--info) 18%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      var(--surface-elevated);
   }
 
   .featured-hole-banner {

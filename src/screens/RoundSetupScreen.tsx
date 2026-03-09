@@ -282,54 +282,68 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
   return (
     <section className="screen stack-sm round-setup-screen">
-      <header className="screen__header">
+      <header className="screen__header round-setup-header">
         <div className="screen-title">
           <img className="screen-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
           <h2>Round Setup</h2>
         </div>
-        <p className="muted">
-          Quick Round gets you playing immediately. Use Advanced only when you need deeper tuning.
+        <p className="muted round-setup-header__support">
+          Start fast with Quick Round, or fine-tune the round below.
         </p>
       </header>
 
-      <section className="panel stack-xs setup-step">
-        <div className="row-between">
+      <section className="panel stack-sm setup-quick-card">
+        <div className="row-between setup-row-wrap">
           <h3 className="step-title">
             <img className="step-title__icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
             Quick Round
           </h3>
-          <span className="chip">Recommended</span>
+          <span className="chip setup-quick-card__chip">Recommended</span>
         </div>
-        <p className="muted">
-          One tap start with Casual defaults: 9 holes, standard course, auto-assigned cards, no
-          featured holes.
-        </p>
-        <button type="button" className="button-primary" onClick={startQuickRound}>
-          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+        <p className="setup-quick-summary">9 holes • standard course • casual defaults</p>
+        <p className="muted">Auto-assigned cards, no featured holes.</p>
+        <button
+          type="button"
+          className="button-primary setup-quick-card__cta"
+          onClick={startQuickRound}
+        >
           Start Quick Round
         </button>
       </section>
 
-      <section className="panel stack-xs setup-step setup-step--basics">
-        <h3 className="step-title">
-          <img className="step-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
-          1. Round Basics
-        </h3>
-        <p className="muted">Select hole count and course type.</p>
+      <section className="setup-advanced-divider">
+        <p className="label">Advanced Setup</p>
+        <p className="muted">
+          Customize your round with the sections below.
+        </p>
+      </section>
 
-        <div className="stack-xs">
-          <span className="label">Holes</span>
-          <div className="button-row">
+      <section className="panel stack-sm setup-step setup-step--basics">
+        <header className="setup-step__header">
+          <h3 className="step-title">
+            <img className="step-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+            1. Round Basics
+          </h3>
+          <p className="muted setup-step__support">Select hole count and course type.</p>
+        </header>
+
+        <div className="setup-control-group">
+          <span className="label setup-control-label">Holes</span>
+          <div className="segmented-control" role="group" aria-label="Hole count">
             <button
               type="button"
-              className={config.holeCount === 9 ? 'button-primary' : ''}
+              className={`segmented-control__button ${
+                config.holeCount === 9 ? 'segmented-control__button--active' : ''
+              }`}
               onClick={() => setHoleCount(9)}
             >
               9
             </button>
             <button
               type="button"
-              className={config.holeCount === 18 ? 'button-primary' : ''}
+              className={`segmented-control__button ${
+                config.holeCount === 18 ? 'segmented-control__button--active' : ''
+              }`}
               onClick={() => setHoleCount(18)}
             >
               18
@@ -337,19 +351,23 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </div>
         </div>
 
-        <div className="stack-xs">
-          <span className="label">Course Type</span>
-          <div className="button-row">
+        <div className="setup-control-group">
+          <span className="label setup-control-label">Course Type</span>
+          <div className="segmented-control" role="group" aria-label="Course type">
             <button
               type="button"
-              className={config.courseStyle === 'par3' ? 'button-primary' : ''}
+              className={`segmented-control__button ${
+                config.courseStyle === 'par3' ? 'segmented-control__button--active' : ''
+              }`}
               onClick={() => setCourseStyle('par3')}
             >
               Par 3
             </button>
             <button
               type="button"
-              className={config.courseStyle === 'standard' ? 'button-primary' : ''}
+              className={`segmented-control__button ${
+                config.courseStyle === 'standard' ? 'segmented-control__button--active' : ''
+              }`}
               onClick={() => setCourseStyle('standard')}
             >
               Standard
@@ -358,19 +376,21 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </div>
       </section>
 
-      <section className="panel stack-xs setup-step setup-step--players">
-        <div className="row-between">
-          <h3 className="step-title">
-            <img className="step-title__icon" src={ICONS.golfers} alt="" aria-hidden="true" />
-            2. Golfers
-          </h3>
-          <span className="chip">
-            {players.length} / {MAX_GOLFERS}
-          </span>
-        </div>
-        <p className="muted">Add between 1 and 8 golfers.</p>
+      <section className="panel stack-sm setup-step setup-step--players">
+        <header className="setup-step__header">
+          <div className="row-between setup-row-wrap">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.golfers} alt="" aria-hidden="true" />
+              2. Golfers
+            </h3>
+            <span className="chip setup-step__count-chip">
+              {players.length} / {MAX_GOLFERS}
+            </span>
+          </div>
+          <p className="muted setup-step__support">Add between 1 and 8 golfers.</p>
+        </header>
 
-        <div className="stack-xs">
+        <div className="stack-xs setup-player-list">
           {players.map((player, index) => (
             <PlayerSetupRow
               key={player.id}
@@ -386,21 +406,28 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           ))}
         </div>
 
-        <button type="button" onClick={addPlayer} disabled={players.length >= MAX_GOLFERS}>
+        <button
+          type="button"
+          className="round-setup-add-player"
+          onClick={addPlayer}
+          disabled={players.length >= MAX_GOLFERS}
+        >
           Add Golfer
         </button>
       </section>
 
-      <section className="panel stack-xs setup-step setup-step--mode">
-        <h3 className="step-title">
-          <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
-          3. Game Mode Selection
-        </h3>
-        <p className="muted">
-          Choose a mode. Tap the info button for details.
-        </p>
+      <section className="panel stack-sm setup-step setup-step--mode">
+        <header className="setup-step__header">
+          <h3 className="step-title">
+            <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+            3. Game Mode Selection
+          </h3>
+          <p className="muted setup-step__support">
+            Choose a mode. Tap the info button for details.
+          </p>
+        </header>
 
-        <div className="stack-xs">
+        <div className="stack-xs round-setup-mode-list">
           {GAME_MODE_PRESETS.map((preset) => (
             <GameModePresetRow
               key={preset.id}
@@ -414,11 +441,13 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       </section>
 
       {config.selectedPresetId === 'powerUps' && (
-        <section className="panel stack-xs setup-step">
-          <h3 className="step-title">
-            <img className="step-title__icon" src={ICONS.holePlay} alt="" aria-hidden="true" />
-            Power Ups Mode
-          </h3>
+        <section className="panel stack-sm setup-step">
+          <header className="setup-step__header">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.holePlay} alt="" aria-hidden="true" />
+              Power Ups Mode
+            </h3>
+          </header>
           <p className="muted">
             Lightweight standalone mode: no card packs, no public-card resolution, and no featured
             holes.
@@ -431,15 +460,15 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
       {isCustomPreset && (
         <>
-          <section className="panel stack-xs setup-step">
-            <div className="row-between">
+          <section className="panel stack-sm setup-step setup-step--advanced">
+            <div className="row-between setup-row-wrap">
               <h3 className="step-title">
                 <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                4. Advanced
+                4. Advanced Options
               </h3>
               <button
                 type="button"
-                className={advancedVisible ? 'button-primary' : ''}
+                className={advancedVisible ? 'button-primary setup-advanced-toggle' : 'setup-advanced-toggle'}
                 onClick={() => setAdvancedVisible((current) => !current)}
                 aria-expanded={advancedVisible}
                 aria-controls="advanced-setup-options"
@@ -447,20 +476,27 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                 {advancedVisible ? 'Hide Advanced' : 'Show Advanced'}
               </button>
             </div>
-            <p className="muted">
+            <p className="muted setup-step__support">
               Custom pack selection and fine-grained toggles are hidden by default to keep setup
               fast.
             </p>
           </section>
 
           {advancedVisible && (
-            <div id="advanced-setup-options" className="stack-xs" role="region" aria-label="Advanced setup options">
-              <section className="panel stack-xs setup-step">
-                <h3 className="step-title">
-                  <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                  Custom Mode
-                </h3>
-                <p className="muted">Customize this round only.</p>
+            <div
+              id="advanced-setup-options"
+              className="stack-xs setup-advanced-stack"
+              role="region"
+              aria-label="Advanced setup options"
+            >
+              <section className="panel stack-sm setup-step">
+                <header className="setup-step__header">
+                  <h3 className="step-title">
+                    <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+                    Custom Mode
+                  </h3>
+                  <p className="muted setup-step__support">Customize this round only.</p>
+                </header>
 
                 <label className="field">
                   <span className="label">Custom Mode Name</span>
@@ -473,12 +509,16 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                 </label>
               </section>
 
-              <section className="panel stack-xs setup-step">
-                <h3 className="step-title">
-                  <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                  Card Packs
-                </h3>
-                <p className="muted">Enable the game modes you want in this round.</p>
+              <section className="panel stack-sm setup-step">
+                <header className="setup-step__header">
+                  <h3 className="step-title">
+                    <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+                    Card Packs
+                  </h3>
+                  <p className="muted setup-step__support">
+                    Enable the game modes you want in this round.
+                  </p>
+                </header>
 
                 <div className="stack-xs">
                   {CARD_PACKS.map((pack) => (
@@ -494,11 +534,13 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                 </div>
               </section>
 
-              <section className="panel stack-xs setup-step">
-                <h3 className="step-title">
-                  <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
-                  Game Options
-                </h3>
+              <section className="panel stack-sm setup-step">
+                <header className="setup-step__header">
+                  <h3 className="step-title">
+                    <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+                    Game Options
+                  </h3>
+                </header>
 
                 <ToggleRow
                   label="Dynamic Difficulty"
@@ -520,19 +562,23 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                   </p>
                 )}
 
-                <section className="stack-xs">
-                  <span className="label">Personal Card Mode</span>
-                  <div className="button-row">
+                <section className="setup-control-group">
+                  <span className="label setup-control-label">Personal Card Mode</span>
+                  <div className="segmented-control" role="group" aria-label="Personal card mode">
                     <button
                       type="button"
-                      className={config.toggles.drawTwoPickOne ? 'button-primary' : ''}
+                      className={`segmented-control__button ${
+                        config.toggles.drawTwoPickOne ? 'segmented-control__button--active' : ''
+                      }`}
                       onClick={() => setDealMode('drawTwoPickOne')}
                     >
                       Draw 2 Pick 1
                     </button>
                     <button
                       type="button"
-                      className={config.toggles.autoAssignOne ? 'button-primary' : ''}
+                      className={`segmented-control__button ${
+                        config.toggles.autoAssignOne ? 'segmented-control__button--active' : ''
+                      }`}
                       onClick={() => setDealMode('autoAssignOne')}
                     >
                       Auto-Assign 1
@@ -541,11 +587,13 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                 </section>
               </section>
 
-              <section className="panel stack-xs setup-step">
-                <h3 className="step-title">
-                  <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
-                  Featured Holes
-                </h3>
+              <section className="panel stack-sm setup-step">
+                <header className="setup-step__header">
+                  <h3 className="step-title">
+                    <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
+                    Featured Holes
+                  </h3>
+                </header>
 
                 <ToggleRow
                   label="Enable Featured Holes"
@@ -554,14 +602,18 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
                   onChange={setFeaturedHolesEnabled}
                 />
 
-                <section className="stack-xs">
-                  <span className="label">Frequency</span>
-                  <div className="button-row">
+                <section className="setup-control-group">
+                  <span className="label setup-control-label">Frequency</span>
+                  <div className="segmented-control segmented-control--three" role="group" aria-label="Featured hole frequency">
                     {(['low', 'normal', 'high'] as const).map((frequency) => (
                       <button
                         key={frequency}
                         type="button"
-                        className={config.featuredHoles.frequency === frequency ? 'button-primary' : ''}
+                        className={`segmented-control__button ${
+                          config.featuredHoles.frequency === frequency
+                            ? 'segmented-control__button--active'
+                            : ''
+                        }`}
                         onClick={() => setFeaturedHolesFrequency(frequency)}
                       >
                         {frequency === 'low' ? 'Low' : frequency === 'normal' ? 'Normal' : 'High'}
@@ -610,8 +662,8 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       )}
 
       <section className="panel stack-xs setup-cta">
-        <button type="button" className="button-primary" onClick={beginRound}>
-          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+        <p className="muted setup-cta__support">Ready when you are.</p>
+        <button type="button" className="button-primary setup-cta__button" onClick={beginRound}>
           Start Round
         </button>
       </section>
