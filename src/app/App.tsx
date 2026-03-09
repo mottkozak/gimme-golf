@@ -117,7 +117,7 @@ function App() {
       <header className="app-shell__header">
         <img
           className="app-logo"
-          src="/gimme-golf-logo.png"
+          src="/Gimme-GOLF-logo-GG.png"
           alt="GIMME GOLF"
         />
         {activeScreen !== 'home' && (
