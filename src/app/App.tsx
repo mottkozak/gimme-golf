@@ -111,13 +111,14 @@ function App() {
   })()
 
   const currentHole = roundState.holes[roundState.currentHoleIndex]
+  const logoSrc = `${import.meta.env.BASE_URL}Gimme-GOLF-logo-GG.png`
 
   return (
     <div className="app-shell">
       <header className="app-shell__header">
         <img
           className="app-logo"
-          src="/Gimme-GOLF-logo-GG.png"
+          src={logoSrc}
           alt="GIMME GOLF"
         />
         {activeScreen !== 'home' && (

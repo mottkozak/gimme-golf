@@ -14,18 +14,34 @@ function GameModePresetRow({
   onOpenInfo,
 }: GameModePresetRowProps) {
   return (
-    <article className={`preset-row ${selected ? 'preset-row--selected' : ''}`}>
+    <article
+      className={`preset-row ${selected ? 'preset-row--selected' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onSelect()
+        }
+      }}
+    >
       <div className="preset-row__details">
         <div className="row-between">
           <div className="preset-row__title">
             <strong>{preset.name}</strong>
             {preset.badgeLabel && <span className="chip">{preset.badgeLabel}</span>}
+            {selected && <span className="chip">Active</span>}
           </div>
           <button
             type="button"
             className="preset-row__info-button"
             aria-label={`About ${preset.name}`}
-            onClick={onOpenInfo}
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpenInfo()
+            }}
           >
             i
           </button>
@@ -34,13 +50,6 @@ function GameModePresetRow({
         <p className="muted">Includes: {preset.includesLabel}</p>
         <p className="muted">Best for: {preset.bestForLabel}</p>
       </div>
-      <button
-        type="button"
-        className={selected ? 'button-primary' : ''}
-        onClick={onSelect}
-      >
-        {selected ? 'Selected' : 'Choose'}
-      </button>
     </article>
   )
 }

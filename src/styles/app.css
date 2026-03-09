@@ -414,6 +414,24 @@ main {
   box-shadow: var(--shadow-soft);
 }
 
+.preset-row {
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+
+.preset-row:hover {
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--border-subtle));
+}
+
+.preset-row:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus);
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border-subtle));
+}
+
 .preset-row__details,
 .pack-row__details {
   display: flex;
