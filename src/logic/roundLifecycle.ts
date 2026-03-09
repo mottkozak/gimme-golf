@@ -4,6 +4,7 @@ import {
   DEFAULT_GAME_MODE_PRESET_ID,
   GAME_MODE_PRESETS_BY_ID,
 } from '../data/gameModePresets.ts'
+import { createEmptyRoundDeckMemory } from './dealCards.ts'
 import { buildEmptyHolePowerUpStates } from './powerUps.ts'
 import { applyRoundSetupDraft, DEFAULT_EXPECTED_SCORE } from './roundSetup.ts'
 import { createPlayerTotals } from './scoring.ts'
@@ -51,6 +52,7 @@ function createBaseRoundState(config: RoundConfig, players: Player[]): RoundStat
     holeCards: [],
     holePowerUps: [],
     holeResults: [],
+    deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: Object.fromEntries(
       players.map((player) => [player.id, createPlayerTotals(0, 0)]),
     ),
@@ -76,6 +78,7 @@ export function createNewRoundState(): RoundState {
       initializedRoundState.players,
       initializedRoundState.holes,
     ),
+    deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: createZeroTotalsByPlayerId(initializedRoundState.players),
   }
 }
@@ -93,6 +96,7 @@ export function resetRoundProgress(roundState: RoundState): RoundState {
     holeCards: [],
     holePowerUps: [],
     holeResults: [],
+    deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: createZeroTotalsByPlayerId(roundState.players),
   }
 
@@ -102,6 +106,7 @@ export function resetRoundProgress(roundState: RoundState): RoundState {
     ...resetRoundState,
     currentHoleIndex: 0,
     holePowerUps: buildEmptyHolePowerUpStates(resetRoundState.players, resetRoundState.holes),
+    deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: createZeroTotalsByPlayerId(resetRoundState.players),
   }
 }

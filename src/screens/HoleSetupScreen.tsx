@@ -1,6 +1,11 @@
+import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import { PERSONAL_CARDS, PUBLIC_CARDS } from '../data/cards.ts'
-import { createDealtHoleCardsState, createEmptyHoleCardsState } from '../logic/dealCards.ts'
+import {
+  buildDeckMemoryFromHoleCards,
+  createDealtHoleCardsState,
+  createEmptyHoleCardsState,
+} from '../logic/dealCards.ts'
 import { assignPowerUpsForHole, createEmptyHolePowerUpState } from '../logic/powerUps.ts'
 import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
 import type { HoleTag } from '../types/cards.ts'
@@ -87,12 +92,16 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
           hole.holeNumber,
         )
       } else {
+        const priorHoleCards = currentState.holeCards.filter((_, holeIndex) => holeIndex !== currentHoleIndex)
+        const deckMemoryForDeal = buildDeckMemoryFromHoleCards(priorHoleCards)
+
         holeCards[currentHoleIndex] = createDealtHoleCardsState(
           currentState.players,
           hole,
           currentState.config,
           PERSONAL_CARDS,
           PUBLIC_CARDS,
+          deckMemoryForDeal,
         )
         holePowerUps[currentHoleIndex] = createEmptyHolePowerUpState(
           currentState.players,
@@ -121,6 +130,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         holeCards,
         holePowerUps,
         holeResults,
+        deckMemory: buildDeckMemoryFromHoleCards(holeCards),
       }
     })
 
@@ -130,7 +140,10 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
-        <h2>Hole Setup</h2>
+        <div className="screen-title">
+          <img className="screen-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+          <h2>Hole Setup</h2>
+        </div>
         <p className="muted">
           Hole {currentHole.holeNumber} of {roundState.holes.length} {isLastHole ? '(Final Hole)' : ''}
         </p>
@@ -169,6 +182,12 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
                   className={`tag-pill ${isActive ? 'active' : ''}`}
                   onClick={() => setHoleTag(option.tag)}
                 >
+                  <img
+                    className="tag-pill__icon"
+                    src={HOLE_TAG_ICON_BY_TAG[option.tag]}
+                    alt=""
+                    aria-hidden="true"
+                  />
                   {option.label}
                 </button>
               )
@@ -177,6 +196,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         </div>
 
         <button type="button" className="button-primary" onClick={dealCardsForCurrentHole}>
+          <img className="button-icon" src={ICONS.dealCards} alt="" aria-hidden="true" />
           {roundState.config.gameMode === 'powerUps'
             ? `Deal Power Ups For Hole ${currentHole.holeNumber}`
             : `Deal Cards For Hole ${currentHole.holeNumber}`}

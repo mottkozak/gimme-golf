@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import type { Player } from '../types/game.ts'
 
 interface PlayerSetupRowProps {
@@ -19,19 +18,13 @@ function PlayerSetupRow({
   onRemove,
 }: PlayerSetupRowProps) {
   const fallbackName = `Golfer ${position}`
-  const [expectedScoreDraft, setExpectedScoreDraft] = useState(String(player.expectedScore18))
-
-  useEffect(() => {
-    setExpectedScoreDraft(String(player.expectedScore18))
-  }, [player.expectedScore18])
-
-  const commitExpectedScore = () => {
-    if (expectedScoreDraft.trim() === '') {
-      setExpectedScoreDraft(String(player.expectedScore18))
-      return
+  const parseExpectedScore = (rawValue: string): number | null => {
+    const digitsOnly = rawValue.replace(/[^\d]/g, '')
+    if (!digitsOnly) {
+      return null
     }
 
-    onUpdateExpectedScore(Number(expectedScoreDraft))
+    return Number(digitsOnly)
   }
 
   return (
@@ -66,14 +59,22 @@ function PlayerSetupRow({
       <label className="field">
         <span className="label">Expected 18-hole score</span>
         <input
+          key={`${player.id}-${player.expectedScore18}`}
           type="text"
           inputMode="numeric"
-          value={expectedScoreDraft}
+          defaultValue={String(player.expectedScore18)}
           onChange={(event) => {
-            const digitsOnly = event.target.value.replace(/[^\d]/g, '')
-            setExpectedScoreDraft(digitsOnly)
+            event.target.value = event.target.value.replace(/[^\d]/g, '')
           }}
-          onBlur={commitExpectedScore}
+          onBlur={(event) => {
+            const parsedScore = parseExpectedScore(event.target.value)
+            if (parsedScore === null) {
+              event.target.value = String(player.expectedScore18)
+              return
+            }
+
+            onUpdateExpectedScore(parsedScore)
+          }}
           onFocus={(event) => event.currentTarget.select()}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {

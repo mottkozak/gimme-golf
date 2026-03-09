@@ -10,7 +10,10 @@ import type {
 } from '../types/game.ts'
 import { getAssignedPowerUp } from './powerUps.ts'
 import { getMomentumTierLabel, type MomentumTier } from './gameBalance.ts'
-import { calculatePlayerHolePointBreakdown } from './scoring.ts'
+import {
+  buildHolePointBreakdownsByPlayerId,
+  createEmptyHolePointBreakdown,
+} from './streaks.ts'
 import { normalizePublicCardResolutions, resolvePublicCardPointDeltas } from './publicCardResolution.ts'
 
 type CanonicalPublicMode =
@@ -605,17 +608,18 @@ export function buildHoleRecapData(roundState: RoundState): HoleRecapData {
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const momentumEnabled = roundState.config.toggles.momentumBonuses
   const featuredHoleType = currentHole.featuredHoleType ?? null
+  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
+    roundState.players,
+    roundState.holes,
+    roundState.holeCards,
+    roundState.holeResults,
+    momentumEnabled,
+  )
 
   const playerRows = roundState.players.map((player) => {
-    const pointBreakdown = calculatePlayerHolePointBreakdown(
-      player.id,
-      roundState.currentHoleIndex,
-      roundState.players,
-      roundState.holes,
-      roundState.holeCards,
-      roundState.holeResults,
-      momentumEnabled,
-    )
+    const pointBreakdown =
+      breakdownsByPlayerId[player.id]?.[roundState.currentHoleIndex] ??
+      createEmptyHolePointBreakdown()
     const totals = roundState.totalsByPlayerId[player.id]
     const momentumBeforeLabel = getMomentumTierLabel(pointBreakdown.momentumTierBefore)
     const momentumAfterLabel = getMomentumTierLabel(pointBreakdown.momentumTierAfter)

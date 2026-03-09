@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ICONS } from '../app/icons.ts'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type {
@@ -8,6 +9,8 @@ import type {
 } from '../types/game.ts'
 import {
   buildPublicResolutionNotes,
+  isPublicCardResolutionComplete,
+  normalizePublicResolutionMode,
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
@@ -22,35 +25,67 @@ type CanonicalPublicResolutionMode =
   | 'trailing_player_selects_target'
   | 'pick_affected_players'
 
-const PUBLIC_RESOLUTION_MODE_OPTIONS: Array<{
-  mode: CanonicalPublicResolutionMode
-  label: string
-}> = [
-  { mode: 'yes_no_triggered', label: 'Yes / No Trigger' },
-  { mode: 'vote_target_player', label: 'Vote Target' },
-  { mode: 'choose_one_of_two_effects', label: 'Choose Effect A/B' },
-  { mode: 'leader_selects_target', label: 'Leader Selects Target' },
-  { mode: 'trailing_player_selects_target', label: 'Trailing Selects Target' },
-  { mode: 'pick_affected_players', label: 'Pick Affected Players' },
-]
+const RESOLUTION_MODE_LABELS: Record<CanonicalPublicResolutionMode, string> = {
+  yes_no_triggered: 'Yes / No Trigger',
+  vote_target_player: 'Target Vote',
+  choose_one_of_two_effects: 'Choose Effect',
+  leader_selects_target: 'Leader Chooses Target',
+  trailing_player_selects_target: 'Trailing Chooses Target',
+  pick_affected_players: 'Pick Affected Players',
+}
 
-const STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
+const RESOLUTION_MODE_GUIDANCE: Record<CanonicalPublicResolutionMode, string> = {
+  yes_no_triggered: 'Mark whether this public card triggered on the hole.',
+  vote_target_player: 'Set a target player for the table vote result.',
+  choose_one_of_two_effects: 'Pick the effect outcome, then confirm any required targets.',
+  leader_selects_target: 'Select the player chosen by the current leaderboard leader.',
+  trailing_player_selects_target: 'Select the player chosen by the current trailing golfer.',
+  pick_affected_players: 'Select each golfer affected by this card.',
+}
+
+const QUICK_STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
+const NINE_PLUS_STROKE_VALUE = 9
 
 function normalizeMode(mode: PublicResolutionMode): CanonicalPublicResolutionMode {
-  switch (mode) {
-    case 'yesNoTriggered':
-      return 'yes_no_triggered'
-    case 'winningPlayer':
-      return 'leader_selects_target'
-    case 'affectedPlayers':
-      return 'pick_affected_players'
-    default:
-      return mode
-  }
+  return normalizePublicResolutionMode(mode) as CanonicalPublicResolutionMode
 }
 
 function isResolvedMissionStatus(status: MissionStatus): boolean {
   return status === 'success' || status === 'failed'
+}
+
+function parseStrokeInput(rawValue: string): number | null {
+  const digitsOnly = rawValue.replace(/[^\d]/g, '')
+  if (!digitsOnly) {
+    return null
+  }
+
+  const parsed = Number(digitsOnly)
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null
+  }
+
+  return Math.round(parsed)
+}
+
+function sortPlayersByGamePoints(
+  players: ScreenProps['roundState']['players'],
+  totalsByPlayerId: ScreenProps['roundState']['totalsByPlayerId'],
+): ScreenProps['roundState']['players'] {
+  return [...players].sort((playerA, playerB) => {
+    const pointsA = totalsByPlayerId[playerA.id]?.gamePoints ?? 0
+    const pointsB = totalsByPlayerId[playerB.id]?.gamePoints ?? 0
+    if (pointsA !== pointsB) {
+      return pointsB - pointsA
+    }
+
+    const nameCompare = playerA.name.localeCompare(playerB.name)
+    if (nameCompare !== 0) {
+      return nameCompare
+    }
+
+    return playerA.id.localeCompare(playerB.id)
+  })
 }
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
@@ -87,62 +122,6 @@ function getSelectedEffectOption(
   )
 }
 
-function hasValidVoteSelection(
-  resolution: PublicCardResolutionState,
-  playerIds: string[],
-): boolean {
-  return playerIds.every((playerId) => {
-    const votedPlayerId = resolution.targetPlayerIdByVoterId[playerId]
-    return typeof votedPlayerId === 'string' && votedPlayerId.length > 0
-  })
-}
-
-function isResolutionComplete(
-  card: PublicCard,
-  resolution: PublicCardResolutionState,
-  playerIds: string[],
-): boolean {
-  if (!resolution.triggered) {
-    return true
-  }
-
-  const normalizedMode = normalizeMode(resolution.mode)
-
-  if (normalizedMode === 'yes_no_triggered') {
-    return true
-  }
-
-  if (normalizedMode === 'vote_target_player') {
-    return hasValidVoteSelection(resolution, playerIds)
-  }
-
-  if (
-    normalizedMode === 'leader_selects_target' ||
-    normalizedMode === 'trailing_player_selects_target'
-  ) {
-    return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
-  }
-
-  if (normalizedMode === 'pick_affected_players') {
-    return resolution.affectedPlayerIds.length > 0
-  }
-
-  const selectedEffectOption = getSelectedEffectOption(card, resolution)
-  if (!selectedEffectOption) {
-    return false
-  }
-
-  if (selectedEffectOption.targetScope === 'all') {
-    return true
-  }
-
-  if (selectedEffectOption.targetScope === 'target') {
-    return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
-  }
-
-  return resolution.affectedPlayerIds.length > 0
-}
-
 function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activeCardPreview, setActiveCardPreview] = useState<{
     playerName: string
@@ -155,6 +134,125 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const currentHolePowerUps = roundState.holePowerUps[roundState.currentHoleIndex]
   const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
   const playerIds = roundState.players.map((player) => player.id)
+  const rankedPlayersByGamePoints = sortPlayersByGamePoints(
+    roundState.players,
+    roundState.totalsByPlayerId,
+  )
+  const leadingPlayerId = rankedPlayersByGamePoints[0]?.id ?? null
+  const trailingPlayerId = rankedPlayersByGamePoints[rankedPlayersByGamePoints.length - 1]?.id ?? null
+
+  const getSuggestedTargetPlayerId = (pointsDelta: number): string | null => {
+    const fallbackPlayerId = roundState.players[0]?.id ?? null
+    if (pointsDelta < 0) {
+      return leadingPlayerId ?? fallbackPlayerId
+    }
+
+    return trailingPlayerId ?? fallbackPlayerId
+  }
+
+  const applyResolutionDefaults = (
+    card: PublicCard,
+    resolution: PublicCardResolutionState,
+  ): PublicCardResolutionState => {
+    const normalizedMode = normalizeMode(card.interaction?.mode ?? resolution.mode)
+    const baseResolution: PublicCardResolutionState = {
+      ...resolution,
+      mode: normalizedMode,
+    }
+
+    if (normalizedMode === 'yes_no_triggered') {
+      return baseResolution
+    }
+
+    if (normalizedMode === 'vote_target_player') {
+      const suggestedTarget = getSuggestedTargetPlayerId(card.points)
+      if (!suggestedTarget) {
+        return baseResolution
+      }
+
+      const nextVotesByVoterId: Record<string, string | null> = {
+        ...baseResolution.targetPlayerIdByVoterId,
+      }
+
+      for (const player of roundState.players) {
+        if (!nextVotesByVoterId[player.id]) {
+          nextVotesByVoterId[player.id] = suggestedTarget
+        }
+      }
+
+      return {
+        ...baseResolution,
+        targetPlayerIdByVoterId: nextVotesByVoterId,
+      }
+    }
+
+    if (
+      normalizedMode === 'leader_selects_target' ||
+      normalizedMode === 'trailing_player_selects_target'
+    ) {
+      return {
+        ...baseResolution,
+        winningPlayerId:
+          baseResolution.winningPlayerId ??
+          getSuggestedTargetPlayerId(card.points),
+      }
+    }
+
+    if (normalizedMode === 'pick_affected_players') {
+      if (baseResolution.affectedPlayerIds.length > 0) {
+        return baseResolution
+      }
+
+      const suggestedTarget = getSuggestedTargetPlayerId(card.points)
+      return {
+        ...baseResolution,
+        affectedPlayerIds: suggestedTarget ? [suggestedTarget] : [],
+      }
+    }
+
+    const effectOptions = getEffectOptions(card)
+    const selectedEffectOptionId =
+      baseResolution.selectedEffectOptionId ?? effectOptions[0]?.id ?? null
+    const selectedEffect = effectOptions.find((effect) => effect.id === selectedEffectOptionId) ?? null
+
+    if (!selectedEffect) {
+      return {
+        ...baseResolution,
+        selectedEffectOptionId,
+      }
+    }
+
+    if (selectedEffect.targetScope === 'all') {
+      return {
+        ...baseResolution,
+        selectedEffectOptionId,
+      }
+    }
+
+    if (selectedEffect.targetScope === 'target') {
+      return {
+        ...baseResolution,
+        selectedEffectOptionId,
+        winningPlayerId:
+          baseResolution.winningPlayerId ??
+          getSuggestedTargetPlayerId(selectedEffect.pointsDelta),
+      }
+    }
+
+    if (baseResolution.affectedPlayerIds.length > 0) {
+      return {
+        ...baseResolution,
+        selectedEffectOptionId,
+      }
+    }
+
+    const suggestedTarget = getSuggestedTargetPlayerId(selectedEffect.pointsDelta)
+    return {
+      ...baseResolution,
+      selectedEffectOptionId,
+      affectedPlayerIds: suggestedTarget ? [suggestedTarget] : [],
+    }
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -215,48 +313,29 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     })
   }
 
-  const setCardTriggered = (cardId: string, triggered: boolean) => {
+  const setCardTriggered = (card: PublicCard, triggered: boolean) => {
     updatePublicResolutions((resolutionsByCardId) => {
-      const existing = resolutionsByCardId[cardId]
+      const existing = resolutionsByCardId[card.id]
       if (!existing) {
         return resolutionsByCardId
       }
 
-      return {
-        ...resolutionsByCardId,
-        [cardId]: {
-          ...existing,
-          triggered,
-          winningPlayerId: triggered ? existing.winningPlayerId : null,
-          affectedPlayerIds: triggered ? existing.affectedPlayerIds : [],
-          targetPlayerIdByVoterId: triggered ? existing.targetPlayerIdByVoterId : {},
-        },
-      }
-    })
-  }
-
-  const setCardMode = (cardId: string, mode: CanonicalPublicResolutionMode) => {
-    updatePublicResolutions((resolutionsByCardId) => {
-      const existing = resolutionsByCardId[cardId]
-      if (!existing) {
-        return resolutionsByCardId
-      }
+      const nextResolution: PublicCardResolutionState = triggered
+        ? applyResolutionDefaults(card, {
+            ...existing,
+            triggered: true,
+          })
+        : {
+            ...existing,
+            triggered: false,
+            winningPlayerId: null,
+            affectedPlayerIds: [],
+            targetPlayerIdByVoterId: {},
+          }
 
       return {
         ...resolutionsByCardId,
-        [cardId]: {
-          ...existing,
-          mode,
-          winningPlayerId:
-            mode === 'leader_selects_target' || mode === 'trailing_player_selects_target'
-              ? existing.winningPlayerId
-              : null,
-          affectedPlayerIds: mode === 'pick_affected_players' ? existing.affectedPlayerIds : [],
-          targetPlayerIdByVoterId:
-            mode === 'vote_target_player' ? existing.targetPlayerIdByVoterId : {},
-          selectedEffectOptionId:
-            mode === 'choose_one_of_two_effects' ? existing.selectedEffectOptionId : null,
-        },
+        [card.id]: nextResolution,
       }
     })
   }
@@ -273,6 +352,25 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         [cardId]: {
           ...existing,
           winningPlayerId,
+        },
+      }
+    })
+  }
+
+  const setUnifiedVoteTarget = (cardId: string, targetPlayerId: string) => {
+    updatePublicResolutions((resolutionsByCardId) => {
+      const existing = resolutionsByCardId[cardId]
+      if (!existing) {
+        return resolutionsByCardId
+      }
+
+      return {
+        ...resolutionsByCardId,
+        [cardId]: {
+          ...existing,
+          targetPlayerIdByVoterId: Object.fromEntries(
+            roundState.players.map((player) => [player.id, targetPlayerId]),
+          ),
         },
       }
     })
@@ -300,39 +398,21 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     })
   }
 
-  const setVotedTargetPlayer = (cardId: string, voterId: string, votedPlayerId: string | null) => {
+  const setSelectedEffectOption = (card: PublicCard, effectOptionId: string) => {
     updatePublicResolutions((resolutionsByCardId) => {
-      const existing = resolutionsByCardId[cardId]
+      const existing = resolutionsByCardId[card.id]
       if (!existing) {
         return resolutionsByCardId
       }
 
-      return {
-        ...resolutionsByCardId,
-        [cardId]: {
-          ...existing,
-          targetPlayerIdByVoterId: {
-            ...existing.targetPlayerIdByVoterId,
-            [voterId]: votedPlayerId,
-          },
-        },
-      }
-    })
-  }
-
-  const setSelectedEffectOption = (cardId: string, effectOptionId: string) => {
-    updatePublicResolutions((resolutionsByCardId) => {
-      const existing = resolutionsByCardId[cardId]
-      if (!existing) {
-        return resolutionsByCardId
-      }
+      const nextResolution = applyResolutionDefaults(card, {
+        ...existing,
+        selectedEffectOptionId: effectOptionId,
+      })
 
       return {
         ...resolutionsByCardId,
-        [cardId]: {
-          ...existing,
-          selectedEffectOptionId: effectOptionId,
-        },
+        [card.id]: nextResolution,
       }
     })
   }
@@ -395,16 +475,19 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   })
 
   const arePublicCardsResolved = currentHoleCards.publicCards.every((card) =>
-    isResolutionComplete(card, currentResolutions[card.id], playerIds),
+    isPublicCardResolutionComplete(card, currentResolutions[card.id], playerIds),
   )
 
   const canContinueToRecap =
     isHoleDataReady && (isPowerUpsMode ? true : arePublicCardsResolved)
 
   return (
-    <section className="screen stack-sm">
+    <section className="screen stack-sm hole-results-screen">
       <header className="screen__header">
-        <h2>Hole Results</h2>
+        <div className="screen-title">
+          <img className="screen-title__icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
+          <h2>Hole Results</h2>
+        </div>
         <p className="muted">
           {isPowerUpsMode
             ? 'Enter strokes and confirm each player power-up status.'
@@ -414,7 +497,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
-      <section className="panel stack-xs">
+      <section className="panel stack-xs hole-results-entry-panel">
         <div className="row-between">
           <strong>Hole {currentHole.holeNumber}</strong>
           <span className="chip">Par {currentHole.par}</span>
@@ -430,6 +513,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
           const hasPersonalCard = Boolean(selectedCard)
+          const isNinePlusSelected = typeof strokes === 'number' && strokes >= NINE_PLUS_STROKE_VALUE
 
           return (
             <article key={player.id} className="panel inset stack-xs hole-results-player-card">
@@ -503,7 +587,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </button>
                 </div>
                 <div className="button-row hole-results-strokes-row">
-                  {STROKE_OPTIONS.map((strokeOption) => {
+                  {QUICK_STROKE_OPTIONS.map((strokeOption) => {
                     const isSelected = strokes === strokeOption
 
                     return (
@@ -520,7 +604,44 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       </button>
                     )
                   })}
+                  <button
+                    type="button"
+                    className={`hole-results-stroke-button ${isNinePlusSelected ? 'button-primary' : ''}`}
+                    onClick={() =>
+                      setStrokes(player.id, isNinePlusSelected ? null : NINE_PLUS_STROKE_VALUE)
+                    }
+                    aria-pressed={isNinePlusSelected}
+                  >
+                    9+
+                  </button>
                 </div>
+                <label className="field field--inline">
+                  <span className="label">Manual</span>
+                  <input
+                    key={`${currentHole.holeNumber}-${player.id}-${strokes ?? 'none'}`}
+                    type="text"
+                    inputMode="numeric"
+                    defaultValue={typeof strokes === 'number' ? String(strokes) : ''}
+                    placeholder="Enter strokes"
+                    onChange={(event) => {
+                      event.target.value = event.target.value.replace(/[^\d]/g, '')
+                    }}
+                    onBlur={(event) => {
+                      const parsedStrokes = parseStrokeInput(event.target.value)
+                      if (parsedStrokes === null) {
+                        event.target.value = typeof strokes === 'number' ? String(strokes) : ''
+                        return
+                      }
+
+                      setStrokes(player.id, parsedStrokes)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.currentTarget.blur()
+                      }
+                    }}
+                  />
+                </label>
               </section>
             </article>
           )
@@ -528,14 +649,18 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       </section>
 
       {!isPowerUpsMode && currentHoleCards.publicCards.length > 0 && (
-        <section className="panel stack-xs">
+        <section className="panel stack-xs public-resolution-panel">
           <h3>Public Card Resolution</h3>
-          <p className="muted">Choose a manual resolution style for each revealed public card.</p>
+          <p className="muted">Resolve each card with a guided flow based on that card rule.</p>
 
           {currentHoleCards.publicCards.map((card) => {
             const resolution = currentResolutions[card.id]
-            const normalizedMode = normalizeMode(resolution.mode)
-            const selectedEffectOption = getSelectedEffectOption(card, resolution)
+            const normalizedMode = normalizeMode(card.interaction?.mode ?? resolution.mode)
+            const guidedResolution: PublicCardResolutionState = {
+              ...resolution,
+              mode: normalizedMode,
+            }
+            const selectedEffectOption = getSelectedEffectOption(card, guidedResolution)
             const requiresTargetSelection =
               normalizedMode === 'leader_selects_target' ||
               normalizedMode === 'trailing_player_selects_target' ||
@@ -545,6 +670,15 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               normalizedMode === 'pick_affected_players' ||
               (normalizedMode === 'choose_one_of_two_effects' &&
                 selectedEffectOption?.targetScope === 'affected')
+            const voteTargets = roundState.players.map(
+              (player) => guidedResolution.targetPlayerIdByVoterId[player.id] ?? null,
+            )
+            const unanimousVoteTargetPlayerId =
+              voteTargets.length > 0 &&
+              voteTargets[0] &&
+              voteTargets.every((targetPlayerId) => targetPlayerId === voteTargets[0])
+                ? voteTargets[0]
+                : null
 
             return (
               <article key={card.id} className="panel inset stack-xs">
@@ -557,69 +691,50 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 </div>
                 <p className="muted">{card.description}</p>
                 <p className="muted">{card.rulesText}</p>
+                <p className="muted">
+                  <strong>Resolution:</strong> {RESOLUTION_MODE_LABELS[normalizedMode]}.
+                </p>
+                <p className="muted">{RESOLUTION_MODE_GUIDANCE[normalizedMode]}</p>
 
                 <div className="button-row">
                   <button
                     type="button"
-                    className={resolution.triggered ? 'button-primary' : ''}
-                    onClick={() => setCardTriggered(card.id, true)}
+                    className={guidedResolution.triggered ? 'button-primary' : ''}
+                    onClick={() => setCardTriggered(card, true)}
                   >
                     Triggered
                   </button>
                   <button
                     type="button"
-                    className={!resolution.triggered ? 'button-primary' : ''}
-                    onClick={() => setCardTriggered(card.id, false)}
+                    className={!guidedResolution.triggered ? 'button-primary' : ''}
+                    onClick={() => setCardTriggered(card, false)}
                   >
                     Not Triggered
                   </button>
                 </div>
 
-                <label className="field">
-                  <span className="label">Resolution Mode</span>
-                  <select
-                    value={normalizedMode}
-                    onChange={(event) =>
-                      setCardMode(card.id, event.target.value as CanonicalPublicResolutionMode)
-                    }
-                  >
-                    {PUBLIC_RESOLUTION_MODE_OPTIONS.map((modeOption) => (
-                      <option key={modeOption.mode} value={modeOption.mode}>
-                        {modeOption.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                {resolution.triggered && normalizedMode === 'vote_target_player' && (
+                {guidedResolution.triggered && normalizedMode === 'vote_target_player' && (
                   <div className="stack-xs">
-                    <span className="label">Votes</span>
-                    {roundState.players.map((voter) => (
-                      <label key={voter.id} className="field field--inline">
-                        <span className="label">{voter.name}</span>
-                        <select
-                          value={resolution.targetPlayerIdByVoterId[voter.id] ?? ''}
-                          onChange={(event) =>
-                            setVotedTargetPlayer(
-                              card.id,
-                              voter.id,
-                              event.target.value || null,
-                            )
-                          }
+                    <span className="label">Vote Target</span>
+                    <div className="button-row row-wrap">
+                      {roundState.players.map((player) => (
+                        <button
+                          key={player.id}
+                          type="button"
+                          className={unanimousVoteTargetPlayerId === player.id ? 'button-primary' : ''}
+                          onClick={() => setUnifiedVoteTarget(card.id, player.id)}
                         >
-                          <option value="">Select target</option>
-                          {roundState.players.map((candidate) => (
-                            <option key={candidate.id} value={candidate.id}>
-                              {candidate.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ))}
+                          {player.name}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="muted">
+                      Quick-set applies the same vote target for all golfers (fast majority capture).
+                    </p>
                   </div>
                 )}
 
-                {resolution.triggered && normalizedMode === 'choose_one_of_two_effects' && (
+                {guidedResolution.triggered && normalizedMode === 'choose_one_of_two_effects' && (
                   <div className="stack-xs">
                     <span className="label">Effect Choice</span>
                     <div className="button-row">
@@ -628,11 +743,11 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                           key={effectOption.id}
                           type="button"
                           className={
-                            resolution.selectedEffectOptionId === effectOption.id
+                            guidedResolution.selectedEffectOptionId === effectOption.id
                               ? 'button-primary'
                               : ''
                           }
-                          onClick={() => setSelectedEffectOption(card.id, effectOption.id)}
+                          onClick={() => setSelectedEffectOption(card, effectOption.id)}
                         >
                           {effectOption.label}
                         </button>
@@ -641,7 +756,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {resolution.triggered && requiresTargetSelection && (
+                {guidedResolution.triggered && requiresTargetSelection && (
                   <div className="stack-xs">
                     <span className="label">Select Target Player</span>
                     <div className="button-row row-wrap">
@@ -650,7 +765,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                           key={player.id}
                           type="button"
                           className={
-                            resolution.winningPlayerId === player.id ? 'button-primary' : ''
+                            guidedResolution.winningPlayerId === player.id ? 'button-primary' : ''
                           }
                           onClick={() => setCardWinner(card.id, player.id)}
                         >
@@ -661,12 +776,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {resolution.triggered && requiresAffectedSelection && (
+                {guidedResolution.triggered && requiresAffectedSelection && (
                   <div className="stack-xs">
                     <span className="label">Pick Affected Players</span>
                     <div className="button-row row-wrap">
                       {roundState.players.map((player) => {
-                        const isAffected = resolution.affectedPlayerIds.includes(player.id)
+                        const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
 
                         return (
                           <button
@@ -683,7 +798,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </div>
                 )}
 
-                {!isResolutionComplete(card, resolution, playerIds) && (
+                {!isPublicCardResolutionComplete(card, guidedResolution, playerIds) && (
                   <p className="muted">Complete selection for this public card before continuing.</p>
                 )}
               </article>
@@ -709,13 +824,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         </section>
       )}
 
-      <section className="panel stack-xs">
+      <section className="panel stack-xs hole-results-next">
         <button
           type="button"
           className="button-primary"
           disabled={!canContinueToRecap}
           onClick={() => onNavigate('leaderboard')}
         >
+          <img className="button-icon" src={ICONS.holeRecap} alt="" aria-hidden="true" />
           Save Results And View Hole Recap
         </button>
         {!canContinueToRecap && (

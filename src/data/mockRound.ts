@@ -1,4 +1,5 @@
 import {
+  buildDeckMemoryFromHoleCards,
   dealPersonalCardsForHole,
   dealPublicCardsForHole,
   getInitialSelectedPersonalCardId,
@@ -74,13 +75,26 @@ function createMockHoleCards(
   players: Player[],
   config: RoundConfig,
 ): HoleCardsState[] {
+  const usedPersonalCardIds = new Set<string>()
+  const usedPublicCardIds = new Set<string>()
+
   return holes.map((hole) => {
     const personalDealResult = dealPersonalCardsForHole(
       players,
       hole,
       config,
       PERSONAL_CARDS,
+      {
+        usedPersonalCardIds: Array.from(usedPersonalCardIds),
+        usedPublicCardIds: Array.from(usedPublicCardIds),
+      },
     )
+
+    for (const dealtCards of Object.values(personalDealResult.dealtPersonalCardsByPlayerId)) {
+      for (const dealtCard of dealtCards) {
+        usedPersonalCardIds.add(dealtCard.id)
+      }
+    }
 
     const selectedCardIdByPlayerId = Object.fromEntries(
       players.map((player) => {
@@ -89,12 +103,21 @@ function createMockHoleCards(
       }),
     )
 
+    const publicCards = dealPublicCardsForHole(hole, config, PUBLIC_CARDS, {
+      usedPersonalCardIds: Array.from(usedPersonalCardIds),
+      usedPublicCardIds: Array.from(usedPublicCardIds),
+    })
+
+    for (const publicCard of publicCards) {
+      usedPublicCardIds.add(publicCard.id)
+    }
+
     return {
       holeNumber: hole.holeNumber,
       dealtPersonalCardsByPlayerId: personalDealResult.dealtPersonalCardsByPlayerId,
       selectedCardIdByPlayerId,
       personalCardOfferByPlayerId: personalDealResult.personalCardOfferByPlayerId,
-      publicCards: dealPublicCardsForHole(hole, config, PUBLIC_CARDS),
+      publicCards,
     }
   })
 }
@@ -152,15 +175,17 @@ function createMockTotals(): Record<string, PlayerTotals> {
 
 export function createMockRoundState(): RoundState {
   const holes = addMockTags()
+  const holeCards = createMockHoleCards(holes, MOCK_PLAYERS, MOCK_CONFIG)
 
   return {
     config: MOCK_CONFIG,
     players: MOCK_PLAYERS,
     holes,
     currentHoleIndex: 2,
-    holeCards: createMockHoleCards(holes, MOCK_PLAYERS, MOCK_CONFIG),
+    holeCards,
     holePowerUps: buildEmptyHolePowerUpStates(MOCK_PLAYERS, holes),
     holeResults: createMockHoleResults(holes, MOCK_PLAYERS),
+    deckMemory: buildDeckMemoryFromHoleCards(holeCards),
     totalsByPlayerId: createMockTotals(),
   }
 }

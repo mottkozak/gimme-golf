@@ -1,3 +1,4 @@
+import { ICONS } from '../app/icons.ts'
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
@@ -55,7 +56,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     })
   }
 
-  const usePowerUp = (playerId: string) => {
+  const markPowerUpUsed = (playerId: string) => {
     onUpdateRoundState((currentState) => {
       const holePowerUps = [...currentState.holePowerUps]
       const currentHolePowerUpState = holePowerUps[currentState.currentHoleIndex]
@@ -78,7 +79,15 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
-        <h2>{isPowerUpsMode ? 'Hole Power Ups' : 'Hole Cards'}</h2>
+        <div className="screen-title">
+          <img
+            className="screen-title__icon"
+            src={isPowerUpsMode ? ICONS.holePlay : ICONS.dealCards}
+            alt=""
+            aria-hidden="true"
+          />
+          <h2>{isPowerUpsMode ? 'Hole Power Ups' : 'Hole Cards'}</h2>
+        </div>
         <p className="muted">
           Hole {currentHole.holeNumber} | Par {currentHole.par}
         </p>
@@ -126,7 +135,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                   playerName={player.name}
                   powerUp={powerUp}
                   used={used}
-                  onUse={() => usePowerUp(player.id)}
+                  onUse={() => markPowerUpUsed(player.id)}
                 />
               )
             })}
@@ -141,6 +150,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               className="button-primary"
               onClick={() => onNavigate('holeResults')}
             >
+              <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
               Continue To Hole Results
             </button>
           </section>
@@ -234,6 +244,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               disabled={!allPlayersHaveSelection}
               onClick={() => onNavigate('holeResults')}
             >
+              <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
               Continue To Hole Results
             </button>
             {!allPlayersHaveSelection && (

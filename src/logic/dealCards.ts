@@ -4,6 +4,7 @@ import type {
   HoleDefinition,
   PersonalCardOfferState,
   Player,
+  RoundDeckMemory,
   RoundConfig,
 } from '../types/game.ts'
 import {
@@ -25,6 +26,54 @@ const DIFFICULTY_RANK: Record<PersonalCard['difficulty'], number> = {
   easy: 1,
   medium: 2,
   hard: 3,
+}
+
+const WEIGHTED_SELECTION_POOL_SIZE = 6
+
+function toUniqueIds(ids: string[]): string[] {
+  return Array.from(new Set(ids))
+}
+
+export function createEmptyRoundDeckMemory(): RoundDeckMemory {
+  return {
+    usedPersonalCardIds: [],
+    usedPublicCardIds: [],
+  }
+}
+
+export function normalizeRoundDeckMemory(
+  deckMemory: RoundDeckMemory | undefined,
+): RoundDeckMemory {
+  if (!deckMemory) {
+    return createEmptyRoundDeckMemory()
+  }
+
+  return {
+    usedPersonalCardIds: toUniqueIds(deckMemory.usedPersonalCardIds ?? []),
+    usedPublicCardIds: toUniqueIds(deckMemory.usedPublicCardIds ?? []),
+  }
+}
+
+export function buildDeckMemoryFromHoleCards(holeCards: HoleCardsState[]): RoundDeckMemory {
+  const usedPersonalCardIds: string[] = []
+  const usedPublicCardIds: string[] = []
+
+  for (const holeCardState of holeCards) {
+    for (const cards of Object.values(holeCardState.dealtPersonalCardsByPlayerId ?? {})) {
+      for (const card of cards) {
+        usedPersonalCardIds.push(card.id)
+      }
+    }
+
+    for (const card of holeCardState.publicCards ?? []) {
+      usedPublicCardIds.push(card.id)
+    }
+  }
+
+  return {
+    usedPersonalCardIds: toUniqueIds(usedPersonalCardIds),
+    usedPublicCardIds: toUniqueIds(usedPublicCardIds),
+  }
 }
 
 function hashString(value: string): number {
@@ -133,30 +182,81 @@ function scoreCardForOffer(
   return difficultyScore + pointScore + Math.round(challengeIndex / 2)
 }
 
+interface RankedPersonalCard {
+  card: PersonalCard
+  score: number
+  tieBreaker: number
+}
+
 function rankCardsForOffer(
   cards: PersonalCard[],
   player: Player,
   hole: HoleDefinition,
   offerKind: PersonalOfferKind,
   dynamicDifficultyEnabled: boolean,
-): PersonalCard[] {
-  return [...cards].sort((cardA, cardB) => {
-    const scoreA = scoreCardForOffer(cardA, player, hole, offerKind, dynamicDifficultyEnabled)
-    const scoreB = scoreCardForOffer(cardB, player, hole, offerKind, dynamicDifficultyEnabled)
+): RankedPersonalCard[] {
+  return cards
+    .map((card) => ({
+      card,
+      score: scoreCardForOffer(card, player, hole, offerKind, dynamicDifficultyEnabled),
+      tieBreaker: createTieBreakerSeed(player.id, hole.holeNumber, card.id),
+    }))
+    .sort((cardA, cardB) => {
+      if (cardA.score !== cardB.score) {
+        return cardB.score - cardA.score
+      }
 
-    if (scoreA !== scoreB) {
-      return scoreB - scoreA
-    }
+      if (cardA.tieBreaker !== cardB.tieBreaker) {
+        return cardA.tieBreaker - cardB.tieBreaker
+      }
 
-    const tieBreakerA = createTieBreakerSeed(player.id, hole.holeNumber, cardA.id)
-    const tieBreakerB = createTieBreakerSeed(player.id, hole.holeNumber, cardB.id)
+      return cardA.card.code.localeCompare(cardB.card.code)
+    })
+}
 
-    if (tieBreakerA !== tieBreakerB) {
-      return tieBreakerA - tieBreakerB
-    }
+function pickWeightedPersonalCardFromRanked(
+  rankedCards: RankedPersonalCard[],
+): PersonalCard | null {
+  if (rankedCards.length === 0) {
+    return null
+  }
 
-    return cardA.code.localeCompare(cardB.code)
+  const candidatePool = rankedCards.slice(0, Math.min(WEIGHTED_SELECTION_POOL_SIZE, rankedCards.length))
+  const floorScore = candidatePool[candidatePool.length - 1]?.score ?? 0
+  const weights = candidatePool.map((candidate, index) => {
+    const scoreWeight = Math.max(1, candidate.score - floorScore + 1)
+    const rankWeight = Math.max(1, candidatePool.length - index)
+    return scoreWeight + rankWeight
   })
+  const totalWeight = weights.reduce((total, weight) => total + weight, 0)
+  let roll = Math.random() * totalWeight
+
+  for (let index = 0; index < candidatePool.length; index += 1) {
+    roll -= weights[index]
+    if (roll <= 0) {
+      return candidatePool[index].card
+    }
+  }
+
+  return candidatePool[candidatePool.length - 1].card
+}
+
+function getPersonalCandidatePool(
+  cards: PersonalCard[],
+  usedPersonalCardIds: Set<string>,
+  minimumFreshCards: number,
+): PersonalCard[] {
+  const freshCards = cards.filter((card) => !usedPersonalCardIds.has(card.id))
+
+  if (freshCards.length >= minimumFreshCards) {
+    return freshCards
+  }
+
+  if (freshCards.length > 0) {
+    return freshCards
+  }
+
+  return cards
 }
 
 function createEmptyOfferState(): PersonalCardOfferState {
@@ -171,19 +271,43 @@ function chooseSafeAndHardCardsForPlayer(
   player: Player,
   hole: HoleDefinition,
   dynamicDifficultyEnabled: boolean,
+  usedPersonalCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const safeRanked = rankCardsForOffer(cards, player, hole, 'safe', dynamicDifficultyEnabled)
-  const safeCard = safeRanked[0]
+  const safeCandidatePool = getPersonalCandidatePool(cards, usedPersonalCardIds, 1)
+  const safeRanked = rankCardsForOffer(
+    safeCandidatePool,
+    player,
+    hole,
+    'safe',
+    dynamicDifficultyEnabled,
+  )
+  const safeCard = pickWeightedPersonalCardFromRanked(safeRanked)
+  if (safeCard) {
+    usedPersonalCardIds.add(safeCard.id)
+  }
+
   const remaining = safeCard ? cards.filter((card) => card.id !== safeCard.id) : cards
-  const hardRanked = rankCardsForOffer(remaining, player, hole, 'hard', dynamicDifficultyEnabled)
+  const hardCandidatePool = getPersonalCandidatePool(remaining, usedPersonalCardIds, 1)
+  const hardRanked = rankCardsForOffer(
+    hardCandidatePool,
+    player,
+    hole,
+    'hard',
+    dynamicDifficultyEnabled,
+  )
   const safeChallengeIndex = safeCard ? getChallengeIndex(safeCard) : -1
 
-  let hardCard = hardRanked[0]
+  let hardCard = pickWeightedPersonalCardFromRanked(hardRanked)
   if (hardCard && safeChallengeIndex >= 0 && getChallengeIndex(hardCard) <= safeChallengeIndex) {
-    const moreDemanding = hardRanked.find((card) => getChallengeIndex(card) > safeChallengeIndex)
-    if (moreDemanding) {
-      hardCard = moreDemanding
+    const moreDemanding = hardRanked
+      .filter((candidate) => getChallengeIndex(candidate.card) > safeChallengeIndex)
+    const moreDemandingPick = pickWeightedPersonalCardFromRanked(moreDemanding)
+    if (moreDemanding.length > 0) {
+      hardCard = moreDemandingPick ?? hardCard
     }
+  }
+  if (hardCard) {
+    usedPersonalCardIds.add(hardCard.id)
   }
 
   const orderedCards = [safeCard, hardCard].filter((card): card is PersonalCard => Boolean(card))
@@ -202,9 +326,17 @@ function chooseSingleCardForPlayer(
   player: Player,
   hole: HoleDefinition,
   dynamicDifficultyEnabled: boolean,
+  usedPersonalCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const singleRanked = rankCardsForOffer(cards, player, hole, 'single', dynamicDifficultyEnabled)
-  const selectedCard = singleRanked[0]
+  const candidatePool = getPersonalCandidatePool(cards, usedPersonalCardIds, 1)
+  const singleRanked = rankCardsForOffer(
+    candidatePool,
+    player,
+    hole,
+    'single',
+    dynamicDifficultyEnabled,
+  )
+  const selectedCard = pickWeightedPersonalCardFromRanked(singleRanked)
 
   if (!selectedCard) {
     return {
@@ -212,6 +344,7 @@ function chooseSingleCardForPlayer(
       offer: createEmptyOfferState(),
     }
   }
+  usedPersonalCardIds.add(selectedCard.id)
 
   return {
     cards: [selectedCard],
@@ -227,9 +360,17 @@ function chooseNoMercyCardForPlayer(
   player: Player,
   hole: HoleDefinition,
   dynamicDifficultyEnabled: boolean,
+  usedPersonalCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const hardRanked = rankCardsForOffer(cards, player, hole, 'hard', dynamicDifficultyEnabled)
-  const selectedCard = hardRanked[0]
+  const candidatePool = getPersonalCandidatePool(cards, usedPersonalCardIds, 1)
+  const hardRanked = rankCardsForOffer(
+    candidatePool,
+    player,
+    hole,
+    'hard',
+    dynamicDifficultyEnabled,
+  )
+  const selectedCard = pickWeightedPersonalCardFromRanked(hardRanked)
 
   if (!selectedCard) {
     return {
@@ -237,6 +378,7 @@ function chooseNoMercyCardForPlayer(
       offer: createEmptyOfferState(),
     }
   }
+  usedPersonalCardIds.add(selectedCard.id)
 
   return {
     cards: [selectedCard],
@@ -312,12 +454,14 @@ export function createDealtHoleCardsState(
   roundConfig: RoundConfig,
   personalDeck: PersonalCard[],
   publicDeck: PublicCard[],
+  deckMemory: RoundDeckMemory | undefined,
 ): HoleCardsState {
   const personalDealResult = dealPersonalCardsForHole(
     players,
     hole,
     roundConfig,
     personalDeck,
+    deckMemory,
   )
   const selectedCardIdByPlayerId = Object.fromEntries(
     players.map((player) => {
@@ -340,7 +484,7 @@ export function createDealtHoleCardsState(
     dealtPersonalCardsByPlayerId: personalDealResult.dealtPersonalCardsByPlayerId,
     selectedCardIdByPlayerId,
     personalCardOfferByPlayerId: personalDealResult.personalCardOfferByPlayerId,
-    publicCards: dealPublicCardsForHole(hole, roundConfig, publicDeck),
+    publicCards: dealPublicCardsForHole(hole, roundConfig, publicDeck, deckMemory),
   }
 }
 
@@ -349,7 +493,10 @@ export function dealPersonalCardsForHole(
   hole: HoleDefinition,
   roundConfig: RoundConfig,
   deck: PersonalCard[],
+  deckMemory: RoundDeckMemory | undefined,
 ): PersonalDealResult {
+  const normalizedDeckMemory = normalizeRoundDeckMemory(deckMemory)
+  const usedPersonalCardIds = new Set(normalizedDeckMemory.usedPersonalCardIds)
   const packFilteredDeck = filterCardsByEnabledPacks(deck, roundConfig.enabledPackIds)
   const eligibleDeck = filterPersonalCardsForHole(packFilteredDeck, hole.par, hole.tags)
   const drawCount = getPersonalDrawCount(roundConfig)
@@ -364,6 +511,7 @@ export function dealPersonalCardsForHole(
         player,
         hole,
         roundConfig.toggles.dynamicDifficulty,
+        usedPersonalCardIds,
       )
       dealtPersonalCardsByPlayerId[player.id] = offer.cards
       personalCardOfferByPlayerId[player.id] = offer.offer
@@ -376,6 +524,7 @@ export function dealPersonalCardsForHole(
         player,
         hole,
         roundConfig.toggles.dynamicDifficulty,
+        usedPersonalCardIds,
       )
       dealtPersonalCardsByPlayerId[player.id] = offer.cards
       personalCardOfferByPlayerId[player.id] = offer.offer
@@ -387,6 +536,7 @@ export function dealPersonalCardsForHole(
       player,
       hole,
       roundConfig.toggles.dynamicDifficulty,
+      usedPersonalCardIds,
     )
     dealtPersonalCardsByPlayerId[player.id] = offer.cards
     personalCardOfferByPlayerId[player.id] = offer.offer
@@ -398,11 +548,66 @@ export function dealPersonalCardsForHole(
   }
 }
 
+function getPublicCardWeight(card: PublicCard): number {
+  const impactWeight = Math.max(1, 4 - Math.min(3, Math.abs(card.points)))
+  const interactionWeight = card.interaction ? 2 : 1
+  return impactWeight + interactionWeight
+}
+
+function pickWeightedPublicCard(cards: PublicCard[]): PublicCard | null {
+  if (cards.length === 0) {
+    return null
+  }
+
+  const weightedCards = cards.map((card) => ({
+    card,
+    weight: getPublicCardWeight(card),
+  }))
+  const totalWeight = weightedCards.reduce((total, entry) => total + entry.weight, 0)
+  let roll = Math.random() * totalWeight
+
+  for (const entry of weightedCards) {
+    roll -= entry.weight
+    if (roll <= 0) {
+      return entry.card
+    }
+  }
+
+  return weightedCards[weightedCards.length - 1].card
+}
+
+function pickPublicCardWithMemory(
+  candidates: PublicCard[],
+  usedPublicCardIds: Set<string>,
+  selectedCardIds: Set<string>,
+): PublicCard | null {
+  const availableCards = candidates.filter((card) => !selectedCardIds.has(card.id))
+  if (availableCards.length === 0) {
+    return null
+  }
+
+  const freshCards = availableCards.filter((card) => !usedPublicCardIds.has(card.id))
+  const candidatePool = freshCards.length > 0 ? freshCards : availableCards
+  const selectedCard = pickWeightedPublicCard(candidatePool)
+
+  if (!selectedCard) {
+    return null
+  }
+
+  selectedCardIds.add(selectedCard.id)
+  usedPublicCardIds.add(selectedCard.id)
+  return selectedCard
+}
+
 export function dealPublicCardsForHole(
   hole: HoleDefinition,
   roundConfig: RoundConfig,
   deck: PublicCard[],
+  deckMemory: RoundDeckMemory | undefined,
 ): PublicCard[] {
+  const normalizedDeckMemory = normalizeRoundDeckMemory(deckMemory)
+  const usedPublicCardIds = new Set(normalizedDeckMemory.usedPublicCardIds)
+  const selectedCardIds = new Set<string>()
   const packFilteredDeck = filterCardsByEnabledPacks(deck, roundConfig.enabledPackIds)
   const filteredDeck = filterPublicCardsForHole(packFilteredDeck, hole.par, hole.tags)
   const fullEligibleDeck = filterPublicCardsForHole(deck, hole.par, hole.tags)
@@ -412,10 +617,26 @@ export function dealPublicCardsForHole(
   if (isChaosFeaturedHole) {
     // Featured Chaos hole fallback: guarantee a Chaos card even when the chaos pack is disabled.
     const featuredChaosCard =
-      filteredDeck.find((card) => card.cardType === 'chaos') ??
-      fullEligibleDeck.find((card) => card.cardType === 'chaos') ??
-      filteredDeck.find((card) => card.cardType === 'prop') ??
-      fullEligibleDeck.find((card) => card.cardType === 'prop')
+      pickPublicCardWithMemory(
+        filteredDeck.filter((card) => card.cardType === 'chaos'),
+        usedPublicCardIds,
+        selectedCardIds,
+      ) ??
+      pickPublicCardWithMemory(
+        fullEligibleDeck.filter((card) => card.cardType === 'chaos'),
+        usedPublicCardIds,
+        selectedCardIds,
+      ) ??
+      pickPublicCardWithMemory(
+        filteredDeck.filter((card) => card.cardType === 'prop'),
+        usedPublicCardIds,
+        selectedCardIds,
+      ) ??
+      pickPublicCardWithMemory(
+        fullEligibleDeck.filter((card) => card.cardType === 'prop'),
+        usedPublicCardIds,
+        selectedCardIds,
+      )
 
     if (featuredChaosCard) {
       cards.push(featuredChaosCard)
@@ -423,14 +644,22 @@ export function dealPublicCardsForHole(
   }
 
   if (roundConfig.enabledPackIds.includes('chaos') && !cards.some((card) => card.cardType === 'chaos')) {
-    const chaosCard = filteredDeck.find((card) => card.cardType === 'chaos')
+    const chaosCard = pickPublicCardWithMemory(
+      filteredDeck.filter((card) => card.cardType === 'chaos'),
+      usedPublicCardIds,
+      selectedCardIds,
+    )
     if (chaosCard) {
       cards.push(chaosCard)
     }
   }
 
   if (roundConfig.enabledPackIds.includes('props')) {
-    const propCard = filteredDeck.find((card) => card.cardType === 'prop')
+    const propCard = pickPublicCardWithMemory(
+      filteredDeck.filter((card) => card.cardType === 'prop'),
+      usedPublicCardIds,
+      selectedCardIds,
+    )
     if (propCard && !cards.some((card) => card.id === propCard.id)) {
       cards.push(propCard)
     }

@@ -104,6 +104,11 @@ export interface HoleResultState {
   publicCardResolutionNotes: string
 }
 
+export interface RoundDeckMemory {
+  usedPersonalCardIds: string[]
+  usedPublicCardIds: string[]
+}
+
 export interface PlayerTotals {
   realScore: number
   gamePoints: number
@@ -126,5 +131,6 @@ export interface RoundState {
   holeCards: HoleCardsState[]
   holePowerUps: HolePowerUpState[]
   holeResults: HoleResultState[]
+  deckMemory: RoundDeckMemory
   totalsByPlayerId: Record<string, PlayerTotals>
 }

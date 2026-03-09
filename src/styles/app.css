@@ -55,6 +55,14 @@ button {
     transform var(--motion-fast) ease;
 }
 
+button .button-icon {
+  width: 1.02rem;
+  height: 1.02rem;
+  object-fit: contain;
+  vertical-align: -0.18rem;
+  margin-right: 0.38rem;
+}
+
 button:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
   background: color-mix(in srgb, var(--bg-inset) 82%, var(--bg-panel));
@@ -117,6 +125,27 @@ h3 {
   font-size: 1.12rem;
   font-weight: 700;
   line-height: 1.25;
+}
+
+.screen-title,
+.step-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.screen-title__icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  object-fit: contain;
+  border-radius: 0.3rem;
+}
+
+.step-title__icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+  border-radius: 0.22rem;
 }
 
 strong {
@@ -207,6 +236,45 @@ main {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+}
+
+.round-setup-screen {
+  gap: var(--space-4);
+}
+
+.setup-step {
+  border-top: 3px solid color-mix(in srgb, var(--accent) 36%, transparent);
+}
+
+.setup-step > h3 {
+  letter-spacing: 0.01em;
+}
+
+.setup-step--basics {
+  border-top-color: color-mix(in srgb, var(--info) 56%, transparent);
+}
+
+.setup-step--players {
+  border-top-color: color-mix(in srgb, var(--warning) 58%, transparent);
+}
+
+.setup-step--mode {
+  border-top-color: color-mix(in srgb, var(--accent) 62%, transparent);
+}
+
+.setup-cta {
+  position: sticky;
+  bottom: var(--space-3);
+  z-index: 5;
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
+  background:
+    linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
+    ),
+    var(--bg-panel);
 }
 
 .home-screen {
@@ -459,6 +527,13 @@ main {
   gap: var(--space-2);
 }
 
+.preset-row__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  object-fit: contain;
+  border-radius: 0.2rem;
+}
+
 .pack-row__info-button,
 .preset-row__info-button {
   min-height: 42px;
@@ -505,6 +580,10 @@ main {
 }
 
 .tag-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
   min-height: 44px;
   padding: 0.42rem 0.74rem;
   border-radius: 999px;
@@ -513,6 +592,12 @@ main {
   color: var(--accent-strong);
   font-size: 0.89rem;
   font-weight: 600;
+}
+
+.tag-pill__icon {
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
 }
 
 .tag-pill.active {
@@ -571,6 +656,22 @@ main {
 
 .recap-section {
   gap: var(--space-3);
+}
+
+.recap-section > .row-between {
+  align-items: flex-end;
+}
+
+.recap-section .recap-item {
+  gap: 0.58rem;
+}
+
+.recap-player-card .recap-metrics {
+  justify-content: flex-end;
+}
+
+.recap-player-card .recap-card-line {
+  font-weight: 600;
 }
 
 .recap-next {
@@ -967,6 +1068,22 @@ main {
   border-top: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
+.hole-results-screen {
+  gap: var(--space-4);
+}
+
+.hole-results-entry-panel {
+  border-top: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+.public-resolution-panel {
+  border-top: 3px solid color-mix(in srgb, var(--info) 48%, transparent);
+}
+
+.hole-results-next {
+  border-top: 3px solid color-mix(in srgb, var(--warning) 48%, transparent);
+}
+
 .hole-results-mission-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1038,8 +1155,7 @@ main {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .hole-summary-player-row,
-  .recap-item {
+  .hole-summary-player-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -1107,6 +1223,21 @@ main {
     box-shadow: var(--shadow-card);
   }
 
+  .setup-step {
+    border-top-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
+  }
+
+  .setup-cta {
+    border-color: color-mix(in srgb, var(--accent) 68%, var(--color-border));
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--accent) 16%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      var(--surface-elevated);
+  }
+
   .panel.inset {
     background: var(--surface-panel);
   }
@@ -1170,6 +1301,12 @@ main {
         color-mix(in srgb, var(--warning) 7%, transparent)
       ),
       var(--surface-elevated);
+  }
+
+  .hole-results-entry-panel,
+  .public-resolution-panel,
+  .hole-results-next {
+    border-top-color: color-mix(in srgb, var(--accent) 68%, var(--color-border));
   }
 
   .power-up-chip {

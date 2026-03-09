@@ -1,3 +1,4 @@
+import { ICONS } from '../app/icons.ts'
 import HoleSummaryList from '../components/HoleSummaryList.tsx'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
 import { computeRoundAwards } from '../logic/awards.ts'
@@ -73,7 +74,10 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
-        <h2>Round Summary</h2>
+        <div className="screen-title">
+          <img className="screen-title__icon" src={ICONS.leaderboard} alt="" aria-hidden="true" />
+          <h2>Round Summary</h2>
+        </div>
         <p className="muted">
           Final results after {roundState.holes.length} holes with real score, game points, and
           adjusted score.
@@ -156,7 +160,11 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
 
       <section className="panel stack-xs">
         <h3>Per-Hole Summary</h3>
-        <p className="muted">Stacked mobile cards with strokes, challenge result, and point impact.</p>
+        <p className="muted">
+          {roundState.config.gameMode === 'powerUps'
+            ? 'Stacked mobile cards with strokes and lightweight power-up flow context.'
+            : 'Stacked mobile cards with strokes, challenge result, and point impact.'}
+        </p>
       </section>
 
       <HoleSummaryList
@@ -165,6 +173,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
         holeCards={roundState.holeCards}
         holeResults={roundState.holeResults}
         momentumEnabled={roundState.config.toggles.momentumBonuses}
+        gameMode={roundState.config.gameMode}
       />
 
       <section className="panel stack-xs">
@@ -176,6 +185,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
             onNavigate('home')
           }}
         >
+          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
           Start New Round
         </button>
         <button type="button" onClick={() => onNavigate('home')}>

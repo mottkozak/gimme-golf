@@ -10,7 +10,7 @@ import type {
   RoundConfig,
   RoundState,
 } from '../types/game.ts'
-import { createEmptyHoleCardsState } from './dealCards.ts'
+import { createEmptyHoleCardsState, createEmptyRoundDeckMemory } from './dealCards.ts'
 import { buildEmptyHolePowerUpStates } from './powerUps.ts'
 import { assignFeaturedHolesForRound, normalizeFeaturedHoleType } from './featuredHoles.ts'
 import { normalizeRoundConfig } from './roundConfig.ts'
@@ -206,6 +206,7 @@ export function applyRoundSetupDraft(
     holeCards: buildHoleCards(players, holes),
     holePowerUps: buildHolePowerUps(players, holes),
     holeResults: buildHoleResults(players, holes),
+    deckMemory: createEmptyRoundDeckMemory(),
     totalsByPlayerId: buildTotalsByPlayerId(players, currentState.totalsByPlayerId),
   }
 }

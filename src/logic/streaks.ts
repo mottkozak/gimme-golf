@@ -75,7 +75,7 @@ function getMissionStatusForPlayer(
   return holeResult?.missionStatusByPlayerId[playerId] ?? 'pending'
 }
 
-function createZeroBreakdown(): HolePointBreakdown {
+export function createEmptyHolePointBreakdown(): HolePointBreakdown {
   return {
     missionPoints: 0,
     baseMissionPoints: 0,
@@ -102,6 +102,21 @@ function createZeroBreakdown(): HolePointBreakdown {
   }
 }
 
+interface HoleBreakdownCacheEntry {
+  playersRef: Player[]
+  holesRef: HoleDefinition[]
+  holeCardsRef: HoleCardsState[]
+  holeResultsRef: HoleResultState[]
+  momentumEnabled: boolean
+  breakdownsByPlayerId: Record<string, HolePointBreakdown[]>
+}
+
+let holeBreakdownCache: HoleBreakdownCacheEntry | null = null
+
+export function clearHolePointBreakdownCache(): void {
+  holeBreakdownCache = null
+}
+
 function getLowestGamePointTotal(gamePointsByPlayerId: Record<string, number>): number {
   return Object.values(gamePointsByPlayerId).reduce(
     (lowest, total) => Math.min(lowest, total),
@@ -109,7 +124,7 @@ function getLowestGamePointTotal(gamePointsByPlayerId: Record<string, number>): 
   )
 }
 
-export function buildHolePointBreakdownsByPlayerId(
+function computeHolePointBreakdownsByPlayerId(
   players: Player[],
   holes: HoleDefinition[],
   holeCards: HoleCardsState[],
@@ -248,6 +263,47 @@ export function buildHolePointBreakdownsByPlayerId(
   return breakdownsByPlayerId
 }
 
+export function buildHolePointBreakdownsByPlayerId(
+  players: Player[],
+  holes: HoleDefinition[],
+  holeCards: HoleCardsState[],
+  holeResults: HoleResultState[],
+  momentumEnabled: boolean,
+): Record<string, HolePointBreakdown[]> {
+  const cached =
+    holeBreakdownCache &&
+    holeBreakdownCache.playersRef === players &&
+    holeBreakdownCache.holesRef === holes &&
+    holeBreakdownCache.holeCardsRef === holeCards &&
+    holeBreakdownCache.holeResultsRef === holeResults &&
+    holeBreakdownCache.momentumEnabled === momentumEnabled
+      ? holeBreakdownCache
+      : null
+
+  if (cached) {
+    return cached.breakdownsByPlayerId
+  }
+
+  const breakdownsByPlayerId = computeHolePointBreakdownsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    momentumEnabled,
+  )
+
+  holeBreakdownCache = {
+    playersRef: players,
+    holesRef: holes,
+    holeCardsRef: holeCards,
+    holeResultsRef: holeResults,
+    momentumEnabled,
+    breakdownsByPlayerId,
+  }
+
+  return breakdownsByPlayerId
+}
+
 export function getPlayerHolePointBreakdown(
   playerId: string,
   holeIndex: number,
@@ -265,7 +321,7 @@ export function getPlayerHolePointBreakdown(
     momentumEnabled,
   )
 
-  return breakdownsByPlayerId[playerId]?.[holeIndex] ?? createZeroBreakdown()
+  return breakdownsByPlayerId[playerId]?.[holeIndex] ?? createEmptyHolePointBreakdown()
 }
 
 export function getCurrentMomentumStateByPlayerId(

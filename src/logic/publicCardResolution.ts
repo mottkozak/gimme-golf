@@ -23,6 +23,10 @@ function normalizeResolutionMode(mode: PublicResolutionMode): PublicResolutionMo
   return legacyModeMap[mode as LegacyPublicResolutionMode] ?? mode
 }
 
+export function normalizePublicResolutionMode(mode: PublicResolutionMode): PublicResolutionMode {
+  return normalizeResolutionMode(mode)
+}
+
 function getDefaultEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
   const absolutePoints = Math.max(1, Math.abs(card.points))
   return [
@@ -98,7 +102,9 @@ export function normalizePublicCardResolutions(
       const defaultResolution = createDefaultPublicCardResolution(card)
       const existingResolution = resolutionsByCardId?.[card.id]
       if (existingResolution) {
-        const normalizedMode = normalizeResolutionMode(existingResolution.mode)
+        const normalizedMode = normalizeResolutionMode(
+          card.interaction?.mode ?? existingResolution.mode,
+        )
         const normalizedSelectedEffectOptionId =
           normalizedMode === 'choose_one_of_two_effects'
             ? existingResolution.selectedEffectOptionId ?? defaultResolution.selectedEffectOptionId
@@ -119,6 +125,66 @@ export function normalizePublicCardResolutions(
       return [card.id, defaultResolution]
     }),
   )
+}
+
+function hasValidVoteSelection(
+  resolution: PublicCardResolutionState,
+  playerIds: string[],
+): boolean {
+  return playerIds.every((playerId) => {
+    const votedPlayerId = resolution.targetPlayerIdByVoterId[playerId]
+    return typeof votedPlayerId === 'string' && votedPlayerId.length > 0
+  })
+}
+
+export function isPublicCardResolutionComplete(
+  card: PublicCard,
+  resolution: PublicCardResolutionState,
+  playerIds: string[],
+): boolean {
+  if (!resolution.triggered) {
+    return true
+  }
+
+  const normalizedMode = normalizeResolutionMode(resolution.mode)
+
+  if (normalizedMode === 'yes_no_triggered') {
+    return true
+  }
+
+  if (normalizedMode === 'vote_target_player') {
+    return hasValidVoteSelection(resolution, playerIds)
+  }
+
+  if (
+    normalizedMode === 'leader_selects_target' ||
+    normalizedMode === 'trailing_player_selects_target'
+  ) {
+    return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
+  }
+
+  if (normalizedMode === 'pick_affected_players') {
+    return resolution.affectedPlayerIds.length > 0
+  }
+
+  const effectOptions = getEffectOptions(card)
+  const selectedEffect =
+    effectOptions.find((effect) => effect.id === resolution.selectedEffectOptionId) ??
+    effectOptions[0]
+
+  if (!selectedEffect) {
+    return false
+  }
+
+  if (selectedEffect.targetScope === 'all') {
+    return true
+  }
+
+  if (selectedEffect.targetScope === 'target') {
+    return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
+  }
+
+  return resolution.affectedPlayerIds.length > 0
 }
 
 function getMajorityVoteWinnerId(

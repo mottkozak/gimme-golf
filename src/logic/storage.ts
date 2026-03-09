@@ -38,6 +38,14 @@ function isFeaturedHolesConfigLike(value: unknown): boolean {
   )
 }
 
+function isDeckMemoryLike(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return isStringArray(value.usedPersonalCardIds) && isStringArray(value.usedPublicCardIds)
+}
+
 function isRoundStateLike(value: unknown): value is RoundState {
   if (!isRecord(value)) {
     return false
@@ -64,6 +72,7 @@ function isRoundStateLike(value: unknown): value is RoundState {
     Array.isArray(value.holeCards) &&
     (value.holePowerUps === undefined || Array.isArray(value.holePowerUps)) &&
     Array.isArray(value.holeResults) &&
+    (value.deckMemory === undefined || isDeckMemoryLike(value.deckMemory)) &&
     isRecord(value.totalsByPlayerId) &&
     typeof value.currentHoleIndex === 'number' &&
     typeof config.toggles.dynamicDifficulty === 'boolean' &&

@@ -6,9 +6,14 @@ import type {
   PlayerTotals,
   RoundState,
 } from '../types/game.ts'
+import { buildDeckMemoryFromHoleCards } from './dealCards.ts'
 import { normalizeRoundConfig } from './roundConfig.ts'
 import { createEmptyHolePowerUpState } from './powerUps.ts'
-import { getPlayerHolePointBreakdown, type HolePointBreakdown } from './streaks.ts'
+import {
+  buildHolePointBreakdownsByPlayerId,
+  createEmptyHolePointBreakdown,
+  type HolePointBreakdown,
+} from './streaks.ts'
 
 export function calculateAdjustedScore(realScore: number, gamePoints: number): number {
   return realScore - gamePoints
@@ -31,15 +36,15 @@ export function calculatePlayerHolePointBreakdown(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): HolePointBreakdown {
-  return getPlayerHolePointBreakdown(
-    playerId,
-    holeIndex,
+  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
     players,
     holes,
     holeCards,
     holeResults,
     momentumEnabled,
   )
+
+  return breakdownsByPlayerId[playerId]?.[holeIndex] ?? createEmptyHolePointBreakdown()
 }
 
 export function calculatePlayerHoleGamePoints(
@@ -85,20 +90,15 @@ export function calculatePlayerGamePoints(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): number {
-  return holeResults.reduce((total, _holeResult, index) => {
-    return (
-      total +
-      calculatePlayerHoleGamePoints(
-        playerId,
-        index,
-        players,
-        holes,
-        holeCards,
-        holeResults,
-        momentumEnabled,
-      )
-    )
-  }, 0)
+  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    momentumEnabled,
+  )
+
+  return (breakdownsByPlayerId[playerId] ?? []).reduce((total, breakdown) => total + breakdown.total, 0)
 }
 
 export function calculateRoundTotalsByPlayerId(
@@ -108,16 +108,20 @@ export function calculateRoundTotalsByPlayerId(
   holeResults: HoleResultState[],
   momentumEnabled: boolean,
 ): Record<string, PlayerTotals> {
+  const breakdownsByPlayerId = buildHolePointBreakdownsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    momentumEnabled,
+  )
+
   return Object.fromEntries(
     players.map((player) => {
       const realScore = calculatePlayerRealScore(player.id, holeResults)
-      const gamePoints = calculatePlayerGamePoints(
-        player.id,
-        players,
-        holes,
-        holeCards,
-        holeResults,
-        momentumEnabled,
+      const gamePoints = (breakdownsByPlayerId[player.id] ?? []).reduce(
+        (total, breakdown) => total + breakdown.total,
+        0,
       )
 
       return [player.id, createPlayerTotals(realScore, gamePoints)]
@@ -201,6 +205,7 @@ export function recalculateRoundTotals(roundState: RoundState): RoundState {
   )
   const normalizedConfig = normalizeRoundConfig(roundState.config)
   const momentumEnabled = normalizedConfig.toggles.momentumBonuses
+  const normalizedDeckMemory = buildDeckMemoryFromHoleCards(normalizedHoleCards)
 
   return {
     ...roundState,
@@ -208,6 +213,7 @@ export function recalculateRoundTotals(roundState: RoundState): RoundState {
     holeCards: normalizedHoleCards,
     holePowerUps: normalizedHolePowerUps,
     holeResults: normalizedHoleResults,
+    deckMemory: normalizedDeckMemory,
     totalsByPlayerId: calculateRoundTotalsByPlayerId(
       roundState.players,
       roundState.holes,

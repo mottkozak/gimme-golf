@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ICONS } from '../app/icons.ts'
 import CardPackToggleRow from '../components/CardPackToggleRow.tsx'
 import GameModePresetRow from '../components/GameModePresetRow.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
@@ -27,7 +28,6 @@ import {
 import type { CardPackId } from '../types/cards.ts'
 import type {
   CourseStyle,
-  FeaturedHoleAssignmentMode,
   FeaturedHoleFrequency,
   GameModePresetId,
   HoleCount,
@@ -224,20 +224,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     }))
   }
 
-  const setFeaturedHolesAssignmentMode = (assignmentMode: FeaturedHoleAssignmentMode) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        featuredHoles: {
-          ...draft.config.featuredHoles,
-          assignmentMode,
-        },
-      },
-    }))
-  }
-
   const setPackEnabled = (packId: CardPackId, enabled: boolean) => {
     updateSetup((draft) => ({
       ...draft,
@@ -267,6 +253,13 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   const beginRound = () => {
     onUpdateRoundState((currentState) => ({
       ...currentState,
+      config: {
+        ...currentState.config,
+        featuredHoles: {
+          ...currentState.config.featuredHoles,
+          assignmentMode: 'auto',
+        },
+      },
       currentHoleIndex: 0,
     }))
     onNavigate('holeSetup')
@@ -281,16 +274,22 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   )
 
   return (
-    <section className="screen stack-sm">
+    <section className="screen stack-sm round-setup-screen">
       <header className="screen__header">
-        <h2>Round Setup</h2>
+        <div className="screen-title">
+          <img className="screen-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+          <h2>Round Setup</h2>
+        </div>
         <p className="muted">
           Choose basics, add golfers, pick a game mode preset, then start the round.
         </p>
       </header>
 
-      <section className="panel stack-xs">
-        <h3>1. Round Basics</h3>
+      <section className="panel stack-xs setup-step setup-step--basics">
+        <h3 className="step-title">
+          <img className="step-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+          1. Round Basics
+        </h3>
         <p className="muted">Select hole count and course type.</p>
 
         <div className="stack-xs">
@@ -334,9 +333,12 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </div>
       </section>
 
-      <section className="panel stack-xs">
+      <section className="panel stack-xs setup-step setup-step--players">
         <div className="row-between">
-          <h3>2. Golfers</h3>
+          <h3 className="step-title">
+            <img className="step-title__icon" src={ICONS.golfers} alt="" aria-hidden="true" />
+            2. Golfers
+          </h3>
           <span className="chip">
             {players.length} / {MAX_GOLFERS}
           </span>
@@ -364,8 +366,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </button>
       </section>
 
-      <section className="panel stack-xs">
-        <h3>3. Game Mode Selection</h3>
+      <section className="panel stack-xs setup-step setup-step--mode">
+        <h3 className="step-title">
+          <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+          3. Game Mode Selection
+        </h3>
         <p className="muted">
           Choose a mode. Tap the info button for details.
         </p>
@@ -385,8 +390,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
       {isCustomPreset && (
         <>
-          <section className="panel stack-xs">
-            <h3>4. Custom Mode</h3>
+          <section className="panel stack-xs setup-step">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+              4. Custom Mode
+            </h3>
             <p className="muted">Customize this round only.</p>
 
             <label className="field">
@@ -400,8 +408,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             </label>
           </section>
 
-          <section className="panel stack-xs">
-            <h3>Card Packs</h3>
+          <section className="panel stack-xs setup-step">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
+              Card Packs
+            </h3>
             <p className="muted">Enable the game modes you want in this round.</p>
 
             <div className="stack-xs">
@@ -418,8 +429,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             </div>
           </section>
 
-          <section className="panel stack-xs">
-            <h3>Game Options</h3>
+          <section className="panel stack-xs setup-step">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+              Game Options
+            </h3>
 
             <ToggleRow
               label="Dynamic Difficulty"
@@ -456,8 +470,11 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             </section>
           </section>
 
-          <section className="panel stack-xs">
-            <h3>Featured Holes</h3>
+          <section className="panel stack-xs setup-step">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
+              Featured Holes
+            </h3>
 
             <ToggleRow
               label="Enable Featured Holes"
@@ -488,28 +505,10 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
             <section className="stack-xs">
               <span className="label">Assignment Mode</span>
-              <div className="button-row">
-                <button
-                  type="button"
-                  className={config.featuredHoles.assignmentMode === 'auto' ? 'button-primary' : ''}
-                  onClick={() => setFeaturedHolesAssignmentMode('auto')}
-                >
-                  Auto Assign
-                </button>
-                <button
-                  type="button"
-                  className={config.featuredHoles.assignmentMode === 'manual' ? 'button-primary' : ''}
-                  onClick={() => setFeaturedHolesAssignmentMode('manual')}
-                >
-                  Manual Assign
-                </button>
-              </div>
-              {config.featuredHoles.assignmentMode === 'manual' && (
-                <p className="muted">
-                  Manual assignment editor is scaffolded in v1. Existing manual picks are preserved;
-                  otherwise the app uses an auto-spaced baseline.
-                </p>
-              )}
+              <p className="muted">
+                Auto Assign is currently enabled. Manual featured-hole assignment returns when the
+                editor ships.
+              </p>
             </section>
 
             {config.featuredHoles.enabled && (
@@ -545,8 +544,9 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </>
       )}
 
-      <section className="panel stack-xs">
+      <section className="panel stack-xs setup-cta">
         <button type="button" className="button-primary" onClick={beginRound}>
+          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
           Start Round
         </button>
       </section>

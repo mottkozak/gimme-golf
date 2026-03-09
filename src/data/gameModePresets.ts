@@ -121,8 +121,8 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
     bestForLabel: 'First-time groups and relaxed rounds',
     includedFeatureIds: ['classic'],
     sortOrder: 1,
-    badgeLabel: null,
-    isRecommended: false,
+    badgeLabel: 'Recommended',
+    isRecommended: true,
     settings: createCardPresetSettings(['classic'], 'low', {
       momentumBonuses: false,
       featuredEnabled: false,
@@ -162,15 +162,15 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
   {
     id: 'balanced',
     name: 'Balanced',
-    shortDescription: 'Recommended default with strategy and variety.',
+    shortDescription: 'Strategy-forward mix with broader card variety.',
     longDescription:
       'Balanced mixes core personal missions with both public card types and Hybrid pressure cards. It keeps pace lively without overwhelming complexity.',
     includesLabel: 'Classic, Chaos, Props, Hybrid',
     bestForLabel: 'Most groups and most rounds',
     includedFeatureIds: ['classic', 'chaos', 'props', 'hybrid'],
     sortOrder: 4,
-    badgeLabel: 'Recommended',
-    isRecommended: true,
+    badgeLabel: null,
+    isRecommended: false,
     settings: createCardPresetSettings(['classic', 'chaos', 'props', 'hybrid'], 'normal'),
   },
   {
@@ -231,7 +231,7 @@ export const GAME_MODE_PRESETS_BY_ID: Record<GameModePresetId, GameModePresetDef
     GameModePresetDefinition
   >
 
-export const DEFAULT_GAME_MODE_PRESET_ID: GameModePresetId = 'balanced'
+export const DEFAULT_GAME_MODE_PRESET_ID: GameModePresetId = 'casual'
 export const DEFAULT_CUSTOM_MODE_NAME = 'My Custom Mode'
 
 const VALID_PRESET_IDS = new Set<GameModePresetId>(GAME_MODE_PRESETS.map((preset) => preset.id))

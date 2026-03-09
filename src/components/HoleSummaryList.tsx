@@ -1,5 +1,9 @@
-import { calculatePlayerHolePointBreakdown } from '../logic/scoring.ts'
-import type { HoleCardsState, HoleDefinition, HoleResultState, Player } from '../types/game.ts'
+import { useMemo } from 'react'
+import {
+  buildHolePointBreakdownsByPlayerId,
+  createEmptyHolePointBreakdown,
+} from '../logic/streaks.ts'
+import type { GameMode, HoleCardsState, HoleDefinition, HoleResultState, Player } from '../types/game.ts'
 
 interface HoleSummaryListProps {
   players: Player[]
@@ -7,6 +11,7 @@ interface HoleSummaryListProps {
   holeCards: HoleCardsState[]
   holeResults: HoleResultState[]
   momentumEnabled: boolean
+  gameMode: GameMode
 }
 
 function getMissionStatusClass(missionStatus: HoleResultState['missionStatusByPlayerId'][string]): string {
@@ -31,7 +36,20 @@ function HoleSummaryList({
   holeCards,
   holeResults,
   momentumEnabled,
+  gameMode,
 }: HoleSummaryListProps) {
+  const breakdownsByPlayerId = useMemo(
+    () =>
+      buildHolePointBreakdownsByPlayerId(
+        players,
+        holes,
+        holeCards,
+        holeResults,
+        momentumEnabled,
+      ),
+    [players, holes, holeCards, holeResults, momentumEnabled],
+  )
+
   return (
     <section className="stack-sm">
       {holes.map((hole, holeIndex) => {
@@ -48,16 +66,10 @@ function HoleSummaryList({
               {players.map((player) => {
                 const strokes = holeResult?.strokesByPlayerId[player.id]
                 const missionStatus = holeResult?.missionStatusByPlayerId[player.id] ?? 'pending'
-                const pointBreakdown = calculatePlayerHolePointBreakdown(
-                  player.id,
-                  holeIndex,
-                  players,
-                  holes,
-                  holeCards,
-                  holeResults,
-                  momentumEnabled,
-                )
+                const pointBreakdown =
+                  breakdownsByPlayerId[player.id]?.[holeIndex] ?? createEmptyHolePointBreakdown()
                 const holePoints = pointBreakdown.total
+                const isPowerUpsMode = gameMode === 'powerUps'
                 const pointParts = [
                   pointBreakdown.baseMissionPoints !== 0
                     ? `card ${formatSignedPoints(pointBreakdown.baseMissionPoints)}`
@@ -78,11 +90,17 @@ function HoleSummaryList({
                     <strong>{player.name}</strong>
                     <div className="recap-metrics">
                       <span>{typeof strokes === 'number' ? `${strokes} strokes` : 'No score'}</span>
-                      <span className={getMissionStatusClass(missionStatus)}>{missionStatus}</span>
-                      <span>
-                        Points {formatSignedPoints(holePoints)}
-                        {pointParts.length > 0 ? ` (${pointParts.join(', ')})` : ''}
-                      </span>
+                      {!isPowerUpsMode && (
+                        <span className={getMissionStatusClass(missionStatus)}>{missionStatus}</span>
+                      )}
+                      {isPowerUpsMode ? (
+                        <span>Power-Ups mode</span>
+                      ) : (
+                        <span>
+                          Points {formatSignedPoints(holePoints)}
+                          {pointParts.length > 0 ? ` (${pointParts.join(', ')})` : ''}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )
