@@ -46,9 +46,6 @@ function GameModePresetRow({
             i
           </button>
         </div>
-        <p className="muted">{preset.shortDescription}</p>
-        <p className="muted">Includes: {preset.includesLabel}</p>
-        <p className="muted">Best for: {preset.bestForLabel}</p>
       </div>
     </article>
   )

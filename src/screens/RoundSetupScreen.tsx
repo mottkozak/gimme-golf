@@ -45,7 +45,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   const [activePresetInfoId, setActivePresetInfoId] = useState<GameModePresetId | null>(null)
   const { config, players } = roundState
   const isCustomPreset = config.selectedPresetId === 'custom'
-  const isPowerUpsMode = config.gameMode === 'powerUps'
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
     onUpdateRoundState((currentState) => {
@@ -275,7 +274,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
   const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] : null
   const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] : null
-  const selectedPreset = GAME_MODE_PRESETS_BY_ID[config.selectedPresetId]
   const featuredHoles = roundState.holes.filter((hole) => hole.featuredHoleType !== null)
   const featuredHoleTargetCount = getFeaturedHoleTargetCount(
     config.holeCount,
@@ -367,9 +365,9 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       </section>
 
       <section className="panel stack-xs">
-        <h3>3. Game Mode Preset</h3>
+        <h3>3. Game Mode Selection</h3>
         <p className="muted">
-          Pick a preset to auto-configure packs and gameplay settings. Use Custom for full control.
+          Choose a mode. Tap the info button for details.
         </p>
 
         <div className="stack-xs">
@@ -545,25 +543,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             )}
           </section>
         </>
-      )}
-
-      {!isCustomPreset && selectedPreset && (
-        <section className="panel stack-xs">
-          <h3>Preset Active: {selectedPreset.name}</h3>
-          <p className="muted">{selectedPreset.shortDescription}</p>
-          <p className="muted">Includes: {selectedPreset.includesLabel}</p>
-          <p className="muted">Best for: {selectedPreset.bestForLabel}</p>
-          {isPowerUpsMode ? (
-            <p className="muted">
-              Power Ups Mode disables mission cards and deals one random power-up per golfer each
-              hole.
-            </p>
-          ) : (
-            <p className="muted">
-              Card packs and toggles are preset-configured. Choose Custom to edit them manually.
-            </p>
-          )}
-        </section>
       )}
 
       <section className="panel stack-xs">

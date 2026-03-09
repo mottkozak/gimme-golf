@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pirata+One&display=swap');
 
 * {
   box-sizing: border-box;
@@ -13,25 +13,16 @@ body,
 
 body {
   min-width: 320px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--bg-app) 95%, var(--bg-inset)) 0%,
-      var(--bg-app) 65%,
-      color-mix(in srgb, var(--bg-app) 86%, var(--bg-inset)) 100%
-    ),
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      transparent calc(100% - 1px),
-      color-mix(in srgb, var(--border-subtle) 18%, transparent) 100%
-    );
-  background-size: auto, 22px 22px;
+  background: linear-gradient(
+    180deg,
+    var(--bg-panel) 0%,
+    var(--bg-app) 100%
+  );
   color: var(--text-primary);
   font-family: var(--font-ui);
-  line-height: 1.45;
+  line-height: 1.5;
   font-size: 16px;
-  letter-spacing: 0.003em;
+  letter-spacing: 0.002em;
 }
 
 a {
@@ -113,23 +104,44 @@ h1,
 h2 {
   font-family: var(--font-display);
   color: color-mix(in srgb, var(--accent-strong) 82%, var(--text-primary));
-  letter-spacing: 0.01em;
+  letter-spacing: 0.012em;
   line-height: 1.14;
 }
 
 h2 {
-  font-size: clamp(1.6rem, 5.4vw, 2rem);
+  font-size: clamp(1.8rem, 6vw, 2.25rem);
 }
 
 h3 {
   font-family: var(--font-ui);
-  font-size: 1.08rem;
+  font-size: 1.12rem;
   font-weight: 700;
   line-height: 1.25;
 }
 
 strong {
   font-weight: 700;
+}
+
+.player-card > header strong,
+.hole-results-player-card > .row-between > strong,
+.hole-summary-player-row > strong {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--accent-strong);
+  line-height: 1.05;
+}
+
+.challenge-card > header strong,
+.public-card > header strong {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--accent-strong);
+  line-height: 1.08;
 }
 
 main {
@@ -159,7 +171,7 @@ main {
   justify-content: space-between;
   gap: var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .app-logo {
@@ -229,13 +241,13 @@ main {
 
 .recap-highlight {
   padding: 1rem;
-  border: 1px solid color-mix(in srgb, var(--warning) 58%, var(--border-subtle));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-subtle));
   border-radius: var(--radius-sm);
   background:
     linear-gradient(
       120deg,
-      color-mix(in srgb, var(--warning) 16%, transparent),
-      color-mix(in srgb, var(--info) 6%, transparent)
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      color-mix(in srgb, var(--bg-panel) 80%, transparent)
     ),
     var(--surface-elevated);
   color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
@@ -245,13 +257,13 @@ main {
 }
 
 .featured-hole-banner {
-  border-color: color-mix(in srgb, var(--warning) 76%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
   border-width: 2px;
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--warning) 16%, transparent),
-      color-mix(in srgb, var(--info) 10%, transparent)
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      color-mix(in srgb, var(--bg-panel) 88%, transparent)
     ),
     var(--bg-inset);
   box-shadow: var(--shadow-soft);
@@ -270,8 +282,8 @@ main {
 }
 
 .featured-hole-banner__chip {
-  border-color: color-mix(in srgb, var(--warning) 75%, var(--border-subtle));
-  background: color-mix(in srgb, var(--warning) 18%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-panel));
   color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
   font-weight: 700;
 }
@@ -297,12 +309,12 @@ main {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: var(--space-4);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-soft);
 }
 
 .panel.inset {
   background: color-mix(in srgb, var(--bg-inset) 96%, var(--bg-panel));
-  box-shadow: var(--shadow-soft);
+  box-shadow: none;
 }
 
 .row-between {
@@ -366,20 +378,20 @@ main {
 }
 
 .chip {
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 95%, var(--text-secondary));
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
   padding: 0.2rem 0.64rem;
   font-size: 0.76rem;
   font-weight: 600;
   line-height: 1.25;
-  color: color-mix(in srgb, var(--text-primary) 84%, var(--accent-strong));
-  background: color-mix(in srgb, var(--bg-inset) 68%, var(--bg-panel));
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+  background: var(--bg-panel);
 }
 
 .chip-button {
   min-height: 34px;
   padding: 0.2rem 0.65rem;
-  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+  background: var(--bg-panel);
 }
 
 .toggle-row,
@@ -392,7 +404,7 @@ main {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: var(--space-3);
-  background: color-mix(in srgb, var(--bg-inset) 80%, var(--bg-panel));
+  background: var(--bg-panel);
 }
 
 .toggle-row input {
@@ -407,10 +419,10 @@ main {
   background:
     linear-gradient(
       130deg,
-      color-mix(in srgb, var(--accent) 10%, transparent),
-      color-mix(in srgb, var(--info) 5%, transparent)
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
     ),
-    color-mix(in srgb, var(--bg-inset) 78%, var(--bg-panel));
+    var(--bg-panel);
   box-shadow: var(--shadow-soft);
 }
 
@@ -459,7 +471,7 @@ main {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   padding: 0.56rem 0.65rem;
-  background: color-mix(in srgb, var(--bg-inset) 85%, var(--bg-panel));
+  background: var(--bg-panel);
 }
 
 .field {
@@ -695,8 +707,8 @@ main {
 
 .challenge-card,
 .public-card {
-  border-top: 2px solid color-mix(in srgb, var(--info) 32%, transparent);
-  background: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-inset));
+  border-top: 2px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--bg-panel);
 }
 
 .challenge-card.selected {
@@ -723,14 +735,14 @@ main {
 }
 
 .power-up-card {
-  border-color: color-mix(in srgb, var(--info) 56%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--border-subtle));
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--info) 10%, transparent),
-      color-mix(in srgb, var(--warning) 8%, transparent)
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      color-mix(in srgb, var(--warning) 6%, transparent)
     ),
-    color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+    var(--bg-panel);
 }
 
 .power-up-card--used {
@@ -738,9 +750,9 @@ main {
 }
 
 .power-up-chip {
-  border-color: color-mix(in srgb, var(--info) 74%, var(--border-subtle));
-  background: color-mix(in srgb, var(--surface-info) 65%, var(--bg-panel));
-  color: var(--text-info);
+  border-color: color-mix(in srgb, var(--accent) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+  color: var(--accent-strong);
 }
 
 .power-up-chip--legendary {
@@ -837,7 +849,11 @@ main {
 }
 
 .summary-stat strong {
-  font-size: 1.08rem;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--accent-strong);
   line-height: 1.25;
 }
 
@@ -948,7 +964,7 @@ main {
 
 .hole-results-player-card {
   gap: var(--space-3);
-  border-top: 2px solid color-mix(in srgb, var(--info) 28%, transparent);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 .hole-results-mission-row {

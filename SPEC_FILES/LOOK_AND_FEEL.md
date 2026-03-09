@@ -2,513 +2,483 @@
 
 ## Brand Direction
 
-Gimme Golf should feel like a modern golf companion app with roots in the classic scorecard aesthetic.
+Gimme Golf should feel like a modern golf companion app rooted in the traditional golf scorecard aesthetic.
 
 The design should balance:
 - traditional golf structure
-- modern mobile clarity
+- modern mobile usability
 - premium but approachable styling
 - strong readability outdoors
-- enough personality to support game modes like Chaos, Novelty, and Power Ups
+- subtle personality during gameplay
 
-The visual tone should feel:
-- calm
+The overall tone should feel:
+
 - clean
-- sporty
-- slightly elevated
-- easy to scan in sunlight
-- respectful of golf traditions without looking old-fashioned
+- calm
+- premium
+- structured
+- readable in bright daylight
+- respectful of golf tradition
 
-## Core Design Principles
+The app should feel like **a modern digital scorecard**, not a game arcade or sports betting interface.
 
-### 1. Scorecard First
-The app should visually borrow from:
+---
+
+# Core Design Principles
+
+## 1. Scorecard Structure
+
+Visual inspiration should come from:
+
 - printed golf scorecards
+- clubhouse leaderboards
+- tournament pairing sheets
 - course signage
-- clubhouse pairing sheets
-- tournament leaderboards
 
-This means:
-- grid logic
-- clear rows and columns
+Key characteristics:
+
+- grid structure
 - strong numeric hierarchy
-- labels that feel structured and tidy
+- clean labels
+- clear separation of players and holes
 
-### 2. Modern Interaction
-Even though the visual inspiration is classic, the interaction design should feel modern:
-- large tap targets
-- clear selected states
-- stacked mobile cards
-- obvious call-to-action buttons
-- minimal typing
-- fast one-handed use
-
-### 3. Calm, Not Loud
-Avoid neon colors, overly saturated accents, or cartoonish styling in the core app UI.
-
-Special modes like Chaos, Party, and Power Ups can have accent badges and highlights, but the main shell should still feel grounded.
-
-### 4. Outdoor Readability
-The UI must work well:
-- in bright daylight
-- on a phone held at waist or chest height
-- during quick glances between shots
-
-That means:
-- high contrast
-- generous spacing
-- clear hierarchy
-- restrained use of subtle gray text
-- minimal low-contrast decorative elements
+The UI should feel **organized and official**, like a well-kept scorecard.
 
 ---
 
-## Visual Style
+## 2. Minimal Color Philosophy
 
-### Overall Feel
-- clean white or warm paper-toned backgrounds
-- deep green primary accents
-- soft muted neutrals
-- scorecard-inspired dividers and paneling
-- modern card layout with subtle rounded corners
-- restrained use of shadows
-- crisp typography
+The interface should use **very few colors**.
 
-### Shape Language
-- rounded corners, but not overly bubbly
-- recommend border radius:
-  - cards: 16px
-  - buttons: 14px
-  - pills/badges: 999px
-- use borders more than heavy shadows
-- shadows should be soft and minimal
+Primary surfaces should be:
+- white or very light cream
+- dark emerald green accents
+- dark text
 
-### Texture / Surface
-Base UI should feel like:
-- polished scorecard paper
-- matte clubhouse signage
-- clean iPhone app surfaces
+Additional colors should only appear when necessary (warnings, awards, highlights).
 
-Optional:
-- a very subtle paper tint or scorecard background tone for secondary surfaces
-- avoid fake grass textures or novelty golf graphics in the core shell
+Avoid colorful or playful palettes across the main UI.
 
 ---
 
-## Color System
+## 3. Outdoor Readability
 
-## Primary Palette
+The app must remain readable in bright sunlight.
 
-### Fairway Green
-Primary brand color for buttons, highlights, active states
+Design should prioritize:
 
-- Hex: `#1F5A3D`
+- strong contrast
+- large text
+- large buttons
+- clear visual hierarchy
+- minimal subtle gray text
+- minimal decorative noise
 
-### Deep Pine
-Darker version for headers, strong text on light surfaces, premium accents
-
-- Hex: `#153B2A`
-
-### Fresh Green
-Support accent for positive states, success, completed missions
-
-- Hex: `#3E8A5E`
+Users should be able to read the screen quickly between shots.
 
 ---
 
-## Neutral Palette
+# Color System
+
+The color palette should remain extremely restrained.
+
+## Primary Colors
+
+### Background White
+Main application background.
+
+Hex: `#FFFFFF`
 
 ### Scorecard Cream
-Primary app background, slightly warmer than pure white
+Secondary background with subtle warmth.
 
-- Hex: `#F7F4EC`
+Hex: `#F7F4EC`
 
-### Clubhouse White
-Card background / surface white
-
-- Hex: `#FCFBF8`
-
-### Sand
-Secondary background / section tint
-
-- Hex: `#EDE6D6`
-
-### Fairway Mist
-Soft border / divider neutral
-
-- Hex: `#D7D2C6`
-
-### Slate
-Secondary text
-
-- Hex: `#5F665F`
-
-### Charcoal
-Primary text
-
-- Hex: `#1F241F`
+Use for:
+- page backgrounds
+- grouped sections
+- scorecard panels
 
 ---
 
-## Accent Colors
+### Emerald Green
+Primary accent color.
 
-### Birdie Blue
-Use sparingly for info states, selected chips, or “special” but non-danger elements
+Hex: `#0F5132`
 
-- Hex: `#4D7C8A`
+Use for:
+- primary buttons
+- active selections
+- highlighted UI states
+- focus states
+- score selections
+- navigation emphasis
 
-### Golden Tee
-Use for featured holes, awards, recommended mode, or premium-adjacent emphasis
-
-- Hex: `#C89B3C`
-
-### Hazard Red
-Use for warnings, penalties, destructive actions, or dangerous/high-risk states
-
-- Hex: `#A94A3B`
-
-### Bunker Clay
-Use for novelty/curse/power-up side accents if needed
-
-- Hex: `#B97846`
+This should be the **dominant accent color in the app**.
 
 ---
 
-## Semantic Colors
+### Deep Emerald
+Darker emerald used for headers or strong accents.
 
-### Success
-- Background: `#E5F3EA`
-- Text/Icon: `#24613F`
+Hex: `#0A3B25`
 
-### Warning
-- Background: `#F7E8D6`
-- Text/Icon: `#915E21`
-
-### Danger
-- Background: `#F5DFDA`
-- Text/Icon: `#8D3B31`
-
-### Info
-- Background: `#E5EEF1`
-- Text/Icon: `#2D5D6B`
+Use for:
+- header bars
+- selected states
+- hover/press states
+- emphasis accents
 
 ---
 
-## Suggested Usage
-
-### Main Buttons
-- background: Fairway Green `#1F5A3D`
-- text: Clubhouse White `#FCFBF8`
-
-### Secondary Buttons
-- background: Sand `#EDE6D6`
-- text: Deep Pine `#153B2A`
-- border: Fairway Mist `#D7D2C6`
-
-### App Background
-- Scorecard Cream `#F7F4EC`
-
-### Cards / Panels
-- Clubhouse White `#FCFBF8`
-- border: Fairway Mist `#D7D2C6`
+## Text Colors
 
 ### Primary Text
-- Charcoal `#1F241F`
+Default text color.
 
-### Secondary Text
-- Slate `#5F665F`
+Hex: `#1A1A1A`
+
+Use for:
+- body text
+- labels
+- instructions
+- player stats
 
 ---
 
-## Typography
+### Secondary Text
+Subtle descriptive text.
 
-The typography should blend:
-- classic golf print sensibility
-- clean mobile readability
-- a touch of premium character
+Hex: `#5A5A5A`
 
-## Font Pairing Recommendation
+Use for:
+- helper text
+- card descriptions
+- secondary UI labels
 
-### Primary UI Font
+---
+
+### Divider / Border
+Subtle UI separation.
+
+Hex: `#E5E5E5`
+
+Use for:
+- card borders
+- score row separators
+- layout structure
+
+---
+
+# Limited Accent Colors
+
+These should appear **rarely** and only when necessary.
+
+## Gold (Awards / Featured Moments)
+
+Hex: `#C89B3C`
+
+Use for:
+- MVP
+- awards
+- featured hole indicators
+- championship highlights
+
+---
+
+## Soft Red (Warnings / Chaos Effects)
+
+Hex: `#B4473B`
+
+Use for:
+- penalties
+- danger states
+- curse effects
+
+Use sparingly.
+
+---
+
+# Typography
+
+Typography should blend **classic golf personality with modern readability**.
+
+## Primary UI Font
+
 **Inter**
+
+Use Inter for nearly all interface text.
+
 Use for:
 - body text
 - buttons
-- inputs
-- score labels
+- labels
 - setup screens
-- utility text
+- instructions
+- UI controls
+- card descriptions
 
 Why:
 - extremely readable
 - modern
-- great for dense app UI
-- excellent on mobile
-
-### Secondary / Headline Font
-**DM Serif Display**
-Use for:
-- screen titles
-- section headers
-- major recap titles
-- awards headings
-- featured hole banners
-
-Why:
-- elegant
-- classic without feeling dusty
-- gives a subtle heritage / golf editorial tone
-
-### Optional Third Accent Font
-**IBM Plex Mono**
-Use sparingly for:
-- score rows
-- hole numbers
-- leaderboard stats
-- scorecard-style numeric displays
-
-Why:
-- feels structured and scorecard-like
-- helps numbers feel organized
-- adds a subtle “official score” character
-
-## Font Usage Rules
-- Do not overuse the serif font
-- Keep the main app UI in Inter
-- Use DM Serif Display only for moments that need tone or emphasis
-- Use IBM Plex Mono only for numbers, stats, or scorecard moments
+- excellent mobile clarity
+- perfect for functional UI
 
 ---
 
-## Type Scale
+## Flavor / Display Font
 
-### Display Title
-- DM Serif Display
-- 32–36px
-- used for home title or end-of-round headings
+**Pirata One**
+
+Pirata One should be used sparingly for moments of personality.
+
+Use for:
+
+- player names during a round
+- challenge card titles
+- power-up names
+- awards
+- special hole titles
+- celebratory screens
+- round winner title
+
+Do NOT use Pirata One for long paragraphs or UI instructions.
+
+It is a **flavor font**, not a system font.
+
+---
+
+## Font Hierarchy
 
 ### Screen Title
-- DM Serif Display
-- 24–28px
+Pirata One  
+28–36px
+
+Example:
+"Round Summary"
+
+---
+
+### Player Name
+Pirata One  
+18–22px
+
+Example:
+"Matt"
+
+---
+
+### Card Title
+Pirata One  
+18–20px
+
+Example:
+"Fairway Finder"
+
+---
 
 ### Section Header
-- Inter SemiBold
-- 18–20px
+Inter SemiBold  
+18px
 
-### Body
-- Inter Regular
-- 15–16px
-
-### Secondary / Helper Text
-- Inter Regular
-- 13–14px
-
-### Score / Numeric UI
-- IBM Plex Mono Medium
-- 16–24px depending on context
+Example:
+"Hole Results"
 
 ---
 
-## UI Components
+### Body Text
+Inter Regular  
+15–16px
 
-## Buttons
-Buttons should feel:
-- large
-- simple
-- premium
-- not overly glossy
+---
 
-### Primary Button
-- filled Fairway Green
-- white text
-- large padding
-- slight press state darkening
+### Helper Text
+Inter Regular  
+13–14px
 
-### Secondary Button
-- light neutral fill
-- dark green text
-- bordered
+Color: secondary text
 
-### Tertiary / Ghost Button
-- no heavy fill
-- text only or minimal outline
-- used sparingly
+---
+
+# Layout & Components
 
 ## Cards
-Cards should be the primary layout unit in the app:
-- player cards
-- recap cards
-- preset mode cards
-- award cards
-- power-up cards
 
-Card styling:
-- background: Clubhouse White
-- border: 1px Fairway Mist
-- radius: 16px
-- shadow: very subtle or none
-- padding: 16–20px
+Cards should be the main layout container.
+
+Used for:
+- player rows
+- mission cards
+- recap summaries
+- round presets
+- awards
+- power-ups
+
+Card style:
+
+background: white  
+border: 1px solid #E5E5E5  
+border-radius: 16px  
+padding: 16–20px  
+shadow: very subtle or none
+
+The UI should rely more on **spacing and borders** than shadows.
+
+---
+
+## Buttons
+
+Buttons should be large and clear for outdoor use.
+
+### Primary Button
+
+background: emerald  
+text: white  
+padding: generous  
+border radius: 14px
+
+Example:
+Start Round  
+Next Hole
+
+---
+
+### Secondary Button
+
+background: white  
+border: 1px solid divider  
+text: dark text
+
+Example:
+Cancel  
+Edit
+
+---
+
+### Selected State
+
+Selected controls should use emerald background or border to clearly show state.
+
+Avoid subtle highlights.
+
+---
 
 ## Score Buttons
-These are critical.
 
-They should:
-- be large and easy to tap
-- show number prominently
-- optionally show golf label below:
-  - Birdie
-  - Par
-  - Bogey
-  - Double
+Score buttons should be:
 
-Selected state:
-- filled green or strong bordered state
-- obvious check or highlight
+- large
+- easily tappable
+- clearly selected
 
-## Chips / Tags
-Use pill-shaped chips for:
-- card pack labels
-- momentum tiers
-- featured hole type
-- challenge categories
+Example layout:
 
-Chip colors should be soft and readable, not candy-like.
+1 2 3 4 5 6 7 8
+
+Optional labels underneath:
+
+Birdie  
+Par  
+Bogey
+
+Selected score:
+emerald fill or bold emerald outline.
 
 ---
 
-## Iconography
+# Iconography
 
-Use clean line icons with consistent stroke weight.
+Icons should be minimal and clean.
 
-Recommended icon style:
-- simple outline icons
-- no skeuomorphic golf clubs or cartoon balls in core shell
-- accent icons only where they improve scanability
+Preferred style:
 
-Examples:
+- simple line icons
+- consistent stroke width
+- no cartoon golf icons
+
+Suggested icons:
+
 - flag
 - trophy
-- bolt
-- flame
-- spark
+- lightning bolt
 - shield
 - target
+- star
 
-Use icons sparingly.
+Icons should support scanning, not dominate the UI.
 
 ---
 
-## Motion / Feedback
+# Motion
 
-Animation should be subtle and useful.
+Animation should remain subtle.
 
-Good places for motion:
-- selecting a card
-- confirming score selection
-- using a power-up
-- momentum tier increase
-- featured hole announcement
-- recap highlight entry
+Good uses:
 
-Avoid:
-- bouncy arcade animation everywhere
-- long transitions
-- distracting motion in sunlight
+- card selection
+- score selection
+- challenge completion
+- award reveal
+- momentum increase
 
-Motion style:
+Motion should be:
+
 - quick
-- clean
-- restrained
+- subtle
+- purposeful
+
+Avoid excessive animation.
 
 ---
 
-## Special Mode Styling
+# Special Moment Styling
 
-The core shell stays consistent, but certain modes can get controlled accents.
+Special moments can briefly introduce extra visual flavor.
 
-### Chaos
-- accent with Hazard Red or Golden Tee badges
-- keep overall layout grounded
+Examples:
 
-### Party / Style / Novelty
-- allow slightly more playful badge colors
-- do not restyle the full app
+### Awards
+Gold accent + Pirata One heading.
 
-### Power Ups
-- can use a stronger accent treatment, such as Birdie Blue or Golden Tee
-- still keep the base app shell consistent
+### Featured Hole
+Emerald banner + title.
 
-### Featured Holes
-- use a banner or highlighted card
-- accent with Golden Tee and Deep Pine
+### Chaos Event
+Subtle red indicator.
+
+These should feel like **small moments of excitement**, not a full UI theme change.
 
 ---
 
-## Accessibility
-
-The app should prioritize:
-- strong contrast
-- large touch targets
-- no color-only meaning
-- readable type sizes
-- obvious selected states
-- visible disabled states
-
-Minimum guidance:
-- primary actions should be obvious without relying only on color
-- selected score buttons should have both color and border/state difference
-- labels should stay readable outdoors
-
----
-
-## Spacing System
+# Spacing System
 
 Use a simple spacing scale:
-- 4
-- 8
-- 12
-- 16
-- 20
-- 24
-- 32
+
+4  
+8  
+12  
+16  
+20  
+24  
+32
 
 Recommended:
-- card padding: 16–20
-- section spacing: 24
-- button height: at least 44–52px
-- vertical spacing between stacked player cards: 16
+
+card padding: 16–20  
+section spacing: 24  
+button height: 48–52  
+player card spacing: 16
 
 ---
 
-## General Style Rules
-
-### Do
-- use structured layouts
-- prioritize readability
-- let numbers breathe
-- use golf-inspired restraint
-- make the app feel premium and calm
-- use serif font only as accent
-
-### Do Not
-- make it neon or arcade-first
-- overuse green everywhere
-- add heavy shadows
-- make the UI visually busy
-- rely on tiny text
-- make it feel like a generic sports-betting app
-
----
-
-## Design Summary
+# Design Summary
 
 Gimme Golf should feel like:
-- a beautiful modern scorecard
-- a premium mobile golf companion
-- a product that respects golf traditions
-- a game system layered on top of that tradition
 
-The visual identity should say:
-“this belongs on a golf course”
-not
-“this belongs in a casino”
+- a modern digital scorecard
+- clean and minimal
+- readable in sunlight
+- respectful of golf tradition
+- quietly playful when the game mechanics shine
+
+The interface should feel **simple, elegant, and structured**, letting the gameplay provide the fun rather than the visual noise.
