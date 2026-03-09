@@ -14,6 +14,18 @@ function isBooleanOrUndefined(value: unknown): boolean {
   return typeof value === 'boolean' || typeof value === 'undefined'
 }
 
+function isPresetIdOrUndefined(value: unknown): boolean {
+  return (
+    typeof value === 'undefined' ||
+    value === 'casual' ||
+    value === 'competitive' ||
+    value === 'party' ||
+    value === 'balanced' ||
+    value === 'powerUps' ||
+    value === 'custom'
+  )
+}
+
 function isFeaturedHolesConfigLike(value: unknown): boolean {
   if (!isRecord(value)) {
     return false
@@ -45,6 +57,8 @@ function isRoundStateLike(value: unknown): value is RoundState {
     (config.gameMode === undefined ||
       config.gameMode === 'cards' ||
       config.gameMode === 'powerUps') &&
+    isPresetIdOrUndefined(config.selectedPresetId) &&
+    (config.customModeName === undefined || typeof config.customModeName === 'string') &&
     Array.isArray(value.players) &&
     Array.isArray(value.holes) &&
     Array.isArray(value.holeCards) &&

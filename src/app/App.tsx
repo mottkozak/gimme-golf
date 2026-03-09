@@ -115,17 +115,11 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-shell__header">
-        <picture>
-          <source
-            media="(prefers-color-scheme: light)"
-            srcSet="/gimme-golf-logo-dark-black.png"
-          />
-          <img
-            className="app-logo"
-            src="/gimme-golf-logo-light-grey.png"
-            alt="GIMME GOLF"
-          />
-        </picture>
+        <img
+          className="app-logo"
+          src="/gimme-golf-logo.png"
+          alt="GIMME GOLF"
+        />
         {activeScreen !== 'home' && (
           <span className="chip">
             Hole {currentHole.holeNumber} / {roundState.config.holeCount}

@@ -6,14 +6,12 @@ import type {
   PublicCardResolutionState,
   PublicResolutionMode,
 } from '../types/game.ts'
-import { getMomentumTierLabel, MOMENTUM_RULES } from '../logic/gameBalance.ts'
 import {
   buildPublicResolutionNotes,
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
 import { getAssignedPowerUp } from '../logic/powerUps.ts'
-import { calculatePlayerHolePointBreakdown } from '../logic/scoring.ts'
 import type { ScreenProps } from './types.ts'
 
 type CanonicalPublicResolutionMode =
@@ -35,6 +33,8 @@ const PUBLIC_RESOLUTION_MODE_OPTIONS: Array<{
   { mode: 'trailing_player_selects_target', label: 'Trailing Selects Target' },
   { mode: 'pick_affected_players', label: 'Pick Affected Players' },
 ]
+
+const STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
 
 function normalizeMode(mode: PublicResolutionMode): CanonicalPublicResolutionMode {
   switch (mode) {
@@ -337,17 +337,8 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     })
   }
 
-  const setStrokes = (playerId: string, value: string) => {
+  const setStrokes = (playerId: string, nextStrokes: number | null) => {
     onUpdateRoundState((currentState) => {
-      const normalizedValue = value.trim()
-      const parsedValue = Number(normalizedValue)
-      const nextStrokes =
-        normalizedValue === ''
-          ? null
-          : Number.isFinite(parsedValue)
-            ? Math.max(1, Math.round(parsedValue))
-            : null
-
       const holeResults = [...currentState.holeResults]
       const holeResultState = holeResults[currentState.currentHoleIndex]
 
@@ -439,22 +430,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
           const hasPersonalCard = Boolean(selectedCard)
-          const pointBreakdown = calculatePlayerHolePointBreakdown(
-            player.id,
-            roundState.currentHoleIndex,
-            roundState.players,
-            roundState.holes,
-            roundState.holeCards,
-            roundState.holeResults,
-            roundState.config.toggles.momentumBonuses,
-          )
-          const nextSuccessBonus = roundState.config.toggles.momentumBonuses
-            ? MOMENTUM_RULES.bonusByTier[pointBreakdown.momentumTierBefore]
-            : 0
-          const momentumTierLabel = getMomentumTierLabel(pointBreakdown.momentumTierBefore)
 
           return (
-            <article key={player.id} className="panel inset stack-xs">
+            <article key={player.id} className="panel inset stack-xs hole-results-player-card">
               <div className="row-between">
                 <strong>{player.name}</strong>
                 {selectedCard ? (
@@ -484,63 +462,66 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   ? `${selectedCard.name} (${selectedCard.points} pts on success)`
                   : 'No personal card selected for this golfer.'}
               </p>
-              {!isPowerUpsMode && (
-                <p className="muted">
-                  Momentum: {pointBreakdown.streakBefore} streak ({momentumTierLabel})
-                  {nextSuccessBonus > 0 ? ` | Next success bonus +${nextSuccessBonus}` : ''}
-                </p>
-              )}
-
-              <label className="field field--inline">
-                <span className="label">Strokes</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={strokes ?? ''}
-                  onChange={(event) => setStrokes(player.id, event.target.value)}
-                  onFocus={(event) => event.currentTarget.select()}
-                />
-              </label>
 
               {isPowerUpsMode ? (
                 <p className="muted">
                   Power Up: <strong>{powerUpUsed ? 'Used' : 'Unused'}</strong>
                 </p>
               ) : hasPersonalCard ? (
-                <div className="button-row">
-                  <button
-                    type="button"
-                    className={missionStatus === 'success' ? 'button-primary' : ''}
-                    onClick={() => setMissionStatus(player.id, 'success')}
-                  >
-                    Challenge: Yes
-                  </button>
-                  <button
-                    type="button"
-                    className={missionStatus === 'failed' ? 'button-primary' : ''}
-                    onClick={() => setMissionStatus(player.id, 'failed')}
-                  >
-                    Challenge: No
-                  </button>
-                </div>
+                <section className="stack-xs">
+                  <span className="label">Challenge</span>
+                  <div className="button-row hole-results-mission-row">
+                    <button
+                      type="button"
+                      className={missionStatus === 'success' ? 'button-primary' : ''}
+                      onClick={() => setMissionStatus(player.id, 'success')}
+                    >
+                      Completed
+                    </button>
+                    <button
+                      type="button"
+                      className={missionStatus === 'failed' ? 'button-primary' : ''}
+                      onClick={() => setMissionStatus(player.id, 'failed')}
+                    >
+                      Failed
+                    </button>
+                  </div>
+                </section>
               ) : (
                 <p className="muted">No personal challenge to resolve for this golfer.</p>
               )}
 
-              <p className="muted">
-                {isPowerUpsMode
-                  ? 'Power Ups Mode does not award mission/game points.'
-                  : `Hole points: card ${pointBreakdown.baseMissionPoints > 0 ? '+' : ''}${
-                      pointBreakdown.baseMissionPoints
-                    }, featured ${pointBreakdown.featuredBonusPoints > 0 ? '+' : ''}${
-                      pointBreakdown.featuredBonusPoints
-                    }, momentum ${pointBreakdown.momentumBonus > 0 ? '+' : ''}${
-                      pointBreakdown.momentumBonus
-                    }, public ${pointBreakdown.publicDelta > 0 ? '+' : ''}${
-                      pointBreakdown.publicDelta
-                    } = ${pointBreakdown.total > 0 ? '+' : ''}${pointBreakdown.total}`}
-              </p>
+              <section className="stack-xs">
+                <div className="row-between">
+                  <span className="label">Strokes</span>
+                  <button
+                    type="button"
+                    className="chip chip-button"
+                    onClick={() => setStrokes(player.id, null)}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="button-row hole-results-strokes-row">
+                  {STROKE_OPTIONS.map((strokeOption) => {
+                    const isSelected = strokes === strokeOption
+
+                    return (
+                      <button
+                        key={strokeOption}
+                        type="button"
+                        className={`hole-results-stroke-button ${isSelected ? 'button-primary' : ''}`}
+                        onClick={() =>
+                          setStrokes(player.id, isSelected ? null : strokeOption)
+                        }
+                        aria-pressed={isSelected}
+                      >
+                        {strokeOption}
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
             </article>
           )
         })}

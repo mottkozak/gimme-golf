@@ -1,5 +1,6 @@
 import { normalizeEnabledPackIds } from '../data/cardPacks.ts'
 import { normalizeFeaturedHolesConfig } from './featuredHoles.ts'
+import { normalizePresetConfig } from './gameModePresets.ts'
 import type { CardPackId } from '../types/cards.ts'
 import type { RoundConfig } from '../types/game.ts'
 
@@ -20,15 +21,19 @@ export function toggleEnabledPack(
 }
 
 export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
-  const gameMode = config.gameMode === 'powerUps' ? 'powerUps' : 'cards'
-  const enabledPackIds = normalizeEnabledPackIds(config.enabledPackIds)
-  const autoAssignOne = Boolean(config.toggles.autoAssignOne)
+  const presetConfig = normalizePresetConfig(config)
+  const gameMode = presetConfig.gameMode === 'powerUps' ? 'powerUps' : 'cards'
+  const enabledPackIds =
+    gameMode === 'powerUps' ? [] : normalizeEnabledPackIds(presetConfig.enabledPackIds)
+  const autoAssignOne = Boolean(presetConfig.toggles.autoAssignOne)
   const momentumBonuses =
-    typeof config.toggles.momentumBonuses === 'boolean' ? config.toggles.momentumBonuses : true
+    typeof presetConfig.toggles.momentumBonuses === 'boolean'
+      ? presetConfig.toggles.momentumBonuses
+      : true
   const hasChaosPack = enabledPackIds.includes('chaos')
   const hasPropsPack = enabledPackIds.includes('props')
   const featuredHoles = normalizeFeaturedHolesConfig(
-    config.featuredHoles,
+    presetConfig.featuredHoles,
     gameMode === 'cards',
   )
   const featuredHolesForMode =
@@ -40,12 +45,12 @@ export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
       : featuredHoles
 
   return {
-    ...config,
+    ...presetConfig,
     gameMode,
     enabledPackIds,
     featuredHoles: featuredHolesForMode,
     toggles: {
-      ...config.toggles,
+      ...presetConfig.toggles,
       momentumBonuses,
       drawTwoPickOne: !autoAssignOne,
       autoAssignOne,

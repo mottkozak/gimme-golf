@@ -3,11 +3,13 @@ import {
   dealPublicCardsForHole,
   getInitialSelectedPersonalCardId,
 } from '../logic/dealCards.ts'
-import { DEFAULT_FEATURED_HOLES_CONFIG } from '../logic/featuredHoles.ts'
 import { buildEmptyHolePowerUpStates } from '../logic/powerUps.ts'
 import { createDefaultHoles } from '../logic/roundSetup.ts'
 import { createPlayerTotals } from '../logic/scoring.ts'
-import { getDefaultEnabledPackIds } from './cardPacks.ts'
+import {
+  DEFAULT_CUSTOM_MODE_NAME,
+  GAME_MODE_PRESETS_BY_ID,
+} from './gameModePresets.ts'
 import type { HoleTag } from '../types/cards.ts'
 import type {
   HoleCardsState,
@@ -19,19 +21,29 @@ import type {
 } from '../types/game.ts'
 import { PERSONAL_CARDS, PUBLIC_CARDS } from './cards.ts'
 
+const MOCK_PRESET_SETTINGS = GAME_MODE_PRESETS_BY_ID.balanced.settings
+
+if (!MOCK_PRESET_SETTINGS) {
+  throw new Error('Balanced preset settings are required for mock round configuration.')
+}
+
 const MOCK_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
-  gameMode: 'cards',
-  enabledPackIds: getDefaultEnabledPackIds(),
-  featuredHoles: DEFAULT_FEATURED_HOLES_CONFIG,
+  gameMode: MOCK_PRESET_SETTINGS.gameMode,
+  selectedPresetId: 'balanced',
+  customModeName: DEFAULT_CUSTOM_MODE_NAME,
+  enabledPackIds: [...MOCK_PRESET_SETTINGS.enabledPackIds],
+  featuredHoles: {
+    ...MOCK_PRESET_SETTINGS.featuredHoles,
+  },
   toggles: {
-    dynamicDifficulty: true,
-    momentumBonuses: true,
-    drawTwoPickOne: true,
-    autoAssignOne: false,
-    enableChaosCards: true,
-    enablePropCards: true,
+    dynamicDifficulty: MOCK_PRESET_SETTINGS.toggles.dynamicDifficulty,
+    momentumBonuses: MOCK_PRESET_SETTINGS.toggles.momentumBonuses,
+    drawTwoPickOne: MOCK_PRESET_SETTINGS.toggles.drawTwoPickOne,
+    autoAssignOne: MOCK_PRESET_SETTINGS.toggles.autoAssignOne,
+    enableChaosCards: MOCK_PRESET_SETTINGS.enabledPackIds.includes('chaos'),
+    enablePropCards: MOCK_PRESET_SETTINGS.enabledPackIds.includes('props'),
   },
 }
 

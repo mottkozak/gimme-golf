@@ -12,6 +12,7 @@ interface LeaderboardTableProps {
   sortMode?: LeaderboardSortMode
   onSortChange?: (sortMode: LeaderboardSortMode) => void
   momentumByPlayerId?: Record<string, LeaderboardMomentumValue>
+  showMomentum?: boolean
 }
 
 function LeaderboardTable({
@@ -20,7 +21,10 @@ function LeaderboardTable({
   sortMode,
   onSortChange,
   momentumByPlayerId,
+  showMomentum,
 }: LeaderboardTableProps) {
+  const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
+
   const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
     if (!onSortChange) {
       return <span>{label}</span>
@@ -47,29 +51,43 @@ function LeaderboardTable({
         <table className="leaderboard-table">
           <thead>
             <tr>
-              <th>Rank</th>
-              <th>Player</th>
-              <th>Heat</th>
-              <th>{renderSortButton('Real', 'realScore')}</th>
-              <th>{renderSortButton('Points', 'gamePoints')}</th>
-              <th>{renderSortButton('Adjusted', 'adjustedScore')}</th>
+              <th className="leaderboard-table__th leaderboard-table__th--rank">Rank</th>
+              <th className="leaderboard-table__th leaderboard-table__th--player">Player</th>
+              {shouldShowMomentum && <th className="leaderboard-table__th">Heat</th>}
+              <th className="leaderboard-table__th leaderboard-table__th--metric">
+                {renderSortButton('Real', 'realScore')}
+              </th>
+              <th className="leaderboard-table__th leaderboard-table__th--metric">
+                {renderSortButton('Points', 'gamePoints')}
+              </th>
+              <th className="leaderboard-table__th leaderboard-table__th--metric">
+                {renderSortButton('Adjusted', 'adjustedScore')}
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, index) => (
               <tr key={row.playerId}>
-                <td>{index + 1}</td>
-                <td>{row.playerName}</td>
-                <td>
-                  {momentumByPlayerId
-                    ? `${momentumByPlayerId[row.playerId]?.streak ?? 0} ${
-                        momentumByPlayerId[row.playerId]?.tierLabel ?? 'Cold'
-                      }`
-                    : '-'}
+                <td className="leaderboard-table__cell leaderboard-table__cell--rank">{index + 1}</td>
+                <td className="leaderboard-table__cell leaderboard-table__cell--player">{row.playerName}</td>
+                {shouldShowMomentum && (
+                  <td className="leaderboard-table__cell">
+                    {momentumByPlayerId
+                      ? `${momentumByPlayerId[row.playerId]?.streak ?? 0} ${
+                          momentumByPlayerId[row.playerId]?.tierLabel ?? 'Cold'
+                        }`
+                      : '-'}
+                  </td>
+                )}
+                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                  {row.realScore}
                 </td>
-                <td>{row.realScore}</td>
-                <td>{row.gamePoints}</td>
-                <td>{row.adjustedScore}</td>
+                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                  {row.gamePoints}
+                </td>
+                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                  {row.adjustedScore}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -1,11 +1,18 @@
 import { useState } from 'react'
 import CardPackToggleRow from '../components/CardPackToggleRow.tsx'
+import GameModePresetRow from '../components/GameModePresetRow.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
 import ToggleRow from '../components/ToggleRow.tsx'
 import { CARD_PACKS, CARD_PACKS_BY_ID } from '../data/cardPacks.ts'
+import {
+  GAME_MODE_FEATURES_BY_ID,
+  GAME_MODE_PRESETS,
+  GAME_MODE_PRESETS_BY_ID,
+} from '../data/gameModePresets.ts'
 import { FEATURED_HOLES_BY_ID } from '../data/featuredHoles.ts'
 import { isPackUnlocked } from '../logic/entitlements.ts'
 import { getFeaturedHoleTargetCount } from '../logic/featuredHoles.ts'
+import { applyGameModePreset } from '../logic/gameModePresets.ts'
 import { toggleEnabledPack } from '../logic/roundConfig.ts'
 import {
   applyCourseStyle,
@@ -22,7 +29,7 @@ import type {
   CourseStyle,
   FeaturedHoleAssignmentMode,
   FeaturedHoleFrequency,
-  GameMode,
+  GameModePresetId,
   HoleCount,
   Player,
 } from '../types/game.ts'
@@ -35,7 +42,9 @@ function createDraftId(position: number): string {
 
 function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activePackInfoId, setActivePackInfoId] = useState<CardPackId | null>(null)
+  const [activePresetInfoId, setActivePresetInfoId] = useState<GameModePresetId | null>(null)
   const { config, players } = roundState
+  const isCustomPreset = config.selectedPresetId === 'custom'
   const isPowerUpsMode = config.gameMode === 'powerUps'
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
@@ -81,19 +90,20 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     })
   }
 
-  const setGameMode = (gameMode: GameMode) => {
+  const setPreset = (presetId: GameModePresetId) => {
+    updateSetup((draft) => ({
+      ...draft,
+      config: applyGameModePreset(draft.config, presetId),
+    }))
+  }
+
+  const setCustomModeName = (customModeName: string) => {
     updateSetup((draft) => ({
       ...draft,
       config: {
         ...draft.config,
-        gameMode,
-        featuredHoles:
-          gameMode === 'powerUps'
-            ? {
-                ...draft.config.featuredHoles,
-                enabled: false,
-              }
-            : draft.config.featuredHoles,
+        selectedPresetId: 'custom',
+        customModeName,
       },
     }))
   }
@@ -164,6 +174,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         toggles: {
           ...draft.config.toggles,
           dynamicDifficulty: checked,
@@ -177,6 +188,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         toggles: {
           ...draft.config.toggles,
           momentumBonuses: checked,
@@ -190,6 +202,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         featuredHoles: {
           ...draft.config.featuredHoles,
           enabled: checked,
@@ -203,6 +216,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         featuredHoles: {
           ...draft.config.featuredHoles,
           frequency,
@@ -216,6 +230,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         featuredHoles: {
           ...draft.config.featuredHoles,
           assignmentMode,
@@ -229,6 +244,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         enabledPackIds: toggleEnabledPack(draft.config.enabledPackIds, packId, enabled),
       },
     }))
@@ -239,6 +255,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       ...draft,
       config: {
         ...draft.config,
+        selectedPresetId: 'custom',
         toggles: {
           ...draft.config.toggles,
           drawTwoPickOne: mode === 'drawTwoPickOne',
@@ -257,6 +274,8 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   }
 
   const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] : null
+  const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] : null
+  const selectedPreset = GAME_MODE_PRESETS_BY_ID[config.selectedPresetId]
   const featuredHoles = roundState.holes.filter((hole) => hole.featuredHoleType !== null)
   const featuredHoleTargetCount = getFeaturedHoleTargetCount(
     config.holeCount,
@@ -268,39 +287,13 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
       <header className="screen__header">
         <h2>Round Setup</h2>
         <p className="muted">
-          Pick the round format, add golfers, and choose game options before hole 1.
+          Choose basics, add golfers, pick a game mode preset, then start the round.
         </p>
       </header>
 
       <section className="panel stack-xs">
-        <h3>Round Basics</h3>
+        <h3>1. Round Basics</h3>
         <p className="muted">Select hole count and course type.</p>
-
-        <div className="stack-xs">
-          <span className="label">Game Mode</span>
-          <div className="button-row">
-            <button
-              type="button"
-              className={config.gameMode === 'cards' ? 'button-primary' : ''}
-              onClick={() => setGameMode('cards')}
-            >
-              Cards Mode
-            </button>
-            <button
-              type="button"
-              className={config.gameMode === 'powerUps' ? 'button-primary' : ''}
-              onClick={() => setGameMode('powerUps')}
-            >
-              Power Ups Mode
-            </button>
-          </div>
-          {isPowerUpsMode && (
-            <p className="muted">
-              Power Ups Mode deals one random power-up per golfer each hole and disables mission
-              cards.
-            </p>
-          )}
-        </div>
 
         <div className="stack-xs">
           <span className="label">Holes</span>
@@ -345,7 +338,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
 
       <section className="panel stack-xs">
         <div className="row-between">
-          <h3>Golfers</h3>
+          <h3>2. Golfers</h3>
           <span className="chip">
             {players.length} / {MAX_GOLFERS}
           </span>
@@ -373,8 +366,42 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </button>
       </section>
 
-      {!isPowerUpsMode && (
+      <section className="panel stack-xs">
+        <h3>3. Game Mode Preset</h3>
+        <p className="muted">
+          Pick a preset to auto-configure packs and gameplay settings. Use Custom for full control.
+        </p>
+
+        <div className="stack-xs">
+          {GAME_MODE_PRESETS.map((preset) => (
+            <GameModePresetRow
+              key={preset.id}
+              preset={preset}
+              selected={config.selectedPresetId === preset.id}
+              onSelect={() => setPreset(preset.id)}
+              onOpenInfo={() => setActivePresetInfoId(preset.id)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {isCustomPreset && (
         <>
+          <section className="panel stack-xs">
+            <h3>4. Custom Mode</h3>
+            <p className="muted">Customize this round only.</p>
+
+            <label className="field">
+              <span className="label">Custom Mode Name</span>
+              <input
+                type="text"
+                value={config.customModeName}
+                onChange={(event) => setCustomModeName(event.target.value)}
+                placeholder="My Custom Mode"
+              />
+            </label>
+          </section>
+
           <section className="panel stack-xs">
             <h3>Card Packs</h3>
             <p className="muted">Enable the game modes you want in this round.</p>
@@ -520,13 +547,32 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </>
       )}
 
+      {!isCustomPreset && selectedPreset && (
+        <section className="panel stack-xs">
+          <h3>Preset Active: {selectedPreset.name}</h3>
+          <p className="muted">{selectedPreset.shortDescription}</p>
+          <p className="muted">Includes: {selectedPreset.includesLabel}</p>
+          <p className="muted">Best for: {selectedPreset.bestForLabel}</p>
+          {isPowerUpsMode ? (
+            <p className="muted">
+              Power Ups Mode disables mission cards and deals one random power-up per golfer each
+              hole.
+            </p>
+          ) : (
+            <p className="muted">
+              Card packs and toggles are preset-configured. Choose Custom to edit them manually.
+            </p>
+          )}
+        </section>
+      )}
+
       <section className="panel stack-xs">
         <button type="button" className="button-primary" onClick={beginRound}>
-          Begin Round
+          Start Round
         </button>
       </section>
 
-      {!isPowerUpsMode && activePackInfo && (
+      {isCustomPreset && activePackInfo && (
         <div
           className="modal-backdrop"
           role="presentation"
@@ -560,6 +606,48 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               Premium-ready: {activePackInfo.isPremium ? 'Yes' : 'No'}
               {activePackInfo.premiumTier ? ` (${activePackInfo.premiumTier})` : ''}
             </p>
+          </section>
+        </div>
+      )}
+
+      {activePresetInfo && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => setActivePresetInfoId(null)}
+        >
+          <section
+            className="panel modal-card stack-xs"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="preset-info-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="row-between">
+              <h3 id="preset-info-title">{activePresetInfo.name}</h3>
+              <button type="button" onClick={() => setActivePresetInfoId(null)}>
+                Close
+              </button>
+            </div>
+
+            <p>{activePresetInfo.longDescription}</p>
+            <p className="muted">Includes: {activePresetInfo.includesLabel}</p>
+            <p className="muted">Best for: {activePresetInfo.bestForLabel}</p>
+            <p className="muted">Preset type: {activePresetInfo.settings ? 'Auto-configured' : 'Customizable'}</p>
+
+            <section className="stack-xs">
+              <span className="label">Included Modes</span>
+              {activePresetInfo.includedFeatureIds.map((featureId) => {
+                const feature = GAME_MODE_FEATURES_BY_ID[featureId]
+
+                return (
+                  <div key={feature.id} className="preset-feature-row">
+                    <strong>{feature.name}</strong>
+                    <p className="muted">{feature.shortDescription}</p>
+                  </div>
+                )
+              })}
+            </section>
           </section>
         </div>
       )}

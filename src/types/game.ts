@@ -10,6 +10,13 @@ export type HoleCount = 9 | 18
 
 export type CourseStyle = 'par3' | 'standard' | 'custom'
 export type GameMode = 'cards' | 'powerUps'
+export type GameModePresetId =
+  | 'casual'
+  | 'competitive'
+  | 'party'
+  | 'balanced'
+  | 'powerUps'
+  | 'custom'
 
 export type FeaturedHoleType = 'jackpot' | 'chaos' | 'double_points' | 'rivalry' | 'no_mercy'
 export type FeaturedHoleFrequency = 'low' | 'normal' | 'high'
@@ -34,6 +41,8 @@ export interface RoundConfig {
   holeCount: HoleCount
   courseStyle: CourseStyle
   gameMode: GameMode
+  selectedPresetId: GameModePresetId
+  customModeName: string
   enabledPackIds: CardPackId[]
   featuredHoles: FeaturedHolesConfig
   toggles: RoundToggles

@@ -1,23 +1,36 @@
 import type { Player, RoundConfig, RoundState } from '../types/game.ts'
-import { getDefaultEnabledPackIds } from '../data/cardPacks.ts'
+import {
+  DEFAULT_CUSTOM_MODE_NAME,
+  DEFAULT_GAME_MODE_PRESET_ID,
+  GAME_MODE_PRESETS_BY_ID,
+} from '../data/gameModePresets.ts'
 import { buildEmptyHolePowerUpStates } from './powerUps.ts'
 import { applyRoundSetupDraft, DEFAULT_EXPECTED_SCORE } from './roundSetup.ts'
 import { createPlayerTotals } from './scoring.ts'
-import { DEFAULT_FEATURED_HOLES_CONFIG } from './featuredHoles.ts'
+
+const DEFAULT_PRESET_SETTINGS = GAME_MODE_PRESETS_BY_ID[DEFAULT_GAME_MODE_PRESET_ID].settings
+
+if (!DEFAULT_PRESET_SETTINGS) {
+  throw new Error('Default game mode preset must include settings.')
+}
 
 const DEFAULT_ROUND_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
-  gameMode: 'cards',
-  enabledPackIds: getDefaultEnabledPackIds(),
-  featuredHoles: DEFAULT_FEATURED_HOLES_CONFIG,
+  gameMode: DEFAULT_PRESET_SETTINGS.gameMode,
+  selectedPresetId: DEFAULT_GAME_MODE_PRESET_ID,
+  customModeName: DEFAULT_CUSTOM_MODE_NAME,
+  enabledPackIds: [...DEFAULT_PRESET_SETTINGS.enabledPackIds],
+  featuredHoles: {
+    ...DEFAULT_PRESET_SETTINGS.featuredHoles,
+  },
   toggles: {
-    dynamicDifficulty: true,
-    momentumBonuses: true,
-    drawTwoPickOne: true,
-    autoAssignOne: false,
-    enableChaosCards: true,
-    enablePropCards: true,
+    dynamicDifficulty: DEFAULT_PRESET_SETTINGS.toggles.dynamicDifficulty,
+    momentumBonuses: DEFAULT_PRESET_SETTINGS.toggles.momentumBonuses,
+    drawTwoPickOne: DEFAULT_PRESET_SETTINGS.toggles.drawTwoPickOne,
+    autoAssignOne: DEFAULT_PRESET_SETTINGS.toggles.autoAssignOne,
+    enableChaosCards: DEFAULT_PRESET_SETTINGS.enabledPackIds.includes('chaos'),
+    enablePropCards: DEFAULT_PRESET_SETTINGS.enabledPackIds.includes('props'),
   },
 }
 

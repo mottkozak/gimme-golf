@@ -1,36 +1,110 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --bg-app: #0b0f10;
-  --bg-panel: #12191b;
-  --bg-inset: #0f1517;
-  --border-subtle: #3a474e;
-  --text-primary: #f2f8fb;
-  --text-secondary: #c3d0d8;
-  --accent: #5fe29c;
-  --accent-strong: #3fc080;
-  --danger: #ff8a8a;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+  /* Typography */
+  --font-ui: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'DM Serif Display', 'Times New Roman', serif;
+  --font-numeric: 'IBM Plex Mono', 'SFMono-Regular', Menlo, Monaco, monospace;
+
+  /* Brand palette */
+  --color-bg-cream: #f7f4ec;
+  --color-bg-white: #fcfbf8;
+  --color-bg-sand: #ede6d6;
+  --color-text-strong: #1f241f;
+  --color-text-muted: #5f665f;
+  --color-green: #1f5a3d;
+  --color-green-deep: #153b2a;
+  --color-green-fresh: #3e8a5e;
+  --color-blue: #4d7c8a;
+  --color-gold: #c89b3c;
+  --color-red: #a94a3b;
+  --color-clay: #b97846;
+  --color-border: #d7d2c6;
+
+  /* Semantic surfaces */
+  --surface-app: var(--color-bg-cream);
+  --surface-panel: var(--color-bg-white);
+  --surface-panel-muted: var(--color-bg-sand);
+  --surface-elevated: #fffdf9;
+  --surface-info: #e5eef1;
+  --surface-success: #e5f3ea;
+  --surface-warning: #f7e8d6;
+  --surface-danger: #f5dfda;
+
+  /* Semantic text */
+  --text-primary: var(--color-text-strong);
+  --text-secondary: var(--color-text-muted);
+  --text-on-primary: var(--color-bg-white);
+  --text-success: #24613f;
+  --text-warning: #915e21;
+  --text-danger: #8d3b31;
+  --text-info: #2d5d6b;
+
+  /* Semantic actions */
+  --accent: var(--color-green);
+  --accent-strong: var(--color-green-deep);
+  --accent-soft: color-mix(in srgb, var(--color-green-fresh) 30%, var(--surface-panel));
+  --info: var(--color-blue);
+  --warning: var(--color-gold);
+  --danger: var(--color-red);
+  --novelty: var(--color-clay);
+
+  /* Legacy aliases to keep existing class names stable */
+  --bg-app: var(--surface-app);
+  --bg-panel: var(--surface-panel);
+  --bg-inset: var(--surface-panel-muted);
+  --border-subtle: var(--color-border);
+
+  /* Layout + rhythm */
+  --radius-lg: 18px;
+  --radius-md: 16px;
+  --radius-sm: 14px;
+  --radius-xs: 10px;
+  --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-5: 1.25rem;
-  --shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+
+  --shadow-soft: 0 1px 2px rgba(31, 36, 31, 0.08);
+  --shadow-card: 0 6px 18px rgba(31, 36, 31, 0.08);
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+
+  --motion-fast: 140ms;
+  --motion-base: 180ms;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    color-scheme: light;
-    --bg-app: #eef4f8;
-    --bg-panel: #ffffff;
-    --bg-inset: #e8eef4;
-    --border-subtle: #bcc9d7;
-    --text-primary: #0f1a24;
-    --text-secondary: #324555;
-    --accent: #157a4f;
-    --accent-strong: #0f633f;
-    --danger: #a83b3b;
-    --shadow: 0 8px 28px rgba(25, 35, 47, 0.1);
+    color-scheme: dark;
+
+    --surface-app: #171d18;
+    --surface-panel: #202921;
+    --surface-panel-muted: #263127;
+    --surface-elevated: #2a352b;
+    --color-border: #49564b;
+
+    --text-primary: #f7f4ec;
+    --text-secondary: #d0cab9;
+
+    --accent: #3e8a5e;
+    --accent-strong: #5aa674;
+    --accent-soft: color-mix(in srgb, #3e8a5e 34%, #202921);
+    --info: #73a5b1;
+    --warning: #d5b06a;
+    --danger: #c76d5f;
+    --novelty: #c99260;
+
+    --surface-info: #24353a;
+    --surface-success: #203427;
+    --surface-warning: #3b2f1f;
+    --surface-danger: #412a27;
+
+    --text-success: #9ed0ae;
+    --text-warning: #efce8e;
+    --text-danger: #f0b2ab;
+    --text-info: #9dc3cc;
   }
 }
