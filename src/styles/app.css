@@ -1046,6 +1046,233 @@ main {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(
+      180deg,
+      var(--surface-panel) 0%,
+      var(--surface-app) 100%
+    );
+  }
+
+  h1,
+  h2 {
+    color: var(--text-primary);
+  }
+
+  .app-shell__header {
+    border-bottom-color: var(--color-border);
+  }
+
+  button {
+    background: transparent;
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  button:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .button-primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-on-primary);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 60%, transparent),
+      var(--glow-accent);
+  }
+
+  .button-primary:hover:not(:disabled) {
+    border-color: var(--accent-strong);
+    background: var(--accent-strong);
+  }
+
+  .button-danger {
+    border-color: color-mix(in srgb, var(--danger) 76%, var(--color-border));
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+    color: #ffc2bc;
+  }
+
+  .button-danger:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--danger) 90%, var(--color-border));
+    background: color-mix(in srgb, var(--danger) 22%, transparent);
+    box-shadow: var(--glow-danger);
+  }
+
+  .panel {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .panel.inset {
+    background: var(--surface-panel);
+  }
+
+  .toggle-row,
+  .pack-row,
+  .preset-row,
+  .preset-feature-row,
+  .summary-stat,
+  .award-row,
+  .recap-item,
+  .hole-summary-player-row,
+  .challenge-card,
+  .public-card,
+  .power-up-card,
+  .hole-summary-card,
+  .hole-results-player-card,
+  .featured-hole-preview-row {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+  }
+
+  .chip,
+  .chip-button,
+  .status-pill,
+  .recap-pill,
+  .tag-pill,
+  .featured-hole-banner__chip {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .tag-pill.active,
+  .preset-row--selected,
+  .challenge-card.selected {
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--accent) 18%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 92%, transparent)
+      ),
+      var(--surface-elevated);
+    border-color: color-mix(in srgb, var(--accent) 72%, var(--color-border));
+    box-shadow: var(--glow-accent);
+  }
+
+  .challenge-card.offer-hard {
+    border-color: color-mix(in srgb, var(--danger) 72%, var(--color-border));
+  }
+
+  .challenge-card.offer-hard.selected {
+    box-shadow: var(--glow-danger);
+  }
+
+  .power-up-card {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 10%, transparent),
+        color-mix(in srgb, var(--warning) 7%, transparent)
+      ),
+      var(--surface-elevated);
+  }
+
+  .power-up-chip {
+    border-color: color-mix(in srgb, var(--accent) 64%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-elevated));
+    color: var(--text-primary);
+  }
+
+  .power-up-chip--legendary {
+    border-color: color-mix(in srgb, var(--warning) 75%, var(--color-border));
+    background: color-mix(in srgb, var(--warning) 18%, var(--surface-elevated));
+    color: #f6dd8b;
+  }
+
+  .recap-highlight {
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--color-border));
+    background:
+      linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--accent) 15%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 85%, transparent)
+      ),
+      var(--surface-elevated);
+    color: var(--text-primary);
+    box-shadow: var(--glow-accent);
+  }
+
+  .featured-hole-banner {
+    border-color: color-mix(in srgb, var(--accent) 80%, var(--color-border));
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 18%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      var(--surface-elevated);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+      var(--glow-accent);
+  }
+
+  .featured-hole-chip,
+  .award-row--major {
+    box-shadow: var(--glow-warning);
+  }
+
+  .featured-hole-preview-row {
+    background:
+      linear-gradient(
+        130deg,
+        color-mix(in srgb, var(--warning) 14%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      var(--surface-elevated);
+  }
+
+  .player-card > header strong,
+  .hole-results-player-card > .row-between > strong,
+  .hole-summary-player-row > strong,
+  .challenge-card > header strong,
+  .public-card > header strong,
+  .summary-stat strong,
+  .award-title {
+    color: color-mix(in srgb, var(--accent) 74%, #ffffff);
+  }
+
+  .leaderboard-table__th {
+    background: var(--surface-panel);
+    border-bottom-color: var(--color-border);
+  }
+
+  .leaderboard-table__th,
+  .leaderboard-table__cell {
+    border-bottom-color: color-mix(in srgb, var(--color-border) 90%, transparent);
+  }
+
+  .leaderboard-table tbody tr:nth-child(even) .leaderboard-table__cell {
+    background: color-mix(in srgb, var(--surface-panel) 85%, transparent);
+  }
+
+  .table-sort-button.active {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+
+  .hole-results-stroke-button {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .hole-results-stroke-button.button-primary {
+    color: #0b0b0b;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 75%, transparent),
+      var(--glow-accent);
+  }
+
+  .modal-backdrop {
+    background: rgba(6, 6, 6, 0.72);
+  }
+}
+
 @media (prefers-contrast: more) {
   button,
   input,
