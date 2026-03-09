@@ -1,31 +1,142 @@
 import { useEffect, useState } from 'react'
-import type { PersonalCard } from '../types/cards.ts'
+import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
+import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type {
   MissionStatus,
   PublicCardResolutionState,
   PublicResolutionMode,
 } from '../types/game.ts'
+import { getMomentumTierLabel, MOMENTUM_RULES } from '../logic/gameBalance.ts'
 import {
   buildPublicResolutionNotes,
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
+import { getAssignedPowerUp } from '../logic/powerUps.ts'
+import { calculatePlayerHolePointBreakdown } from '../logic/scoring.ts'
 import type { ScreenProps } from './types.ts'
+
+type CanonicalPublicResolutionMode =
+  | 'yes_no_triggered'
+  | 'vote_target_player'
+  | 'choose_one_of_two_effects'
+  | 'leader_selects_target'
+  | 'trailing_player_selects_target'
+  | 'pick_affected_players'
+
+const PUBLIC_RESOLUTION_MODE_OPTIONS: Array<{
+  mode: CanonicalPublicResolutionMode
+  label: string
+}> = [
+  { mode: 'yes_no_triggered', label: 'Yes / No Trigger' },
+  { mode: 'vote_target_player', label: 'Vote Target' },
+  { mode: 'choose_one_of_two_effects', label: 'Choose Effect A/B' },
+  { mode: 'leader_selects_target', label: 'Leader Selects Target' },
+  { mode: 'trailing_player_selects_target', label: 'Trailing Selects Target' },
+  { mode: 'pick_affected_players', label: 'Pick Affected Players' },
+]
+
+function normalizeMode(mode: PublicResolutionMode): CanonicalPublicResolutionMode {
+  switch (mode) {
+    case 'yesNoTriggered':
+      return 'yes_no_triggered'
+    case 'winningPlayer':
+      return 'leader_selects_target'
+    case 'affectedPlayers':
+      return 'pick_affected_players'
+    default:
+      return mode
+  }
+}
 
 function isResolvedMissionStatus(status: MissionStatus): boolean {
   return status === 'success' || status === 'failed'
 }
 
-function isResolutionComplete(resolution: PublicCardResolutionState): boolean {
+type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
+
+function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
+  const absolutePoints = Math.max(1, Math.abs(card.points))
+  return (
+    card.interaction?.effectOptions ?? [
+      {
+        id: 'effect-positive',
+        label: `+${absolutePoints} to selected players`,
+        pointsDelta: absolutePoints,
+        targetScope: 'affected',
+      },
+      {
+        id: 'effect-negative',
+        label: `-${absolutePoints} to selected players`,
+        pointsDelta: -absolutePoints,
+        targetScope: 'affected',
+      },
+    ]
+  )
+}
+
+function getSelectedEffectOption(
+  card: PublicCard,
+  resolution: PublicCardResolutionState,
+): EffectOption | null {
+  const effectOptions = getEffectOptions(card)
+  return (
+    effectOptions.find((effect) => effect.id === resolution.selectedEffectOptionId) ??
+    effectOptions[0] ??
+    null
+  )
+}
+
+function hasValidVoteSelection(
+  resolution: PublicCardResolutionState,
+  playerIds: string[],
+): boolean {
+  return playerIds.every((playerId) => {
+    const votedPlayerId = resolution.targetPlayerIdByVoterId[playerId]
+    return typeof votedPlayerId === 'string' && votedPlayerId.length > 0
+  })
+}
+
+function isResolutionComplete(
+  card: PublicCard,
+  resolution: PublicCardResolutionState,
+  playerIds: string[],
+): boolean {
   if (!resolution.triggered) {
     return true
   }
 
-  if (resolution.mode === 'yesNoTriggered') {
+  const normalizedMode = normalizeMode(resolution.mode)
+
+  if (normalizedMode === 'yes_no_triggered') {
     return true
   }
 
-  if (resolution.mode === 'winningPlayer') {
+  if (normalizedMode === 'vote_target_player') {
+    return hasValidVoteSelection(resolution, playerIds)
+  }
+
+  if (
+    normalizedMode === 'leader_selects_target' ||
+    normalizedMode === 'trailing_player_selects_target'
+  ) {
+    return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
+  }
+
+  if (normalizedMode === 'pick_affected_players') {
+    return resolution.affectedPlayerIds.length > 0
+  }
+
+  const selectedEffectOption = getSelectedEffectOption(card, resolution)
+  if (!selectedEffectOption) {
+    return false
+  }
+
+  if (selectedEffectOption.targetScope === 'all') {
+    return true
+  }
+
+  if (selectedEffectOption.targetScope === 'target') {
     return typeof resolution.winningPlayerId === 'string' && resolution.winningPlayerId.length > 0
   }
 
@@ -41,6 +152,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
   const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
+  const currentHolePowerUps = roundState.holePowerUps[roundState.currentHoleIndex]
+  const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
+  const playerIds = roundState.players.map((player) => player.id)
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -115,12 +229,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           triggered,
           winningPlayerId: triggered ? existing.winningPlayerId : null,
           affectedPlayerIds: triggered ? existing.affectedPlayerIds : [],
+          targetPlayerIdByVoterId: triggered ? existing.targetPlayerIdByVoterId : {},
         },
       }
     })
   }
 
-  const setCardMode = (cardId: string, mode: PublicResolutionMode) => {
+  const setCardMode = (cardId: string, mode: CanonicalPublicResolutionMode) => {
     updatePublicResolutions((resolutionsByCardId) => {
       const existing = resolutionsByCardId[cardId]
       if (!existing) {
@@ -132,8 +247,15 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         [cardId]: {
           ...existing,
           mode,
-          winningPlayerId: mode === 'winningPlayer' ? existing.winningPlayerId : null,
-          affectedPlayerIds: mode === 'affectedPlayers' ? existing.affectedPlayerIds : [],
+          winningPlayerId:
+            mode === 'leader_selects_target' || mode === 'trailing_player_selects_target'
+              ? existing.winningPlayerId
+              : null,
+          affectedPlayerIds: mode === 'pick_affected_players' ? existing.affectedPlayerIds : [],
+          targetPlayerIdByVoterId:
+            mode === 'vote_target_player' ? existing.targetPlayerIdByVoterId : {},
+          selectedEffectOptionId:
+            mode === 'choose_one_of_two_effects' ? existing.selectedEffectOptionId : null,
         },
       }
     })
@@ -173,6 +295,43 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         [cardId]: {
           ...existing,
           affectedPlayerIds: nextAffectedPlayerIds,
+        },
+      }
+    })
+  }
+
+  const setVotedTargetPlayer = (cardId: string, voterId: string, votedPlayerId: string | null) => {
+    updatePublicResolutions((resolutionsByCardId) => {
+      const existing = resolutionsByCardId[cardId]
+      if (!existing) {
+        return resolutionsByCardId
+      }
+
+      return {
+        ...resolutionsByCardId,
+        [cardId]: {
+          ...existing,
+          targetPlayerIdByVoterId: {
+            ...existing.targetPlayerIdByVoterId,
+            [voterId]: votedPlayerId,
+          },
+        },
+      }
+    })
+  }
+
+  const setSelectedEffectOption = (cardId: string, effectOptionId: string) => {
+    updatePublicResolutions((resolutionsByCardId) => {
+      const existing = resolutionsByCardId[cardId]
+      if (!existing) {
+        return resolutionsByCardId
+      }
+
+      return {
+        ...resolutionsByCardId,
+        [cardId]: {
+          ...existing,
+          selectedEffectOptionId: effectOptionId,
         },
       }
     })
@@ -229,28 +388,40 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
   const isHoleDataReady = roundState.players.every((player) => {
     const strokes = currentResult.strokesByPlayerId[player.id]
+    if (typeof strokes !== 'number') {
+      return false
+    }
+
+    if (isPowerUpsMode) {
+      return true
+    }
+
     const missionStatus = currentResult.missionStatusByPlayerId[player.id]
     const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
     const requiresMissionResolution = dealtCards.length > 0
 
-    return (
-      typeof strokes === 'number' &&
-      (!requiresMissionResolution || isResolvedMissionStatus(missionStatus))
-    )
+    return !requiresMissionResolution || isResolvedMissionStatus(missionStatus)
   })
 
   const arePublicCardsResolved = currentHoleCards.publicCards.every((card) =>
-    isResolutionComplete(currentResolutions[card.id]),
+    isResolutionComplete(card, currentResolutions[card.id], playerIds),
   )
 
-  const canContinueToRecap = isHoleDataReady && arePublicCardsResolved
+  const canContinueToRecap =
+    isHoleDataReady && (isPowerUpsMode ? true : arePublicCardsResolved)
 
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
         <h2>Hole Results</h2>
-        <p className="muted">Enter strokes, challenge success, and resolve public cards manually.</p>
+        <p className="muted">
+          {isPowerUpsMode
+            ? 'Enter strokes and confirm each player power-up status.'
+            : 'Enter strokes, challenge success, and resolve public cards manually.'}
+        </p>
       </header>
+
+      <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
       <section className="panel stack-xs">
         <div className="row-between">
@@ -263,9 +434,24 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const selectedCard = (currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []).find(
             (card) => card.id === selectedCardId,
           )
+          const assignedPowerUp = getAssignedPowerUp(currentHolePowerUps, player.id)
+          const powerUpUsed = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
           const missionStatus = currentResult.missionStatusByPlayerId[player.id]
           const strokes = currentResult.strokesByPlayerId[player.id]
           const hasPersonalCard = Boolean(selectedCard)
+          const pointBreakdown = calculatePlayerHolePointBreakdown(
+            player.id,
+            roundState.currentHoleIndex,
+            roundState.players,
+            roundState.holes,
+            roundState.holeCards,
+            roundState.holeResults,
+            roundState.config.toggles.momentumBonuses,
+          )
+          const nextSuccessBonus = roundState.config.toggles.momentumBonuses
+            ? MOMENTUM_RULES.bonusByTier[pointBreakdown.momentumTierBefore]
+            : 0
+          const momentumTierLabel = getMomentumTierLabel(pointBreakdown.momentumTierBefore)
 
           return (
             <article key={player.id} className="panel inset stack-xs">
@@ -285,15 +471,25 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     Card: {selectedCard.code}
                   </button>
                 ) : (
-                  <span className="chip">No card</span>
+                  <span className="chip">{isPowerUpsMode ? 'Power Ups Mode' : 'No card'}</span>
                 )}
               </div>
 
               <p className="muted">
-                {selectedCard
+                {isPowerUpsMode
+                  ? assignedPowerUp
+                    ? `${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
+                    : 'No power-up assigned for this golfer.'
+                  : selectedCard
                   ? `${selectedCard.name} (${selectedCard.points} pts on success)`
                   : 'No personal card selected for this golfer.'}
               </p>
+              {!isPowerUpsMode && (
+                <p className="muted">
+                  Momentum: {pointBreakdown.streakBefore} streak ({momentumTierLabel})
+                  {nextSuccessBonus > 0 ? ` | Next success bonus +${nextSuccessBonus}` : ''}
+                </p>
+              )}
 
               <label className="field field--inline">
                 <span className="label">Strokes</span>
@@ -307,7 +503,11 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 />
               </label>
 
-              {hasPersonalCard ? (
+              {isPowerUpsMode ? (
+                <p className="muted">
+                  Power Up: <strong>{powerUpUsed ? 'Used' : 'Unused'}</strong>
+                </p>
+              ) : hasPersonalCard ? (
                 <div className="button-row">
                   <button
                     type="button"
@@ -327,18 +527,43 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               ) : (
                 <p className="muted">No personal challenge to resolve for this golfer.</p>
               )}
+
+              <p className="muted">
+                {isPowerUpsMode
+                  ? 'Power Ups Mode does not award mission/game points.'
+                  : `Hole points: card ${pointBreakdown.baseMissionPoints > 0 ? '+' : ''}${
+                      pointBreakdown.baseMissionPoints
+                    }, featured ${pointBreakdown.featuredBonusPoints > 0 ? '+' : ''}${
+                      pointBreakdown.featuredBonusPoints
+                    }, momentum ${pointBreakdown.momentumBonus > 0 ? '+' : ''}${
+                      pointBreakdown.momentumBonus
+                    }, public ${pointBreakdown.publicDelta > 0 ? '+' : ''}${
+                      pointBreakdown.publicDelta
+                    } = ${pointBreakdown.total > 0 ? '+' : ''}${pointBreakdown.total}`}
+              </p>
             </article>
           )
         })}
       </section>
 
-      {currentHoleCards.publicCards.length > 0 && (
+      {!isPowerUpsMode && currentHoleCards.publicCards.length > 0 && (
         <section className="panel stack-xs">
           <h3>Public Card Resolution</h3>
           <p className="muted">Choose a manual resolution style for each revealed public card.</p>
 
           {currentHoleCards.publicCards.map((card) => {
             const resolution = currentResolutions[card.id]
+            const normalizedMode = normalizeMode(resolution.mode)
+            const selectedEffectOption = getSelectedEffectOption(card, resolution)
+            const requiresTargetSelection =
+              normalizedMode === 'leader_selects_target' ||
+              normalizedMode === 'trailing_player_selects_target' ||
+              (normalizedMode === 'choose_one_of_two_effects' &&
+                selectedEffectOption?.targetScope === 'target')
+            const requiresAffectedSelection =
+              normalizedMode === 'pick_affected_players' ||
+              (normalizedMode === 'choose_one_of_two_effects' &&
+                selectedEffectOption?.targetScope === 'affected')
 
             return (
               <article key={card.id} className="panel inset stack-xs">
@@ -369,67 +594,115 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   </button>
                 </div>
 
-                <div className="button-row">
-                  <button
-                    type="button"
-                    className={resolution.mode === 'yesNoTriggered' ? 'button-primary' : ''}
-                    onClick={() => setCardMode(card.id, 'yesNoTriggered')}
+                <label className="field">
+                  <span className="label">Resolution Mode</span>
+                  <select
+                    value={normalizedMode}
+                    onChange={(event) =>
+                      setCardMode(card.id, event.target.value as CanonicalPublicResolutionMode)
+                    }
                   >
-                    Yes/No Trigger
-                  </button>
-                  <button
-                    type="button"
-                    className={resolution.mode === 'winningPlayer' ? 'button-primary' : ''}
-                    onClick={() => setCardMode(card.id, 'winningPlayer')}
-                  >
-                    Pick Winner
-                  </button>
-                  <button
-                    type="button"
-                    className={resolution.mode === 'affectedPlayers' ? 'button-primary' : ''}
-                    onClick={() => setCardMode(card.id, 'affectedPlayers')}
-                  >
-                    Pick Affected
-                  </button>
-                </div>
+                    {PUBLIC_RESOLUTION_MODE_OPTIONS.map((modeOption) => (
+                      <option key={modeOption.mode} value={modeOption.mode}>
+                        {modeOption.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-                {resolution.triggered && resolution.mode === 'winningPlayer' && (
-                  <div className="button-row row-wrap">
-                    {roundState.players.map((player) => (
-                      <button
-                        key={player.id}
-                        type="button"
-                        className={
-                          resolution.winningPlayerId === player.id ? 'button-primary' : ''
-                        }
-                        onClick={() => setCardWinner(card.id, player.id)}
-                      >
-                        {player.name}
-                      </button>
+                {resolution.triggered && normalizedMode === 'vote_target_player' && (
+                  <div className="stack-xs">
+                    <span className="label">Votes</span>
+                    {roundState.players.map((voter) => (
+                      <label key={voter.id} className="field field--inline">
+                        <span className="label">{voter.name}</span>
+                        <select
+                          value={resolution.targetPlayerIdByVoterId[voter.id] ?? ''}
+                          onChange={(event) =>
+                            setVotedTargetPlayer(
+                              card.id,
+                              voter.id,
+                              event.target.value || null,
+                            )
+                          }
+                        >
+                          <option value="">Select target</option>
+                          {roundState.players.map((candidate) => (
+                            <option key={candidate.id} value={candidate.id}>
+                              {candidate.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     ))}
                   </div>
                 )}
 
-                {resolution.triggered && resolution.mode === 'affectedPlayers' && (
-                  <div className="button-row row-wrap">
-                    {roundState.players.map((player) => {
-                      const isAffected = resolution.affectedPlayerIds.includes(player.id)
-
-                      return (
+                {resolution.triggered && normalizedMode === 'choose_one_of_two_effects' && (
+                  <div className="stack-xs">
+                    <span className="label">Effect Choice</span>
+                    <div className="button-row">
+                      {getEffectOptions(card).map((effectOption) => (
                         <button
-                          key={player.id}
+                          key={effectOption.id}
                           type="button"
-                          className={isAffected ? 'button-primary' : ''}
-                          onClick={() => toggleAffectedPlayer(card.id, player.id)}
+                          className={
+                            resolution.selectedEffectOptionId === effectOption.id
+                              ? 'button-primary'
+                              : ''
+                          }
+                          onClick={() => setSelectedEffectOption(card.id, effectOption.id)}
                         >
-                          {player.name}
+                          {effectOption.label}
                         </button>
-                      )
-                    })}
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {!isResolutionComplete(resolution) && (
+                {resolution.triggered && requiresTargetSelection && (
+                  <div className="stack-xs">
+                    <span className="label">Select Target Player</span>
+                    <div className="button-row row-wrap">
+                      {roundState.players.map((player) => (
+                        <button
+                          key={player.id}
+                          type="button"
+                          className={
+                            resolution.winningPlayerId === player.id ? 'button-primary' : ''
+                          }
+                          onClick={() => setCardWinner(card.id, player.id)}
+                        >
+                          {player.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {resolution.triggered && requiresAffectedSelection && (
+                  <div className="stack-xs">
+                    <span className="label">Pick Affected Players</span>
+                    <div className="button-row row-wrap">
+                      {roundState.players.map((player) => {
+                        const isAffected = resolution.affectedPlayerIds.includes(player.id)
+
+                        return (
+                          <button
+                            key={player.id}
+                            type="button"
+                            className={isAffected ? 'button-primary' : ''}
+                            onClick={() => toggleAffectedPlayer(card.id, player.id)}
+                          >
+                            {player.name}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {!isResolutionComplete(card, resolution, playerIds) && (
                   <p className="muted">Complete selection for this public card before continuing.</p>
                 )}
               </article>

@@ -1,5 +1,7 @@
+import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import { PERSONAL_CARDS, PUBLIC_CARDS } from '../data/cards.ts'
 import { createDealtHoleCardsState, createEmptyHoleCardsState } from '../logic/dealCards.ts'
+import { assignPowerUpsForHole, createEmptyHolePowerUpState } from '../logic/powerUps.ts'
 import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
 import type { HoleTag } from '../types/cards.ts'
 import type { ScreenProps } from './types.ts'
@@ -21,11 +23,17 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         currentState.players,
         holes[currentState.currentHoleIndex].holeNumber,
       )
+      const holePowerUps = [...currentState.holePowerUps]
+      holePowerUps[currentState.currentHoleIndex] = createEmptyHolePowerUpState(
+        currentState.players,
+        holes[currentState.currentHoleIndex].holeNumber,
+      )
 
       return {
         ...currentState,
         holes,
         holeCards,
+        holePowerUps,
       }
     })
   }
@@ -45,11 +53,17 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         currentState.players,
         holes[currentState.currentHoleIndex].holeNumber,
       )
+      const holePowerUps = [...currentState.holePowerUps]
+      holePowerUps[currentState.currentHoleIndex] = createEmptyHolePowerUpState(
+        currentState.players,
+        holes[currentState.currentHoleIndex].holeNumber,
+      )
 
       return {
         ...currentState,
         holes,
         holeCards,
+        holePowerUps,
       }
     })
   }
@@ -58,15 +72,33 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
     onUpdateRoundState((currentState) => {
       const currentHoleIndex = currentState.currentHoleIndex
       const hole = currentState.holes[currentHoleIndex]
+      const isPowerUpsMode = currentState.config.gameMode === 'powerUps'
 
       const holeCards = [...currentState.holeCards]
-      holeCards[currentHoleIndex] = createDealtHoleCardsState(
-        currentState.players,
-        hole,
-        currentState.config,
-        PERSONAL_CARDS,
-        PUBLIC_CARDS,
-      )
+      const holePowerUps = [...currentState.holePowerUps]
+
+      if (isPowerUpsMode) {
+        holeCards[currentHoleIndex] = createEmptyHoleCardsState(
+          currentState.players,
+          hole.holeNumber,
+        )
+        holePowerUps[currentHoleIndex] = assignPowerUpsForHole(
+          currentState.players,
+          hole.holeNumber,
+        )
+      } else {
+        holeCards[currentHoleIndex] = createDealtHoleCardsState(
+          currentState.players,
+          hole,
+          currentState.config,
+          PERSONAL_CARDS,
+          PUBLIC_CARDS,
+        )
+        holePowerUps[currentHoleIndex] = createEmptyHolePowerUpState(
+          currentState.players,
+          hole.holeNumber,
+        )
+      }
 
       const holeResults = [...currentState.holeResults]
       holeResults[currentHoleIndex] = {
@@ -87,6 +119,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
       return {
         ...currentState,
         holeCards,
+        holePowerUps,
         holeResults,
       }
     })
@@ -102,6 +135,8 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
           Hole {currentHole.holeNumber} of {roundState.holes.length} {isLastHole ? '(Final Hole)' : ''}
         </p>
       </header>
+
+      <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} />
 
       <section className="panel stack-xs">
         <div className="row-between">
@@ -142,7 +177,9 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         </div>
 
         <button type="button" className="button-primary" onClick={dealCardsForCurrentHole}>
-          Deal Cards For Hole {currentHole.holeNumber}
+          {roundState.config.gameMode === 'powerUps'
+            ? `Deal Power Ups For Hole ${currentHole.holeNumber}`
+            : `Deal Cards For Hole ${currentHole.holeNumber}`}
         </button>
       </section>
     </section>

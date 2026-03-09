@@ -1,0 +1,41 @@
+packId,packName,code,name,challenge,points,difficulty,type,visibility,eligiblePars,requiredTags,excludedTags,rulesText
+props,Props,PRP-001,Somebody Birdies,Will anyone in the group make birdie?,2,neutral,prop,Public,"3, 4, 5",-,-,Each golfer predicts yes/no. Correct calls earn +2.
+props,Props,PRP-002,Longest Drive Leader,Pick who has the longest drive in play.,2,neutral,prop,Public,"4, 5",-,-,Each golfer picks a player. Correct pick earns +2.
+props,Props,PRP-003,Green Hit (Player Pick),Pick any active player: will they hit the green in regulation?,2,neutral,prop,Public,"3, 4, 5",-,-,Template card: select target golfer before tee-off and predict yes/no on their GIR result.
+props,Props,PRP-004,Clutch Putt (Player Pick),Pick any active player: will they make a putt over 8 feet?,2,neutral,prop,Public,"3, 4, 5",-,-,Template card: select target golfer and resolve success if they hole a putt longer than 8 feet.
+props,Props,PRP-005,Fairway Bet (Player Pick),Pick any active player: will they hit the fairway?,2,neutral,prop,Public,"4, 5",-,-,Template card: select target golfer and resolve success if their tee shot is fairway in regulation.
+props,Props,PRP-006,Safe Hole,Will nobody in the group take a penalty stroke?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-007,Trouble Hole,Will at least one player hit bunker or water?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-008,Par 3 Dart,Will anyone finish inside 20 feet on the tee shot?,2,neutral,prop,Public,3,-,-,"On par 3, yes/no prediction. Correct call earns +2."
+props,Props,PRP-009,No Three-Putts,Will the group combine for zero 3-putts on this hole?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-010,Blow-Up Alert,Will any player make double bogey or worse?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-011,Scramble Save,Will anyone miss the green and still save par?,3,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +3.
+props,Props,PRP-012,Bomb Watch,Will anyone drive it 260+ in play?,2,neutral,prop,Public,"4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-013,Birdie Player Pick,Pick one player most likely to make birdie.,3,neutral,prop,Public,"3, 4, 5",-,-,Choose one active golfer before play. Correct pick earns +3.
+props,Props,PRP-014,Bounce Back Call,Will the player with worst real score last hole make bogey or better here?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction using prior-hole real-score loser as target. Correct call earns +2.
+props,Props,PRP-015,Two-Putt Field,Will every player who reaches the green take two putts or fewer?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-016,Hero Shot,Will someone attempt an aggressive line/carry/recovery and pull it off?,3,neutral,prop,Public,"4, 5",-,-,Yes/no prediction. Correct call earns +3.
+props,Props,PRP-017,Closest to Pin Pick,Pick who will finish closest on a par 3 after the tee shot.,3,neutral,prop,Public,3,-,-,Choose one active golfer on par 3. Correct pick earns +3.
+props,Props,PRP-018,Chaos Prediction,Will the hole public Chaos card affect at least two players?,2,neutral,prop,Public,"3, 4, 5",-,-,Yes/no prediction. Correct call earns +2.
+props,Props,PRP-019,Fairway Sweep,Will at least half the group hit the fairway?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least half the group hit the fairway? Correct call: +2.
+props,Props,PRP-020,Green Sweep,Will at least half the group hit the green in regulation?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least half the group hit the green in regulation? Correct call: +2.
+props,Props,PRP-021,Sand Visit,Will anyone visit a bunker and still make bogey or better?,2,neutral,prop,Public,"3, 4, 5",bunkers,-,Manual prop resolution. Will anyone visit a bunker and still make bogey or better? Correct call: +2.
+props,Props,PRP-022,Long Putt Drop,Will any player make a putt over 15 feet?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will any player make a putt over 15 feet? Correct call: +2.
+props,Props,PRP-023,Clean Card,Will the entire group avoid penalty strokes this hole?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will the entire group avoid penalty strokes this hole? Correct call: +2.
+props,Props,PRP-024,Lone Birdie,Will exactly one player make birdie?,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will exactly one player make birdie? Correct call: +3.
+props,Props,PRP-025,All Safe,Will every player keep their tee shot in play?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will every player keep their tee shot in play? Correct call: +2.
+props,Props,PRP-026,Blowup Pair,Will at least two players make double bogey or worse?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least two players make double bogey or worse? Correct call: +2.
+props,Props,PRP-027,Best Ball Brain,Pick the player most likely to record the lowest real score on the hole.,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Pick the player most likely to record the lowest real score on the hole. Correct call: +3.
+props,Props,PRP-028,Sand Save Alert,Will anyone get up-and-down from a bunker?,3,neutral,prop,Public,"3, 4, 5",bunkers,-,Manual prop resolution. Will anyone get up-and-down from a bunker? Correct call: +3.
+props,Props,PRP-029,Hero or Zero,Will someone attempt a risky aggressive shot and pay for it with bogey or worse?,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will someone attempt a risky aggressive shot and pay for it with bogey or worse? Correct call: +3.
+props,Props,PRP-030,Mission Monster,Will at least three players complete their personal mission this hole?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least three players complete their personal mission this hole? Correct call: +2.
+props,Props,PRP-031,Par Train,Will at least two players make par or better?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least two players make par or better? Correct call: +2.
+props,Props,PRP-032,Risk Pays Off,Will any player complete a Risk card this hole?,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will any player complete a Risk card this hole? Correct call: +3.
+props,Props,PRP-033,Clean Tee Shots,Will every player keep their first shot in play?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will every player keep their first shot in play? Correct call: +2.
+props,Props,PRP-034,Mission Fail Rate,Will more players fail their mission than complete it?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will more players fail their mission than complete it? Correct call: +2.
+props,Props,PRP-035,One-Putt Club,Will anyone one-putt from outside 6 feet?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will anyone one-putt from outside 6 feet? Correct call: +2.
+props,Props,PRP-036,Best Score Pick,Pick which player will post the best real score on the hole.,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Pick which player will post the best real score on the hole. Correct call: +3.
+props,Props,PRP-037,Bounce-Back Hole,Will any player who made double bogey or worse on the last hole make par or better here?,3,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will any player who made double bogey or worse on the last hole make par or better here? Correct call: +3.
+props,Props,PRP-038,Green Parade,Will at least two players hit the green in regulation?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will at least two players hit the green in regulation? Correct call: +2.
+props,Props,PRP-039,Trouble and Recovery,Will anyone find trouble and still make bogey or better?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will anyone find trouble and still make bogey or better? Correct call: +2.
+props,Props,PRP-040,Bonus Chaos,Will the Chaos card award or remove points from more than one player?,2,neutral,prop,Public,"3, 4, 5",-,-,Manual prop resolution. Will the Chaos card award or remove points from more than one player? Correct call: +2.

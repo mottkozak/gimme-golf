@@ -10,6 +10,22 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
 }
 
+function isBooleanOrUndefined(value: unknown): boolean {
+  return typeof value === 'boolean' || typeof value === 'undefined'
+}
+
+function isFeaturedHolesConfigLike(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    typeof value.enabled === 'boolean' &&
+    (value.frequency === 'low' || value.frequency === 'normal' || value.frequency === 'high') &&
+    (value.assignmentMode === 'auto' || value.assignmentMode === 'manual')
+  )
+}
+
 function isRoundStateLike(value: unknown): value is RoundState {
   if (!isRecord(value)) {
     return false
@@ -26,17 +42,23 @@ function isRoundStateLike(value: unknown): value is RoundState {
     (config.courseStyle === 'par3' ||
       config.courseStyle === 'standard' ||
       config.courseStyle === 'custom') &&
+    (config.gameMode === undefined ||
+      config.gameMode === 'cards' ||
+      config.gameMode === 'powerUps') &&
     Array.isArray(value.players) &&
     Array.isArray(value.holes) &&
     Array.isArray(value.holeCards) &&
+    (value.holePowerUps === undefined || Array.isArray(value.holePowerUps)) &&
     Array.isArray(value.holeResults) &&
     isRecord(value.totalsByPlayerId) &&
     typeof value.currentHoleIndex === 'number' &&
     typeof config.toggles.dynamicDifficulty === 'boolean' &&
+    isBooleanOrUndefined(config.toggles.momentumBonuses) &&
     typeof config.toggles.drawTwoPickOne === 'boolean' &&
     typeof config.toggles.autoAssignOne === 'boolean' &&
     typeof config.toggles.enableChaosCards === 'boolean' &&
     typeof config.toggles.enablePropCards === 'boolean' &&
+    (config.featuredHoles === undefined || isFeaturedHolesConfigLike(config.featuredHoles)) &&
     (config.enabledPackIds === undefined || isStringArray(config.enabledPackIds))
   )
 }

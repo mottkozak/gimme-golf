@@ -1,14 +1,26 @@
 import type { LeaderboardSortMode } from '../logic/leaderboard.ts'
 import type { LeaderboardEntry } from '../types/game.ts'
 
+interface LeaderboardMomentumValue {
+  streak: number
+  tierLabel: string
+}
+
 interface LeaderboardTableProps {
   title: string
   rows: LeaderboardEntry[]
   sortMode?: LeaderboardSortMode
   onSortChange?: (sortMode: LeaderboardSortMode) => void
+  momentumByPlayerId?: Record<string, LeaderboardMomentumValue>
 }
 
-function LeaderboardTable({ title, rows, sortMode, onSortChange }: LeaderboardTableProps) {
+function LeaderboardTable({
+  title,
+  rows,
+  sortMode,
+  onSortChange,
+  momentumByPlayerId,
+}: LeaderboardTableProps) {
   const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
     if (!onSortChange) {
       return <span>{label}</span>
@@ -37,6 +49,7 @@ function LeaderboardTable({ title, rows, sortMode, onSortChange }: LeaderboardTa
             <tr>
               <th>Rank</th>
               <th>Player</th>
+              <th>Heat</th>
               <th>{renderSortButton('Real', 'realScore')}</th>
               <th>{renderSortButton('Points', 'gamePoints')}</th>
               <th>{renderSortButton('Adjusted', 'adjustedScore')}</th>
@@ -47,6 +60,13 @@ function LeaderboardTable({ title, rows, sortMode, onSortChange }: LeaderboardTa
               <tr key={row.playerId}>
                 <td>{index + 1}</td>
                 <td>{row.playerName}</td>
+                <td>
+                  {momentumByPlayerId
+                    ? `${momentumByPlayerId[row.playerId]?.streak ?? 0} ${
+                        momentumByPlayerId[row.playerId]?.tierLabel ?? 'Cold'
+                      }`
+                    : '-'}
+                </td>
                 <td>{row.realScore}</td>
                 <td>{row.gamePoints}</td>
                 <td>{row.adjustedScore}</td>

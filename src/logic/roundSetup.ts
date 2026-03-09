@@ -2,6 +2,7 @@ import type { HoleTag } from '../types/cards.ts'
 import type {
   CourseStyle,
   HoleCardsState,
+  HolePowerUpState,
   HoleCount,
   HoleDefinition,
   HoleResultState,
@@ -10,6 +11,8 @@ import type {
   RoundState,
 } from '../types/game.ts'
 import { createEmptyHoleCardsState } from './dealCards.ts'
+import { buildEmptyHolePowerUpStates } from './powerUps.ts'
+import { assignFeaturedHolesForRound, normalizeFeaturedHoleType } from './featuredHoles.ts'
 import { normalizeRoundConfig } from './roundConfig.ts'
 import { createPlayerTotals } from './scoring.ts'
 
@@ -55,6 +58,7 @@ export function createDefaultHoles(
     holeNumber: index + 1,
     par: getParForIndex(index, courseStyle),
     tags: [],
+    featuredHoleType: null,
   }))
 }
 
@@ -93,6 +97,7 @@ export function resizeHoles(
       holeNumber: index + 1,
       par: normalizePar(existingHole.par),
       tags: existingHole.tags,
+      featuredHoleType: normalizeFeaturedHoleType(existingHole.featuredHoleType),
     }
   })
 }
@@ -114,6 +119,7 @@ export function applyCourseStyle(
     return {
       ...hole,
       tags: existingHole?.tags ?? [],
+      featuredHoleType: normalizeFeaturedHoleType(existingHole?.featuredHoleType),
     }
   })
 }
@@ -139,11 +145,14 @@ function ensurePlayers(players: Player[]): Player[] {
 }
 
 function ensureHoles(config: RoundConfig, holes: HoleDefinition[]): HoleDefinition[] {
-  return resizeHoles(holes, config.holeCount, config.courseStyle).map((hole, index) => ({
+  const normalized = resizeHoles(holes, config.holeCount, config.courseStyle).map((hole, index) => ({
     holeNumber: index + 1,
     par: normalizePar(hole.par),
     tags: HOLE_TAG_OPTIONS.map((option) => option.tag).filter((tag) => hole.tags.includes(tag)),
+    featuredHoleType: normalizeFeaturedHoleType(hole.featuredHoleType),
   }))
+
+  return assignFeaturedHolesForRound(normalized, config.featuredHoles)
 }
 
 function buildHoleCards(
@@ -151,6 +160,13 @@ function buildHoleCards(
   holes: HoleDefinition[],
 ): HoleCardsState[] {
   return holes.map((hole) => createEmptyHoleCardsState(players, hole.holeNumber))
+}
+
+function buildHolePowerUps(
+  players: Player[],
+  holes: HoleDefinition[],
+): HolePowerUpState[] {
+  return buildEmptyHolePowerUpStates(players, holes)
 }
 
 function buildHoleResults(players: Player[], holes: HoleDefinition[]): HoleResultState[] {
@@ -188,6 +204,7 @@ export function applyRoundSetupDraft(
     holes,
     currentHoleIndex: Math.min(currentState.currentHoleIndex, holes.length - 1),
     holeCards: buildHoleCards(players, holes),
+    holePowerUps: buildHolePowerUps(players, holes),
     holeResults: buildHoleResults(players, holes),
     totalsByPlayerId: buildTotalsByPlayerId(players, currentState.totalsByPlayerId),
   }

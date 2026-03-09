@@ -1,14 +1,19 @@
 import type { Player, RoundConfig, RoundState } from '../types/game.ts'
 import { getDefaultEnabledPackIds } from '../data/cardPacks.ts'
+import { buildEmptyHolePowerUpStates } from './powerUps.ts'
 import { applyRoundSetupDraft, DEFAULT_EXPECTED_SCORE } from './roundSetup.ts'
 import { createPlayerTotals } from './scoring.ts'
+import { DEFAULT_FEATURED_HOLES_CONFIG } from './featuredHoles.ts'
 
 const DEFAULT_ROUND_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
+  gameMode: 'cards',
   enabledPackIds: getDefaultEnabledPackIds(),
+  featuredHoles: DEFAULT_FEATURED_HOLES_CONFIG,
   toggles: {
     dynamicDifficulty: true,
+    momentumBonuses: true,
     drawTwoPickOne: true,
     autoAssignOne: false,
     enableChaosCards: true,
@@ -31,6 +36,7 @@ function createBaseRoundState(config: RoundConfig, players: Player[]): RoundStat
     holes: [],
     currentHoleIndex: 0,
     holeCards: [],
+    holePowerUps: [],
     holeResults: [],
     totalsByPlayerId: Object.fromEntries(
       players.map((player) => [player.id, createPlayerTotals(0, 0)]),
@@ -53,6 +59,10 @@ export function createNewRoundState(): RoundState {
   return {
     ...initializedRoundState,
     currentHoleIndex: 0,
+    holePowerUps: buildEmptyHolePowerUpStates(
+      initializedRoundState.players,
+      initializedRoundState.holes,
+    ),
     totalsByPlayerId: createZeroTotalsByPlayerId(initializedRoundState.players),
   }
 }
@@ -68,6 +78,7 @@ export function resetRoundProgress(roundState: RoundState): RoundState {
     ...roundState,
     currentHoleIndex: 0,
     holeCards: [],
+    holePowerUps: [],
     holeResults: [],
     totalsByPlayerId: createZeroTotalsByPlayerId(roundState.players),
   }
@@ -77,6 +88,7 @@ export function resetRoundProgress(roundState: RoundState): RoundState {
   return {
     ...resetRoundState,
     currentHoleIndex: 0,
+    holePowerUps: buildEmptyHolePowerUpStates(resetRoundState.players, resetRoundState.holes),
     totalsByPlayerId: createZeroTotalsByPlayerId(resetRoundState.players),
   }
 }

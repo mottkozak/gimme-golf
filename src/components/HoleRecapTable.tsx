@@ -4,8 +4,14 @@ export interface HoleRecapRow {
   playerId: string
   playerName: string
   strokes: number | null
+  selectedCardCode: string | null
   missionStatus: MissionStatus
+  missionPoints: number
+  momentumBonus: number
+  publicDelta: number
   holePoints: number
+  streakAfter: number
+  momentumTierAfter: string
 }
 
 interface HoleRecapTableProps {
@@ -37,8 +43,13 @@ function HoleRecapTable({ title, rows }: HoleRecapTableProps) {
             <tr>
               <th>Player</th>
               <th>Strokes</th>
-              <th>Card Success</th>
+              <th>Card</th>
+              <th>Success</th>
+              <th>Card Pts</th>
+              <th>Momentum</th>
+              <th>Public</th>
               <th>Hole Pts</th>
+              <th>Streak</th>
             </tr>
           </thead>
           <tbody>
@@ -46,10 +57,26 @@ function HoleRecapTable({ title, rows }: HoleRecapTableProps) {
               <tr key={row.playerId}>
                 <td>{row.playerName}</td>
                 <td>{row.strokes ?? '-'}</td>
+                <td>{row.selectedCardCode ?? '-'}</td>
                 <td>{formatMissionStatus(row.missionStatus)}</td>
+                <td>
+                  {row.missionPoints > 0 ? '+' : ''}
+                  {row.missionPoints}
+                </td>
+                <td>
+                  {row.momentumBonus > 0 ? '+' : ''}
+                  {row.momentumBonus}
+                </td>
+                <td>
+                  {row.publicDelta > 0 ? '+' : ''}
+                  {row.publicDelta}
+                </td>
                 <td>
                   {row.holePoints > 0 ? '+' : ''}
                   {row.holePoints}
+                </td>
+                <td>
+                  {row.streakAfter} ({row.momentumTierAfter})
                 </td>
               </tr>
             ))}

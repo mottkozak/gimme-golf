@@ -48,6 +48,17 @@ input {
   font: inherit;
 }
 
+select {
+  width: 100%;
+  min-height: 48px;
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font: inherit;
+}
+
 h1,
 h2,
 h3,
@@ -125,6 +136,78 @@ main {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.hole-recap-screen {
+  gap: var(--space-4);
+}
+
+.recap-header {
+  gap: var(--space-2);
+}
+
+.recap-highlight-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.recap-highlight {
+  padding: 0.95rem 1rem;
+  border: 2px solid color-mix(in srgb, var(--accent) 70%, var(--border-subtle));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.featured-hole-banner {
+  border-color: color-mix(in srgb, #f4cc61 75%, var(--border-subtle));
+  border-width: 3px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #f4cc61 26%, transparent),
+      color-mix(in srgb, #72bde6 14%, transparent)
+    ),
+    var(--bg-inset);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, #f4cc61 35%, transparent),
+    var(--shadow);
+}
+
+.featured-hole-banner--compact {
+  padding: var(--space-3);
+}
+
+.featured-hole-banner__label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.featured-hole-banner__chip {
+  border-color: color-mix(in srgb, #f4cc61 85%, var(--border-subtle));
+  background: color-mix(in srgb, #f4cc61 18%, transparent);
+  font-weight: 700;
+}
+
+.featured-hole-banner__title {
+  font-size: 1.18rem;
+}
+
+.featured-hole-banner__rule {
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.featured-hole-banner__meta {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
 }
 
 .panel {
@@ -260,7 +343,8 @@ main {
   gap: var(--space-3);
 }
 
-.field--inline input {
+.field--inline input,
+.field--inline select {
   width: 6.2rem;
 }
 
@@ -319,6 +403,113 @@ main {
   font-size: 0.92rem;
 }
 
+.recap-player-card {
+  border-color: color-mix(in srgb, var(--border-subtle) 85%, var(--accent) 15%);
+}
+
+.recap-player-card--success {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--border-subtle));
+}
+
+.recap-player-card--failed {
+  border-color: color-mix(in srgb, var(--danger) 70%, var(--border-subtle));
+}
+
+.recap-card-line {
+  padding-bottom: 0.1rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--border-subtle) 70%, transparent);
+}
+
+.recap-section {
+  gap: var(--space-3);
+}
+
+.recap-next {
+  margin-top: var(--space-1);
+}
+
+.badge-success {
+  border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.badge-failure {
+  border-color: color-mix(in srgb, var(--danger) 80%, transparent);
+}
+
+.badge-public {
+  border-color: color-mix(in srgb, #72bde6 80%, transparent);
+}
+
+.badge-winner {
+  border-color: color-mix(in srgb, #f4cc61 80%, transparent);
+}
+
+.badge-momentum {
+  border-color: color-mix(in srgb, #f3a85f 80%, transparent);
+}
+
+.badge-featured {
+  border-color: color-mix(in srgb, #f4cc61 80%, transparent);
+}
+
+.recap-metrics--primary,
+.recap-metrics--momentum,
+.recap-metrics--totals {
+  gap: 0.45rem;
+}
+
+.recap-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  font-size: 0.82rem;
+}
+
+.recap-pill--success {
+  border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.recap-pill--failed {
+  border-color: color-mix(in srgb, var(--danger) 80%, transparent);
+}
+
+.recap-pill--bonus {
+  border-color: color-mix(in srgb, #f4cc61 80%, transparent);
+}
+
+.recap-pill--featured {
+  border-color: color-mix(in srgb, #72bde6 75%, transparent);
+}
+
+.recap-pill--hole {
+  border-color: color-mix(in srgb, #72bde6 80%, transparent);
+}
+
+.recap-pill--total {
+  border-color: color-mix(in srgb, var(--text-secondary) 55%, var(--border-subtle));
+}
+
+.recap-pill--momentum-up {
+  border-color: color-mix(in srgb, #f3a85f 80%, transparent);
+}
+
+.recap-impact-row {
+  padding: 0.3rem 0.1rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--border-subtle) 65%, transparent);
+}
+
+.recap-impact-plus {
+  color: color-mix(in srgb, var(--accent) 90%, white);
+}
+
+.recap-impact-minus {
+  color: color-mix(in srgb, var(--danger) 90%, white);
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -344,6 +535,47 @@ main {
 
 .challenge-card.selected {
   border-color: var(--accent);
+}
+
+.challenge-card.offer-safe {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-subtle));
+}
+
+.challenge-card.offer-hard {
+  border-color: color-mix(in srgb, var(--danger) 70%, var(--border-subtle));
+}
+
+.challenge-card.offer-single {
+  border-color: color-mix(in srgb, var(--text-secondary) 40%, var(--border-subtle));
+}
+
+.power-up-card {
+  border-color: color-mix(in srgb, #72bde6 60%, var(--border-subtle));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #72bde6 16%, transparent),
+      color-mix(in srgb, #f4cc61 8%, transparent)
+    ),
+    var(--bg-inset);
+}
+
+.power-up-card--used {
+  opacity: 0.82;
+}
+
+.power-up-chip {
+  border-color: color-mix(in srgb, #72bde6 78%, var(--border-subtle));
+  background: color-mix(in srgb, #72bde6 14%, transparent);
+}
+
+.power-up-chip--legendary {
+  border-color: color-mix(in srgb, #f4cc61 78%, var(--border-subtle));
+  background: color-mix(in srgb, #f4cc61 16%, transparent);
+}
+
+.power-up-title {
+  font-size: 1.05rem;
 }
 
 .leaderboard-table {
@@ -392,10 +624,96 @@ main {
 }
 
 .summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   border: 2px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: var(--space-3);
   background: var(--bg-inset);
+}
+
+.summary-stat strong {
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.summary-stat p:last-child {
+  font-weight: 600;
+}
+
+.award-group {
+  padding: 0.15rem 0;
+}
+
+.award-group__title {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.award-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.8rem 0.85rem;
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+}
+
+.award-row--major {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
+}
+
+.award-row--fun {
+  border-color: color-mix(in srgb, #72bde6 42%, var(--border-subtle));
+}
+
+.award-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 0.97rem;
+  letter-spacing: 0.02em;
+}
+
+.award-winner {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.award-explanation,
+.award-stat {
+  margin: 0;
+}
+
+.award-explanation {
+  color: var(--text-secondary);
+}
+
+.award-stat {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text-primary) 85%, var(--text-secondary));
+}
+
+.featured-hole-chip {
+  border-color: color-mix(in srgb, #f4cc61 75%, var(--border-subtle));
+  background: color-mix(in srgb, #f4cc61 16%, transparent);
+}
+
+.featured-hole-preview-row {
+  padding: 0.55rem 0.65rem;
+  border: 2px solid color-mix(in srgb, #f4cc61 55%, var(--border-subtle));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, #f4cc61 10%, var(--bg-inset));
+}
+
+.featured-hole-recap {
+  border-color: color-mix(in srgb, #f4cc61 65%, var(--border-subtle));
 }
 
 .hole-summary-card {

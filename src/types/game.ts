@@ -1,11 +1,29 @@
-import type { CardPackId, HoleTag, PersonalCard, PublicCard } from './cards.ts'
+import type {
+  CardPackId,
+  HoleTag,
+  PersonalCard,
+  PublicCard,
+  PublicInteractionMode,
+} from './cards.ts'
 
 export type HoleCount = 9 | 18
 
 export type CourseStyle = 'par3' | 'standard' | 'custom'
+export type GameMode = 'cards' | 'powerUps'
+
+export type FeaturedHoleType = 'jackpot' | 'chaos' | 'double_points' | 'rivalry' | 'no_mercy'
+export type FeaturedHoleFrequency = 'low' | 'normal' | 'high'
+export type FeaturedHoleAssignmentMode = 'auto' | 'manual'
+
+export interface FeaturedHolesConfig {
+  enabled: boolean
+  frequency: FeaturedHoleFrequency
+  assignmentMode: FeaturedHoleAssignmentMode
+}
 
 export interface RoundToggles {
   dynamicDifficulty: boolean
+  momentumBonuses: boolean
   drawTwoPickOne: boolean
   autoAssignOne: boolean
   enableChaosCards: boolean
@@ -15,7 +33,9 @@ export interface RoundToggles {
 export interface RoundConfig {
   holeCount: HoleCount
   courseStyle: CourseStyle
+  gameMode: GameMode
   enabledPackIds: CardPackId[]
+  featuredHoles: FeaturedHolesConfig
   toggles: RoundToggles
 }
 
@@ -29,11 +49,13 @@ export interface HoleDefinition {
   holeNumber: number
   par: number
   tags: HoleTag[]
+  featuredHoleType: FeaturedHoleType | null
 }
 
 export type MissionStatus = 'pending' | 'success' | 'failed'
 
-export type PublicResolutionMode = 'yesNoTriggered' | 'winningPlayer' | 'affectedPlayers'
+export type LegacyPublicResolutionMode = 'yesNoTriggered' | 'winningPlayer' | 'affectedPlayers'
+export type PublicResolutionMode = PublicInteractionMode | LegacyPublicResolutionMode
 
 export interface PublicCardResolutionState {
   cardId: string
@@ -41,13 +63,27 @@ export interface PublicCardResolutionState {
   triggered: boolean
   winningPlayerId: string | null
   affectedPlayerIds: string[]
+  targetPlayerIdByVoterId: Record<string, string | null>
+  selectedEffectOptionId: string | null
+}
+
+export interface PersonalCardOfferState {
+  safeCardId: string | null
+  hardCardId: string | null
 }
 
 export interface HoleCardsState {
   holeNumber: number
   dealtPersonalCardsByPlayerId: Record<string, PersonalCard[]>
   selectedCardIdByPlayerId: Record<string, string | null>
+  personalCardOfferByPlayerId: Record<string, PersonalCardOfferState>
   publicCards: PublicCard[]
+}
+
+export interface HolePowerUpState {
+  holeNumber: number
+  assignedPowerUpIdByPlayerId: Record<string, string | null>
+  usedPowerUpByPlayerId: Record<string, boolean>
 }
 
 export interface HoleResultState {
@@ -79,6 +115,7 @@ export interface RoundState {
   holes: HoleDefinition[]
   currentHoleIndex: number
   holeCards: HoleCardsState[]
+  holePowerUps: HolePowerUpState[]
   holeResults: HoleResultState[]
   totalsByPlayerId: Record<string, PlayerTotals>
 }

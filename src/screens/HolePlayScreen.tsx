@@ -1,10 +1,16 @@
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
+import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
+import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
+import { getAssignedPowerUp } from '../logic/powerUps.ts'
 import type { ScreenProps } from './types.ts'
 
 function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentHoleCards = roundState.holeCards[roundState.currentHoleIndex]
+  const currentHolePowerUps = roundState.holePowerUps[roundState.currentHoleIndex]
+  const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
+  const isNoMercyHole = currentHole.featuredHoleType === 'no_mercy'
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
 
@@ -25,6 +31,9 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     return dealtCards.length > 0
   })
   const hasAnyCardsDealt = hasAnyPersonalCardsDealt || currentHoleCards.publicCards.length > 0
+  const hasAnyPowerUpsDealt = roundState.players.some((player) => {
+    return Boolean(currentHolePowerUps?.assignedPowerUpIdByPlayerId[player.id])
+  })
 
   const selectCard = (playerId: string, cardId: string) => {
     onUpdateRoundState((currentState) => {
@@ -46,16 +55,47 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     })
   }
 
+  const usePowerUp = (playerId: string) => {
+    onUpdateRoundState((currentState) => {
+      const holePowerUps = [...currentState.holePowerUps]
+      const currentHolePowerUpState = holePowerUps[currentState.currentHoleIndex]
+
+      holePowerUps[currentState.currentHoleIndex] = {
+        ...currentHolePowerUpState,
+        usedPowerUpByPlayerId: {
+          ...currentHolePowerUpState.usedPowerUpByPlayerId,
+          [playerId]: true,
+        },
+      }
+
+      return {
+        ...currentState,
+        holePowerUps,
+      }
+    })
+  }
+
   return (
     <section className="screen stack-sm">
       <header className="screen__header">
-        <h2>Hole Cards</h2>
+        <h2>{isPowerUpsMode ? 'Hole Power Ups' : 'Hole Cards'}</h2>
         <p className="muted">
           Hole {currentHole.holeNumber} | Par {currentHole.par}
         </p>
       </header>
 
-      {!hasAnyCardsDealt && (
+      <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
+
+      {isPowerUpsMode && !hasAnyPowerUpsDealt && (
+        <section className="panel stack-xs">
+          <p className="muted">No power-ups dealt for this hole yet.</p>
+          <button type="button" onClick={() => onNavigate('holeSetup')}>
+            Back To Hole Setup
+          </button>
+        </section>
+      )}
+
+      {!isPowerUpsMode && !hasAnyCardsDealt && (
         <section className="panel stack-xs">
           <p className="muted">No cards dealt for this hole yet.</p>
           <button type="button" onClick={() => onNavigate('holeSetup')}>
@@ -64,11 +104,55 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
         </section>
       )}
 
-      {hasAnyCardsDealt && (
+      {isPowerUpsMode && hasAnyPowerUpsDealt && (
+        <>
+          <section className="stack-sm">
+            {roundState.players.map((player) => {
+              const powerUp = getAssignedPowerUp(currentHolePowerUps, player.id)
+              const used = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
+
+              if (!powerUp) {
+                return (
+                  <article key={player.id} className="panel stack-xs">
+                    <strong>{player.name}</strong>
+                    <p className="muted">No power-up assigned for this hole.</p>
+                  </article>
+                )
+              }
+
+              return (
+                <PowerUpCard
+                  key={player.id}
+                  playerName={player.name}
+                  powerUp={powerUp}
+                  used={used}
+                  onUse={() => usePowerUp(player.id)}
+                />
+              )
+            })}
+          </section>
+
+          <section className="panel stack-xs">
+            <p className="muted">
+              Declare your power-up before using it. Unused power-ups expire at the end of this hole.
+            </p>
+            <button
+              type="button"
+              className="button-primary"
+              onClick={() => onNavigate('holeResults')}
+            >
+              Continue To Hole Results
+            </button>
+          </section>
+        </>
+      )}
+
+      {!isPowerUpsMode && hasAnyCardsDealt && (
         <>
           <section className="stack-sm">
             {roundState.players.map((player) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+              const offerState = currentHoleCards.personalCardOfferByPlayerId[player.id]
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
 
               return (
@@ -77,12 +161,31 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                     <strong>{player.name}</strong>
                     <span className="chip">Selected: {selectedCardId ?? 'None'}</span>
                   </div>
+                  {isDrawTwoPickOne && !isNoMercyHole && (
+                    <p className="muted">
+                      Choose between a safer option and a higher-upside hard option.
+                    </p>
+                  )}
 
                   <div className="stack-xs">
-                    {dealtCards.map((card) => (
-                      <div key={card.id} className="stack-xs">
-                        <ChallengeCardView card={card} selected={selectedCardId === card.id} />
-                        {isDrawTwoPickOne && (
+                    {dealtCards.map((card) => {
+                      const offerKind =
+                        offerState?.safeCardId === card.id && offerState?.hardCardId === null
+                          ? 'single'
+                          : offerState?.safeCardId === card.id
+                            ? 'safe'
+                            : offerState?.hardCardId === card.id
+                              ? 'hard'
+                              : undefined
+
+                      return (
+                        <div key={card.id} className="stack-xs">
+                          <ChallengeCardView
+                            card={card}
+                            selected={selectedCardId === card.id}
+                            offerKind={offerKind}
+                          />
+                        {isDrawTwoPickOne && !isNoMercyHole && (
                           <button
                             type="button"
                             className={selectedCardId === card.id ? 'button-primary' : ''}
@@ -91,8 +194,9 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                             {selectedCardId === card.id ? 'Selected' : 'Choose This Card'}
                           </button>
                         )}
-                      </div>
-                    ))}
+                        </div>
+                      )
+                    })}
 
                     {dealtCards.length === 0 && (
                       <p className="muted">No personal cards available from enabled packs.</p>
@@ -101,6 +205,11 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
                   {!isDrawTwoPickOne && (
                     <p className="muted">Auto-assign mode enabled. Card assigned automatically.</p>
+                  )}
+                  {isNoMercyHole && (
+                    <p className="muted">
+                      No Mercy active. Safer option removed and a harder card was forced.
+                    </p>
                   )}
                 </article>
               )

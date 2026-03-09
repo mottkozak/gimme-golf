@@ -3,6 +3,8 @@ import {
   dealPublicCardsForHole,
   getInitialSelectedPersonalCardId,
 } from '../logic/dealCards.ts'
+import { DEFAULT_FEATURED_HOLES_CONFIG } from '../logic/featuredHoles.ts'
+import { buildEmptyHolePowerUpStates } from '../logic/powerUps.ts'
 import { createDefaultHoles } from '../logic/roundSetup.ts'
 import { createPlayerTotals } from '../logic/scoring.ts'
 import { getDefaultEnabledPackIds } from './cardPacks.ts'
@@ -20,9 +22,12 @@ import { PERSONAL_CARDS, PUBLIC_CARDS } from './cards.ts'
 const MOCK_CONFIG: RoundConfig = {
   holeCount: 9,
   courseStyle: 'standard',
+  gameMode: 'cards',
   enabledPackIds: getDefaultEnabledPackIds(),
+  featuredHoles: DEFAULT_FEATURED_HOLES_CONFIG,
   toggles: {
     dynamicDifficulty: true,
+    momentumBonuses: true,
     drawTwoPickOne: true,
     autoAssignOne: false,
     enableChaosCards: true,
@@ -48,6 +53,7 @@ function addMockTags(): RoundState['holes'] {
   return createDefaultHoles(MOCK_CONFIG.holeCount, MOCK_CONFIG.courseStyle).map((hole) => ({
     ...hole,
     tags: TAGS_BY_HOLE_NUMBER[hole.holeNumber] ?? [],
+    featuredHoleType: hole.holeNumber === 3 ? 'jackpot' : hole.holeNumber === 7 ? 'rivalry' : null,
   }))
 }
 
@@ -57,7 +63,7 @@ function createMockHoleCards(
   config: RoundConfig,
 ): HoleCardsState[] {
   return holes.map((hole) => {
-    const dealtPersonalCardsByPlayerId = dealPersonalCardsForHole(
+    const personalDealResult = dealPersonalCardsForHole(
       players,
       hole,
       config,
@@ -66,15 +72,16 @@ function createMockHoleCards(
 
     const selectedCardIdByPlayerId = Object.fromEntries(
       players.map((player) => {
-        const dealtCards = dealtPersonalCardsByPlayerId[player.id] ?? []
+        const dealtCards = personalDealResult.dealtPersonalCardsByPlayerId[player.id] ?? []
         return [player.id, getInitialSelectedPersonalCardId(dealtCards, config)]
       }),
     )
 
     return {
       holeNumber: hole.holeNumber,
-      dealtPersonalCardsByPlayerId,
+      dealtPersonalCardsByPlayerId: personalDealResult.dealtPersonalCardsByPlayerId,
       selectedCardIdByPlayerId,
+      personalCardOfferByPlayerId: personalDealResult.personalCardOfferByPlayerId,
       publicCards: dealPublicCardsForHole(hole, config, PUBLIC_CARDS),
     }
   })
@@ -140,6 +147,7 @@ export function createMockRoundState(): RoundState {
     holes,
     currentHoleIndex: 2,
     holeCards: createMockHoleCards(holes, MOCK_PLAYERS, MOCK_CONFIG),
+    holePowerUps: buildEmptyHolePowerUpStates(MOCK_PLAYERS, holes),
     holeResults: createMockHoleResults(holes, MOCK_PLAYERS),
     totalsByPlayerId: createMockTotals(),
   }

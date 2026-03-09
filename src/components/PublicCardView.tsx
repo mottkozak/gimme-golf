@@ -13,7 +13,11 @@ function PublicCardView({ card }: PublicCardViewProps) {
       </header>
       <p>{card.description}</p>
       <div className="row-between">
-        <span>Manual resolve</span>
+        <span>
+          {card.interaction?.mode
+            ? `Manual resolve (${card.interaction.mode.replaceAll('_', ' ')})`
+            : 'Manual resolve'}
+        </span>
         <span>{card.points >= 0 ? '+' : ''}{card.points} pts</span>
       </div>
     </article>

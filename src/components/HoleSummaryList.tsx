@@ -1,4 +1,4 @@
-import { calculatePlayerHoleGamePoints } from '../logic/scoring.ts'
+import { calculatePlayerHolePointBreakdown } from '../logic/scoring.ts'
 import type { HoleCardsState, HoleDefinition, HoleResultState, Player } from '../types/game.ts'
 
 interface HoleSummaryListProps {
@@ -6,6 +6,7 @@ interface HoleSummaryListProps {
   holes: HoleDefinition[]
   holeCards: HoleCardsState[]
   holeResults: HoleResultState[]
+  momentumEnabled: boolean
 }
 
 function getMissionStatusClass(missionStatus: HoleResultState['missionStatusByPlayerId'][string]): string {
@@ -20,11 +21,20 @@ function getMissionStatusClass(missionStatus: HoleResultState['missionStatusByPl
   return 'status-pill status-pending'
 }
 
-function HoleSummaryList({ players, holes, holeCards, holeResults }: HoleSummaryListProps) {
+function formatSignedPoints(value: number): string {
+  return `${value > 0 ? '+' : ''}${value}`
+}
+
+function HoleSummaryList({
+  players,
+  holes,
+  holeCards,
+  holeResults,
+  momentumEnabled,
+}: HoleSummaryListProps) {
   return (
     <section className="stack-sm">
       {holes.map((hole, holeIndex) => {
-        const holeCardState = holeCards[holeIndex]
         const holeResult = holeResults[holeIndex]
 
         return (
@@ -38,12 +48,30 @@ function HoleSummaryList({ players, holes, holeCards, holeResults }: HoleSummary
               {players.map((player) => {
                 const strokes = holeResult?.strokesByPlayerId[player.id]
                 const missionStatus = holeResult?.missionStatusByPlayerId[player.id] ?? 'pending'
-                const publicDelta = holeResult?.publicPointDeltaByPlayerId[player.id] ?? 0
-                const holePoints = calculatePlayerHoleGamePoints(
+                const pointBreakdown = calculatePlayerHolePointBreakdown(
                   player.id,
-                  holeCardState,
-                  holeResult,
+                  holeIndex,
+                  players,
+                  holes,
+                  holeCards,
+                  holeResults,
+                  momentumEnabled,
                 )
+                const holePoints = pointBreakdown.total
+                const pointParts = [
+                  pointBreakdown.baseMissionPoints !== 0
+                    ? `card ${formatSignedPoints(pointBreakdown.baseMissionPoints)}`
+                    : null,
+                  pointBreakdown.featuredBonusPoints !== 0
+                    ? `featured ${formatSignedPoints(pointBreakdown.featuredBonusPoints)}`
+                    : null,
+                  pointBreakdown.momentumBonus !== 0
+                    ? `momentum ${formatSignedPoints(pointBreakdown.momentumBonus)}`
+                    : null,
+                  pointBreakdown.publicDelta !== 0
+                    ? `public ${formatSignedPoints(pointBreakdown.publicDelta)}`
+                    : null,
+                ].filter((part): part is string => Boolean(part))
 
                 return (
                   <div key={player.id} className="hole-summary-player-row">
@@ -52,11 +80,8 @@ function HoleSummaryList({ players, holes, holeCards, holeResults }: HoleSummary
                       <span>{typeof strokes === 'number' ? `${strokes} strokes` : 'No score'}</span>
                       <span className={getMissionStatusClass(missionStatus)}>{missionStatus}</span>
                       <span>
-                        Points {holePoints > 0 ? '+' : ''}
-                        {holePoints}
-                        {publicDelta !== 0
-                          ? ` (public ${publicDelta > 0 ? '+' : ''}${publicDelta})`
-                          : ''}
+                        Points {formatSignedPoints(holePoints)}
+                        {pointParts.length > 0 ? ` (${pointParts.join(', ')})` : ''}
                       </span>
                     </div>
                   </div>

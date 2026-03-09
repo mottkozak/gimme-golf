@@ -1,36 +1,91 @@
 import type { PublicCard } from '../types/cards.ts'
 import type {
+  LegacyPublicResolutionMode,
   Player,
   PublicCardResolutionState,
   PublicResolutionMode,
 } from '../types/game.ts'
+
+type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
 function includesAnyKeyword(value: string, keywords: string[]): boolean {
   const normalized = value.toLowerCase()
   return keywords.some((keyword) => normalized.includes(keyword))
 }
 
+function normalizeResolutionMode(mode: PublicResolutionMode): PublicResolutionMode {
+  const legacyModeMap: Record<LegacyPublicResolutionMode, PublicResolutionMode> = {
+    yesNoTriggered: 'yes_no_triggered',
+    winningPlayer: 'leader_selects_target',
+    affectedPlayers: 'pick_affected_players',
+  }
+
+  return legacyModeMap[mode as LegacyPublicResolutionMode] ?? mode
+}
+
+function getDefaultEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
+  const absolutePoints = Math.max(1, Math.abs(card.points))
+  return [
+    {
+      id: 'effect-positive',
+      label: `+${absolutePoints} to selected players`,
+      pointsDelta: absolutePoints,
+      targetScope: 'affected',
+    },
+    {
+      id: 'effect-negative',
+      label: `-${absolutePoints} to selected players`,
+      pointsDelta: -absolutePoints,
+      targetScope: 'affected',
+    },
+  ]
+}
+
+function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
+  return card.interaction?.effectOptions ?? getDefaultEffectOptions(card)
+}
+
 export function getDefaultPublicResolutionMode(card: PublicCard): PublicResolutionMode {
+  if (card.interaction?.mode) {
+    return card.interaction.mode
+  }
+
+  const fullText = `${card.name} ${card.description} ${card.rulesText}`
+
+  if (includesAnyKeyword(fullText, ['vote', 'majority', 'pick who'])) {
+    return 'vote_target_player'
+  }
+
+  if (includesAnyKeyword(fullText, ['choose one', 'one of two', 'either'])) {
+    return 'choose_one_of_two_effects'
+  }
+
   if (card.cardType === 'chaos') {
-    return 'affectedPlayers'
+    return 'pick_affected_players'
   }
 
   const winnerKeywords = ['pick', 'leader', 'closest', 'winner']
 
-  if (includesAnyKeyword(`${card.name} ${card.description} ${card.rulesText}`, winnerKeywords)) {
-    return 'winningPlayer'
+  if (includesAnyKeyword(fullText, winnerKeywords)) {
+    return 'leader_selects_target'
   }
 
-  return 'yesNoTriggered'
+  return 'yes_no_triggered'
 }
 
 export function createDefaultPublicCardResolution(card: PublicCard): PublicCardResolutionState {
+  const defaultMode = getDefaultPublicResolutionMode(card)
+  const defaultEffectId =
+    defaultMode === 'choose_one_of_two_effects' ? getEffectOptions(card)[0]?.id ?? null : null
+
   return {
     cardId: card.id,
-    mode: getDefaultPublicResolutionMode(card),
+    mode: defaultMode,
     triggered: false,
     winningPlayerId: null,
     affectedPlayerIds: [],
+    targetPlayerIdByVoterId: {},
+    selectedEffectOptionId: defaultEffectId,
   }
 }
 
@@ -40,14 +95,55 @@ export function normalizePublicCardResolutions(
 ): Record<string, PublicCardResolutionState> {
   return Object.fromEntries(
     cards.map((card) => {
+      const defaultResolution = createDefaultPublicCardResolution(card)
       const existingResolution = resolutionsByCardId?.[card.id]
       if (existingResolution) {
-        return [card.id, existingResolution]
+        const normalizedMode = normalizeResolutionMode(existingResolution.mode)
+        const normalizedSelectedEffectOptionId =
+          normalizedMode === 'choose_one_of_two_effects'
+            ? existingResolution.selectedEffectOptionId ?? defaultResolution.selectedEffectOptionId
+            : null
+
+        return [
+          card.id,
+          {
+            ...defaultResolution,
+            ...existingResolution,
+            mode: normalizedMode,
+            targetPlayerIdByVoterId: existingResolution.targetPlayerIdByVoterId ?? {},
+            selectedEffectOptionId: normalizedSelectedEffectOptionId,
+          },
+        ]
       }
 
-      return [card.id, createDefaultPublicCardResolution(card)]
+      return [card.id, defaultResolution]
     }),
   )
+}
+
+function getMajorityVoteWinnerId(
+  votesByVoterId: Record<string, string | null>,
+  validPlayerIds: Set<string>,
+): string | null {
+  const voteCounts: Record<string, number> = {}
+
+  for (const votedPlayerId of Object.values(votesByVoterId)) {
+    if (!votedPlayerId || !validPlayerIds.has(votedPlayerId)) {
+      continue
+    }
+
+    voteCounts[votedPlayerId] = (voteCounts[votedPlayerId] ?? 0) + 1
+  }
+
+  const rankedVotes = Object.entries(voteCounts).sort((entryA, entryB) => entryB[1] - entryA[1])
+  const topVoteCount = rankedVotes[0]?.[1]
+  const tieCount = rankedVotes.filter(([, count]) => count === topVoteCount).length
+
+  if (!topVoteCount || tieCount > 1) {
+    return null
+  }
+
+  return rankedVotes[0]?.[0] ?? null
 }
 
 export function resolvePublicCardPointDeltas(
@@ -65,27 +161,75 @@ export function resolvePublicCardPointDeltas(
       continue
     }
 
-    if (resolution.mode === 'yesNoTriggered') {
+    const normalizedMode = normalizeResolutionMode(resolution.mode)
+
+    if (normalizedMode === 'yes_no_triggered') {
       for (const player of players) {
         pointDeltasByPlayerId[player.id] += card.points
       }
       continue
     }
 
-    if (resolution.mode === 'winningPlayer') {
-      const winningPlayerId = resolution.winningPlayerId
-      if (winningPlayerId && validPlayerIds.has(winningPlayerId)) {
-        pointDeltasByPlayerId[winningPlayerId] += card.points
+    if (
+      normalizedMode === 'leader_selects_target' ||
+      normalizedMode === 'trailing_player_selects_target'
+    ) {
+      const targetPlayerId = resolution.winningPlayerId
+      if (targetPlayerId && validPlayerIds.has(targetPlayerId)) {
+        pointDeltasByPlayerId[targetPlayerId] += card.points
       }
       continue
     }
 
-    const affectedPlayerIds = Array.from(new Set(resolution.affectedPlayerIds)).filter((playerId) =>
-      validPlayerIds.has(playerId),
-    )
+    if (normalizedMode === 'vote_target_player') {
+      const votedPlayerId = getMajorityVoteWinnerId(
+        resolution.targetPlayerIdByVoterId ?? {},
+        validPlayerIds,
+      )
+      if (votedPlayerId) {
+        pointDeltasByPlayerId[votedPlayerId] += card.points
+      }
+      continue
+    }
 
-    for (const affectedPlayerId of affectedPlayerIds) {
-      pointDeltasByPlayerId[affectedPlayerId] += card.points
+    if (normalizedMode === 'pick_affected_players') {
+      const affectedPlayerIds = Array.from(new Set(resolution.affectedPlayerIds)).filter(
+        (playerId) => validPlayerIds.has(playerId),
+      )
+
+      for (const affectedPlayerId of affectedPlayerIds) {
+        pointDeltasByPlayerId[affectedPlayerId] += card.points
+      }
+      continue
+    }
+
+    if (normalizedMode === 'choose_one_of_two_effects') {
+      const effectOptions = getEffectOptions(card)
+      const selectedEffect =
+        effectOptions.find((effect) => effect.id === resolution.selectedEffectOptionId) ??
+        effectOptions[0]
+
+      if (!selectedEffect) {
+        continue
+      }
+
+      if (selectedEffect.targetScope === 'all') {
+        for (const player of players) {
+          pointDeltasByPlayerId[player.id] += selectedEffect.pointsDelta
+        }
+      } else if (selectedEffect.targetScope === 'target') {
+        const targetPlayerId = resolution.winningPlayerId
+        if (targetPlayerId && validPlayerIds.has(targetPlayerId)) {
+          pointDeltasByPlayerId[targetPlayerId] += selectedEffect.pointsDelta
+        }
+      } else {
+        const affectedPlayerIds = Array.from(new Set(resolution.affectedPlayerIds)).filter(
+          (playerId) => validPlayerIds.has(playerId),
+        )
+        for (const affectedPlayerId of affectedPlayerIds) {
+          pointDeltasByPlayerId[affectedPlayerId] += selectedEffect.pointsDelta
+        }
+      }
     }
   }
 
@@ -96,13 +240,22 @@ export function buildPublicResolutionNotes(
   cards: PublicCard[],
   resolutionsByCardId: Record<string, PublicCardResolutionState>,
 ): string {
-  const triggeredCardCodes = cards
-    .filter((card) => resolutionsByCardId[card.id]?.triggered)
-    .map((card) => card.code)
+  const triggeredCards = cards.filter((card) => resolutionsByCardId[card.id]?.triggered)
 
-  if (triggeredCardCodes.length === 0) {
+  if (triggeredCards.length === 0) {
     return 'No public card effects triggered.'
   }
 
-  return `Triggered: ${triggeredCardCodes.join(', ')}`
+  const noteParts = triggeredCards.map((card) => {
+    const resolution = resolutionsByCardId[card.id]
+    const mode = normalizeResolutionMode(resolution.mode)
+    const effectSuffix =
+      mode === 'choose_one_of_two_effects' && resolution.selectedEffectOptionId
+        ? ` / ${resolution.selectedEffectOptionId}`
+        : ''
+
+    return `${card.code} (${mode}${effectSuffix})`
+  })
+
+  return `Triggered: ${noteParts.join(', ')}`
 }

@@ -22,6 +22,28 @@ export type PersonalCardType =
 
 export type PublicCardType = 'chaos' | 'prop'
 
+export type PublicInteractionMode =
+  | 'yes_no_triggered'
+  | 'vote_target_player'
+  | 'choose_one_of_two_effects'
+  | 'leader_selects_target'
+  | 'trailing_player_selects_target'
+  | 'pick_affected_players'
+
+export type PublicInteractionTargetScope = 'target' | 'affected' | 'all'
+
+export interface PublicInteractionEffectOption {
+  id: string
+  label: string
+  pointsDelta: number
+  targetScope: PublicInteractionTargetScope
+}
+
+export interface PublicCardInteractionDefinition {
+  mode: PublicInteractionMode
+  effectOptions?: [PublicInteractionEffectOption, PublicInteractionEffectOption]
+}
+
 export type HoleTag =
   | 'water'
   | 'bunkers'
@@ -57,6 +79,7 @@ export interface PublicCard extends CardBase {
   cardType: PublicCardType
   isPublic: true
   difficulty: 'neutral'
+  interaction?: PublicCardInteractionDefinition
 }
 
 export type GimmeGolfCard = PersonalCard | PublicCard

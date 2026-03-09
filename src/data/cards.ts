@@ -54,6 +54,7 @@ interface PublicCardInput {
   rulesText: string
   requiredTags?: HoleTag[]
   excludedTags?: HoleTag[]
+  interaction?: PublicCard['interaction']
 }
 
 function personalCard(input: PersonalCardInput): PersonalCard {
@@ -74,6 +75,7 @@ function publicCard(input: PublicCardInput): PublicCard {
     requiredTags: input.requiredTags ?? [],
     excludedTags: input.excludedTags ?? [],
     isPublic: true,
+    interaction: input.interaction,
   }
 }
 
@@ -721,6 +723,9 @@ const CHAOS_CARDS: PublicCard[] = [
     points: 2,
     eligiblePars: PAR_4_5,
     rulesText: 'After hole, award +2 to golfer with longest in-play drive.',
+    interaction: {
+      mode: 'vote_target_player',
+    },
   }),
   publicCard({
     id: 'c-chaos-003',
@@ -731,6 +736,9 @@ const CHAOS_CARDS: PublicCard[] = [
     points: 2,
     eligiblePars: PAR_3,
     rulesText: 'On par 3, award +2 to closest tee shot in regulation.',
+    interaction: {
+      mode: 'vote_target_player',
+    },
   }),
   publicCard({
     id: 'c-chaos-004',
@@ -751,6 +759,9 @@ const CHAOS_CARDS: PublicCard[] = [
     points: -1,
     eligiblePars: ALL_PARS,
     rulesText: 'First mission finisher chooses one opponent to receive -1.',
+    interaction: {
+      mode: 'leader_selects_target',
+    },
   }),
   publicCard({
     id: 'c-chaos-006',
@@ -851,6 +862,23 @@ const CHAOS_CARDS: PublicCard[] = [
     points: 1,
     eligiblePars: ALL_PARS,
     rulesText: 'Manual swap effect: winner transfers 1 point with chosen opponent.',
+    interaction: {
+      mode: 'choose_one_of_two_effects',
+      effectOptions: [
+        {
+          id: 'chaos-swap-plus',
+          label: '+1 to selected target',
+          pointsDelta: 1,
+          targetScope: 'target',
+        },
+        {
+          id: 'chaos-swap-minus',
+          label: '-1 to selected target',
+          pointsDelta: -1,
+          targetScope: 'target',
+        },
+      ],
+    },
   }),
   publicCard({
     id: 'c-chaos-016',
@@ -906,6 +934,9 @@ const PROP_CARDS: PublicCard[] = [
     points: 2,
     eligiblePars: PAR_4_5,
     rulesText: 'Each golfer picks a player. Correct pick earns +2.',
+    interaction: {
+      mode: 'vote_target_player',
+    },
   }),
   publicCard({
     id: 'c-prop-003',
@@ -917,6 +948,9 @@ const PROP_CARDS: PublicCard[] = [
     eligiblePars: ALL_PARS,
     rulesText:
       'Template card: select target golfer before tee-off and predict yes/no on their GIR result.',
+    interaction: {
+      mode: 'vote_target_player',
+    },
   }),
   publicCard({
     id: 'c-prop-004',
