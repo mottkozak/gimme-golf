@@ -14,15 +14,20 @@ function HomeScreen({
     <section className="screen home-screen">
       <header className="screen__header">
         <h2>GIMME GOLF</h2>
-        <p className="muted">Start a round and configure everything in a quick mobile flow.</p>
+        <p>A gentle reminder that golf is a game.</p>
       </header>
 
       <section className="panel stack-xs">
         <p className="muted">
-          Set your hole count, course style, golfers, and game options, then begin hole-by-hole play.
+          Add challenges to every hole, stir up a little chaos, and keep the competition alive with
+          your group. Gimme Golf adds a game alongside your game - all inside a simple scorecard
+          built for the course.
+        </p>
+        <p className="muted">
+          Start a round, add your golfers, and tee it up.
         </p>
         <button type="button" className="button-primary" onClick={startRound}>
-          Start Round
+          Begin Round
         </button>
       </section>
     </section>
