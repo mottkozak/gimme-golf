@@ -1,10 +1,20 @@
+import { useEffect, useRef } from 'react'
 import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
+import { trackCardSelected, trackHoleStarted } from '../logic/analytics.ts'
 import { createEmptyHoleCardsState } from '../logic/dealCards.ts'
+import {
+  formatOfferPointRangeLabel,
+  getOfferPointRange,
+  getSkillBandForExpectedScore,
+  getSkillBandLabel,
+  getSkillBandSummaryLine,
+} from '../logic/gameBalance.ts'
 import { prepareCurrentHoleForPlay } from '../logic/holeFlow.ts'
+import { getDisplayPlayerName } from '../logic/playerNames.ts'
 import {
   getAssignedCurse,
   getAssignedPowerUp,
@@ -17,14 +27,19 @@ import type { HoleTag } from '../types/cards.ts'
 import type { ScreenProps } from './types.ts'
 
 function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
+  const trackedHoleIndexRef = useRef<number | null>(null)
   const currentHoleIndex = roundState.currentHoleIndex
   const currentHole = roundState.holes[currentHoleIndex]
   const currentHoleCards = roundState.holeCards[currentHoleIndex]
   const currentHolePowerUps = roundState.holePowerUps[currentHoleIndex]
   const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
   const isNoMercyHole = currentHole.featuredHoleType === 'no_mercy'
+  const playerNameById = Object.fromEntries(
+    roundState.players.map((player, index) => [player.id, getDisplayPlayerName(player.name, index)]),
+  )
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
+  const isDynamicDifficultyEnabled = roundState.config.toggles.dynamicDifficulty
 
   const hasAnyPersonalCardsDealt = roundState.players.some((player) => {
     const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
@@ -57,13 +72,24 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   const canSelectCards = isDrawTwoPickOne && !isNoMercyHole
   const readinessSummary =
     playersRequiringSelection.length > 0
-      ? `${readyPlayersCount} / ${playersRequiringSelection.length} golfers ready`
-      : 'All golfers ready'
+      ? `Selections ready: ${readyPlayersCount} / ${playersRequiringSelection.length}`
+      : 'All selections ready'
   const missionHelperCopy = canSelectCards
-    ? 'Pick one mission per golfer.'
+    ? isDynamicDifficultyEnabled
+      ? 'Each golfer gets a Safe line and an Upside line tuned by expected score band.'
+      : 'Each golfer picks one mission card before you continue.'
     : isNoMercyHole
-      ? 'No Mercy active. Harder missions were forced this hole.'
-      : 'Missions are auto-assigned for this hole.'
+      ? 'No Mercy is active, so harder missions were auto-assigned this hole.'
+      : 'Missions are auto-assigned this hole.'
+
+  useEffect(() => {
+    if (trackedHoleIndexRef.current === currentHoleIndex) {
+      return
+    }
+
+    trackedHoleIndexRef.current = currentHoleIndex
+    trackHoleStarted(roundState, currentHole.holeNumber, isHolePrepared)
+  }, [currentHole.holeNumber, currentHoleIndex, isHolePrepared, roundState])
 
   const updateCurrentHole = (updater: (currentState: RoundState) => RoundState) => {
     onUpdateRoundState((currentState) => {
@@ -143,6 +169,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   }
 
   const selectCard = (playerId: string, cardId: string) => {
+    trackCardSelected(roundState, currentHole.holeNumber, playerId, cardId)
     updateCurrentHole((currentState) => {
       const holeCards = [...currentState.holeCards]
       const holeCardState = holeCards[currentState.currentHoleIndex]
@@ -203,19 +230,28 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
             alt=""
             aria-hidden="true"
           />
-          <h2>{isPowerUpsMode ? 'Hole Power Ups' : 'Hole Cards'}</h2>
+          <h2>{isPowerUpsMode ? 'Hole Setup: Power Ups' : 'Hole Setup: Missions'}</h2>
         </div>
         <p className="muted">
-          Hole {currentHole.holeNumber} | Par {currentHole.par}
+          Hole {currentHole.holeNumber} | Par {currentHole.par} | Step 1 of 2
         </p>
       </header>
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
+      <section className="panel inset stack-xs hole-flow-note">
+        <p className="label">What Happens Next</p>
+        <p className="muted">
+          {!isHolePrepared
+            ? `Confirm par, optionally tag the hole, then ${isPowerUpsMode ? 'deal power-ups' : 'deal cards'}.`
+            : 'Play the hole, then go to Hole Results to enter strokes and resolve outcomes.'}
+        </p>
+      </section>
+
       {!isHolePrepared && (
         <section className="panel stack-xs hole-setup-card">
           <div className="hole-setup-control-group">
-            <span className="label hole-setup-label">Par (confirm)</span>
+            <span className="label hole-setup-label">Par</span>
             <div className="segmented-control segmented-control--four" role="group" aria-label="Par selection">
               {[3, 4, 5, 6].map((par) => (
                 <button
@@ -235,7 +271,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           <div className="hole-setup-control-group">
             <span className="label hole-setup-label hole-setup-label--optional">Course Tags (optional)</span>
             {currentHole.tags.length === 0 && (
-              <p className="muted hole-setup-tags-empty">No tags selected</p>
+              <p className="muted hole-setup-tags-empty">No tags selected yet (safe to skip).</p>
             )}
             <div className="tag-grid hole-setup-tag-grid">
               {HOLE_TAG_OPTIONS.map((option) => {
@@ -261,8 +297,11 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           </div>
 
           <button type="button" className="button-primary hole-setup-deal-button" onClick={dealForCurrentHole}>
-            {isPowerUpsMode ? 'Deal Power Ups' : 'Deal Cards'}
+            {isPowerUpsMode
+              ? `Deal Hole ${currentHole.holeNumber} Power Ups`
+              : `Deal Hole ${currentHole.holeNumber} Cards`}
           </button>
+          <p className="muted">After dealing, you can go straight to Hole Results.</p>
         </section>
       )}
 
@@ -277,7 +316,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               if (!powerUp && !curse) {
                 return (
                   <article key={player.id} className="panel stack-xs">
-                    <strong>{player.name}</strong>
+                    <strong>{playerNameById[player.id]}</strong>
                     <p className="muted">No power-up assigned for this hole.</p>
                   </article>
                 )
@@ -287,15 +326,19 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                 <section key={player.id} className="stack-xs">
                   {powerUp ? (
                     <PowerUpCard
-                      playerName={player.name}
+                      playerName={playerNameById[player.id]}
                       powerUp={powerUp}
                       used={used}
                       onUse={() => markPowerUpUsed(player.id)}
                     />
                   ) : (
                     <>
-                      <strong>{player.name}</strong>
-                      <p className="muted">No positive power-up assigned for this hole.</p>
+                      <strong>{playerNameById[player.id]}</strong>
+                      <p className="muted">
+                        {curse
+                          ? 'Curse assigned for this hole, so no positive power-up.'
+                          : 'No positive power-up assigned for this hole.'}
+                      </p>
                     </>
                   )}
                   {curse && (
@@ -316,12 +359,12 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
           <section className="panel stack-xs">
             <p className="muted">
-              Declare your power-up before using it. Curses apply to previous-hole winner(s) and
-              expire at the end of this hole.
+              Declare power-ups before use. Curses apply to current round leader(s) for this hole
+              only and replace their positive power-up.
             </p>
             <button type="button" className="button-primary" onClick={continueToResults}>
               <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
-              Continue To Hole Results
+              Enter Hole Results
             </button>
           </section>
         </>
@@ -331,6 +374,16 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
         <>
           <p className="muted hole-cards-helper">{missionHelperCopy}</p>
 
+          {canSelectCards && isDynamicDifficultyEnabled && (
+            <section className="panel inset stack-xs hole-fairness-note">
+              <p className="label">Fair Play Offers</p>
+              <p className="muted">
+                Expected score sets reward ceilings so mixed-skill groups stay competitive. Real
+                strokes are never modified by mission cards.
+              </p>
+            </section>
+          )}
+
           <section className="stack-sm hole-draft-list">
             {roundState.players.map((player) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
@@ -338,17 +391,30 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
               const isPlayerReady =
                 typeof selectedCardId === 'string' && selectedCardId.length > 0
+              const skillBand = getSkillBandForExpectedScore(player.expectedScore18)
+              const skillBandLabel = getSkillBandLabel(skillBand)
+              const safeRange = formatOfferPointRangeLabel(
+                getOfferPointRange(player.expectedScore18, isDynamicDifficultyEnabled, 'safe'),
+              )
+              const hardRange = formatOfferPointRangeLabel(
+                getOfferPointRange(player.expectedScore18, isDynamicDifficultyEnabled, 'hard'),
+              )
 
               return (
                 <article key={player.id} className="panel stack-xs hole-draft-player">
                   <header className="row-between setup-row-wrap">
-                    <strong>{player.name}</strong>
+                    <strong>{playerNameById[player.id]}</strong>
                     {canSelectCards && (
                       <span className={`status-pill ${isPlayerReady ? 'status-success' : 'status-pending'}`}>
                         {isPlayerReady ? 'Ready' : 'Pending'}
                       </span>
                     )}
                   </header>
+                  {canSelectCards && isDynamicDifficultyEnabled && (
+                    <p className="muted hole-draft-player__fairness">
+                      {skillBandLabel} band • Safe {safeRange} • Upside {hardRange}
+                    </p>
+                  )}
 
                   <div className="stack-xs hole-draft-options">
                     {dealtCards.map((card) => {
@@ -360,6 +426,14 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                             : offerState?.hardCardId === card.id
                               ? 'hard'
                               : undefined
+                      const offerDetail =
+                        offerKind === 'safe'
+                          ? `Safe line target: ${safeRange}`
+                          : offerKind === 'hard'
+                            ? `Upside line target: ${hardRange}`
+                            : offerKind === 'single' && isDynamicDifficultyEnabled
+                              ? `Auto line target: ${getSkillBandSummaryLine(skillBand)}`
+                              : undefined
 
                       return (
                         <ChallengeCardView
@@ -367,6 +441,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                           card={card}
                           selected={selectedCardId === card.id}
                           offerKind={offerKind}
+                          offerDetail={offerDetail}
                           onSelect={
                             canSelectCards ? () => selectCard(player.id, card.id) : undefined
                           }
@@ -375,7 +450,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                     })}
 
                     {dealtCards.length === 0 && (
-                      <p className="muted">No personal cards available from enabled packs.</p>
+                      <p className="muted">No missions available from enabled packs for this golfer.</p>
                     )}
                   </div>
                 </article>
@@ -398,7 +473,9 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                     <PublicCardView key={card.id} card={card} />
                   ))}
                 </div>
-                <p className="muted hole-public-preview__helper">Preview only. Resolve on Hole Results.</p>
+                <p className="muted hole-public-preview__helper">
+                  Preview only. Public cards are resolved on Hole Results.
+                </p>
               </>
             )}
           </section>
@@ -411,10 +488,10 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               disabled={!allPlayersHaveSelection}
               onClick={continueToResults}
             >
-              Continue
+              Go To Hole Results
             </button>
             {!allPlayersHaveSelection && (
-              <p className="muted">Pick one mission for each golfer to continue.</p>
+              <p className="muted">Pick one mission for each golfer before continuing.</p>
             )}
           </section>
         </>

@@ -1,6 +1,7 @@
 import { ICONS } from '../app/icons.ts'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
+import { trackSummaryScreenViewed } from '../logic/analytics.ts'
 import {
   buildHoleRecapData,
   formatWinnerSummary,
@@ -91,6 +92,10 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     [roundSortMode, roundState.players, roundState.totalsByPlayerId],
   )
 
+  useEffect(() => {
+    trackSummaryScreenViewed(roundState, 'leaderboard', recapData.holeNumber)
+  }, [recapData.holeNumber, roundState])
+
   const holeWinnerScore = recapData.gamePointHoleWinners.score
   const bestStrokeScore = recapData.bestRealScoreHoleWinners.score
   const roundLeaderScore = recapData.leaderSnapshot.adjusted.score
@@ -118,15 +123,23 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           </div>
           <span className="chip">Par {recapData.holePar}</span>
         </div>
-        <p className="muted">Between-holes snapshot</p>
+        <p className="muted">Quick between-holes snapshot before the next tee.</p>
       </header>
 
       <section className="panel recap-hero stack-xs" aria-live="polite">
-        <p className="recap-highlight-label">Top Moment</p>
+        <p className="recap-highlight-label">Best Moment</p>
         <p className="recap-highlight recap-hero__headline">{recapData.highlightLine}</p>
         <p className="recap-hero__sub">
           Hole winner: {formatWinnerSummary(recapData.gamePointHoleWinners)}
           {typeof holeWinnerScore === 'number' ? ` (${formatSignedPoints(holeWinnerScore)})` : ''}
+        </p>
+      </section>
+
+      <section className="panel inset stack-xs recap-score-clarity">
+        <p className="label">Scoring Clarity</p>
+        <p className="muted">
+          Real = golf strokes only (never modified). Points = side-game outcomes. Adjusted = real
+          score minus game points.
         </p>
       </section>
 
@@ -191,6 +204,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       />
 
       <section className="panel stack-xs recap-next recap-next--sticky">
+        <p className="muted recap-next__helper">
+          {isLastHole
+            ? 'Next: final round summary and shareable recap.'
+            : `Next: set up Hole ${recapData.holeNumber + 1} and deal.`}
+        </p>
         <button type="button" className="button-primary" onClick={progressRound}>
           <img
             className="button-icon"
@@ -198,7 +216,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             alt=""
             aria-hidden="true"
           />
-          {isLastHole ? 'Finish Round' : `Next Hole ${recapData.holeNumber + 1}`}
+          {isLastHole ? 'Finish Round' : `Set Up Hole ${recapData.holeNumber + 1}`}
         </button>
       </section>
 

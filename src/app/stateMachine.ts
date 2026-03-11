@@ -11,16 +11,23 @@ export interface AppState {
   activeScreen: AppScreen
   roundState: RoundState
   hasSavedRound: boolean
+  savedRoundUpdatedAtMs: number | null
+  roundSaveWarning: string | null
   shouldPersistRoundState: boolean
 }
 
 export type AppAction =
   | { type: 'navigate'; screen: AppScreen }
   | { type: 'update_round_state'; updater: (currentState: RoundState) => RoundState }
-  | { type: 'resume_saved_round'; savedRoundState: RoundState | null }
+  | { type: 'resume_saved_round'; savedRoundState: RoundState | null; savedAtMs: number | null }
   | { type: 'reset_round' }
   | { type: 'abandon_round' }
-  | { type: 'mark_persisted' }
+  | { type: 'mark_persisted'; savedAtMs: number | null }
+
+const ROUND_SAVE_WARNING =
+  'Local save is unavailable. Keep this app open to avoid losing round progress.'
+const SAVED_ROUND_UNAVAILABLE_WARNING =
+  'Saved round was unavailable. Start a new round to continue.'
 
 const SCREEN_TRANSITIONS: Record<AppScreen, ReadonlySet<AppScreen>> = {
   home: new Set(['home', 'roundSetup', 'holePlay']),
@@ -149,6 +156,81 @@ function canTransitionScreen(currentScreen: AppScreen, nextScreen: AppScreen): b
   return SCREEN_TRANSITIONS[currentScreen]?.has(nextScreen) ?? false
 }
 
+function getClampedHoleIndex(roundState: RoundState): number {
+  if (roundState.holes.length === 0) {
+    return 0
+  }
+
+  return Math.min(
+    Math.max(roundState.currentHoleIndex, 0),
+    roundState.holes.length - 1,
+  )
+}
+
+function clampRoundHoleIndex(roundState: RoundState): RoundState {
+  const clampedHoleIndex = getClampedHoleIndex(roundState)
+
+  if (roundState.currentHoleIndex === clampedHoleIndex) {
+    return roundState
+  }
+
+  return {
+    ...roundState,
+    currentHoleIndex: clampedHoleIndex,
+  }
+}
+
+function normalizeRoundState(roundState: RoundState): RoundState {
+  return clampRoundHoleIndex(recalculateRoundTotals(roundState))
+}
+
+function isHolePreparedForPlay(roundState: RoundState, holeIndex: number): boolean {
+  return (
+    hasAnyDealtCardsForHole(roundState, holeIndex) ||
+    hasAnyAssignedPowerUpsForHole(roundState, holeIndex)
+  )
+}
+
+function canTransitionWithRoundState(
+  currentScreen: AppScreen,
+  nextScreen: AppScreen,
+  roundState: RoundState,
+): boolean {
+  if (!canTransitionScreen(currentScreen, nextScreen)) {
+    return false
+  }
+
+  if (roundState.holes.length === 0) {
+    return nextScreen === 'home' || nextScreen === 'roundSetup'
+  }
+
+  const currentHoleIndex = getClampedHoleIndex(roundState)
+  const isLastHole = currentHoleIndex === roundState.holes.length - 1
+
+  if (currentScreen === 'holePlay' && nextScreen === 'holeResults') {
+    return isHolePreparedForPlay(roundState, currentHoleIndex)
+  }
+
+  if (currentScreen === 'holeResults' && nextScreen === 'leaderboard') {
+    return isHoleComplete(roundState, currentHoleIndex)
+  }
+
+  if (currentScreen === 'leaderboard' && nextScreen === 'endRound') {
+    return isLastHole && isHoleComplete(roundState, currentHoleIndex)
+  }
+
+  if (currentScreen === 'leaderboard' && nextScreen === 'holePlay') {
+    if (isLastHole && isHoleComplete(roundState, currentHoleIndex)) {
+      return false
+    }
+
+    const previousHoleIndex = currentHoleIndex - 1
+    return previousHoleIndex < 0 || isHoleComplete(roundState, previousHoleIndex)
+  }
+
+  return true
+}
+
 export function getResumeScreen(roundState: RoundState): AppScreen {
   if (roundState.holes.length === 0) {
     return 'roundSetup'
@@ -181,20 +263,25 @@ export function getResumeScreen(roundState: RoundState): AppScreen {
   return 'holePlay'
 }
 
-export function createInitialAppState(savedRoundState: RoundState | null): AppState {
-  const hydratedRoundState = recalculateRoundTotals(savedRoundState ?? createNewRoundState())
+export function createInitialAppState(
+  savedRoundState: RoundState | null,
+  savedRoundUpdatedAtMs: number | null = null,
+): AppState {
+  const hydratedRoundState = normalizeRoundState(savedRoundState ?? createNewRoundState())
 
   return {
     activeScreen: 'home',
     roundState: hydratedRoundState,
     hasSavedRound: Boolean(savedRoundState),
+    savedRoundUpdatedAtMs,
+    roundSaveWarning: null,
     shouldPersistRoundState: false,
   }
 }
 
 export function reduceAppState(state: AppState, action: AppAction): AppState {
   if (action.type === 'navigate') {
-    if (!canTransitionScreen(state.activeScreen, action.screen)) {
+    if (!canTransitionWithRoundState(state.activeScreen, action.screen, state.roundState)) {
       return state
     }
 
@@ -209,7 +296,7 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       ...state,
       hasSavedRound: true,
       shouldPersistRoundState: true,
-      roundState: recalculateRoundTotals(action.updater(state.roundState)),
+      roundState: normalizeRoundState(action.updater(state.roundState)),
     }
   }
 
@@ -218,15 +305,19 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         hasSavedRound: false,
+        savedRoundUpdatedAtMs: null,
+        roundSaveWarning: SAVED_ROUND_UNAVAILABLE_WARNING,
       }
     }
 
-    const resumedRoundState = recalculateRoundTotals(action.savedRoundState)
+    const resumedRoundState = normalizeRoundState(action.savedRoundState)
     return {
       ...state,
       activeScreen: getResumeScreen(resumedRoundState),
       roundState: resumedRoundState,
       hasSavedRound: true,
+      savedRoundUpdatedAtMs: action.savedAtMs,
+      roundSaveWarning: null,
       shouldPersistRoundState: false,
     }
   }
@@ -236,8 +327,9 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       ...state,
       activeScreen: 'home',
       hasSavedRound: true,
+      roundSaveWarning: null,
       shouldPersistRoundState: true,
-      roundState: recalculateRoundTotals(resetRoundProgress(state.roundState)),
+      roundState: normalizeRoundState(resetRoundProgress(state.roundState)),
     }
   }
 
@@ -246,8 +338,10 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       ...state,
       activeScreen: 'home',
       hasSavedRound: false,
+      savedRoundUpdatedAtMs: null,
+      roundSaveWarning: null,
       shouldPersistRoundState: false,
-      roundState: recalculateRoundTotals(createNewRoundState()),
+      roundState: normalizeRoundState(createNewRoundState()),
     }
   }
 
@@ -258,6 +352,9 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
 
     return {
       ...state,
+      savedRoundUpdatedAtMs:
+        typeof action.savedAtMs === 'number' ? action.savedAtMs : state.savedRoundUpdatedAtMs,
+      roundSaveWarning: action.savedAtMs === null ? ROUND_SAVE_WARNING : null,
       shouldPersistRoundState: false,
     }
   }

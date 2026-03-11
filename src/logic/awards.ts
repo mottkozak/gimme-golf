@@ -1,6 +1,7 @@
 import { AWARD_DEFINITION_BY_ID, type AwardId } from '../data/awards.ts'
 import type { PersonalCardType } from '../types/cards.ts'
 import type { RoundState } from '../types/game.ts'
+import { getDisplayPlayerName } from './playerNames.ts'
 import { buildHolePointBreakdownsByPlayerId } from './streaks.ts'
 
 const HIGH_VALUE_CARD_POINTS_THRESHOLD = 3
@@ -210,13 +211,13 @@ function buildPlayerRoundStats(roundState: RoundState): Record<string, PlayerRou
   )
 
   const statsByPlayerId: Record<string, PlayerRoundStats> = Object.fromEntries(
-    roundState.players.map((player) => {
+    roundState.players.map((player, playerIndex) => {
       const totals = roundState.totalsByPlayerId[player.id]
       return [
         player.id,
         {
           playerId: player.id,
-          playerName: player.name,
+          playerName: getDisplayPlayerName(player.name, playerIndex),
           missionsCompleted: 0,
           missionsFailed: 0,
           totalGamePoints: totals?.gamePoints ?? 0,

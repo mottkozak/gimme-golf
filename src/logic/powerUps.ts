@@ -68,26 +68,54 @@ export function getPreviousHoleWinnerIds(
   holeResults: HoleResultState[],
   currentHoleIndex: number,
 ): string[] {
+  return getRoundLeaderIds(players, holeResults, currentHoleIndex)
+}
+
+export function getRoundLeaderIds(
+  players: Player[],
+  holeResults: HoleResultState[],
+  currentHoleIndex: number,
+): string[] {
   if (currentHoleIndex <= 0) {
     return []
   }
 
-  const previousHoleResult = holeResults[currentHoleIndex - 1]
-  if (!previousHoleResult || !isHoleScoredForAllPlayers(previousHoleResult, players)) {
+  const cumulativeStrokesByPlayerId = Object.fromEntries(
+    players.map((player) => [player.id, 0]),
+  ) as Record<string, number>
+  let completedHoleCount = 0
+
+  for (let holeIndex = 0; holeIndex < currentHoleIndex; holeIndex += 1) {
+    const holeResult = holeResults[holeIndex]
+    if (!holeResult || !isHoleScoredForAllPlayers(holeResult, players)) {
+      continue
+    }
+
+    completedHoleCount += 1
+
+    for (const player of players) {
+      const strokes = holeResult.strokesByPlayerId[player.id]
+      if (typeof strokes === 'number') {
+        cumulativeStrokesByPlayerId[player.id] += strokes
+      }
+    }
+  }
+
+  if (completedHoleCount === 0) {
     return []
   }
 
-  const lowestScore = players.reduce((lowest, player) => {
-    const strokes = previousHoleResult.strokesByPlayerId[player.id]
-    return typeof strokes === 'number' ? Math.min(lowest, strokes) : lowest
-  }, Number.POSITIVE_INFINITY)
+  const lowestTotalStrokes = players.reduce(
+    (lowest, player) => Math.min(lowest, cumulativeStrokesByPlayerId[player.id]),
+    Number.POSITIVE_INFINITY,
+  )
 
-  if (!Number.isFinite(lowestScore)) {
+  if (!Number.isFinite(lowestTotalStrokes)) {
     return []
   }
 
   return players
-    .filter((player) => previousHoleResult.strokesByPlayerId[player.id] === lowestScore)
+    .filter((player) => cumulativeStrokesByPlayerId[player.id] === lowestTotalStrokes)
     .map((player) => player.id)
 }
 
@@ -108,24 +136,30 @@ export function assignPowerUpsForHoleWithCurses(
   cursePool: PowerUp[] = CURSE_CARDS,
 ): HolePowerUpState {
   const positiveAssignments = assignPowerUpsFromPool(players, holeNumber, positivePowerUpPool)
-  const previousHoleWinnerIds = getPreviousHoleWinnerIds(players, holeResults, currentHoleIndex)
+  const roundLeaderIds = getRoundLeaderIds(players, holeResults, currentHoleIndex)
 
-  if (previousHoleWinnerIds.length === 0 || cursePool.length === 0) {
+  if (roundLeaderIds.length === 0 || cursePool.length === 0) {
     return positiveAssignments
   }
 
   const shuffledCurses = shufflePowerUps(cursePool)
+  const assignedPowerUpIdByPlayerId: HolePowerUpState['assignedPowerUpIdByPlayerId'] = {
+    ...positiveAssignments.assignedPowerUpIdByPlayerId,
+  }
   const assignedCurseIdByPlayerId: HolePowerUpState['assignedCurseIdByPlayerId'] = {
     ...positiveAssignments.assignedCurseIdByPlayerId,
   }
 
-  previousHoleWinnerIds.forEach((playerId, playerIndex) => {
+  roundLeaderIds.forEach((playerId, playerIndex) => {
     const curse = shuffledCurses[playerIndex % shuffledCurses.length]
     assignedCurseIdByPlayerId[playerId] = curse?.id ?? null
+    // Curse replaces the positive card for that hole.
+    assignedPowerUpIdByPlayerId[playerId] = null
   })
 
   return {
     ...positiveAssignments,
+    assignedPowerUpIdByPlayerId,
     assignedCurseIdByPlayerId,
   }
 }

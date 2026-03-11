@@ -1,3 +1,4 @@
+import { getDisplayPlayerName } from './playerNames.ts'
 import type { LeaderboardEntry, Player, PlayerTotals } from '../types/game.ts'
 
 export type LeaderboardSortMode = 'adjustedScore' | 'realScore' | 'gamePoints'
@@ -34,11 +35,11 @@ export function buildLeaderboardEntries(
   sortMode: LeaderboardSortMode = 'adjustedScore',
 ): LeaderboardEntry[] {
   return players
-    .map((player) => {
+    .map((player, index) => {
       const totals = totalsByPlayerId[player.id]
       return {
         playerId: player.id,
-        playerName: player.name,
+        playerName: getDisplayPlayerName(player.name, index),
         realScore: totals?.realScore ?? 0,
         gamePoints: totals?.gamePoints ?? 0,
         adjustedScore: totals?.adjustedScore ?? 0,

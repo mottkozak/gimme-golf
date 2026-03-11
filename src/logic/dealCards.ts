@@ -9,6 +9,7 @@ import type {
 } from '../types/game.ts'
 import {
   DYNAMIC_OFFER_TUNING,
+  getOfferPointRange,
   getSkillBandForExpectedScore,
   STATIC_OFFER_TUNING,
   type SkillBandOfferTuning,
@@ -230,6 +231,48 @@ function getPreferredPointsForOffer(
   return Array.from(new Set([5, ...basePoints]))
 }
 
+function getPointDistanceFromRange(points: number, minPoints: number, maxPoints: number): number {
+  if (points < minPoints) {
+    return minPoints - points
+  }
+
+  if (points > maxPoints) {
+    return points - maxPoints
+  }
+
+  return 0
+}
+
+function filterCardsForOfferPointRange(
+  cards: PersonalCard[],
+  player: Player,
+  offerKind: PersonalOfferKind,
+  dynamicDifficultyEnabled: boolean,
+): PersonalCard[] {
+  if (!dynamicDifficultyEnabled) {
+    return cards
+  }
+
+  const pointRange = getOfferPointRange(player.expectedScore18, dynamicDifficultyEnabled, offerKind)
+  const cardsInsideRange = cards.filter(
+    (card) => card.points >= pointRange.minPoints && card.points <= pointRange.maxPoints,
+  )
+  if (cardsInsideRange.length > 0) {
+    return cardsInsideRange
+  }
+
+  const closestDistance = cards.reduce((bestDistance, card) => {
+    const distance = getPointDistanceFromRange(card.points, pointRange.minPoints, pointRange.maxPoints)
+    return Math.min(bestDistance, distance)
+  }, Number.POSITIVE_INFINITY)
+
+  return cards.filter(
+    (card) =>
+      getPointDistanceFromRange(card.points, pointRange.minPoints, pointRange.maxPoints) ===
+      closestDistance,
+  )
+}
+
 function scoreCardForOffer(
   card: PersonalCard,
   player: Player,
@@ -365,12 +408,17 @@ function chooseSafeAndHardCardsForPlayer(
   recentPersonalCardIds: Set<string>,
   recentPlayerCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const safeCandidatePool = getPersonalCandidatePool(
-    cards,
-    usedPersonalCardIds,
-    recentPersonalCardIds,
-    recentPlayerCardIds,
-    1,
+  const safeCandidatePool = filterCardsForOfferPointRange(
+    getPersonalCandidatePool(
+      cards,
+      usedPersonalCardIds,
+      recentPersonalCardIds,
+      recentPlayerCardIds,
+      1,
+    ),
+    player,
+    'safe',
+    dynamicDifficultyEnabled,
   )
   const safeRanked = rankCardsForOffer(
     safeCandidatePool,
@@ -386,12 +434,17 @@ function chooseSafeAndHardCardsForPlayer(
   }
 
   const remaining = safeCard ? cards.filter((card) => card.id !== safeCard.id) : cards
-  const hardCandidatePool = getPersonalCandidatePool(
-    remaining,
-    usedPersonalCardIds,
-    recentPersonalCardIds,
-    recentPlayerCardIds,
-    1,
+  const hardCandidatePool = filterCardsForOfferPointRange(
+    getPersonalCandidatePool(
+      remaining,
+      usedPersonalCardIds,
+      recentPersonalCardIds,
+      recentPlayerCardIds,
+      1,
+    ),
+    player,
+    'hard',
+    dynamicDifficultyEnabled,
   )
   const hardRanked = rankCardsForOffer(
     hardCandidatePool,
@@ -436,12 +489,17 @@ function chooseSingleCardForPlayer(
   recentPersonalCardIds: Set<string>,
   recentPlayerCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const candidatePool = getPersonalCandidatePool(
-    cards,
-    usedPersonalCardIds,
-    recentPersonalCardIds,
-    recentPlayerCardIds,
-    1,
+  const candidatePool = filterCardsForOfferPointRange(
+    getPersonalCandidatePool(
+      cards,
+      usedPersonalCardIds,
+      recentPersonalCardIds,
+      recentPlayerCardIds,
+      1,
+    ),
+    player,
+    'single',
+    dynamicDifficultyEnabled,
   )
   const singleRanked = rankCardsForOffer(
     candidatePool,
@@ -479,12 +537,17 @@ function chooseNoMercyCardForPlayer(
   recentPersonalCardIds: Set<string>,
   recentPlayerCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const candidatePool = getPersonalCandidatePool(
-    cards,
-    usedPersonalCardIds,
-    recentPersonalCardIds,
-    recentPlayerCardIds,
-    1,
+  const candidatePool = filterCardsForOfferPointRange(
+    getPersonalCandidatePool(
+      cards,
+      usedPersonalCardIds,
+      recentPersonalCardIds,
+      recentPlayerCardIds,
+      1,
+    ),
+    player,
+    'hard',
+    dynamicDifficultyEnabled,
   )
   const hardRanked = rankCardsForOffer(
     candidatePool,

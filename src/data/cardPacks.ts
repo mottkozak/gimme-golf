@@ -1,5 +1,16 @@
 import type { CardPackId, CardType } from '../types/cards.ts'
 
+export type CardPackDisplayGroupId = 'personal' | 'public' | 'expansion'
+export type CardPackReleaseStage = 'active' | 'planned'
+export type CardPackVisibility = 'visible' | 'hidden'
+
+export interface CardPackDisplayGroupDefinition {
+  id: CardPackDisplayGroupId
+  label: string
+  helperText: string
+  sortOrder: number
+}
+
 export interface CardPackDefinition {
   id: CardPackId
   name: string
@@ -11,15 +22,54 @@ export interface CardPackDefinition {
   isPremium: boolean
   premiumTier: string | null
   category: 'core' | 'public' | 'expansion'
+  displayGroupId: CardPackDisplayGroupId
   displayGroup: string
   sortOrder: number
   iconKey: string | null
   badgeLabel: string | null
   includedCardTypes: CardType[]
   gameplayNotes: string[]
+  releaseStage: CardPackReleaseStage
+  setupVisibility: CardPackVisibility
+  featureVisibility: CardPackVisibility
+  availabilityLabel: string
 }
 
-export const CARD_PACKS: CardPackDefinition[] = [
+export interface CardPackSetupSection {
+  id: CardPackDisplayGroupId
+  label: string
+  helperText: string
+  packs: CardPackDefinition[]
+}
+
+export const CARD_PACK_DISPLAY_GROUPS: CardPackDisplayGroupDefinition[] = [
+  {
+    id: 'personal',
+    label: 'Personal Packs',
+    helperText: 'One mission lane per golfer each hole.',
+    sortOrder: 1,
+  },
+  {
+    id: 'public',
+    label: 'Public Packs',
+    helperText: 'One group-wide public card lane per hole.',
+    sortOrder: 2,
+  },
+  {
+    id: 'expansion',
+    label: 'Expansion Packs',
+    helperText: 'Optional variants for returning groups.',
+    sortOrder: 3,
+  },
+]
+
+export const CARD_PACK_DISPLAY_GROUPS_BY_ID: Record<CardPackDisplayGroupId, CardPackDisplayGroupDefinition> =
+  Object.fromEntries(CARD_PACK_DISPLAY_GROUPS.map((group) => [group.id, group])) as Record<
+    CardPackDisplayGroupId,
+    CardPackDisplayGroupDefinition
+  >
+
+export const CARD_PACK_CATALOG: CardPackDefinition[] = [
   {
     id: 'classic',
     name: 'Classic',
@@ -32,6 +82,7 @@ export const CARD_PACKS: CardPackDefinition[] = [
     isPremium: false,
     premiumTier: null,
     category: 'core',
+    displayGroupId: 'personal',
     displayGroup: 'Personal Packs',
     sortOrder: 1,
     iconKey: 'golf',
@@ -41,6 +92,10 @@ export const CARD_PACKS: CardPackDefinition[] = [
       'Each golfer receives personal challenge cards.',
       'Common cards are easiest, Skill and Risk cards raise reward and difficulty.',
     ],
+    releaseStage: 'active',
+    setupVisibility: 'visible',
+    featureVisibility: 'visible',
+    availabilityLabel: 'Available now',
   },
   {
     id: 'chaos',
@@ -54,6 +109,7 @@ export const CARD_PACKS: CardPackDefinition[] = [
     isPremium: false,
     premiumTier: null,
     category: 'public',
+    displayGroupId: 'public',
     displayGroup: 'Public Packs',
     sortOrder: 2,
     iconKey: 'chaos',
@@ -63,6 +119,10 @@ export const CARD_PACKS: CardPackDefinition[] = [
       'At most one Chaos card appears per hole when enabled.',
       'Chaos effects only impact game points, never real strokes.',
     ],
+    releaseStage: 'active',
+    setupVisibility: 'visible',
+    featureVisibility: 'visible',
+    availabilityLabel: 'Available now',
   },
   {
     id: 'props',
@@ -76,6 +136,7 @@ export const CARD_PACKS: CardPackDefinition[] = [
     isPremium: false,
     premiumTier: null,
     category: 'public',
+    displayGroupId: 'public',
     displayGroup: 'Public Packs',
     sortOrder: 3,
     iconKey: 'prop',
@@ -85,6 +146,10 @@ export const CARD_PACKS: CardPackDefinition[] = [
       'At most one Prop card appears per hole when enabled.',
       'Prop outcomes are manually resolved on Hole Results.',
     ],
+    releaseStage: 'active',
+    setupVisibility: 'visible',
+    featureVisibility: 'visible',
+    availabilityLabel: 'Available now',
   },
   {
     id: 'novelty',
@@ -98,6 +163,7 @@ export const CARD_PACKS: CardPackDefinition[] = [
     isPremium: true,
     premiumTier: 'future-expansion',
     category: 'expansion',
+    displayGroupId: 'expansion',
     displayGroup: 'Expansion Packs',
     sortOrder: 6,
     iconKey: 'novelty',
@@ -107,6 +173,10 @@ export const CARD_PACKS: CardPackDefinition[] = [
       'Novelty cards combine odd actions with score thresholds.',
       'Designed for humor and high-variance moments.',
     ],
+    releaseStage: 'active',
+    setupVisibility: 'visible',
+    featureVisibility: 'visible',
+    availabilityLabel: 'Available now',
   },
   {
     id: 'hybrid',
@@ -120,6 +190,7 @@ export const CARD_PACKS: CardPackDefinition[] = [
     isPremium: true,
     premiumTier: 'future-expansion',
     category: 'expansion',
+    displayGroupId: 'expansion',
     displayGroup: 'Expansion Packs',
     sortOrder: 7,
     iconKey: 'hybrid',
@@ -129,12 +200,97 @@ export const CARD_PACKS: CardPackDefinition[] = [
       'Hybrid cards increase direct rivalry between players.',
       'Most effective in groups of three or more.',
     ],
+    releaseStage: 'active',
+    setupVisibility: 'visible',
+    featureVisibility: 'visible',
+    availabilityLabel: 'Available now',
+  },
+  {
+    id: 'curse',
+    name: 'Curses',
+    shortDescription: 'Reserved for future expansion release.',
+    longDescription:
+      'Curses remain cataloged for compatibility and future release planning. This pack is intentionally hidden from setup.',
+    includesLabel: 'Curse personal challenge cards',
+    bestForLabel: 'Reserved for future releases',
+    isEnabledByDefault: false,
+    isPremium: true,
+    premiumTier: 'future-expansion',
+    category: 'expansion',
+    displayGroupId: 'expansion',
+    displayGroup: 'Expansion Packs',
+    sortOrder: 90,
+    iconKey: null,
+    badgeLabel: null,
+    includedCardTypes: ['curse'],
+    gameplayNotes: [],
+    releaseStage: 'planned',
+    setupVisibility: 'hidden',
+    featureVisibility: 'hidden',
+    availabilityLabel: 'Not released',
+  },
+  {
+    id: 'style',
+    name: 'Style',
+    shortDescription: 'Reserved for future expansion release.',
+    longDescription:
+      'Style cards remain cataloged for compatibility and future release planning. This pack is intentionally hidden from setup.',
+    includesLabel: 'Style personal challenge cards',
+    bestForLabel: 'Reserved for future releases',
+    isEnabledByDefault: false,
+    isPremium: true,
+    premiumTier: 'future-expansion',
+    category: 'expansion',
+    displayGroupId: 'expansion',
+    displayGroup: 'Expansion Packs',
+    sortOrder: 91,
+    iconKey: null,
+    badgeLabel: null,
+    includedCardTypes: ['style'],
+    gameplayNotes: [],
+    releaseStage: 'planned',
+    setupVisibility: 'hidden',
+    featureVisibility: 'hidden',
+    availabilityLabel: 'Not released',
   },
 ]
 
-export const CARD_PACKS_BY_ID: Partial<Record<CardPackId, CardPackDefinition>> = Object.fromEntries(
-  CARD_PACKS.map((pack) => [pack.id, pack]),
-) as Partial<Record<CardPackId, CardPackDefinition>>
+function isReleasedPack(pack: CardPackDefinition): boolean {
+  return pack.releaseStage === 'active'
+}
+
+function isSetupVisiblePack(pack: CardPackDefinition): boolean {
+  return isReleasedPack(pack) && pack.setupVisibility === 'visible'
+}
+
+function isFeatureVisiblePack(pack: CardPackDefinition): boolean {
+  return isReleasedPack(pack) && pack.featureVisibility === 'visible'
+}
+
+export const ACTIVE_CARD_PACKS: CardPackDefinition[] = CARD_PACK_CATALOG.filter(isReleasedPack)
+
+export const CARD_PACKS: CardPackDefinition[] = ACTIVE_CARD_PACKS.filter(isSetupVisiblePack)
+
+export const CARD_PACKS_FOR_MODE_FEATURES: CardPackDefinition[] =
+  ACTIVE_CARD_PACKS.filter(isFeatureVisiblePack)
+
+export const CARD_PACKS_BY_ID: Record<CardPackId, CardPackDefinition> = Object.fromEntries(
+  CARD_PACK_CATALOG.map((pack) => [pack.id, pack]),
+) as Record<CardPackId, CardPackDefinition>
+
+export function getSetupCardPackSections(): CardPackSetupSection[] {
+  const setupVisiblePacks = [...CARD_PACKS].sort((packA, packB) => packA.sortOrder - packB.sortOrder)
+
+  return [...CARD_PACK_DISPLAY_GROUPS]
+    .sort((groupA, groupB) => groupA.sortOrder - groupB.sortOrder)
+    .map((group) => ({
+      id: group.id,
+      label: group.label,
+      helperText: group.helperText,
+      packs: setupVisiblePacks.filter((pack) => pack.displayGroupId === group.id),
+    }))
+    .filter((section) => section.packs.length > 0)
+}
 
 export function getPackIdForCardType(cardType: CardType): CardPackId {
   switch (cardType) {

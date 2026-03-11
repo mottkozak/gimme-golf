@@ -1,4 +1,4 @@
-import { CARD_PACKS } from './cardPacks.ts'
+import { CARD_PACKS_FOR_MODE_FEATURES } from './cardPacks.ts'
 import type { CardPackId } from '../types/cards.ts'
 import type {
   FeaturedHoleAssignmentMode,
@@ -8,6 +8,8 @@ import type {
 } from '../types/game.ts'
 
 export type GameModeFeatureId = CardPackId | 'powerUps'
+export type GameModePresetReleaseStage = 'active' | 'legacy'
+export type GameModePresetVisibility = 'visible' | 'hidden'
 
 export interface GameModeFeatureDefinition {
   id: GameModeFeatureId
@@ -48,10 +50,19 @@ export interface GameModePresetDefinition {
   sortOrder: number
   badgeLabel: string | null
   isRecommended: boolean
+  releaseStage: GameModePresetReleaseStage
+  setupVisibility: GameModePresetVisibility
   settings: GameModePresetSettings | null
 }
 
-const CARD_PACK_FEATURES: GameModeFeatureDefinition[] = CARD_PACKS.map((pack) => ({
+export interface SetupPresetCollection {
+  visiblePresets: GameModePresetDefinition[]
+  recommendedPreset: GameModePresetDefinition
+  browsePresets: GameModePresetDefinition[]
+  customPreset: GameModePresetDefinition
+}
+
+const CARD_PACK_FEATURES: GameModeFeatureDefinition[] = CARD_PACKS_FOR_MODE_FEATURES.map((pack) => ({
   id: pack.id,
   name: pack.name,
   shortDescription: pack.shortDescription,
@@ -65,10 +76,10 @@ const CARD_PACK_FEATURES: GameModeFeatureDefinition[] = CARD_PACKS.map((pack) =>
 const POWER_UPS_FEATURE: GameModeFeatureDefinition = {
   id: 'powerUps',
   name: 'Power Up / Curse Pack',
-  shortDescription: 'Standalone mode with per-hole power-ups plus winner curses.',
+  shortDescription: 'Standalone mode with per-hole power-ups plus leader curses.',
   longDescription:
-    'Power Up / Curse Pack replaces mission cards with one random positive power-up per golfer each hole. Starting on hole 2, previous-hole winner(s) also receive one curse restriction for the next hole.',
-  includesLabel: 'Per-hole power-ups plus winner curses',
+    'Power Up / Curse Pack replaces mission cards with one random positive power-up per golfer each hole. Starting on hole 2, current round leader(s) receive one curse restriction instead of a positive power-up for the next hole.',
+  includesLabel: 'Per-hole power-ups plus leader curses',
   bestForLabel: 'Arcade-style rounds and novelty play',
   type: 'standalone',
   sortOrder: 99,
@@ -79,10 +90,10 @@ export const GAME_MODE_FEATURES: GameModeFeatureDefinition[] = [
   POWER_UPS_FEATURE,
 ]
 
-export const GAME_MODE_FEATURES_BY_ID: Record<GameModeFeatureId, GameModeFeatureDefinition> =
+export const GAME_MODE_FEATURES_BY_ID: Partial<Record<GameModeFeatureId, GameModeFeatureDefinition>> =
   Object.fromEntries(
     GAME_MODE_FEATURES.map((feature) => [feature.id, feature]),
-  ) as Record<GameModeFeatureId, GameModeFeatureDefinition>
+  ) as Partial<Record<GameModeFeatureId, GameModeFeatureDefinition>>
 
 function createCardPresetSettings(
   enabledPackIds: CardPackId[],
@@ -115,66 +126,90 @@ function createCardPresetSettings(
   }
 }
 
-export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
+export const GAME_MODE_PRESET_CATALOG: GameModePresetDefinition[] = [
   {
     id: 'casual',
-    name: 'Core Pack',
-    shortDescription: 'Quick-start mode using only the Core 54 mission set.',
+    name: 'Quick Start',
+    shortDescription: 'Best first round for mixed-skill groups. Fast setup and low friction.',
     longDescription:
-      'Core Pack is the quick-start baseline: Core 54 personal cards plus app-specific cards that map to those same core categories. Setup stays light with auto-assigned cards, no momentum bonuses, and no featured holes.',
-    includesLabel: 'Core 54 mission cards (Common, Skill, Risk)',
-    bestForLabel: 'Quick rounds, onboarding, and low-friction setup',
+      'Quick Start is the easiest way to tee off. It runs the Core mission set, keeps dealing automatic, and turns off extra systems that add overhead in a first round.',
+    includesLabel: 'Core missions only, auto-assigned cards',
+    bestForLabel: 'First rounds, mixed-skill groups, and pace-of-play focus',
     includedFeatureIds: ['classic'],
     sortOrder: 1,
-    badgeLabel: 'Quick Start Default',
+    badgeLabel: 'Best First Round',
     isRecommended: true,
+    releaseStage: 'active',
+    setupVisibility: 'visible',
     settings: createCardPresetSettings(['classic'], 'low', {
       momentumBonuses: false,
       featuredEnabled: false,
-      dynamicDifficulty: false,
+      dynamicDifficulty: true,
       personalCardMode: 'autoAssignOne',
     }),
   },
   {
     id: 'competitive',
-    name: 'Fun Pack',
-    shortDescription: 'Core Pack plus Match Play Plus 18 (Novelty) expansion cards.',
+    name: 'Balanced Challenge',
+    shortDescription: 'More strategy and variety while staying readable for most groups.',
     longDescription:
-      'Fun Pack layers Novelty expansion cards onto the Core Pack to create playful, high-variety holes while keeping the familiar mission foundation.',
-    includesLabel: 'Core Pack + Match Play Plus 18 (Novelty)',
-    bestForLabel: 'Friendly rounds and novelty-first groups',
+      'Balanced Challenge adds novelty cards and progression systems for groups that want more decisions without full custom setup.',
+    includesLabel: 'Core + Novelty, dynamic difficulty, featured holes',
+    bestForLabel: 'Returning groups who want more depth',
     includedFeatureIds: ['classic', 'novelty'],
     sortOrder: 2,
     badgeLabel: null,
     isRecommended: false,
+    releaseStage: 'active',
+    setupVisibility: 'visible',
     settings: createCardPresetSettings(['classic', 'novelty'], 'normal'),
   },
   {
     id: 'party',
-    name: 'Party Pack',
-    shortDescription: 'Core Pack plus one party lane: Chaos mode or Props mode.',
+    name: 'Social Party',
+    shortDescription: 'Table-talk heavy mode with public-card swings and lively moments.',
     longDescription:
-      'Party Pack starts from Core and adds one public-card lane for social energy. Choose Chaos mode for swingy hole effects or Props mode for prediction-style group interaction.',
-    includesLabel: 'Core Pack + Chaos or Props (choose one)',
-    bestForLabel: 'Social groups that want faster table-talk moments',
+      'Social Party starts from Core and adds one public-card lane. Choose Chaos for big swings or Props for prediction-style callouts.',
+    includesLabel: 'Core + one public-card lane (Chaos or Props)',
+    bestForLabel: 'Social groups that want more banter and surprise',
     includedFeatureIds: ['classic', 'chaos', 'props'],
     sortOrder: 3,
     badgeLabel: null,
     isRecommended: false,
+    releaseStage: 'active',
+    setupVisibility: 'visible',
     settings: createCardPresetSettings(['classic', 'chaos'], 'high'),
   },
   {
-    id: 'powerUps',
-    name: 'Power Up / Curse Pack',
-    shortDescription: 'Standalone mode with per-hole power-ups and winner curses.',
+    id: 'balanced',
+    name: 'Balanced (Legacy)',
+    shortDescription: 'Legacy preset kept for saved-round compatibility.',
     longDescription:
-      'Power Up / Curse Pack is a separate game mode that disables mission cards and card-pack scoring. Hole 1 gives everyone a positive power-up. From hole 2 onward, everyone still gets a positive power-up and previous-hole winner(s) also receive one curse restriction.',
-    includesLabel: 'Power-up cards plus curse restrictions only',
-    bestForLabel: 'Fast arcade rounds and high novelty',
-    includedFeatureIds: ['powerUps'],
+      'This hidden preset is retained so older local round saves can still normalize safely.',
+    includesLabel: 'Legacy compatibility preset',
+    bestForLabel: 'Internal compatibility',
+    includedFeatureIds: ['classic', 'novelty'],
     sortOrder: 4,
+    badgeLabel: 'Legacy',
+    isRecommended: false,
+    releaseStage: 'legacy',
+    setupVisibility: 'hidden',
+    settings: createCardPresetSettings(['classic', 'novelty'], 'normal'),
+  },
+  {
+    id: 'powerUps',
+    name: 'Power Ups (Arcade)',
+    shortDescription: 'Standalone arcade-style round with power-ups and leader curses.',
+    longDescription:
+      'Power Ups is a separate mode that skips mission cards and runs one power-up per golfer each hole, with current round leader(s) receiving curse cards instead from hole 2 onward.',
+    includesLabel: 'Power-ups + curses (no mission/public card flow)',
+    bestForLabel: 'Novelty-first rounds and fast arcade energy',
+    includedFeatureIds: ['powerUps'],
+    sortOrder: 5,
     badgeLabel: null,
     isRecommended: false,
+    releaseStage: 'active',
+    setupVisibility: 'visible',
     settings: {
       gameMode: 'powerUps',
       enabledPackIds: [],
@@ -194,28 +229,32 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
   },
   {
     id: 'custom',
-    name: 'Custom',
-    shortDescription: 'Build your own mix of packs and options.',
+    name: 'Custom (Legacy)',
+    shortDescription: 'Legacy preset retained for compatibility with older local saves.',
     longDescription:
-      'Custom mode unlocks full round tuning for card packs, momentum, dealing style, and featured-hole settings. You can also name the mode for this round.',
-    includesLabel: 'Any enabled card packs',
-    bestForLabel: 'Advanced setup and house rules',
-    includedFeatureIds: [
-      'classic',
-      'chaos',
-      'props',
-      'novelty',
-      'hybrid',
-    ],
-    sortOrder: 5,
-    badgeLabel: null,
+      'Custom mode is no longer exposed in setup, but remains in the catalog so legacy local rounds can still load safely.',
+    includesLabel: 'Legacy compatibility preset',
+    bestForLabel: 'Internal compatibility',
+    includedFeatureIds: ['classic', 'chaos', 'props', 'novelty', 'hybrid'],
+    sortOrder: 6,
+    badgeLabel: 'Legacy',
     isRecommended: false,
+    releaseStage: 'legacy',
+    setupVisibility: 'hidden',
     settings: null,
   },
 ]
 
+function isSetupVisiblePreset(preset: GameModePresetDefinition): boolean {
+  return preset.releaseStage === 'active' && preset.setupVisibility === 'visible'
+}
+
+export const GAME_MODE_PRESETS: GameModePresetDefinition[] = GAME_MODE_PRESET_CATALOG
+  .filter(isSetupVisiblePreset)
+  .sort((presetA, presetB) => presetA.sortOrder - presetB.sortOrder)
+
 export const GAME_MODE_PRESETS_BY_ID: Record<GameModePresetId, GameModePresetDefinition> =
-  Object.fromEntries(GAME_MODE_PRESETS.map((preset) => [preset.id, preset])) as Record<
+  Object.fromEntries(GAME_MODE_PRESET_CATALOG.map((preset) => [preset.id, preset])) as Record<
     GameModePresetId,
     GameModePresetDefinition
   >
@@ -223,8 +262,32 @@ export const GAME_MODE_PRESETS_BY_ID: Record<GameModePresetId, GameModePresetDef
 export const DEFAULT_GAME_MODE_PRESET_ID: GameModePresetId = 'casual'
 export const DEFAULT_CUSTOM_MODE_NAME = 'My Custom Mode'
 
-const VALID_PRESET_IDS = new Set<GameModePresetId>(GAME_MODE_PRESETS.map((preset) => preset.id))
+const VALID_PRESET_IDS = new Set<GameModePresetId>(GAME_MODE_PRESET_CATALOG.map((preset) => preset.id))
+const VISIBLE_PRESET_IDS = new Set<GameModePresetId>(GAME_MODE_PRESETS.map((preset) => preset.id))
 
 export function isGameModePresetId(value: unknown): value is GameModePresetId {
   return typeof value === 'string' && VALID_PRESET_IDS.has(value as GameModePresetId)
+}
+
+export function isSetupVisibleGameModePresetId(value: unknown): value is GameModePresetId {
+  return typeof value === 'string' && VISIBLE_PRESET_IDS.has(value as GameModePresetId)
+}
+
+export function getSetupPresetCollection(): SetupPresetCollection {
+  const visiblePresets = [...GAME_MODE_PRESETS]
+  const recommendedPreset =
+    visiblePresets.find((preset) => preset.isRecommended) ??
+    visiblePresets[0] ??
+    GAME_MODE_PRESETS_BY_ID.casual
+  const customPreset = visiblePresets.find((preset) => preset.id === 'custom') ?? GAME_MODE_PRESETS_BY_ID.custom
+  const browsePresets = visiblePresets.filter(
+    (preset) => preset.id !== recommendedPreset.id && preset.id !== customPreset.id,
+  )
+
+  return {
+    visiblePresets,
+    recommendedPreset,
+    browsePresets,
+    customPreset,
+  }
 }

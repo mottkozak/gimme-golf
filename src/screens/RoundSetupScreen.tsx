@@ -1,21 +1,25 @@
 import { useState } from 'react'
 import { ICONS } from '../app/icons.ts'
-import CardPackToggleRow from '../components/CardPackToggleRow.tsx'
 import GameModePresetRow from '../components/GameModePresetRow.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
-import ToggleRow from '../components/ToggleRow.tsx'
-import { CARD_PACKS, CARD_PACKS_BY_ID } from '../data/cardPacks.ts'
 import {
   GAME_MODE_FEATURES_BY_ID,
-  GAME_MODE_PRESETS,
   GAME_MODE_PRESETS_BY_ID,
+  getSetupPresetCollection,
 } from '../data/gameModePresets.ts'
-import { FEATURED_HOLES_BY_ID } from '../data/featuredHoles.ts'
-import { isPackUnlocked } from '../logic/entitlements.ts'
-import { getFeaturedHoleTargetCount } from '../logic/featuredHoles.ts'
+import {
+  formatOfferPointRangeLabel,
+  getOfferPointRange,
+} from '../logic/gameBalance.ts'
 import { applyGameModePreset } from '../logic/gameModePresets.ts'
+import {
+  trackPresetSelected,
+  trackRoundSetupCompleted,
+  trackRoundStarted,
+} from '../logic/analytics.ts'
+import { loadLocalIdentityState } from '../logic/localIdentity.ts'
 import { applyQuickRoundDefaults } from '../logic/quickRound.ts'
-import { toggleEnabledPack } from '../logic/roundConfig.ts'
+import { hasRoundProgress } from '../logic/roundProgress.ts'
 import {
   applyCourseStyle,
   applyRoundSetupDraft,
@@ -26,10 +30,8 @@ import {
   resizeHoles,
   type RoundSetupDraft,
 } from '../logic/roundSetup.ts'
-import type { CardPackId } from '../types/cards.ts'
 import type {
   CourseStyle,
-  FeaturedHoleFrequency,
   GameModePresetId,
   HoleCount,
   Player,
@@ -41,12 +43,46 @@ function createDraftId(position: number): string {
   return `player-${position}-${timestamp}`
 }
 
-function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
-  const [activePackInfoId, setActivePackInfoId] = useState<CardPackId | null>(null)
+function normalizeSetupPlayerName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ')
+}
+
+function isDefaultSetupPlayerName(playerName: string, position: number): boolean {
+  const normalizedName = normalizeSetupPlayerName(playerName)
+  if (!normalizedName) {
+    return true
+  }
+
+  return normalizedName.toLocaleLowerCase() === `golfer ${position}`.toLocaleLowerCase()
+}
+
+function dedupeNames(names: string[]): string[] {
+  const seen = new Set<string>()
+  const deduped: string[] = []
+
+  for (const name of names) {
+    const normalizedName = normalizeSetupPlayerName(name)
+    if (!normalizedName) {
+      continue
+    }
+
+    const normalizedKey = normalizedName.toLocaleLowerCase()
+    if (seen.has(normalizedKey)) {
+      continue
+    }
+
+    seen.add(normalizedKey)
+    deduped.push(normalizedName)
+  }
+
+  return deduped
+}
+
+function RoundSetupScreen({ roundState, hasSavedRound, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activePresetInfoId, setActivePresetInfoId] = useState<GameModePresetId | null>(null)
-  const [advancedVisible, setAdvancedVisible] = useState(false)
+  const [showOtherPresetModes, setShowOtherPresetModes] = useState(false)
+  const [localIdentityState] = useState(() => loadLocalIdentityState())
   const { config, players } = roundState
-  const isCustomPreset = config.selectedPresetId === 'custom'
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
     onUpdateRoundState((currentState) => {
@@ -91,7 +127,19 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     })
   }
 
-  const setPreset = (presetId: GameModePresetId) => {
+  const setPreset = (presetId: GameModePresetId, source: 'recommended_card' | 'preset_row') => {
+    if (config.selectedPresetId !== presetId) {
+      const nextConfig = applyGameModePreset(roundState.config, presetId)
+      trackPresetSelected(
+        {
+          ...roundState,
+          config: nextConfig,
+        },
+        presetId,
+        source,
+      )
+    }
+
     updateSetup((draft) => ({
       ...draft,
       config: applyGameModePreset(draft.config, presetId),
@@ -105,17 +153,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         ...draft.config,
         selectedPresetId: 'party',
         enabledPackIds: mode === 'props' ? ['classic', 'props'] : ['classic', 'chaos'],
-      },
-    }))
-  }
-
-  const setCustomModeName = (customModeName: string) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        customModeName,
       },
     }))
   }
@@ -181,89 +218,96 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     }))
   }
 
-  const setDynamicDifficulty = (checked: boolean) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        toggles: {
-          ...draft.config.toggles,
-          dynamicDifficulty: checked,
-        },
-      },
-    }))
+  const applyLastGroupShortcut = (lastGroupNames: string[]) => {
+    updateSetup((draft) => {
+      const normalizedNames = dedupeNames(lastGroupNames).slice(0, MAX_GOLFERS)
+      if (normalizedNames.length === 0) {
+        return draft
+      }
+
+      const nextPlayers: Player[] = normalizedNames.map((name, index) => {
+        const existingPlayer = draft.players[index]
+        return {
+          id: existingPlayer?.id ?? createDraftId(index + 1),
+          name,
+          expectedScore18: existingPlayer?.expectedScore18 ?? DEFAULT_EXPECTED_SCORE,
+        }
+      })
+
+      return {
+        ...draft,
+        players: nextPlayers,
+      }
+    })
   }
 
-  const setMomentumBonuses = (checked: boolean) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        toggles: {
-          ...draft.config.toggles,
-          momentumBonuses: checked,
-        },
-      },
-    }))
-  }
+  const applySuggestedPlayerNameShortcut = (suggestedName: string) => {
+    const normalizedSuggestedName = normalizeSetupPlayerName(suggestedName)
+    if (!normalizedSuggestedName) {
+      return
+    }
 
-  const setFeaturedHolesEnabled = (checked: boolean) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        featuredHoles: {
-          ...draft.config.featuredHoles,
-          enabled: checked,
-        },
-      },
-    }))
-  }
+    updateSetup((draft) => {
+      const duplicateExists = draft.players.some(
+        (player) =>
+          normalizeSetupPlayerName(player.name).toLocaleLowerCase() ===
+          normalizedSuggestedName.toLocaleLowerCase(),
+      )
 
-  const setFeaturedHolesFrequency = (frequency: FeaturedHoleFrequency) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        featuredHoles: {
-          ...draft.config.featuredHoles,
-          frequency,
-        },
-      },
-    }))
-  }
+      if (duplicateExists) {
+        return draft
+      }
 
-  const setPackEnabled = (packId: CardPackId, enabled: boolean) => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        enabledPackIds: toggleEnabledPack(draft.config.enabledPackIds, packId, enabled),
-      },
-    }))
-  }
+      const emptySlotIndex = draft.players.findIndex((player, playerIndex) =>
+        isDefaultSetupPlayerName(player.name, playerIndex + 1),
+      )
 
-  const setDealMode = (mode: 'drawTwoPickOne' | 'autoAssignOne') => {
-    updateSetup((draft) => ({
-      ...draft,
-      config: {
-        ...draft.config,
-        selectedPresetId: 'custom',
-        toggles: {
-          ...draft.config.toggles,
-          drawTwoPickOne: mode === 'drawTwoPickOne',
-          autoAssignOne: mode === 'autoAssignOne',
-        },
-      },
-    }))
+      if (emptySlotIndex >= 0) {
+        return {
+          ...draft,
+          players: draft.players.map((player, playerIndex) =>
+            playerIndex === emptySlotIndex
+              ? {
+                  ...player,
+                  name: normalizedSuggestedName,
+                }
+              : player,
+          ),
+        }
+      }
+
+      if (draft.players.length >= MAX_GOLFERS) {
+        return draft
+      }
+
+      return {
+        ...draft,
+        players: [
+          ...draft.players,
+          {
+            id: createDraftId(draft.players.length + 1),
+            name: normalizedSuggestedName,
+            expectedScore18: DEFAULT_EXPECTED_SCORE,
+          },
+        ],
+      }
+    })
   }
 
   const beginRound = () => {
+    const nextRoundState = {
+      ...roundState,
+      config: {
+        ...roundState.config,
+        featuredHoles: {
+          ...roundState.config.featuredHoles,
+          assignmentMode: 'auto' as const,
+        },
+      },
+      currentHoleIndex: 0,
+    }
+    trackRoundSetupCompleted(nextRoundState, 'start_round')
+    trackRoundStarted(nextRoundState, 'setup_start_round')
     onUpdateRoundState((currentState) => ({
       ...currentState,
       config: {
@@ -279,21 +323,54 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   }
 
   const startQuickRound = () => {
+    const quickStartRoundState = applyQuickRoundDefaults(roundState)
+    trackRoundSetupCompleted(quickStartRoundState, 'quick_defaults_start')
+    trackRoundStarted(quickStartRoundState, 'setup_quick_round')
     onUpdateRoundState((currentState) => applyQuickRoundDefaults(currentState))
     onNavigate('holePlay')
   }
 
-  const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] ?? null : null
-  const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] : null
-  const featuredHoles = roundState.holes.filter((hole) => hole.featuredHoleType !== null)
+  const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] ?? null : null
+  const setupPresetCollection = getSetupPresetCollection()
+  const recommendedPreset = setupPresetCollection.recommendedPreset
+  const alternatePresetModes = setupPresetCollection.browsePresets
+  const activePresetCandidate = GAME_MODE_PRESETS_BY_ID[config.selectedPresetId] ?? recommendedPreset
+  const activePreset =
+    activePresetCandidate.setupVisibility === 'visible' ? activePresetCandidate : recommendedPreset
+  const isRecommendedPresetSelected = activePreset.id === recommendedPreset.id
+  const shouldShowOtherPresetModes = showOtherPresetModes || !isRecommendedPresetSelected
+  const dynamicDifficultyStatusLabel = config.toggles.dynamicDifficulty ? 'On' : 'Off'
+  const drawModeStatusLabel = config.toggles.drawTwoPickOne ? 'Pick 1 of 2' : 'Auto-pick 1'
+  const advancedSafeRangeLabel = formatOfferPointRangeLabel(getOfferPointRange(80, true, 'safe'))
+  const advancedHardRangeLabel = formatOfferPointRangeLabel(getOfferPointRange(80, true, 'hard'))
+  const intermediateSafeRangeLabel = formatOfferPointRangeLabel(
+    getOfferPointRange(92, true, 'safe'),
+  )
+  const intermediateHardRangeLabel = formatOfferPointRangeLabel(
+    getOfferPointRange(92, true, 'hard'),
+  )
+  const developingSafeRangeLabel = formatOfferPointRangeLabel(
+    getOfferPointRange(112, true, 'safe'),
+  )
+  const developingHardRangeLabel = formatOfferPointRangeLabel(
+    getOfferPointRange(112, true, 'hard'),
+  )
+  const hasPublicCardLaneEnabled =
+    config.gameMode === 'cards' &&
+    (config.enabledPackIds.includes('chaos') || config.enabledPackIds.includes('props'))
+  const publicCardsStatusLabel = hasPublicCardLaneEnabled ? 'On' : 'Off'
+  const featuredHolesStatusLabel = config.featuredHoles.enabled
+    ? `On (${config.featuredHoles.frequency})`
+    : 'Off'
   const partyPackMode: 'chaos' | 'props' =
     config.enabledPackIds.includes('props') && !config.enabledPackIds.includes('chaos')
       ? 'props'
       : 'chaos'
-  const featuredHoleTargetCount = getFeaturedHoleTargetCount(
-    config.holeCount,
-    config.featuredHoles.frequency,
-  )
+  const recentPlayerNameSuggestions = localIdentityState.recentPlayerNames.slice(0, 8)
+  const recentGroupNames = localIdentityState.roundHistory[0]?.playerNames ?? []
+  const hasSavedPlayerShortcuts =
+    recentGroupNames.length > 0 || recentPlayerNameSuggestions.length > 0
+  const isReplayReadySetup = hasSavedRound && !hasRoundProgress(roundState)
 
   return (
     <section className="screen stack-sm round-setup-screen">
@@ -303,9 +380,34 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           <h2>Round Setup</h2>
         </div>
         <p className="muted round-setup-header__support">
-          Start fast with Quick Round, or fine-tune the round below.
+          {isReplayReadySetup
+            ? 'Same golfers and mode are loaded. Start now, or tweak one setting before teeing off.'
+            : 'Set this once, then each hole follows the same simple play-to-results loop.'}
         </p>
       </header>
+
+      {isReplayReadySetup && (
+        <section className="panel inset stack-xs setup-replay-ready">
+          <div className="row-between setup-row-wrap">
+            <p className="label">Replay Ready</p>
+            <span className="chip">Saved Locally</span>
+          </div>
+          <p className="muted">
+            {players.length} golfer{players.length === 1 ? '' : 's'} are preloaded from your last
+            round. Keep this mode for a fast run-it-back, or adjust options below.
+          </p>
+        </section>
+      )}
+
+      <section className="panel stack-xs setup-round-preview">
+        <p className="label">Round Snapshot</p>
+        <p className="setup-round-preview__summary">
+          {players.length} golfer{players.length === 1 ? '' : 's'} • {config.holeCount} holes • {activePreset.name}
+        </p>
+        <p className="muted">
+          {activePreset.shortDescription}
+        </p>
+      </section>
 
       <section className="panel stack-sm setup-quick-card">
         <div className="row-between setup-row-wrap">
@@ -315,21 +417,23 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </h3>
           <span className="chip setup-quick-card__chip">Recommended</span>
         </div>
-        <p className="setup-quick-summary">9 holes • standard course • Core Pack defaults</p>
-        <p className="muted">Core Pack only, auto-assigned cards, and no featured holes.</p>
+        <p className="setup-quick-summary">9 holes • standard course • Quick Start preset</p>
+        <p className="muted">
+          Fastest way to tee off with a mixed-skill group. Save customization for round two.
+        </p>
         <button
           type="button"
-          className="button-primary setup-quick-card__cta"
+          className="setup-quick-card__cta"
           onClick={startQuickRound}
         >
-          Start Quick Round
+          Use Quick Defaults & Start
         </button>
       </section>
 
       <section className="setup-advanced-divider">
-        <p className="label">Advanced Setup</p>
+        <p className="label">Customize (Optional)</p>
         <p className="muted">
-          Customize your round with the sections below.
+          Skip anything you do not need. Defaults are ready to play.
         </p>
       </section>
 
@@ -339,7 +443,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             <img className="step-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
             1. Round Basics
           </h3>
-          <p className="muted setup-step__support">Select hole count and course type.</p>
+          <p className="muted setup-step__support">Keep defaults unless your course format is different today.</p>
         </header>
 
         <div className="setup-control-group">
@@ -402,8 +506,64 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               {players.length} / {MAX_GOLFERS}
             </span>
           </div>
-          <p className="muted setup-step__support">Add between 1 and 8 golfers.</p>
+          <p className="muted setup-step__support">
+            Add 1-8 golfers. Expected score helps mixed-skill fairness by tuning offer upside only.
+            Real golf strokes are never edited.
+          </p>
         </header>
+
+        <section className="panel inset stack-xs setup-fairness-card" aria-label="Mixed-skill fairness">
+          <div className="row-between setup-row-wrap">
+            <p className="label">Mixed-Skill Fair Play</p>
+            <span className="chip">Dynamic Difficulty</span>
+          </div>
+          <p className="muted">
+            Draw 2 Pick 1 offers a safer line and an upside line per golfer, based on expected score.
+          </p>
+          <div className="stack-xs setup-fairness-card__bands">
+            <p className="muted">
+              <strong>Advanced (72-85):</strong> Safe {advancedSafeRangeLabel} • Upside {advancedHardRangeLabel}
+            </p>
+            <p className="muted">
+              <strong>Intermediate (86-100):</strong> Safe {intermediateSafeRangeLabel} • Upside {intermediateHardRangeLabel}
+            </p>
+            <p className="muted">
+              <strong>Developing (101+):</strong> Safe {developingSafeRangeLabel} • Upside {developingHardRangeLabel}
+            </p>
+          </div>
+        </section>
+
+        {hasSavedPlayerShortcuts && (
+          <section className="panel inset stack-xs setup-player-shortcuts" aria-label="Player quick fill">
+            <div className="row-between setup-row-wrap">
+              <p className="label">Quick Fill</p>
+              {recentGroupNames.length > 0 && (
+                <button
+                  type="button"
+                  className="setup-player-shortcuts__button"
+                  onClick={() => applyLastGroupShortcut(recentGroupNames)}
+                >
+                  Use Last Group
+                </button>
+              )}
+            </div>
+            {recentPlayerNameSuggestions.length > 0 && (
+              <div className="setup-player-shortcuts__chips" role="list" aria-label="Recent golfer names">
+                {recentPlayerNameSuggestions.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    className="chip setup-player-shortcuts__chip"
+                    onClick={() => applySuggestedPlayerNameShortcut(name)}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="muted">Tap a saved name to fill the next open golfer slot.</p>
+          </section>
+        )}
 
         <div className="stack-xs setup-player-list">
           {players.map((player, index) => (
@@ -412,6 +572,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               player={player}
               position={index + 1}
               canRemove={players.length > MIN_GOLFERS}
+              nameSuggestions={recentPlayerNameSuggestions}
               onUpdateName={(name) => updatePlayerName(player.id, name)}
               onUpdateExpectedScore={(expectedScore) =>
                 updatePlayerExpectedScore(player.id, expectedScore)
@@ -435,24 +596,109 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         <header className="setup-step__header">
           <h3 className="step-title">
             <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
-            3. Game Mode Selection
+            3. Game Mode
           </h3>
           <p className="muted setup-step__support">
-            Choose a mode. Tap the info button for details.
+            Start with one obvious default, then explore more only if your group wants it.
           </p>
         </header>
 
-        <div className="stack-xs round-setup-mode-list">
-          {GAME_MODE_PRESETS.map((preset) => (
-            <GameModePresetRow
-              key={preset.id}
-              preset={preset}
-              selected={config.selectedPresetId === preset.id}
-              onSelect={() => setPreset(preset.id)}
-              onOpenInfo={() => setActivePresetInfoId(preset.id)}
-            />
-          ))}
-        </div>
+        <section
+          className={`panel inset stack-xs setup-mode-recommended ${
+            isRecommendedPresetSelected ? 'setup-mode-recommended--selected' : ''
+          }`}
+        >
+          <div className="row-between setup-row-wrap">
+            <p className="label">Best First Round</p>
+            <span className="chip">
+              {isRecommendedPresetSelected ? 'Selected' : 'Recommended'}
+            </span>
+          </div>
+          <h4 className="setup-mode-recommended__title">{recommendedPreset.name}</h4>
+          <p className="muted">{recommendedPreset.shortDescription}</p>
+          <p className="muted">Includes: {recommendedPreset.includesLabel}</p>
+          <button
+            type="button"
+            className={isRecommendedPresetSelected ? 'setup-mode-recommended__button' : 'button-primary setup-mode-recommended__button'}
+            onClick={() => setPreset(recommendedPreset.id, 'recommended_card')}
+            disabled={isRecommendedPresetSelected}
+          >
+            {isRecommendedPresetSelected ? 'Using Recommended Mode' : 'Use Recommended Mode'}
+          </button>
+        </section>
+
+        <section className="panel inset stack-xs setup-mode-guidance" aria-label="Mode setting guidance">
+          <p className="label">What This Changes</p>
+          <p className="muted">
+            You do not need to master every system now. These labels explain what happens in play.
+          </p>
+          <ul className="list-reset setup-mode-guidance__list">
+            <li className="setup-mode-guidance__item">
+              <div className="row-between setup-row-wrap">
+                <strong>Dynamic Difficulty</strong>
+                <span className="chip">{dynamicDifficultyStatusLabel}</span>
+              </div>
+              <p className="muted">
+                Uses expected score to set fair offer ceilings: stronger golfers get lower-upside offers,
+                developing golfers get more comeback upside.
+              </p>
+            </li>
+            <li className="setup-mode-guidance__item">
+              <div className="row-between setup-row-wrap">
+                <strong>Deal Style</strong>
+                <span className="chip">{drawModeStatusLabel}</span>
+              </div>
+              <p className="muted">
+                Pick 1 of 2 shows a Safe line (lower upside) and an Upside line (riskier reward).
+                Auto-pick keeps pace fastest.
+              </p>
+            </li>
+            <li className="setup-mode-guidance__item">
+              <div className="row-between setup-row-wrap">
+                <strong>Public Cards</strong>
+                <span className="chip">{publicCardsStatusLabel}</span>
+              </div>
+              <p className="muted">Mostly used in Party mode for extra group interaction and swings.</p>
+            </li>
+            <li className="setup-mode-guidance__item">
+              <div className="row-between setup-row-wrap">
+                <strong>Featured Holes</strong>
+                <span className="chip">{featuredHolesStatusLabel}</span>
+              </div>
+              <p className="muted">Special holes add personality. Off/Low is easiest for a first round.</p>
+            </li>
+          </ul>
+        </section>
+
+        <section className="stack-xs">
+          <button
+            type="button"
+            className={shouldShowOtherPresetModes ? 'button-primary setup-mode-browse' : 'setup-mode-browse'}
+            onClick={() => setShowOtherPresetModes((current) => !current)}
+            aria-expanded={shouldShowOtherPresetModes}
+            aria-controls="setup-mode-options"
+          >
+            {shouldShowOtherPresetModes ? 'Hide Other Modes' : 'Browse Other Modes'}
+          </button>
+          {!shouldShowOtherPresetModes && (
+            <p className="muted">Most groups can skip this and start with Quick Start.</p>
+          )}
+        </section>
+
+        {shouldShowOtherPresetModes && (
+          <div id="setup-mode-options" className="stack-xs round-setup-mode-list">
+            {alternatePresetModes.map((preset) => (
+              <GameModePresetRow
+                key={preset.id}
+                preset={preset}
+                selected={config.selectedPresetId === preset.id}
+                onSelect={() => setPreset(preset.id, 'preset_row')}
+                onOpenInfo={() => setActivePresetInfoId(preset.id)}
+              />
+            ))}
+          </div>
+        )}
+
       </section>
 
       {config.selectedPresetId === 'party' && (
@@ -515,258 +761,17 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </p>
           <p className="muted">
             Hole 1 gives everyone a positive power-up. From hole 2 onward, everyone still gets a
-            positive power-up and previous-hole winner(s) also receive one curse restriction.
+            positive power-up except current round leader(s), who instead receive one curse restriction.
           </p>
         </section>
       )}
 
-      {isCustomPreset && (
-        <>
-          <section className="panel stack-sm setup-step setup-step--advanced">
-            <div className="row-between setup-row-wrap">
-              <h3 className="step-title">
-                <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                4. Advanced Options
-              </h3>
-              <button
-                type="button"
-                className={advancedVisible ? 'button-primary setup-advanced-toggle' : 'setup-advanced-toggle'}
-                onClick={() => setAdvancedVisible((current) => !current)}
-                aria-expanded={advancedVisible}
-                aria-controls="advanced-setup-options"
-              >
-                {advancedVisible ? 'Hide Advanced' : 'Show Advanced'}
-              </button>
-            </div>
-            <p className="muted setup-step__support">
-              Custom pack selection and fine-grained toggles are hidden by default to keep setup
-              fast.
-            </p>
-          </section>
-
-          {advancedVisible && (
-            <div
-              id="advanced-setup-options"
-              className="stack-xs setup-advanced-stack"
-              role="region"
-              aria-label="Advanced setup options"
-            >
-              <section className="panel stack-sm setup-step">
-                <header className="setup-step__header">
-                  <h3 className="step-title">
-                    <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                    Custom Mode
-                  </h3>
-                  <p className="muted setup-step__support">Customize this round only.</p>
-                </header>
-
-                <label className="field">
-                  <span className="label">Custom Mode Name</span>
-                  <input
-                    type="text"
-                    value={config.customModeName}
-                    onChange={(event) => setCustomModeName(event.target.value)}
-                    placeholder="My Custom Mode"
-                  />
-                </label>
-              </section>
-
-              <section className="panel stack-sm setup-step">
-                <header className="setup-step__header">
-                  <h3 className="step-title">
-                    <img className="step-title__icon" src={ICONS.customPack} alt="" aria-hidden="true" />
-                    Card Packs
-                  </h3>
-                  <p className="muted setup-step__support">
-                    Enable the game modes you want in this round.
-                  </p>
-                </header>
-
-                <div className="stack-xs">
-                  {CARD_PACKS.map((pack) => (
-                    <CardPackToggleRow
-                      key={pack.id}
-                      pack={pack}
-                      enabled={config.enabledPackIds.includes(pack.id)}
-                      unlocked={isPackUnlocked(pack.id, pack.premiumTier)}
-                      onToggle={(enabled) => setPackEnabled(pack.id, enabled)}
-                      onOpenInfo={() => setActivePackInfoId(pack.id)}
-                    />
-                  ))}
-                </div>
-              </section>
-
-              <section className="panel stack-sm setup-step">
-                <header className="setup-step__header">
-                  <h3 className="step-title">
-                    <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
-                    Game Options
-                  </h3>
-                </header>
-
-                <ToggleRow
-                  label="Dynamic Difficulty"
-                  description="Weight challenge difficulty by expected score."
-                  checked={config.toggles.dynamicDifficulty}
-                  onChange={setDynamicDifficulty}
-                />
-
-                <ToggleRow
-                  label="Momentum Bonuses"
-                  description="Award streak bonuses for consecutive personal card success."
-                  checked={config.toggles.momentumBonuses}
-                  onChange={setMomentumBonuses}
-                />
-                {config.toggles.momentumBonuses && (
-                  <p className="muted">
-                    Momentum is automatic: consecutive Completed results increase bonus tiers over
-                    time.
-                  </p>
-                )}
-
-                <section className="setup-control-group">
-                  <span className="label setup-control-label">Personal Card Mode</span>
-                  <div className="segmented-control" role="group" aria-label="Personal card mode">
-                    <button
-                      type="button"
-                      className={`segmented-control__button ${
-                        config.toggles.drawTwoPickOne ? 'segmented-control__button--active' : ''
-                      }`}
-                      onClick={() => setDealMode('drawTwoPickOne')}
-                    >
-                      Draw 2 Pick 1
-                    </button>
-                    <button
-                      type="button"
-                      className={`segmented-control__button ${
-                        config.toggles.autoAssignOne ? 'segmented-control__button--active' : ''
-                      }`}
-                      onClick={() => setDealMode('autoAssignOne')}
-                    >
-                      Auto-Assign 1
-                    </button>
-                  </div>
-                </section>
-              </section>
-
-              <section className="panel stack-sm setup-step">
-                <header className="setup-step__header">
-                  <h3 className="step-title">
-                    <img className="step-title__icon" src={ICONS.golfFlag} alt="" aria-hidden="true" />
-                    Featured Holes
-                  </h3>
-                </header>
-
-                <ToggleRow
-                  label="Enable Featured Holes"
-                  description="Add occasional special hole modifiers for pacing and excitement."
-                  checked={config.featuredHoles.enabled}
-                  onChange={setFeaturedHolesEnabled}
-                />
-
-                <section className="setup-control-group">
-                  <span className="label setup-control-label">Frequency</span>
-                  <div className="segmented-control segmented-control--three" role="group" aria-label="Featured hole frequency">
-                    {(['low', 'normal', 'high'] as const).map((frequency) => (
-                      <button
-                        key={frequency}
-                        type="button"
-                        className={`segmented-control__button ${
-                          config.featuredHoles.frequency === frequency
-                            ? 'segmented-control__button--active'
-                            : ''
-                        }`}
-                        onClick={() => setFeaturedHolesFrequency(frequency)}
-                      >
-                        {frequency === 'low' ? 'Low' : frequency === 'normal' ? 'Normal' : 'High'}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="muted">
-                    Target featured holes this round: {featuredHoleTargetCount}
-                  </p>
-                  <p className="muted">Auto spacing tries to keep featured holes spread out.</p>
-                </section>
-
-                {config.featuredHoles.enabled && (
-                  <section className="stack-xs">
-                    <span className="label">Current Featured Holes</span>
-                    {featuredHoles.length > 0 ? (
-                      <div className="stack-xs">
-                        {featuredHoles.map((hole) => {
-                          const featuredHoleType = hole.featuredHoleType
-                          if (!featuredHoleType) {
-                            return null
-                          }
-
-                          const featuredHole = FEATURED_HOLES_BY_ID[featuredHoleType]
-
-                          return (
-                            <div key={hole.holeNumber} className="featured-hole-preview-row">
-                              <div className="row-between">
-                                <strong>Hole {hole.holeNumber}</strong>
-                                <span className="chip featured-hole-chip">{featuredHole.name}</span>
-                              </div>
-                              <p className="muted">{featuredHole.quickRule}</p>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    ) : (
-                      <p className="muted">No featured holes assigned for current settings.</p>
-                    )}
-                  </section>
-                )}
-              </section>
-            </div>
-          )}
-        </>
-      )}
-
       <section className="panel stack-xs setup-cta">
-        <p className="muted setup-cta__support">Ready when you are.</p>
+        <p className="muted setup-cta__support">Next step: Hole 1 setup and deal.</p>
         <button type="button" className="button-primary setup-cta__button" onClick={beginRound}>
           Start Round
         </button>
       </section>
-
-      {isCustomPreset && activePackInfo && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onClick={() => setActivePackInfoId(null)}
-        >
-          <section
-            className="panel modal-card stack-xs"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="pack-info-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="row-between">
-              <h3 id="pack-info-title">{activePackInfo.name}</h3>
-              <button type="button" onClick={() => setActivePackInfoId(null)}>
-                Close
-              </button>
-            </div>
-
-            <p>{activePackInfo.longDescription}</p>
-            <p className="muted">Includes: {activePackInfo.includesLabel}</p>
-            <p className="muted">Best for: {activePackInfo.bestForLabel}</p>
-            <div className="stack-xs">
-              {activePackInfo.gameplayNotes.map((note) => (
-                <p key={note} className="muted">
-                  - {note}
-                </p>
-              ))}
-            </div>
-            <p className="muted">
-              Premium-ready: {activePackInfo.isPremium ? 'Yes' : 'No'}
-              {activePackInfo.premiumTier ? ` (${activePackInfo.premiumTier})` : ''}
-            </p>
-          </section>
-        </div>
-      )}
 
       {activePresetInfo && (
         <div
@@ -797,6 +802,9 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               <span className="label">Included Modes</span>
               {activePresetInfo.includedFeatureIds.map((featureId) => {
                 const feature = GAME_MODE_FEATURES_BY_ID[featureId]
+                if (!feature) {
+                  return null
+                }
 
                 return (
                   <div key={feature.id} className="preset-feature-row">

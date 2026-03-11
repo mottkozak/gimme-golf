@@ -42,23 +42,38 @@ function installLocalStorageMock(): LocalStorageLike {
 function completeCurrentHole(roundState: RoundState, completedAtMs: number): RoundState {
   const holeIndex = roundState.currentHoleIndex
   const players = roundState.players
+  const holeCards = [...roundState.holeCards]
   const holeResults = [...roundState.holeResults]
 
-  const missionStatusByPlayerId: Record<string, MissionStatus> = Object.fromEntries(
-    players.map((player) => {
-      const dealtCards = roundState.holeCards[holeIndex]?.dealtPersonalCardsByPlayerId[player.id] ?? []
-      return [player.id, dealtCards.length > 0 ? 'success' : 'pending']
-    }),
-  )
+  holeCards[holeIndex] = {
+    ...holeCards[holeIndex],
+    dealtPersonalCardsByPlayerId: Object.fromEntries(players.map((player) => [player.id, []])),
+    selectedCardIdByPlayerId: Object.fromEntries(players.map((player) => [player.id, null])),
+    personalCardOfferByPlayerId: Object.fromEntries(
+      players.map((player) => [
+        player.id,
+        {
+          safeCardId: null,
+          hardCardId: null,
+        },
+      ]),
+    ),
+    publicCards: [],
+  }
 
   holeResults[holeIndex] = {
     ...holeResults[holeIndex],
     strokesByPlayerId: Object.fromEntries(players.map((player) => [player.id, 4])),
-    missionStatusByPlayerId,
+    missionStatusByPlayerId: Object.fromEntries(
+      players.map((player) => [player.id, 'pending' as MissionStatus]),
+    ),
+    publicPointDeltaByPlayerId: Object.fromEntries(players.map((player) => [player.id, 0])),
+    publicCardResolutionsByCardId: {},
   }
 
   return {
     ...roundState,
+    holeCards,
     holeResults,
     holeUxMetrics: markHoleCompletedAt(roundState.holeUxMetrics, holeIndex, completedAtMs),
   }
@@ -76,14 +91,18 @@ test('state machine flow: persistence, resume, and abandon', () => {
 
   assert.equal(appState.shouldPersistRoundState, true)
 
-  saveRoundState(appState.roundState)
-  appState = reduceAppState(appState, { type: 'mark_persisted' })
+  const savedAtMs = saveRoundState(appState.roundState)
+  appState = reduceAppState(appState, { type: 'mark_persisted', savedAtMs })
   assert.equal(appState.shouldPersistRoundState, false)
 
   const savedRoundState = loadRoundState()
   assert.ok(savedRoundState)
 
-  appState = reduceAppState(appState, { type: 'resume_saved_round', savedRoundState })
+  appState = reduceAppState(appState, {
+    type: 'resume_saved_round',
+    savedRoundState,
+    savedAtMs: null,
+  })
   assert.equal(appState.hasSavedRound, true)
   assert.equal(appState.activeScreen, 'holePlay')
 
@@ -139,4 +158,55 @@ test('state machine flow: multi-hole run progression', () => {
   assert.equal(appState.roundState.holeUxMetrics[1].durationMs, 1_000)
   assert.equal(appState.roundState.holeUxMetrics[0].startedAtMs, 1_000)
   assert.equal(appState.roundState.holeUxMetrics[1].startedAtMs, 3_000)
+})
+
+test('state machine flow: blocks invalid round progression transitions', () => {
+  installLocalStorageMock()
+
+  let appState = createInitialAppState(null)
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'roundSetup' })
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'holePlay' })
+  assert.equal(appState.activeScreen, 'holePlay')
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'holeResults' })
+  assert.equal(appState.activeScreen, 'holePlay')
+
+  appState = reduceAppState(appState, {
+    type: 'update_round_state',
+    updater: (currentState) => prepareCurrentHoleForPlay(currentState, 1_500),
+  })
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'holeResults' })
+  assert.equal(appState.activeScreen, 'holeResults')
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'leaderboard' })
+  assert.equal(appState.activeScreen, 'holeResults')
+
+  appState = reduceAppState(appState, {
+    type: 'update_round_state',
+    updater: (currentState) => completeCurrentHole(currentState, 2_500),
+  })
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'leaderboard' })
+  assert.equal(appState.activeScreen, 'leaderboard')
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'endRound' })
+  assert.equal(appState.activeScreen, 'leaderboard')
+
+  appState = reduceAppState(appState, {
+    type: 'update_round_state',
+    updater: (currentState) => ({
+      ...currentState,
+      currentHoleIndex: currentState.holes.length - 1,
+    }),
+  })
+  appState = reduceAppState(appState, {
+    type: 'update_round_state',
+    updater: (currentState) => completeCurrentHole(currentState, 3_000),
+  })
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'holePlay' })
+  assert.equal(appState.activeScreen, 'leaderboard')
+
+  appState = reduceAppState(appState, { type: 'navigate', screen: 'endRound' })
+  assert.equal(appState.activeScreen, 'endRound')
 })

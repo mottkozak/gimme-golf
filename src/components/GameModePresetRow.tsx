@@ -16,10 +16,13 @@ function GameModePresetRow({
 }: GameModePresetRowProps) {
   return (
     <article
-      className={`preset-row ${selected ? 'preset-row--selected' : ''}`}
+      className={`preset-row ${selected ? 'preset-row--selected' : ''} ${
+        preset.isRecommended ? 'preset-row--recommended' : ''
+      } ${preset.id === 'custom' ? 'preset-row--advanced' : ''}`}
       role="button"
       tabIndex={0}
       aria-pressed={selected}
+      aria-label={`${preset.name}. ${preset.shortDescription}`}
       onClick={onSelect}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -52,8 +55,18 @@ function GameModePresetRow({
           </button>
         </div>
         <p className="muted preset-row__description">{preset.shortDescription}</p>
+        <p className="muted preset-row__meta">Best for: {preset.bestForLabel}</p>
         <div className="preset-row__chips">
-          {preset.badgeLabel && <span className="chip preset-row__chip">{preset.badgeLabel}</span>}
+          {preset.badgeLabel && (
+            <span
+              className={`chip preset-row__chip ${preset.isRecommended ? 'preset-row__chip--recommended' : ''}`}
+            >
+              {preset.badgeLabel}
+            </span>
+          )}
+          {preset.id === 'custom' && (
+            <span className="chip preset-row__chip preset-row__chip--advanced">Advanced</span>
+          )}
           {selected && <span className="chip preset-row__chip preset-row__chip--active">Active</span>}
         </div>
       </div>

@@ -6,9 +6,13 @@ export type RoundStateUpdater = (currentState: RoundState) => RoundState
 export interface ScreenProps {
   roundState: RoundState
   hasSavedRound: boolean
+  savedRoundUpdatedAtMs: number | null
+  isRoundSavePending: boolean
+  roundSaveWarning: string | null
   onNavigate: (screen: AppScreen) => void
-  onResumeSavedRound: () => void
+  onResumeSavedRound: () => boolean
   onResetRound: () => void
   onAbandonRound: () => void
+  onReplayTutorial: () => void
   onUpdateRoundState: (updater: RoundStateUpdater) => void
 }

@@ -3,7 +3,7 @@
 
   /* Typography */
   --font-ui: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Pirata One', 'Times New Roman', serif;
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Times New Roman', serif;
   --font-numeric: var(--font-ui);
 
   /* Brand palette */
@@ -11,7 +11,7 @@
   --color-bg-white: #ffffff;
   --color-bg-sand: #f4f0e4;
   --color-text-strong: #1a1a1a;
-  --color-text-muted: #474747;
+  --color-text-muted: #3f4740;
   --color-green: #0f5132;
   --color-green-deep: #0a3b25;
   --color-green-fresh: #1f6946;
@@ -19,7 +19,7 @@
   --color-gold: #c89b3c;
   --color-red: #b4473b;
   --color-clay: #8a6b3b;
-  --color-border: #e5e5e5;
+  --color-border: #d8ddd4;
 
   /* Semantic surfaces */
   --surface-app: var(--color-bg-cream);
@@ -69,15 +69,19 @@
   --space-6: 1.5rem;
   --space-7: 2rem;
 
-  --shadow-soft: 0 1px 2px rgba(15, 20, 15, 0.06);
-  --shadow-card: 0 1px 3px rgba(15, 20, 15, 0.06);
+  --shadow-soft:
+    0 1px 2px rgba(11, 22, 14, 0.08),
+    0 10px 24px -20px rgba(11, 22, 14, 0.26);
+  --shadow-card:
+    0 1px 2px rgba(11, 22, 14, 0.07),
+    0 12px 28px -22px rgba(11, 22, 14, 0.24);
   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
   --glow-accent: 0 0 0 rgba(0, 0, 0, 0);
   --glow-warning: 0 0 0 rgba(0, 0, 0, 0);
   --glow-danger: 0 0 0 rgba(0, 0, 0, 0);
 
-  --motion-fast: 140ms;
-  --motion-base: 180ms;
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
 }
 
 @media (prefers-contrast: more) {

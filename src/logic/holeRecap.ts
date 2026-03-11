@@ -20,7 +20,7 @@ import {
   resolvePublicCardPointDeltas,
   type CanonicalPublicResolutionMode,
 } from './publicCardResolution.ts'
-import { formatPlayerNames } from './playerNames.ts'
+import { formatPlayerNames, getDisplayPlayerName } from './playerNames.ts'
 import { createRefMemoizedSelector } from './selectors.ts'
 import { resolveMajorityVoteWinnerId } from './votes.ts'
 
@@ -146,7 +146,12 @@ function getPlayerNameById(players: Player[], playerId: string | null): string |
     return null
   }
 
-  return players.find((player) => player.id === playerId)?.name ?? null
+  const playerIndex = players.findIndex((player) => player.id === playerId)
+  if (playerIndex < 0) {
+    return null
+  }
+
+  return getDisplayPlayerName(players[playerIndex].name, playerIndex)
 }
 
 function getWinnerSummaryByMetric(
@@ -182,7 +187,10 @@ function getWinnerSummaryByMetric(
   return {
     score: winnerScore,
     playerIds: winners.map((winner) => winner.id),
-    playerNames: winners.map((winner) => winner.name),
+    playerNames: winners.map((winner) => {
+      const winnerIndex = players.findIndex((player) => player.id === winner.id)
+      return getDisplayPlayerName(winner.name, winnerIndex >= 0 ? winnerIndex : 0)
+    }),
   }
 }
 
@@ -291,9 +299,9 @@ function buildPublicCardRecapItems(roundState: HoleRecapComputationState): Publi
       { [card.id]: resolution },
     )
     const impactRows = roundState.players
-      .map((player) => ({
+      .map((player, playerIndex) => ({
         playerId: player.id,
-        playerName: player.name,
+        playerName: getDisplayPlayerName(player.name, playerIndex),
         delta: cardPointDeltaByPlayerId[player.id] ?? 0,
       }))
       .filter((row) => row.delta !== 0)
@@ -580,7 +588,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
     momentumEnabled,
   )
 
-  const playerRows = roundState.players.map((player) => {
+  const playerRows = roundState.players.map((player, playerIndex) => {
     const pointBreakdown =
       breakdownsByPlayerId[player.id]?.[roundState.currentHoleIndex] ??
       createEmptyHolePointBreakdown()
@@ -604,7 +612,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
 
     return {
       playerId: player.id,
-      playerName: player.name,
+      playerName: getDisplayPlayerName(player.name, playerIndex),
       powerUpTitle: assignedPowerUp?.title ?? null,
       curseTitle: assignedCurse?.title ?? null,
       powerUpUsed: typeof powerUpUsed === 'boolean' ? powerUpUsed : null,

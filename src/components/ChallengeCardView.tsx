@@ -4,20 +4,21 @@ interface ChallengeCardViewProps {
   card: PersonalCard
   selected: boolean
   offerKind?: 'safe' | 'hard' | 'single'
+  offerDetail?: string
   onSelect?: () => void
 }
 
 function getOfferKindLabel(offerKind: ChallengeCardViewProps['offerKind']): string | null {
   if (offerKind === 'safe') {
-    return 'Safe'
+    return 'Safe Line'
   }
 
   if (offerKind === 'hard') {
-    return 'Hard'
+    return 'Upside Line'
   }
 
   if (offerKind === 'single') {
-    return 'Auto'
+    return 'Auto Line'
   }
 
   return null
@@ -27,7 +28,7 @@ function toLabel(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function ChallengeCardView({ card, selected, offerKind, onSelect }: ChallengeCardViewProps) {
+function ChallengeCardView({ card, selected, offerKind, offerDetail, onSelect }: ChallengeCardViewProps) {
   const offerKindLabel = getOfferKindLabel(offerKind)
   const isSelectable = typeof onSelect === 'function'
   const pointsLabel = `${card.points >= 0 ? '+' : ''}${card.points} pts`
@@ -60,6 +61,7 @@ function ChallengeCardView({ card, selected, offerKind, onSelect }: ChallengeCar
         </div>
       </header>
       <p className="challenge-card__description">{card.description}</p>
+      {offerDetail && <p className="muted challenge-card__offer-detail">{offerDetail}</p>}
       <div className="challenge-card__badges">
         <span className="chip">{toLabel(card.cardType)}</span>
         {offerKindLabel && (

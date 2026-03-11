@@ -24,6 +24,7 @@ function LeaderboardTable({
   showMomentum,
 }: LeaderboardTableProps) {
   const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
+  const formatSignedPoints = (value: number): string => `${value > 0 ? '+' : ''}${value}`
 
   const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
     if (!onSortChange) {
@@ -55,10 +56,10 @@ function LeaderboardTable({
               <th className="leaderboard-table__th leaderboard-table__th--player">Player</th>
               {shouldShowMomentum && <th className="leaderboard-table__th">Heat</th>}
               <th className="leaderboard-table__th leaderboard-table__th--metric">
-                {renderSortButton('Real', 'realScore')}
+                {renderSortButton('Real (strokes)', 'realScore')}
               </th>
               <th className="leaderboard-table__th leaderboard-table__th--metric">
-                {renderSortButton('Points', 'gamePoints')}
+                {renderSortButton('Game Pts', 'gamePoints')}
               </th>
               <th className="leaderboard-table__th leaderboard-table__th--metric">
                 {renderSortButton('Adjusted', 'adjustedScore')}
@@ -67,7 +68,10 @@ function LeaderboardTable({
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={row.playerId}>
+              <tr
+                key={row.playerId}
+                className={`leaderboard-table__row ${index === 0 ? 'leaderboard-table__row--leader' : ''}`}
+              >
                 <td className="leaderboard-table__cell leaderboard-table__cell--rank">{index + 1}</td>
                 <td className="leaderboard-table__cell leaderboard-table__cell--player">{row.playerName}</td>
                 {shouldShowMomentum && (
@@ -83,7 +87,7 @@ function LeaderboardTable({
                   {row.realScore}
                 </td>
                 <td className="leaderboard-table__cell leaderboard-table__cell--metric">
-                  {row.gamePoints}
+                  {formatSignedPoints(row.gamePoints)}
                 </td>
                 <td className="leaderboard-table__cell leaderboard-table__cell--metric">
                   {row.adjustedScore}
@@ -93,6 +97,10 @@ function LeaderboardTable({
           </tbody>
         </table>
       </div>
+      <p className="muted leaderboard-table__legend">
+        Real score is pure golf strokes. Game points come from side-game outcomes. Adjusted score
+        equals real score minus game points.
+      </p>
     </div>
   )
 }

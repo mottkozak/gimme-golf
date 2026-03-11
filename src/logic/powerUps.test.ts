@@ -76,7 +76,7 @@ test('power ups mode: hole 1 assigns only positive power-ups', () => {
   })
 })
 
-test('power ups mode: previous-hole winner also gets a curse on the next hole', () => {
+test('power ups mode: overall round leader gets a curse and no positive power-up', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 3,
@@ -94,7 +94,7 @@ test('power ups mode: previous-hole winner also gets a curse on the next hole', 
     [createTestCurse('curse', 'Curse')],
   )
 
-  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, 'good')
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, null)
   assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p2, 'good')
   assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p3, 'good')
 
@@ -103,7 +103,7 @@ test('power ups mode: previous-hole winner also gets a curse on the next hole', 
   assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
 })
 
-test('power ups mode: tied previous-hole winners each receive a curse', () => {
+test('power ups mode: tied overall round leaders each receive a curse and no positive power-up', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 4,
@@ -121,12 +121,16 @@ test('power ups mode: tied previous-hole winners each receive a curse', () => {
     [createTestCurse('curse', 'Curse')],
   )
 
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, null)
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p2, null)
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p3, 'good')
+
   assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, 'curse')
   assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, 'curse')
   assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
 })
 
-test('power ups mode: incomplete previous hole assigns no curses', () => {
+test('power ups mode: incomplete prior holes assign no curses', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 3,
@@ -150,12 +154,12 @@ test('power ups mode: incomplete previous hole assigns no curses', () => {
   })
 })
 
-test('power ups mode: curse assignment uses previous hole winners, not cumulative leaders', () => {
+test('power ups mode: curse assignment uses cumulative leaders, not most recent hole winner', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 3,
-      p2: 4,
-      p3: 5,
+      p2: 6,
+      p3: 7,
     }),
     createHoleResult(2, {
       p1: 6,
@@ -173,9 +177,13 @@ test('power ups mode: curse assignment uses previous hole winners, not cumulativ
     [createTestCurse('curse', 'Curse')],
   )
 
-  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, null)
-  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, null)
   assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
+
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, null)
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p2, 'good')
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p3, 'good')
 })
 
 test('getAssignedPowerUp resolves assigned positive power-up ids', () => {

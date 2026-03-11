@@ -80,6 +80,24 @@ const BASE_ROUND_CONFIG: RoundConfig = {
   },
 }
 
+const DYNAMIC_DRAW_TWO_CONFIG: RoundConfig = {
+  ...BASE_ROUND_CONFIG,
+  toggles: {
+    ...BASE_ROUND_CONFIG.toggles,
+    dynamicDifficulty: true,
+    drawTwoPickOne: true,
+    autoAssignOne: false,
+  },
+}
+
+function getPointsForCardId(cards: PersonalCard[], cardId: string | null): number | null {
+  if (!cardId) {
+    return null
+  }
+
+  return cards.find((card) => card.id === cardId)?.points ?? null
+}
+
 test('dealPersonalCardsForHole favors fresh cards before reused cards', () => {
   const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
   const hole: HoleDefinition = {
@@ -274,4 +292,106 @@ test('dealPublicCardsForHole prefers cards outside the recent window when deck m
   } finally {
     Math.random = originalRandom
   }
+})
+
+test('dynamic difficulty keeps advanced offer ceilings at safe +1 and hard +2', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 80 }]
+  const hole: HoleDefinition = {
+    holeNumber: 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const offerDeck = [
+    createPersonalCard({ id: 'a1', code: 'A1', points: 1, difficulty: 'easy' }),
+    createPersonalCard({ id: 'a2', code: 'A2', points: 1, difficulty: 'medium' }),
+    createPersonalCard({ id: 'a3', code: 'A3', points: 2, difficulty: 'hard' }),
+    createPersonalCard({ id: 'a4', code: 'A4', points: 3, difficulty: 'hard' }),
+    createPersonalCard({ id: 'a5', code: 'A5', points: 4, difficulty: 'hard' }),
+  ]
+
+  const deal = dealPersonalCardsForHole(
+    players,
+    hole,
+    DYNAMIC_DRAW_TWO_CONFIG,
+    offerDeck,
+    {
+      usedPersonalCardIds: [],
+      usedPublicCardIds: [],
+    },
+  )
+
+  const offer = deal.personalCardOfferByPlayerId.p1
+  assert.equal(getPointsForCardId(offerDeck, offer.safeCardId), 1)
+  assert.equal(getPointsForCardId(offerDeck, offer.hardCardId), 2)
+})
+
+test('dynamic difficulty keeps intermediate offer ceilings at safe +1 to +2 and hard +3', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 92 }]
+  const hole: HoleDefinition = {
+    holeNumber: 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const offerDeck = [
+    createPersonalCard({ id: 'i1', code: 'I1', points: 1, difficulty: 'easy' }),
+    createPersonalCard({ id: 'i2', code: 'I2', points: 2, difficulty: 'medium' }),
+    createPersonalCard({ id: 'i3', code: 'I3', points: 3, difficulty: 'hard' }),
+    createPersonalCard({ id: 'i4', code: 'I4', points: 4, difficulty: 'hard' }),
+    createPersonalCard({ id: 'i5', code: 'I5', points: 5, difficulty: 'hard' }),
+  ]
+
+  const deal = dealPersonalCardsForHole(
+    players,
+    hole,
+    DYNAMIC_DRAW_TWO_CONFIG,
+    offerDeck,
+    {
+      usedPersonalCardIds: [],
+      usedPublicCardIds: [],
+    },
+  )
+
+  const offer = deal.personalCardOfferByPlayerId.p1
+  const safePoints = getPointsForCardId(offerDeck, offer.safeCardId)
+  const hardPoints = getPointsForCardId(offerDeck, offer.hardCardId)
+
+  assert.ok(safePoints === 1 || safePoints === 2)
+  assert.equal(hardPoints, 3)
+})
+
+test('dynamic difficulty gives developing golfers higher-upside hard offers (+4 to +5)', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 112 }]
+  const hole: HoleDefinition = {
+    holeNumber: 1,
+    par: 4,
+    tags: [],
+    featuredHoleType: null,
+  }
+  const offerDeck = [
+    createPersonalCard({ id: 'd1', code: 'D1', points: 1, difficulty: 'easy' }),
+    createPersonalCard({ id: 'd2', code: 'D2', points: 2, difficulty: 'easy' }),
+    createPersonalCard({ id: 'd3', code: 'D3', points: 3, difficulty: 'medium' }),
+    createPersonalCard({ id: 'd4', code: 'D4', points: 4, difficulty: 'hard' }),
+    createPersonalCard({ id: 'd5', code: 'D5', points: 5, difficulty: 'hard' }),
+  ]
+
+  const deal = dealPersonalCardsForHole(
+    players,
+    hole,
+    DYNAMIC_DRAW_TWO_CONFIG,
+    offerDeck,
+    {
+      usedPersonalCardIds: [],
+      usedPublicCardIds: [],
+    },
+  )
+
+  const offer = deal.personalCardOfferByPlayerId.p1
+  const safePoints = getPointsForCardId(offerDeck, offer.safeCardId)
+  const hardPoints = getPointsForCardId(offerDeck, offer.hardCardId)
+
+  assert.equal(safePoints, 2)
+  assert.ok(hardPoints === 4 || hardPoints === 5)
 })
