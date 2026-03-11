@@ -1,4 +1,5 @@
 import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
+import AppIcon from '../components/AppIcon.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import { PERSONAL_CARDS, PUBLIC_CARDS } from '../data/cards.ts'
 import {
@@ -147,7 +148,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
     <section className="screen stack-sm">
       <header className="screen__header">
         <div className="screen-title">
-          <img className="screen-title__icon" src={ICONS.roundSetup} alt="" aria-hidden="true" />
+          <AppIcon className="screen-title__icon" icon={ICONS.roundSetup} />
           <h2>Hole Setup</h2>
         </div>
         <p className="muted">
@@ -188,12 +189,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
                   className={`tag-pill ${isActive ? 'active' : ''}`}
                   onClick={() => setHoleTag(option.tag)}
                 >
-                  <img
-                    className="tag-pill__icon"
-                    src={HOLE_TAG_ICON_BY_TAG[option.tag]}
-                    alt=""
-                    aria-hidden="true"
-                  />
+                  <AppIcon className="tag-pill__icon" icon={HOLE_TAG_ICON_BY_TAG[option.tag]} />
                   {option.label}
                 </button>
               )
@@ -202,7 +198,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
         </div>
 
         <button type="button" className="button-primary" onClick={dealCardsForCurrentHole}>
-          <img className="button-icon" src={ICONS.dealCards} alt="" aria-hidden="true" />
+          <AppIcon className="button-icon" icon={ICONS.dealCards} />
           {roundState.config.gameMode === 'powerUps'
             ? `Deal Power Ups For Hole ${currentHole.holeNumber}`
             : `Deal Cards For Hole ${currentHole.holeNumber}`}

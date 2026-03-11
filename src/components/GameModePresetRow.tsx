@@ -1,4 +1,5 @@
 import { PRESET_ICON_BY_ID } from '../app/icons.ts'
+import AppIcon from './AppIcon.tsx'
 import type { GameModePresetDefinition } from '../data/gameModePresets.ts'
 
 interface GameModePresetRowProps {
@@ -34,12 +35,7 @@ function GameModePresetRow({
       <div className="preset-row__details">
         <div className="row-between preset-row__top">
           <div className="preset-row__title">
-            <img
-              className="preset-row__icon"
-              src={PRESET_ICON_BY_ID[preset.id]}
-              alt=""
-              aria-hidden="true"
-            />
+            <AppIcon className="preset-row__icon" icon={PRESET_ICON_BY_ID[preset.id]} />
             <strong>{preset.name}</strong>
           </div>
           <button

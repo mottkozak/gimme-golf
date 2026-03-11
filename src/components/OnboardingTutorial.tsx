@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { ICONS } from '../app/icons.ts'
+import { ICONS, type AppIconName } from '../app/icons.ts'
+import AppIcon from './AppIcon.tsx'
 import type { OnboardingCompletionStatus } from '../logic/onboarding.ts'
 
 interface TutorialStep {
@@ -7,7 +8,7 @@ interface TutorialStep {
   title: string
   description: string
   detail: string
-  iconSrc: string
+  icon: AppIconName
 }
 
 interface OnboardingTutorialProps {
@@ -20,7 +21,7 @@ const TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Home: Quick Round or Full Setup',
     description: 'Quick Round jumps straight into the recommended Quick Start mode.',
     detail: 'Use Full Setup when you want to review players or choose a different mode first.',
-    iconSrc: ICONS.teeOff,
+    icon: ICONS.teeOff,
   },
   {
     id: 'setup',
@@ -28,21 +29,21 @@ const TUTORIAL_STEPS: readonly TutorialStep[] = [
     description: 'Quick Start is the best first-round mode for mixed-skill groups.',
     detail:
       'Dynamic Difficulty helps balance skill gaps, Auto-pick keeps pace, and public/featured extras stay optional.',
-    iconSrc: ICONS.roundSetup,
+    icon: ICONS.roundSetup,
   },
   {
     id: 'play',
     title: 'Hole Play: Deal and Confirm Readiness',
     description: 'At each hole, deal cards or assign power-ups based on your selected mode.',
     detail: 'Once everyone is ready, continue to results to lock in what happened on that hole.',
-    iconSrc: ICONS.holePlay,
+    icon: ICONS.holePlay,
   },
   {
     id: 'results',
     title: 'Hole Results: Score and Resolve',
     description: 'Enter strokes for each player, then resolve missions and public card outcomes.',
     detail: 'Save to update standings and move cleanly to the next hole.',
-    iconSrc: ICONS.holeResults,
+    icon: ICONS.holeResults,
   },
 ] as const
 
@@ -151,7 +152,7 @@ function OnboardingTutorial({ onClose }: OnboardingTutorialProps) {
 
         <section className="stack-xs onboarding-modal__content">
           <div className="step-title onboarding-modal__title">
-            <img className="step-title__icon" src={currentStep.iconSrc} alt="" aria-hidden="true" />
+            <AppIcon className="step-title__icon" icon={currentStep.icon} />
             <h3 id={titleId} ref={titleRef} tabIndex={-1}>
               {currentStep.title}
             </h3>

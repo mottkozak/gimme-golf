@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
+import AppIcon from '../components/AppIcon.tsx'
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
@@ -224,11 +225,9 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     <section className="screen stack-sm hole-play-screen">
       <header className="screen__header hole-play-header">
         <div className="screen-title">
-          <img
+          <AppIcon
             className="screen-title__icon"
-            src={isPowerUpsMode ? ICONS.holePlay : ICONS.dealCards}
-            alt=""
-            aria-hidden="true"
+            icon={isPowerUpsMode ? ICONS.holePlay : ICONS.dealCards}
           />
           <h2>{isPowerUpsMode ? 'Hole Setup: Power Ups' : 'Hole Setup: Missions'}</h2>
         </div>
@@ -283,12 +282,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                     className={`tag-pill hole-setup-tag-pill ${isActive ? 'active' : ''}`}
                     onClick={() => setHoleTag(option.tag)}
                   >
-                    <img
-                      className="tag-pill__icon"
-                      src={HOLE_TAG_ICON_BY_TAG[option.tag]}
-                      alt=""
-                      aria-hidden="true"
-                    />
+                    <AppIcon className="tag-pill__icon" icon={HOLE_TAG_ICON_BY_TAG[option.tag]} />
                     {option.label}
                   </button>
                 )
@@ -363,7 +357,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               only and replace their positive power-up.
             </p>
             <button type="button" className="button-primary" onClick={continueToResults}>
-              <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
+              <AppIcon className="button-icon" icon={ICONS.holeResults} />
               Enter Hole Results
             </button>
           </section>

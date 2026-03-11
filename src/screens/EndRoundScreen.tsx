@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
+import AppIcon from '../components/AppIcon.tsx'
 import HoleSummaryList from '../components/HoleSummaryList.tsx'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
 import { computeRoundAwards } from '../logic/awards.ts'
@@ -450,7 +451,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
     <section className="screen stack-sm end-round-screen">
       <header className="screen__header end-round-header">
         <div className="screen-title">
-          <img className="screen-title__icon" src={ICONS.leaderboard} alt="" aria-hidden="true" />
+          <AppIcon className="screen-title__icon" icon={ICONS.leaderboard} />
           <h2>Round Summary</h2>
         </div>
         <p className="muted">Final recap after {roundState.holes.length} holes. Ceremony time.</p>
@@ -743,7 +744,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
 
       <section className="end-cta-bar end-cta-bar--with-share end-cta-bar--replay">
         <button type="button" onClick={shareRecap} disabled={isSharingRecap}>
-          <img className="button-icon" src={ICONS.holeRecap} alt="" aria-hidden="true" />
+          <AppIcon className="button-icon" icon={ICONS.holeRecap} />
           {isSharingRecap ? 'Preparing Recap...' : 'Share Recap'}
         </button>
         <button
@@ -751,7 +752,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
           className="button-primary"
           onClick={runItBack}
         >
-          <img className="button-icon" src={ICONS.teeOff} alt="" aria-hidden="true" />
+          <AppIcon className="button-icon" icon={ICONS.teeOff} />
           Run It Back
         </button>
         <button type="button" onClick={editBeforeNextRound}>

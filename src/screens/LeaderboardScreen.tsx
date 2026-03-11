@@ -1,5 +1,6 @@
 import { ICONS } from '../app/icons.ts'
 import { useEffect, useMemo, useState } from 'react'
+import AppIcon from '../components/AppIcon.tsx'
 import LeaderboardTable from '../components/LeaderboardTable.tsx'
 import { trackSummaryScreenViewed } from '../logic/analytics.ts'
 import {
@@ -118,7 +119,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       <header className="screen__header recap-header">
         <div className="row-between">
           <div className="screen-title">
-            <img className="screen-title__icon" src={ICONS.holeRecap} alt="" aria-hidden="true" />
+            <AppIcon className="screen-title__icon" icon={ICONS.holeRecap} />
             <h2>Hole {recapData.holeNumber} Recap</h2>
           </div>
           <span className="chip">Par {recapData.holePar}</span>
@@ -210,12 +211,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             : `Next: set up Hole ${recapData.holeNumber + 1} and deal.`}
         </p>
         <button type="button" className="button-primary" onClick={progressRound}>
-          <img
-            className="button-icon"
-            src={isLastHole ? ICONS.leaderboard : ICONS.golfFlag}
-            alt=""
-            aria-hidden="true"
-          />
+          <AppIcon className="button-icon" icon={isLastHole ? ICONS.leaderboard : ICONS.golfFlag} />
           {isLastHole ? 'Finish Round' : `Set Up Hole ${recapData.holeNumber + 1}`}
         </button>
       </section>

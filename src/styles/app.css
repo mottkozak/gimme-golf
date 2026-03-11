@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
 
 * {
   box-sizing: border-box;
@@ -91,10 +92,26 @@ button {
     transform var(--motion-fast) ease;
 }
 
+.app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 400;
+  user-select: none;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
 button .button-icon {
   width: 1.02rem;
   height: 1.02rem;
-  object-fit: contain;
+  font-size: 1.02rem;
   vertical-align: -0.18rem;
   margin-right: 0.38rem;
 }
@@ -175,14 +192,14 @@ h3 {
 .screen-title__icon {
   width: 1.7rem;
   height: 1.7rem;
-  object-fit: contain;
+  font-size: 1.5rem;
   border-radius: 0.3rem;
 }
 
 .step-title__icon {
   width: 1.2rem;
   height: 1.2rem;
-  object-fit: contain;
+  font-size: 1.1rem;
   border-radius: 0.22rem;
 }
 
@@ -897,6 +914,7 @@ main {
 .hole-setup-tag-pill .tag-pill__icon {
   width: 0.92rem;
   height: 0.92rem;
+  font-size: 0.92rem;
   opacity: 0.82;
   filter: saturate(0.82);
 }
@@ -932,6 +950,193 @@ main {
 .home-screen {
   justify-content: flex-start;
   gap: var(--space-4);
+}
+
+.mode-list-header {
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border-subtle));
+}
+
+.mode-list-panel {
+  border-width: 2px;
+}
+
+.mode-list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mode-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 76px;
+  border-radius: var(--radius-md);
+  border: 2px solid color-mix(in srgb, var(--border-subtle) 84%, var(--accent) 16%);
+  background: color-mix(in srgb, var(--bg-panel) 96%, var(--bg-inset));
+  text-align: left;
+  padding: 0.74rem 0.9rem;
+}
+
+.mode-card__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.42rem;
+  height: 2.42rem;
+  border-radius: 0.74rem;
+  background: color-mix(in srgb, var(--bg-panel) 82%, white 18%);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 88%, var(--accent) 12%);
+}
+
+.mode-card__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+}
+
+.mode-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.mode-card__copy strong {
+  font-family: var(--font-display);
+  font-size: 1.48rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.mode-card__tagline {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+}
+
+.mode-card__meta {
+  font-size: 0.79rem;
+  color: var(--text-secondary);
+}
+
+.mode-card__chevron {
+  width: 1.04rem;
+  height: 1.04rem;
+  font-size: 1.04rem;
+  color: color-mix(in srgb, var(--text-secondary) 80%, var(--accent-strong));
+}
+
+.mode-detail-screen {
+  gap: var(--space-4);
+}
+
+.mode-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mode-detail-back {
+  align-self: flex-start;
+  min-height: 40px;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 90%, var(--accent) 10%);
+  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  font-weight: 700;
+}
+
+.mode-detail-back__icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  margin-right: 0.2rem;
+  vertical-align: -0.08rem;
+}
+
+.mode-detail-hero {
+  border-width: 2px;
+  min-height: 360px;
+  justify-content: center;
+  text-align: center;
+}
+
+.mode-detail-hero__icon {
+  width: 4.4rem;
+  height: 4.4rem;
+  font-size: 4.4rem;
+  margin: 0 auto;
+}
+
+.mode-detail-hero__tagline {
+  font-size: 1.06rem;
+  font-weight: 700;
+}
+
+.mode-detail-warning {
+  border: 1px solid color-mix(in srgb, var(--warning) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--warning) 12%, var(--bg-panel));
+}
+
+.mode-detail-cta {
+  border-width: 2px;
+}
+
+.mode-detail-play {
+  min-height: 60px;
+  font-size: 1.04rem;
+}
+
+.mode-tone--classic {
+  border-color: color-mix(in srgb, #d7b57a 68%, var(--border-subtle));
+  background: color-mix(in srgb, #d7b57a 10%, var(--bg-panel));
+}
+
+.mode-tone--novelty {
+  border-color: color-mix(in srgb, #dd8f9f 58%, var(--border-subtle));
+  background: color-mix(in srgb, #dd8f9f 14%, var(--bg-panel));
+}
+
+.mode-tone--chaos {
+  border-color: color-mix(in srgb, #e88282 60%, var(--border-subtle));
+  background: color-mix(in srgb, #e88282 14%, var(--bg-panel));
+}
+
+.mode-tone--props {
+  border-color: color-mix(in srgb, #8dc2a7 60%, var(--border-subtle));
+  background: color-mix(in srgb, #8dc2a7 16%, var(--bg-panel));
+}
+
+.mode-tone--power-ups {
+  border-color: color-mix(in srgb, #b9a0de 60%, var(--border-subtle));
+  background: color-mix(in srgb, #b9a0de 16%, var(--bg-panel));
+}
+
+.mode-config-screen .setup-step {
+  border-width: 2px;
+}
+
+.mode-config-mode-card {
+  border-width: 2px;
+}
+
+.mode-config-mode-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.54rem;
+}
+
+.mode-config-mode-card__title strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.mode-config-mode-card__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .home-screen__header {
@@ -1489,7 +1694,7 @@ main {
 .preset-row__icon {
   width: 1.05rem;
   height: 1.05rem;
-  object-fit: contain;
+  font-size: 1.05rem;
   border-radius: 0.2rem;
 }
 
@@ -1608,7 +1813,7 @@ main {
 .tag-pill__icon {
   width: 1rem;
   height: 1rem;
-  object-fit: contain;
+  font-size: 1rem;
 }
 
 .tag-pill.active {

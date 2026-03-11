@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
+import AppIcon from '../components/AppIcon.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import {
   trackHoleCompleted,
@@ -679,7 +680,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       <header className="screen__header hole-results-header">
         <div className="row-between hole-results-header__title-row">
           <div className="screen-title">
-            <img className="screen-title__icon" src={ICONS.holeResults} alt="" aria-hidden="true" />
+            <AppIcon className="screen-title__icon" icon={ICONS.holeResults} />
             <h2>Hole Results</h2>
           </div>
           <span className="chip hole-results-progress-chip">
@@ -1288,7 +1289,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           disabled={!canContinueToRecap}
           onClick={continueToRecap}
         >
-          <img className="button-icon" src={ICONS.holeRecap} alt="" aria-hidden="true" />
+          <AppIcon className="button-icon" icon={ICONS.holeRecap} />
           Save Hole & View Recap
         </button>
         {!canContinueToRecap && (
