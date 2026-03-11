@@ -13,6 +13,5 @@ export interface ScreenProps {
   onResumeSavedRound: () => boolean
   onResetRound: () => void
   onAbandonRound: () => void
-  onReplayTutorial: () => void
   onUpdateRoundState: (updater: RoundStateUpdater) => void
 }

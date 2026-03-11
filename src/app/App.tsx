@@ -22,7 +22,6 @@ function App() {
   const [onboardingCompletionStatus, setOnboardingCompletionStatus] = useState(() =>
     loadOnboardingCompletionStatus(),
   )
-  const [isReplayTutorialRequested, setIsReplayTutorialRequested] = useState(false)
   const [initialRoundSnapshot] = useState(() => loadRoundStateSnapshot())
   const [appState, dispatch] = useReducer(
     reduceAppState,
@@ -76,19 +75,14 @@ function App() {
     dispatch({ type: 'navigate', screen })
   }
 
-  const onReplayTutorial: ScreenProps['onReplayTutorial'] = () => {
-    setIsReplayTutorialRequested(true)
-  }
-
   const closeOnboarding = (completionStatus: OnboardingCompletionStatus) => {
     saveOnboardingCompletionStatus(completionStatus)
     setOnboardingCompletionStatus(completionStatus)
-    setIsReplayTutorialRequested(false)
   }
 
   const isOnboardingVisible = shouldShowOnboarding({
     completionStatus: onboardingCompletionStatus,
-    isReplayRequested: isReplayTutorialRequested,
+    isReplayRequested: false,
   })
 
   const sharedScreenProps: ScreenProps = {
@@ -101,7 +95,6 @@ function App() {
     onResumeSavedRound,
     onResetRound,
     onAbandonRound,
-    onReplayTutorial,
     onUpdateRoundState,
   }
 
@@ -129,20 +122,19 @@ function App() {
     Math.max(appState.roundState.holes.length - 1, 0),
   )
   const currentHole = appState.roundState.holes[safeCurrentHoleIndex]
-  const logoSrc = `${import.meta.env.BASE_URL}Gimme-GOLF-logo-GG.png`
+  const shouldShowProgressChip = appState.activeScreen !== 'home'
 
   return (
     <div className="app-shell">
       <header className="app-shell__header">
-        <img
-          className="app-logo"
-          src={logoSrc}
-          alt="GIMME GOLF"
-        />
-        {appState.activeScreen !== 'home' && (
+        <span className="app-shell__header-spacer" aria-hidden="true" />
+        <h1 className="app-wordmark">Gimme Golf</h1>
+        {shouldShowProgressChip ? (
           <span className="chip app-shell__progress-chip">
             Hole {currentHole?.holeNumber ?? 1} of {appState.roundState.config.holeCount}
           </span>
+        ) : (
+          <span className="app-shell__header-spacer" aria-hidden="true" />
         )}
       </header>
 

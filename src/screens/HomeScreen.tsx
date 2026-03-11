@@ -42,7 +42,6 @@ function HomeScreen({
   roundSaveWarning,
   onNavigate,
   onResumeSavedRound,
-  onReplayTutorial,
   onUpdateRoundState,
 }: ScreenProps) {
   const [activeModeId, setActiveModeId] = useState<LandingModeId | null>(null)
@@ -118,56 +117,48 @@ function HomeScreen({
     launchModeFlow(modeId)
   }
 
-  const replayTutorial = () => {
-    trackHomeAction({
-      action: 'replay_tutorial',
-      hasSavedRound,
-      currentScreen: 'home',
-    })
-    onReplayTutorial()
-  }
-
   const activeMode = activeModeId ? getLandingModeById(activeModeId) : null
 
   if (activeMode) {
     return (
       <section className={`screen stack-sm mode-detail-screen mode-tone--${activeMode.toneClassName}`}>
-        <header className="screen__header mode-detail-header">
+        <header className="mode-detail-header">
           <button
             type="button"
             className="mode-detail-back"
+            aria-label="Back"
             onClick={() => setActiveModeId(null)}
           >
             <AppIcon className="mode-detail-back__icon" icon="arrow_back" />
-            Back
           </button>
-          <p className="muted">Step 2 of 3: review mode details.</p>
+          <p className="mode-detail-step">Step 2 of 3</p>
         </header>
 
-        <section className="panel mode-detail-hero stack-sm">
+        <section className="mode-detail-hero" aria-label={`${activeMode.name} mode details`}>
+          <p className="mode-detail-date">Today</p>
+          <h2 className="mode-detail-title">{activeMode.name}</h2>
           <AppIcon className="mode-detail-hero__icon" icon={activeMode.icon} />
-          <div className="stack-xs">
-            <h2>{activeMode.name}</h2>
-            <p className="mode-detail-hero__tagline">{activeMode.tagline}</p>
-            <p className="muted">{activeMode.description}</p>
-            <p className="muted">Includes: {activeMode.packsLabel}</p>
-          </div>
+          <p className="mode-detail-hero__tagline">{activeMode.tagline}</p>
+          <p className="mode-detail-copy">{activeMode.description}</p>
+          <p className="mode-detail-copy mode-detail-copy--subtle">Includes: {activeMode.packsLabel}</p>
         </section>
 
         {hasSavedRoundProgress && (
-          <section className="panel mode-detail-warning stack-xs">
+          <section className="mode-detail-warning stack-xs">
             <p className="label">Saved Round In Progress</p>
-            <p className="muted">
+            <p>
               Starting {activeMode.name} opens a new setup and replaces in-progress local hole data.
             </p>
           </section>
         )}
 
-        <section className="panel mode-detail-cta stack-xs">
-          <p className="muted">Step 3 opens course + golfer config before tee-off.</p>
+        <section className="mode-detail-cta stack-xs">
+          <p className="mode-detail-copy mode-detail-copy--subtle">
+            Step 3 opens course + golfer config before tee-off.
+          </p>
           <button
             type="button"
-            className="button-primary mode-detail-play"
+            className="mode-detail-play"
             onClick={() => playMode(activeMode.id)}
           >
             Play {activeMode.name}
@@ -244,13 +235,6 @@ function HomeScreen({
             </button>
           ))}
         </div>
-      </section>
-
-      <section className="panel stack-xs home-help-card">
-        <p className="label">Need a refresher?</p>
-        <button type="button" className="home-action-button home-action-button--secondary" onClick={replayTutorial}>
-          Replay Tutorial
-        </button>
       </section>
 
       {pendingModeId && (
