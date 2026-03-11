@@ -67,7 +67,7 @@ const POWER_UPS_FEATURE: GameModeFeatureDefinition = {
   name: 'Power Ups',
   shortDescription: 'Standalone mode with one random power-up per golfer per hole.',
   longDescription:
-    'Power Ups Mode replaces mission cards with one random power-up per golfer each hole. Players can declare and use it once during that hole.',
+    'Power Ups Mode replaces mission cards with one random power-up per golfer each hole. Starting on hole 2, the current leader receives a curse-style bad power-up while everyone else receives positive power-ups.',
   includesLabel: 'Random per-hole power-ups',
   bestForLabel: 'Fast rounds, variety, and casual groups',
   type: 'standalone',
@@ -185,7 +185,7 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
     name: 'Power Ups',
     shortDescription: 'Standalone mode with random per-hole power-ups.',
     longDescription:
-      'Power Ups is a separate mode that disables mission cards and card-pack scoring. Each golfer gets one random power-up each hole and may use it once.',
+      'Power Ups is a separate mode that disables mission cards and card-pack scoring. Hole 1 gives everyone a positive power-up. From hole 2 onward, leaders are dealt bad curse power-ups while trailing players get positive power-ups.',
     includesLabel: 'Power Ups mode only',
     bestForLabel: 'Fast rounds and novelty-focused play',
     includedFeatureIds: ['powerUps'],

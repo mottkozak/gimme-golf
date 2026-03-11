@@ -188,8 +188,9 @@ export const POWER_UPS: PowerUp[] = [
   },
   {
     id: 'reverse-bounce',
-    title: 'Reverse Bounce',
-    description: 'If approach hits green then rolls off, place it back on the fringe.',
+    title: 'Sticky Stuff',
+    description:
+      'If approach hits green then rolls off, place it back where you believe it hit the green first.',
     category: 'hazard-trouble',
   },
   {
@@ -256,7 +257,7 @@ export const POWER_UPS: PowerUp[] = [
   {
     id: 'green-bump',
     title: 'Green Bump',
-    description: 'If your chip finishes within 10 feet, move it 3 feet closer.',
+    description: 'Once your chip lands on the green, move it one club length closer to the hole.',
     category: 'recovery',
   },
   {
@@ -318,7 +319,7 @@ export const POWER_UPS: PowerUp[] = [
   {
     id: 'ball-magnet',
     title: 'Ball Magnet',
-    description: 'If your putt passes within 6 inches of hole, it counts as holed.',
+    description: 'If your putt passes within 6 inches of hole on your first putt, it counts as holed.',
     category: 'legendary',
     legendary: true,
   },
@@ -331,6 +332,155 @@ export const POWER_UPS: PowerUp[] = [
   },
 ]
 
+export const BAD_POWER_UPS: PowerUp[] = [
+  {
+    id: 'curse-no-driver',
+    title: 'No Driver',
+    description: 'You cannot use driver on this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-putter-only',
+    title: 'Putter Grip Lock',
+    description: 'Any putt inside 5 feet must be holed cleanly with no gimmies.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-first-off-tee',
+    title: 'First Off The Tee',
+    description: 'You must tee off first regardless of honors.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-practice',
+    title: 'No Practice Swings',
+    description: 'No practice swings allowed on full shots this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-three-club-limit',
+    title: 'Three-Club Limit',
+    description: 'Choose only three clubs for the hole. You may use putter in addition.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-quiet-setup',
+    title: 'Silent Setup',
+    description: 'No talking during your setup, swing, or immediate result.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-club-down',
+    title: 'Club Down',
+    description: 'On one full swing, you must take one less club than normal.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-club-up',
+    title: 'Club Up',
+    description: 'On one full swing, you must take one extra club and swing smooth.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-gps',
+    title: 'No Yardage Help',
+    description: 'No rangefinder or GPS allowed on this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-fast-decision',
+    title: 'Ten-Second Decision',
+    description: 'You must pick your club within 10 seconds when it is your turn.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-putt-from-fringe',
+    title: 'Texas Holdem',
+    description: 'If your ball is on the fringe, you must putt instead of chip.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-hero-shot',
+    title: 'No Hero Shot',
+    description: 'When in trouble, you must play the safe punch-out option.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-free-drop',
+    title: 'No Optional Relief',
+    description: 'Optional free relief is disabled for you on this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-one-ball',
+    title: 'One Ball Only',
+    description: 'No provisional or second ball allowed this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-back-tee',
+    title: 'Back Tee Penalty',
+    description: 'You must tee off from one tee box behind the group.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-bunker-tax',
+    title: 'Bunker Tax',
+    description: 'If you hit a bunker, add one penalty stroke.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-short-putt-repeat',
+    title: 'No Tap-In',
+    description: 'All putts must be played from at least one putter head behind the marker.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-rough-only-drop',
+    title: 'Rough Is Fairway',
+    description: 'If you hit fairway off the tee, move your ball to first cut rough.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-lie-improvement',
+    title: 'No Lie Improvement',
+    description: 'Ball must be played exactly as it lies unless required by safety rules.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-blind-commit',
+    title: 'Blind Commit',
+    description: 'Choose your club before hearing anyone else discuss yardage.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-two-putt-max-fail',
+    title: 'Three-Putt Punisher',
+    description: 'If you three-putt, add one extra stroke penalty.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-par-or-worse',
+    title: 'Par Pressure',
+    description: 'If you make worse than par, add one penalty stroke.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-no-favorite-club',
+    title: 'No Favorite Club',
+    description: 'You cannot use your favorite club this hole.',
+    category: 'curse',
+  },
+  {
+    id: 'curse-carry-bag',
+    title: 'No Cart Assist',
+    description: 'No cart ride to your ball after tee shot; walk to your next shot.',
+    category: 'curse',
+  },
+]
+
+const ALL_POWER_UPS = [...POWER_UPS, ...BAD_POWER_UPS]
+
 export const POWER_UPS_BY_ID: Record<string, PowerUp> = Object.fromEntries(
-  POWER_UPS.map((powerUp) => [powerUp.id, powerUp]),
+  ALL_POWER_UPS.map((powerUp) => [powerUp.id, powerUp]),
 )

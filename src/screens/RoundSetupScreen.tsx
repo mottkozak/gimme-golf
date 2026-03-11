@@ -455,6 +455,10 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           <p className="muted">
             Each golfer receives one random power-up per hole and can use it once before scoring.
           </p>
+          <p className="muted">
+            Hole 1 is all positive power-ups. From hole 2 onward, current leader(s) receive
+            curse-style bad power-ups while everyone else gets positive power-ups.
+          </p>
         </section>
       )}
 

@@ -5,7 +5,10 @@ import {
   createDealtHoleCardsState,
   createEmptyHoleCardsState,
 } from './dealCards.ts'
-import { assignPowerUpsForHole, createEmptyHolePowerUpState } from './powerUps.ts'
+import {
+  assignPowerUpsForHoleWithLeaderHandicap,
+  createEmptyHolePowerUpState,
+} from './powerUps.ts'
 import { markHoleStartedAt } from './uxMetrics.ts'
 
 export function prepareCurrentHoleForPlay(
@@ -28,9 +31,11 @@ export function prepareCurrentHoleForPlay(
       roundState.players,
       currentHole.holeNumber,
     )
-    holePowerUps[currentHoleIndex] = assignPowerUpsForHole(
+    holePowerUps[currentHoleIndex] = assignPowerUpsForHoleWithLeaderHandicap(
       roundState.players,
       currentHole.holeNumber,
+      roundState.holeResults,
+      currentHoleIndex,
     )
   } else {
     const priorHoleCards = roundState.holeCards.filter(
