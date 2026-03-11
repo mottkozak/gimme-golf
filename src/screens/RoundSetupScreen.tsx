@@ -98,6 +98,17 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     }))
   }
 
+  const setPartyPackMode = (mode: 'chaos' | 'props') => {
+    updateSetup((draft) => ({
+      ...draft,
+      config: {
+        ...draft.config,
+        selectedPresetId: 'party',
+        enabledPackIds: mode === 'props' ? ['classic', 'props'] : ['classic', 'chaos'],
+      },
+    }))
+  }
+
   const setCustomModeName = (customModeName: string) => {
     updateSetup((draft) => ({
       ...draft,
@@ -275,6 +286,10 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
   const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] ?? null : null
   const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] : null
   const featuredHoles = roundState.holes.filter((hole) => hole.featuredHoleType !== null)
+  const partyPackMode: 'chaos' | 'props' =
+    config.enabledPackIds.includes('props') && !config.enabledPackIds.includes('chaos')
+      ? 'props'
+      : 'chaos'
   const featuredHoleTargetCount = getFeaturedHoleTargetCount(
     config.holeCount,
     config.featuredHoles.frequency,
@@ -300,8 +315,8 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </h3>
           <span className="chip setup-quick-card__chip">Recommended</span>
         </div>
-        <p className="setup-quick-summary">9 holes • standard course • casual defaults</p>
-        <p className="muted">Auto-assigned cards, no featured holes.</p>
+        <p className="setup-quick-summary">9 holes • standard course • Core Pack defaults</p>
+        <p className="muted">Core Pack only, auto-assigned cards, and no featured holes.</p>
         <button
           type="button"
           className="button-primary setup-quick-card__cta"
@@ -440,12 +455,55 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         </div>
       </section>
 
+      {config.selectedPresetId === 'party' && (
+        <section className="panel stack-sm setup-step">
+          <header className="setup-step__header">
+            <h3 className="step-title">
+              <img className="step-title__icon" src={ICONS.gameOptions} alt="" aria-hidden="true" />
+              Party Lane
+            </h3>
+            <p className="muted setup-step__support">
+              Choose which public-card mode to run in Party Pack.
+            </p>
+          </header>
+
+          <section className="setup-control-group">
+            <span className="label setup-control-label">Party Mode</span>
+            <div className="segmented-control" role="group" aria-label="Party pack mode">
+              <button
+                type="button"
+                className={`segmented-control__button ${
+                  partyPackMode === 'chaos' ? 'segmented-control__button--active' : ''
+                }`}
+                onClick={() => setPartyPackMode('chaos')}
+              >
+                Chaos
+              </button>
+              <button
+                type="button"
+                className={`segmented-control__button ${
+                  partyPackMode === 'props' ? 'segmented-control__button--active' : ''
+                }`}
+                onClick={() => setPartyPackMode('props')}
+              >
+                Props
+              </button>
+            </div>
+            <p className="muted">
+              {partyPackMode === 'chaos'
+                ? 'Chaos mode adds one swingy public modifier card per hole.'
+                : 'Props mode adds one prediction-style public card per hole.'}
+            </p>
+          </section>
+        </section>
+      )}
+
       {config.selectedPresetId === 'powerUps' && (
         <section className="panel stack-sm setup-step">
           <header className="setup-step__header">
             <h3 className="step-title">
               <img className="step-title__icon" src={ICONS.holePlay} alt="" aria-hidden="true" />
-              Power Ups Mode
+              Power Up / Curse Pack
             </h3>
           </header>
           <p className="muted">

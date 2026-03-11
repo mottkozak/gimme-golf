@@ -27,13 +27,13 @@ function clonePresetSettings(settings: GameModePresetSettings): GameModePresetSe
   }
 }
 
-function getBalancedPresetSettings(): GameModePresetSettings {
-  const balanced = GAME_MODE_PRESETS_BY_ID.balanced.settings
-  if (!balanced) {
-    throw new Error('Balanced preset settings are required for custom fallback.')
+function getCorePresetSettings(): GameModePresetSettings {
+  const core = GAME_MODE_PRESETS_BY_ID.casual.settings
+  if (!core) {
+    throw new Error('Core preset settings are required for custom fallback.')
   }
 
-  return clonePresetSettings(balanced)
+  return clonePresetSettings(core)
 }
 
 function applyPresetSettings(
@@ -85,7 +85,7 @@ export function applyGameModePreset(
 
     if (config.gameMode === 'powerUps') {
       return {
-        ...applyPresetSettings(config, 'custom', getBalancedPresetSettings()),
+        ...applyPresetSettings(config, 'custom', getCorePresetSettings()),
         selectedPresetId: 'custom',
         customModeName,
       }

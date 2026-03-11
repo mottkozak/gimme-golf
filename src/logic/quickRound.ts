@@ -1,4 +1,5 @@
 import type { RoundState } from '../types/game.ts'
+import { DEFAULT_GAME_MODE_PRESET_ID } from '../data/gameModePresets.ts'
 import { createFeaturedHolesRandomSeed } from './featuredHoles.ts'
 import { applyGameModePreset } from './gameModePresets.ts'
 import { applyRoundSetupDraft, resizeHoles } from './roundSetup.ts'
@@ -14,7 +15,7 @@ export function applyQuickRoundDefaults(roundState: RoundState): RoundState {
         randomSeed: createFeaturedHolesRandomSeed(),
       },
     },
-    'casual',
+    DEFAULT_GAME_MODE_PRESET_ID,
   )
 
   const quickRoundState = applyRoundSetupDraft(roundState, {
