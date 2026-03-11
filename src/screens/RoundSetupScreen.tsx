@@ -272,7 +272,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
     onNavigate('holePlay')
   }
 
-  const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] : null
+  const activePackInfo = activePackInfoId ? CARD_PACKS_BY_ID[activePackInfoId] ?? null : null
   const activePresetInfo = activePresetInfoId ? GAME_MODE_PRESETS_BY_ID[activePresetInfoId] : null
   const featuredHoles = roundState.holes.filter((hole) => hole.featuredHoleType !== null)
   const featuredHoleTargetCount = getFeaturedHoleTargetCount(
@@ -456,8 +456,8 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             Each golfer receives one random power-up per hole and can use it once before scoring.
           </p>
           <p className="muted">
-            Hole 1 is all positive power-ups. From hole 2 onward, current leader(s) receive
-            curse-style bad power-ups while everyone else gets positive power-ups.
+            Hole 1 gives everyone a positive power-up. From hole 2 onward, everyone still gets a
+            positive power-up and previous-hole winner(s) also receive one curse restriction.
           </p>
         </section>
       )}

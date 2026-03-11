@@ -7,7 +7,7 @@ import {
   createEmptyHoleCardsState,
 } from '../logic/dealCards.ts'
 import {
-  assignPowerUpsForHoleWithLeaderHandicap,
+  assignPowerUpsForHoleWithCurses,
   createEmptyHolePowerUpState,
 } from '../logic/powerUps.ts'
 import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
@@ -90,7 +90,7 @@ function HoleSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenP
           currentState.players,
           hole.holeNumber,
         )
-        holePowerUps[currentHoleIndex] = assignPowerUpsForHoleWithLeaderHandicap(
+        holePowerUps[currentHoleIndex] = assignPowerUpsForHoleWithCurses(
           currentState.players,
           hole.holeNumber,
           currentState.holeResults,

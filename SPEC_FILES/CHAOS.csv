@@ -1,0 +1,19 @@
+source,code_or_id,name,challenge_description,type,category,current_pack,difficulty,assigned_deck,selected_status,flags,notes
+mission_card,CHA-002,Longest Drive Bonus,Longest drive in play gets +2.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-003,Closest to Pin Bonus,"On par 3s, closest to the pin gets +2.",chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-004,Shared Pain,"If any player makes double bogey or worse, every other player gets +1.",chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-005,Sabotage Token,First player on the green assigns -1 to any opponent.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-007,Lone Wolf,Only one player may score mission points. First to complete locks everyone else out.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-011,Birdie Bounty,Any birdie is worth +2 extra game points.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-012,Bogey Tax,Any player making double bogey or worse gets -1 game point.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-013,Long Putt Special,Any made putt over 10 feet is worth +1 extra.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-015,Chaos Swap,Hole winner in game points may swap one point with any other player.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-018,Jackpot Hole,All mission rewards on this hole are worth +1 extra.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-021,Robin Hood,Current game leader loses 1 point if they fail; last place gains 1 if they succeed.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-026,Mercy Rule,Any player in last place gets +1 just for completing a Common card this hole.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-027,Group Project,"If everyone in the group makes bogey or better, everyone gets +1.",chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-028,Disaster Dividend,"If any player cards triple bogey or worse, all other players get +2.",chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-031,Bonus for Bravery,Any player completing a Risk card this hole gets +1 extra.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-033,Clean Card Bonus,Any player who completes the hole avoiding a penalty stroke gets +1 extra.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-036,Miss and Pay,Any player who 3-putts loses 1 game point.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-037,Kingmaker,The player with the best real score on the hole may give +1 to any other player.,chaos,,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.

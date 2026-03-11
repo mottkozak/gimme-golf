@@ -8,7 +8,7 @@ import type {
   PublicCardResolutionState,
   RoundState,
 } from '../types/game.ts'
-import { getAssignedPowerUp } from './powerUps.ts'
+import { getAssignedCurse, getAssignedPowerUp } from './powerUps.ts'
 import { getMomentumTierLabel, type MomentumTier } from './gameBalance.ts'
 import {
   buildHolePointBreakdownsByPlayerId,
@@ -37,6 +37,7 @@ export interface HoleRecapPlayerRow {
   playerId: string
   playerName: string
   powerUpTitle: string | null
+  curseTitle: string | null
   powerUpUsed: boolean | null
   selectedCardName: string | null
   selectedCardCode: string | null
@@ -594,6 +595,10 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
       roundState.holePowerUps[roundState.currentHoleIndex],
       player.id,
     )
+    const assignedCurse = getAssignedCurse(
+      roundState.holePowerUps[roundState.currentHoleIndex],
+      player.id,
+    )
     const powerUpUsed =
       roundState.holePowerUps[roundState.currentHoleIndex]?.usedPowerUpByPlayerId[player.id]
 
@@ -601,6 +606,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
       playerId: player.id,
       playerName: player.name,
       powerUpTitle: assignedPowerUp?.title ?? null,
+      curseTitle: assignedCurse?.title ?? null,
       powerUpUsed: typeof powerUpUsed === 'boolean' ? powerUpUsed : null,
       selectedCardName: pointBreakdown.selectedCardName,
       selectedCardCode: pointBreakdown.selectedCardCode,

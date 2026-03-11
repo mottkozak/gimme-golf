@@ -65,10 +65,10 @@ const CARD_PACK_FEATURES: GameModeFeatureDefinition[] = CARD_PACKS.map((pack) =>
 const POWER_UPS_FEATURE: GameModeFeatureDefinition = {
   id: 'powerUps',
   name: 'Power Ups',
-  shortDescription: 'Standalone mode with one random power-up per golfer per hole.',
+  shortDescription: 'Standalone mode with positive power-ups plus leader curses.',
   longDescription:
-    'Power Ups Mode replaces mission cards with one random power-up per golfer each hole. Starting on hole 2, the current leader receives a curse-style bad power-up while everyone else receives positive power-ups.',
-  includesLabel: 'Random per-hole power-ups',
+    'Power Ups Mode replaces mission cards with one random positive power-up per golfer each hole. Starting on hole 2, previous-hole winner(s) also receive one curse restriction for the next hole.',
+  includesLabel: 'Per-hole power-ups plus winner curses',
   bestForLabel: 'Fast rounds, variety, and casual groups',
   type: 'standalone',
   sortOrder: 99,
@@ -154,17 +154,14 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
     name: 'Party',
     shortDescription: 'High-variance social mode with extra chaos.',
     longDescription:
-      'Party mode increases fun swings with Chaos, Curse, Style, and Novelty content layered on top of Classic cards. Great for social rounds and banter.',
-    includesLabel: 'Classic, Chaos, Curse, Style, Novelty',
+      'Party mode increases social swings with Chaos and Props layered on top of Classic cards. Great for quick banter and hole-to-hole momentum changes.',
+    includesLabel: 'Classic, Chaos, Props',
     bestForLabel: 'Social rounds and friend groups',
-    includedFeatureIds: ['classic', 'chaos', 'curse', 'style', 'novelty'],
+    includedFeatureIds: ['classic', 'chaos', 'props'],
     sortOrder: 3,
     badgeLabel: null,
     isRecommended: false,
-    settings: createCardPresetSettings(
-      ['classic', 'chaos', 'curse', 'style', 'novelty'],
-      'high',
-    ),
+    settings: createCardPresetSettings(['classic', 'chaos', 'props'], 'high'),
   },
   {
     id: 'balanced',
@@ -183,9 +180,9 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
   {
     id: 'powerUps',
     name: 'Power Ups',
-    shortDescription: 'Standalone mode with random per-hole power-ups.',
+    shortDescription: 'Standalone mode with positive power-ups and curses.',
     longDescription:
-      'Power Ups is a separate mode that disables mission cards and card-pack scoring. Hole 1 gives everyone a positive power-up. From hole 2 onward, leaders are dealt bad curse power-ups while trailing players get positive power-ups.',
+      'Power Ups is a separate mode that disables mission cards and card-pack scoring. Hole 1 gives everyone a positive power-up. From hole 2 onward, everyone still gets a positive power-up and previous-hole winner(s) also receive one curse restriction.',
     includesLabel: 'Power Ups mode only',
     bestForLabel: 'Fast rounds and novelty-focused play',
     includedFeatureIds: ['powerUps'],
@@ -221,8 +218,6 @@ export const GAME_MODE_PRESETS: GameModePresetDefinition[] = [
       'classic',
       'chaos',
       'props',
-      'curse',
-      'style',
       'novelty',
       'hybrid',
     ],

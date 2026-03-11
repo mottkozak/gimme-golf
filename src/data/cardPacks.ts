@@ -87,50 +87,6 @@ export const CARD_PACKS: CardPackDefinition[] = [
     ],
   },
   {
-    id: 'curse',
-    name: 'Curse',
-    shortDescription: 'Restrictions and handicaps for tougher missions.',
-    longDescription:
-      'Personal challenge cards that add a constraint or annoying condition, then reward you for surviving the hole anyway.',
-    includesLabel: 'Curse personal challenge cards',
-    bestForLabel: 'Competitive groups and difficulty spikes',
-    isEnabledByDefault: true,
-    isPremium: true,
-    premiumTier: 'future-expansion',
-    category: 'expansion',
-    displayGroup: 'Expansion Packs',
-    sortOrder: 4,
-    iconKey: 'curse',
-    badgeLabel: 'Premium-ready',
-    includedCardTypes: ['curse'],
-    gameplayNotes: [
-      'Curse cards are personal restrictions, resolved manually.',
-      'Great for increasing pressure on stronger players.',
-    ],
-  },
-  {
-    id: 'style',
-    name: 'Style',
-    shortDescription: 'Social and theatrical challenge cards.',
-    longDescription:
-      'Personal cards focused on swagger, commitment, and fun presentation during the round. Best for casual or party-style play.',
-    includesLabel: 'Style personal challenge cards',
-    bestForLabel: 'Casual rounds and social groups',
-    isEnabledByDefault: true,
-    isPremium: true,
-    premiumTier: 'future-expansion',
-    category: 'expansion',
-    displayGroup: 'Expansion Packs',
-    sortOrder: 5,
-    iconKey: 'style',
-    badgeLabel: 'Premium-ready',
-    includedCardTypes: ['style'],
-    gameplayNotes: [
-      'Style cards are manual yes/no checks based on group agreement.',
-      'Best for casual, social rounds.',
-    ],
-  },
-  {
     id: 'novelty',
     name: 'Novelty',
     shortDescription: 'Unusual shot challenges and creative play.',
@@ -176,9 +132,9 @@ export const CARD_PACKS: CardPackDefinition[] = [
   },
 ]
 
-export const CARD_PACKS_BY_ID: Record<CardPackId, CardPackDefinition> = Object.fromEntries(
+export const CARD_PACKS_BY_ID: Partial<Record<CardPackId, CardPackDefinition>> = Object.fromEntries(
   CARD_PACKS.map((pack) => [pack.id, pack]),
-) as Record<CardPackId, CardPackDefinition>
+) as Partial<Record<CardPackId, CardPackDefinition>>
 
 export function getPackIdForCardType(cardType: CardType): CardPackId {
   switch (cardType) {
@@ -224,7 +180,9 @@ export function normalizeEnabledPackIds(candidatePackIds: readonly string[] | un
     return getDefaultEnabledPackIds()
   }
 
-  return nextPackIds.sort(
-    (packA, packB) => CARD_PACKS_BY_ID[packA].sortOrder - CARD_PACKS_BY_ID[packB].sortOrder,
-  )
+  return nextPackIds.sort((packA, packB) => {
+    const sortOrderA = CARD_PACKS_BY_ID[packA]?.sortOrder ?? Number.MAX_SAFE_INTEGER
+    const sortOrderB = CARD_PACKS_BY_ID[packB]?.sortOrder ?? Number.MAX_SAFE_INTEGER
+    return sortOrderA - sortOrderB
+  })
 }

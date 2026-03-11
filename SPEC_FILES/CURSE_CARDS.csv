@@ -1,0 +1,19 @@
+source,code_or_id,name,challenge_description,type,category,current_pack,difficulty,assigned_deck,selected_status,flags,notes
+power_up_card,CUR-001,No Driver,You cannot use driver on this hole.,curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-002,Three-Club Limit,Choose only three clubs for the hole. You may use putter in addition.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-003,Back Tee Penalty,You must tee off from one tee box behind the group.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-004,Bunker Tax,"If you hit a bunker, add one penalty stroke.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-005,Rough Is Fairway,"If you hit fairway off the tee, move your ball to first cut rough.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-006,No Tap-In,All putts must be played from at least one putter head behind the marker.,curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-007,Club Down,"On one full swing, you must take one less club than normal.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-008,Club Up,"On one full swing, you must take one extra club and swing smooth.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-009,Texas Holdem,"If your ball is on the fringe, you must putt instead of chip.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-010,No Practice Swings,No practice swings allowed on full shots this hole.,curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-011,No Yardage Help,No rangefinder or GPS allowed on this hole.,curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-012,Blind Commit,Choose your club before hearing anyone else discuss yardage.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-013,Ten-Second Decision,You must pick your club within 10 seconds when it is your turn.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-014,No Optional Relief,Optional free relief is disabled for you on this hole.,curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-015,One Ball Only,No provisional or second ball allowed this hole.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-016,No Hero Shot,"When in trouble, you must play the safe punch-out option.",curse,curse,power-ups,medium,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-017,Par Pressure,"If you make worse than par, add one penalty stroke.",curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.
+power_up_card,CUR-018,No Favorite Club,You cannot use your favorite club this hole.,curse,curse,power-ups,hard,Expansion 2 Power Up,selected,,Active curse card for Power Ups mode.

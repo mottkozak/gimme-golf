@@ -5,7 +5,11 @@ import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
 import { createEmptyHoleCardsState } from '../logic/dealCards.ts'
 import { prepareCurrentHoleForPlay } from '../logic/holeFlow.ts'
-import { getAssignedPowerUp, createEmptyHolePowerUpState } from '../logic/powerUps.ts'
+import {
+  getAssignedCurse,
+  getAssignedPowerUp,
+  createEmptyHolePowerUpState,
+} from '../logic/powerUps.ts'
 import { HOLE_TAG_OPTIONS, normalizePar, toggleHoleTag } from '../logic/roundSetup.ts'
 import { incrementHoleTapCount } from '../logic/uxMetrics.ts'
 import type { RoundState } from '../types/game.ts'
@@ -28,7 +32,10 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   })
   const hasAnyCardsDealt = hasAnyPersonalCardsDealt || currentHoleCards.publicCards.length > 0
   const hasAnyPowerUpsDealt = roundState.players.some((player) =>
-    Boolean(currentHolePowerUps?.assignedPowerUpIdByPlayerId[player.id]),
+    Boolean(
+      currentHolePowerUps?.assignedPowerUpIdByPlayerId[player.id] ??
+        currentHolePowerUps?.assignedCurseIdByPlayerId[player.id],
+    ),
   )
   const isHolePrepared = isPowerUpsMode ? hasAnyPowerUpsDealt : hasAnyCardsDealt
 
@@ -264,9 +271,10 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           <section className="stack-sm">
             {roundState.players.map((player) => {
               const powerUp = getAssignedPowerUp(currentHolePowerUps, player.id)
+              const curse = getAssignedCurse(currentHolePowerUps, player.id)
               const used = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
 
-              if (!powerUp) {
+              if (!powerUp && !curse) {
                 return (
                   <article key={player.id} className="panel stack-xs">
                     <strong>{player.name}</strong>
@@ -276,21 +284,40 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               }
 
               return (
-                <PowerUpCard
-                  key={player.id}
-                  playerName={player.name}
-                  powerUp={powerUp}
-                  used={used}
-                  onUse={() => markPowerUpUsed(player.id)}
-                />
+                <section key={player.id} className="stack-xs">
+                  {powerUp ? (
+                    <PowerUpCard
+                      playerName={player.name}
+                      powerUp={powerUp}
+                      used={used}
+                      onUse={() => markPowerUpUsed(player.id)}
+                    />
+                  ) : (
+                    <>
+                      <strong>{player.name}</strong>
+                      <p className="muted">No positive power-up assigned for this hole.</p>
+                    </>
+                  )}
+                  {curse && (
+                    <section className="panel inset stack-xs">
+                      <div className="row-between">
+                        <strong>Curse</strong>
+                        <span className="chip">{curse.category}</span>
+                      </div>
+                      <h3 className="power-up-title">{curse.title}</h3>
+                      <p>{curse.description}</p>
+                      <p className="muted">Restriction applies for this hole only.</p>
+                    </section>
+                  )}
+                </section>
               )
             })}
           </section>
 
           <section className="panel stack-xs">
             <p className="muted">
-              Declare your power-up before using it. Unused power-ups expire at the end of this
-              hole.
+              Declare your power-up before using it. Curses apply to previous-hole winner(s) and
+              expire at the end of this hole.
             </p>
             <button type="button" className="button-primary" onClick={continueToResults}>
               <img className="button-icon" src={ICONS.holeResults} alt="" aria-hidden="true" />

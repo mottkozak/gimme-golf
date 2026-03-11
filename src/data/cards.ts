@@ -6,7 +6,6 @@ import type {
   GimmeGolfCard,
 } from '../types/cards.ts'
 import {
-  EXPANSION_DECK_COUNTS,
   EXPANSION_PERSONAL_CARDS,
   EXPANSION_PUBLIC_CARDS,
 } from './expansionCards.ts'
@@ -19,8 +18,8 @@ export const TARGET_DECK_COUNTS = {
   risk: 40,
   chaos: 40,
   prop: 40,
-  curse: 15,
-  style: 15,
+  curse: 0,
+  style: 0,
   hybrid: 10,
   novelty: 30,
 } as const
@@ -755,11 +754,11 @@ const CHAOS_CARDS: PublicCard[] = [
     id: 'c-chaos-005',
     code: 'CHA-005',
     name: 'Sabotage Token',
-    description: 'First player to complete mission assigns -1 to any opponent.',
+    description: 'First player on the green assigns -1 to any opponent.',
     cardType: 'chaos',
     points: -1,
     eligiblePars: ALL_PARS,
-    rulesText: 'First mission finisher chooses one opponent to receive -1.',
+    rulesText: 'First player on the green chooses one opponent to receive -1.',
     interaction: {
       mode: 'leader_selects_target',
     },
@@ -1107,18 +1106,165 @@ const PROP_CARDS: PublicCard[] = [
   }),
 ]
 
-export const PERSONAL_CARDS: PersonalCard[] = [
+const RAW_PERSONAL_CARDS: PersonalCard[] = [
   ...COMMON_CARDS,
   ...SKILL_CARDS,
   ...RISK_CARDS,
   ...EXPANSION_PERSONAL_CARDS,
-]
+] as PersonalCard[]
 const EXPLICIT_EXPANSION_PUBLIC_CARDS: PublicCard[] = EXPANSION_PUBLIC_CARDS.map((card) => ({
   ...card,
   interaction: buildExplicitPublicInteraction(card),
 }))
 
-export const PUBLIC_CARDS: PublicCard[] = [...CHAOS_CARDS, ...PROP_CARDS, ...EXPLICIT_EXPANSION_PUBLIC_CARDS]
+const APP_REMOVED_CARD_CODES = new Set([
+  // Chaos removals
+  'CHA-001',
+  'CHA-006',
+  'CHA-008',
+  'CHA-010',
+  'CHA-016',
+  'CHA-017',
+  'CHA-020',
+  'CHA-023',
+  'CHA-024',
+  'CHA-025',
+  'CHA-029',
+  'CHA-030',
+  'CHA-032',
+  'CHA-034',
+  'CHA-038',
+  'CHA-040',
+  // Common removals
+  'COM-011',
+  'COM-012',
+  'COM-016',
+  'COM-017',
+  'COM-018',
+  'COM-020',
+  'COM-024',
+  'COM-025',
+  'COM-028',
+  'COM-029',
+  'COM-034',
+  'COM-035',
+  'COM-036',
+  'COM-037',
+  'COM-040',
+  // Hybrid removals
+  'HYB-003',
+  'HYB-009',
+  'HYB-010',
+  // Novelty removals
+  'NOV-005',
+  'NOV-007',
+  'NOV-008',
+  'NOV-009',
+  'NOV-010',
+  'NOV-011',
+  'NOV-012',
+  'NOV-014',
+  'NOV-019',
+  'NOV-020',
+  'NOV-021',
+  'NOV-022',
+  'NOV-026',
+  'NOV-028',
+  'NOV-030',
+  // Prop removals
+  'PRP-005',
+  'PRP-011',
+  'PRP-014',
+  'PRP-018',
+  'PRP-021',
+  'PRP-023',
+  'PRP-025',
+  'PRP-027',
+  'PRP-028',
+  'PRP-030',
+  'PRP-032',
+  'PRP-033',
+  'PRP-034',
+  'PRP-036',
+  'PRP-037',
+  'PRP-038',
+  'PRP-039',
+  'PRP-040',
+  // Risk removals
+  'RSK-001',
+  'RSK-006',
+  'RSK-009',
+  'RSK-011',
+  'RSK-016',
+  'RSK-017',
+  'RSK-018',
+  'RSK-023',
+  'RSK-024',
+  'RSK-026',
+  'RSK-027',
+  'RSK-028',
+  'RSK-029',
+  'RSK-030',
+  'RSK-031',
+  'RSK-032',
+  'RSK-033',
+  'RSK-034',
+  'RSK-035',
+  'RSK-036',
+  'RSK-037',
+  'RSK-038',
+  'RSK-039',
+  'RSK-040',
+  // Skill removals
+  'SKL-009',
+  'SKL-010',
+  'SKL-014',
+  'SKL-015',
+  'SKL-016',
+  'SKL-018',
+  'SKL-020',
+  'SKL-025',
+  'SKL-026',
+  'SKL-027',
+  'SKL-029',
+  'SKL-030',
+  'SKL-034',
+  'SKL-035',
+  'SKL-036',
+  'SKL-038',
+  'SKL-039',
+  'SKL-040',
+])
+
+function isCardRemovedFromApp(card: GimmeGolfCard): boolean {
+  if (APP_REMOVED_CARD_CODES.has(card.code)) {
+    return true
+  }
+
+  // Style and standalone mission-curse cards are removed from app pools.
+  if (card.cardType === 'style' || card.cardType === 'curse') {
+    return true
+  }
+
+  return false
+}
+
+const RAW_PUBLIC_CARDS: PublicCard[] = [
+  ...CHAOS_CARDS,
+  ...PROP_CARDS,
+  ...EXPLICIT_EXPANSION_PUBLIC_CARDS,
+]
+
+const RAW_ALL_CARDS: GimmeGolfCard[] = [...RAW_PERSONAL_CARDS, ...RAW_PUBLIC_CARDS]
+
+const FILTERED_ALL_CARDS: GimmeGolfCard[] = RAW_ALL_CARDS.filter((card) => !isCardRemovedFromApp(card))
+
+export const PUBLIC_CARDS: PublicCard[] = FILTERED_ALL_CARDS.filter(
+  (card): card is PublicCard => card.isPublic,
+)
+export const PERSONAL_CARDS: PersonalCard[] = FILTERED_ALL_CARDS.filter(
+  (card): card is PersonalCard => !card.isPublic,
+)
 export const ALL_CARDS: GimmeGolfCard[] = [...PERSONAL_CARDS, ...PUBLIC_CARDS]
 
 export const CARD_DECK: DeckCollection = {
@@ -1128,15 +1274,15 @@ export const CARD_DECK: DeckCollection = {
 }
 
 export const ACTUAL_DECK_COUNTS = {
-  common: COMMON_CARDS.length + EXPANSION_DECK_COUNTS.common,
-  skill: SKILL_CARDS.length + EXPANSION_DECK_COUNTS.skill,
-  risk: RISK_CARDS.length + EXPANSION_DECK_COUNTS.risk,
-  chaos: CHAOS_CARDS.length + EXPANSION_DECK_COUNTS.chaos,
-  prop: PROP_CARDS.length + EXPANSION_DECK_COUNTS.prop,
-  curse: EXPANSION_DECK_COUNTS.curse,
-  style: EXPANSION_DECK_COUNTS.style,
-  hybrid: EXPANSION_DECK_COUNTS.hybrid,
-  novelty: EXPANSION_DECK_COUNTS.novelty,
+  common: PERSONAL_CARDS.filter((card) => card.cardType === 'common').length,
+  skill: PERSONAL_CARDS.filter((card) => card.cardType === 'skill').length,
+  risk: PERSONAL_CARDS.filter((card) => card.cardType === 'risk').length,
+  chaos: PUBLIC_CARDS.filter((card) => card.cardType === 'chaos').length,
+  prop: PUBLIC_CARDS.filter((card) => card.cardType === 'prop').length,
+  curse: PERSONAL_CARDS.filter((card) => card.cardType === 'curse').length,
+  style: PERSONAL_CARDS.filter((card) => card.cardType === 'style').length,
+  hybrid: PERSONAL_CARDS.filter((card) => card.cardType === 'hybrid').length,
+  novelty: PERSONAL_CARDS.filter((card) => card.cardType === 'novelty').length,
 } as const
 
-export const CARD_DATA_VERSION = 'phase5-expansion-pack-270-v1'
+export const CARD_DATA_VERSION = 'phase5-expansion-pack-270-v4'

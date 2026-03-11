@@ -10,7 +10,7 @@ import {
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
-import { getAssignedPowerUp } from '../logic/powerUps.ts'
+import { getAssignedCurse, getAssignedPowerUp } from '../logic/powerUps.ts'
 import {
   incrementHoleTapCount,
   markHoleCompletedAt,
@@ -663,6 +663,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             (card) => card.id === selectedCardId,
           )
           const assignedPowerUp = getAssignedPowerUp(currentHolePowerUps, player.id)
+          const assignedCurse = getAssignedCurse(currentHolePowerUps, player.id)
           const powerUpUsed = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
           const strokes = currentResult.strokesByPlayerId[player.id]
           const quickStrokeOptions = buildQuickStrokeOptions(currentHole.par)
@@ -694,9 +695,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
               <p className="muted">
                 {isPowerUpsMode
-                  ? assignedPowerUp
-                    ? `${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
-                    : 'No power-up assigned for this golfer.'
+                  ? [
+                      assignedPowerUp
+                        ? `Power Up: ${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
+                        : 'Power Up: none',
+                      assignedCurse ? `Curse: ${assignedCurse.title}` : 'Curse: none',
+                    ].join(' | ')
                   : selectedCard
                     ? `${selectedCard.name} (${selectedCard.points} pts on success)`
                     : 'No personal card selected for this golfer.'}

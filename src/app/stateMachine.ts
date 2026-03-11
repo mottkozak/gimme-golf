@@ -45,7 +45,10 @@ function hasAnyAssignedPowerUpsForHole(roundState: RoundState, holeIndex: number
   const holePowerUpState = roundState.holePowerUps[holeIndex]
 
   return roundState.players.some((player) =>
-    Boolean(holePowerUpState?.assignedPowerUpIdByPlayerId[player.id]),
+    Boolean(
+      holePowerUpState?.assignedPowerUpIdByPlayerId[player.id] ??
+        holePowerUpState?.assignedCurseIdByPlayerId[player.id],
+    ),
   )
 }
 

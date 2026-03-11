@@ -93,6 +93,7 @@ export interface HoleCardsState {
 export interface HolePowerUpState {
   holeNumber: number
   assignedPowerUpIdByPlayerId: Record<string, string | null>
+  assignedCurseIdByPlayerId: Record<string, string | null>
   usedPowerUpByPlayerId: Record<string, boolean>
 }
 

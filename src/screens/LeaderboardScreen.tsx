@@ -150,6 +150,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               Power-ups used: {recapData.playerRows.filter((row) => row.powerUpUsed).length}
             </li>
           )}
+          {isPowerUpsMode && (
+            <li className="recap-why-list__item">
+              Curses assigned: {recapData.playerRows.filter((row) => row.curseTitle).length}
+            </li>
+          )}
         </ul>
       </section>
 
@@ -280,6 +285,9 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     <>
                       <p className="recap-card-line">
                         {row.powerUpTitle ? `Power Up: ${row.powerUpTitle}` : 'No Power Up assigned'}
+                      </p>
+                      <p className="recap-card-line">
+                        {row.curseTitle ? `Curse: ${row.curseTitle}` : 'No Curse assigned'}
                       </p>
                       <div className="recap-metrics recap-metrics--totals">
                         <span className={`recap-pill ${row.powerUpUsed ? 'badge-success' : 'status-pending'}`}>

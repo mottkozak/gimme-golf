@@ -63,25 +63,24 @@ mission_card,CHA-002,Longest Drive Bonus,Longest drive in play gets +2.,chaos,ch
 mission_card,CHA-003,Closest to Pin Bonus,"On par 3s, closest to the pin gets +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-004,Shared Pain,"If any player makes double bogey or worse, every other player gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-005,Sabotage Token,First player on the green assigns -1 to any opponent.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-008,Comeback Card,Player currently last in game score gets +1 bonus if they complete any mission.,chaos,chaos,neutral,Expansion 1 Party,selected,hard_verify,Selected for physical print run.
+mission_card,CHA-007,Lone Wolf,Only one player may score mission points. First to complete locks everyone else out.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-011,Birdie Bounty,Any birdie is worth +2 extra game points.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-012,Bogey Tax,Any player making double bogey or worse gets -1 game point.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-013,Long Putt Special,Any made putt over 10 feet is worth +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-014,Target Golf,Approach shots on green earn +1 extra if player also avoids a 3-putt.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-017,Team Trouble,"If one player finds water, every other player making bogey or better gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,course_specific,Selected for physical print run.
+mission_card,CHA-015,Chaos Swap,Hole winner in game points may swap one point with any other player.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-018,Jackpot Hole,All mission rewards on this hole are worth +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-021,Robin Hood,Current game leader loses 1 point if they fail; last place gains 1 if they succeed.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-026,Mercy Rule,Any player in last place gets +1 just for completing a Common card this hole.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-027,Group Project,"If everyone in the group makes bogey or better, everyone gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-028,Disaster Dividend,"If any player cards triple bogey or worse, all other players get +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-029,Clutch Multiplier,Any made putt over 12 feet is worth +2 instead of +1 bonus.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-030,Fairway Tax,Any player missing the fairway on a par 4 or 5 loses 1 game point unless their mission specifically involves recovery.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-031,Bonus for Bravery,Any player completing a Risk card this hole gets +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-033,Clean Card Bonus,Any player who completes the hole avoiding a penalty stroke gets +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-034,Shared Glory,"If every player gets bogey or better, everyone gets +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-036,Miss and Pay,Any player who 3-putts loses 1 game point.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-037,Kingmaker,The player with the best real score on the hole may give +1 to any other player.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-001,Somebody Birdies,Will anyone in the group make birdie?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-002,Longest Drive Leader,Pick who has the longest drive in play.,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-003,Green Hit (Player Pick),Pick any active player: will they hit the green in regulation?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-004,Clutch Putt (Player Pick),Pick any active player: will they make a putt over 8 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-005,Fairway Bet (Player Pick),Pick any active player: will they hit the fairway?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-006,Safe Hole,Will nobody in the group take a penalty stroke?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-007,Trouble Hole,Will at least one player hit bunker or water?,prop,props,neutral,Expansion 1 Party,selected,course_specific,Selected for physical print run.
 mission_card,PRP-008,Par 3 Dart,Will anyone finish inside 20 feet on the tee shot?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
@@ -89,12 +88,13 @@ mission_card,PRP-009,No Three-Putts,Will the group combine for zero 3-putts on t
 mission_card,PRP-010,Blow-Up Alert,Will any player make double bogey or worse?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-012,Bomb Watch,Will anyone drive it 260+ in play?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-015,Two-Putt Field,Will every player who reaches the green take two putts or fewer?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-017,Closest to Pin Pick,Pick who will finish closest on a par 3 after the tee shot.,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-019,Fairway Sweep,Will at least half the group hit the fairway?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-020,Green Sweep,Will at least half the group hit the green in regulation?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-022,Long Putt Drop,Will any player make a putt over 15 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-023,Clean Card,Will the entire group avoid penalty strokes this hole?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-025,All Safe,Will every player keep their tee shot in play?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-024,Lone Birdie,Will exactly one player make birdie?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-031,Par Train,Will at least two players make par or better?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-035,One-Putt Club,Will anyone one-putt from outside 6 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CUR-001,No Warm Blanket,You cannot use your favorite club on the hole.,curse,curse,hard,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CUR-002,Pressure Tee,You must tee off first regardless of honors.,curse,curse,medium,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CUR-003,No Practice Swing,No practice swings on any full shot this hole.,curse,curse,medium,Expansion 1 Party,selected,,Selected for physical print run.

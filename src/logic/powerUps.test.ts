@@ -2,11 +2,12 @@
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { BAD_POWER_UPS } from '../data/powerUps.ts'
+import { CURSE_CARDS, type PowerUp } from '../data/powerUps.ts'
 import type { HoleResultState, Player } from '../types/game.ts'
 import {
-  assignPowerUpsForHoleWithLeaderHandicap,
+  assignPowerUpsForHoleWithCurses,
   createEmptyHolePowerUpState,
+  getAssignedCurse,
   getAssignedPowerUp,
 } from './powerUps.ts'
 
@@ -30,22 +31,52 @@ function createHoleResult(
   }
 }
 
-test('power ups handicap: hole 1 assigns only positive power-ups', () => {
-  const holePowerUps = assignPowerUpsForHoleWithLeaderHandicap(
+function createTestPowerUp(id: string, title: string): PowerUp {
+  return {
+    id,
+    code: `PWR-T-${id.toUpperCase()}`,
+    title,
+    description: 'test',
+    cardKind: 'power_up',
+    category: 'test',
+    difficulty: 'medium',
+    isActive: true,
+    expansionPack: 'power-ups',
+    legendary: false,
+  }
+}
+
+function createTestCurse(id: string, title: string): PowerUp {
+  return {
+    id,
+    code: `CUR-T-${id.toUpperCase()}`,
+    title,
+    description: 'test',
+    cardKind: 'curse',
+    category: 'curse',
+    difficulty: 'medium',
+    isActive: true,
+    expansionPack: 'power-ups',
+  }
+}
+
+test('power ups mode: hole 1 assigns only positive power-ups', () => {
+  const holePowerUps = assignPowerUpsForHoleWithCurses(
     PLAYERS,
     1,
     [],
     0,
-    [{ id: 'good', title: 'Good', description: 'positive' }],
-    [{ id: 'bad', title: 'Bad', description: 'negative' }],
+    [createTestPowerUp('good', 'Good')],
+    [createTestCurse('curse', 'Curse')],
   )
 
   PLAYERS.forEach((player) => {
     assert.equal(holePowerUps.assignedPowerUpIdByPlayerId[player.id], 'good')
+    assert.equal(holePowerUps.assignedCurseIdByPlayerId[player.id], null)
   })
 })
 
-test('power ups handicap: current leader gets a bad power-up on later holes', () => {
+test('power ups mode: previous-hole winner also gets a curse on the next hole', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 3,
@@ -54,21 +85,25 @@ test('power ups handicap: current leader gets a bad power-up on later holes', ()
     }),
   ]
 
-  const holePowerUps = assignPowerUpsForHoleWithLeaderHandicap(
+  const holePowerUps = assignPowerUpsForHoleWithCurses(
     PLAYERS,
     2,
     holeResults,
     1,
-    [{ id: 'good', title: 'Good', description: 'positive' }],
-    [{ id: 'bad', title: 'Bad', description: 'negative' }],
+    [createTestPowerUp('good', 'Good')],
+    [createTestCurse('curse', 'Curse')],
   )
 
-  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, 'bad')
+  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, 'good')
   assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p2, 'good')
   assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p3, 'good')
+
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, null)
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
 })
 
-test('power ups handicap: tied leaders all receive bad power-ups', () => {
+test('power ups mode: tied previous-hole winners each receive a curse', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 4,
@@ -77,21 +112,21 @@ test('power ups handicap: tied leaders all receive bad power-ups', () => {
     }),
   ]
 
-  const holePowerUps = assignPowerUpsForHoleWithLeaderHandicap(
+  const holePowerUps = assignPowerUpsForHoleWithCurses(
     PLAYERS,
     2,
     holeResults,
     1,
-    [{ id: 'good', title: 'Good', description: 'positive' }],
-    [{ id: 'bad', title: 'Bad', description: 'negative' }],
+    [createTestPowerUp('good', 'Good')],
+    [createTestCurse('curse', 'Curse')],
   )
 
-  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p1, 'bad')
-  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p2, 'bad')
-  assert.equal(holePowerUps.assignedPowerUpIdByPlayerId.p3, 'good')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
 })
 
-test('power ups handicap: incomplete prior hole keeps assignments positive', () => {
+test('power ups mode: incomplete previous hole assigns no curses', () => {
   const holeResults: HoleResultState[] = [
     createHoleResult(1, {
       p1: 3,
@@ -100,28 +135,66 @@ test('power ups handicap: incomplete prior hole keeps assignments positive', () 
     }),
   ]
 
-  const holePowerUps = assignPowerUpsForHoleWithLeaderHandicap(
+  const holePowerUps = assignPowerUpsForHoleWithCurses(
     PLAYERS,
     2,
     holeResults,
     1,
-    [{ id: 'good', title: 'Good', description: 'positive' }],
-    [{ id: 'bad', title: 'Bad', description: 'negative' }],
+    [createTestPowerUp('good', 'Good')],
+    [createTestCurse('curse', 'Curse')],
   )
 
   PLAYERS.forEach((player) => {
     assert.equal(holePowerUps.assignedPowerUpIdByPlayerId[player.id], 'good')
+    assert.equal(holePowerUps.assignedCurseIdByPlayerId[player.id], null)
   })
 })
 
-test('getAssignedPowerUp resolves bad power-up ids', () => {
+test('power ups mode: curse assignment uses previous hole winners, not cumulative leaders', () => {
+  const holeResults: HoleResultState[] = [
+    createHoleResult(1, {
+      p1: 3,
+      p2: 4,
+      p3: 5,
+    }),
+    createHoleResult(2, {
+      p1: 6,
+      p2: 4,
+      p3: 5,
+    }),
+  ]
+
+  const holePowerUps = assignPowerUpsForHoleWithCurses(
+    PLAYERS,
+    3,
+    holeResults,
+    2,
+    [createTestPowerUp('good', 'Good')],
+    [createTestCurse('curse', 'Curse')],
+  )
+
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p1, null)
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p2, 'curse')
+  assert.equal(holePowerUps.assignedCurseIdByPlayerId.p3, null)
+})
+
+test('getAssignedPowerUp resolves assigned positive power-up ids', () => {
   const holePowerUpState = createEmptyHolePowerUpState(PLAYERS, 2)
-  const badPowerUpId = BAD_POWER_UPS[0]?.id
+  holePowerUpState.assignedPowerUpIdByPlayerId.p1 = 'pinball-wizard'
 
-  assert.ok(badPowerUpId)
-
-  holePowerUpState.assignedPowerUpIdByPlayerId.p1 = badPowerUpId
   const assignedPowerUp = getAssignedPowerUp(holePowerUpState, 'p1')
 
-  assert.equal(assignedPowerUp?.id, badPowerUpId)
+  assert.equal(assignedPowerUp?.id, 'pinball-wizard')
+})
+
+test('getAssignedCurse resolves assigned curse ids', () => {
+  const holePowerUpState = createEmptyHolePowerUpState(PLAYERS, 2)
+  const curseId = CURSE_CARDS[0]?.id
+
+  assert.ok(curseId)
+
+  holePowerUpState.assignedCurseIdByPlayerId.p1 = curseId
+  const assignedCurse = getAssignedCurse(holePowerUpState, 'p1')
+
+  assert.equal(assignedCurse?.id, curseId)
 })

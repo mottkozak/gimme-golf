@@ -171,6 +171,12 @@ function normalizeHolePowerUps(
           existing.assignedPowerUpIdByPlayerId?.[player.id] ?? null,
         ]),
       ),
+      assignedCurseIdByPlayerId: Object.fromEntries(
+        players.map((player) => [
+          player.id,
+          existing.assignedCurseIdByPlayerId?.[player.id] ?? null,
+        ]),
+      ),
       usedPowerUpByPlayerId: Object.fromEntries(
         players.map((player) => [
           player.id,

@@ -119,86 +119,86 @@ mission_card,SKL-037,Strong Three,"On a par 3, finish with par or better after h
 mission_card,SKL-038,Long Putt Touch,"From outside 20 feet, avoid both a 3-putt and leaving the second putt outside 3 feet.",skill,classic,medium,Cut / App-Only,cut,,over target count for physical pack
 mission_card,SKL-039,Trouble Conversion,"After finding rough, trees, or an awkward lie, still get the next shot onto a safe target.",skill,classic,medium,Cut / App-Only,cut,course_specific,too course-specific
 mission_card,SKL-040,Smart Birdie Look,Create a realistic birdie chance without taking on unnecessary danger.,skill,classic,medium,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-001,Score Doubler,"If any player makes birdie, they choose one opponent whose game points are canceled or doubled negatively.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,CHA-001,Score Doubler,"If any player makes birdie, they choose one opponent whose game points are canceled or doubled negatively.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,CHA-002,Longest Drive Bonus,Longest drive in play gets +2.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-003,Closest to Pin Bonus,"On par 3s, closest to the pin gets +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-004,Shared Pain,"If any player makes double bogey or worse, every other player gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-005,Sabotage Token,First player on the green assigns -1 to any opponent.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-006,Copycat,"If two players complete the same style of achievement, both get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-007,Lone Wolf,Only one player may score mission points. First to complete locks everyone else out.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-008,Comeback Card,Player currently last in game score gets +1 bonus if they complete any mission.,chaos,chaos,neutral,Expansion 1 Party,selected,hard_verify,Selected for physical print run.
-mission_card,CHA-009,Pressure Cooker,"If you miss a putt inside 4 feet, you cannot score mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-010,No Safe Plays,Layups do not count for mission rewards unless card explicitly allows it.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,CHA-006,Copycat,"If two players complete the same style of achievement, both get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-007,Lone Wolf,Only one player may score mission points. First to complete locks everyone else out.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-008,Comeback Card,Player currently last in game score gets +1 bonus if they complete any mission.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,CHA-009,Pressure Cooker,"If you miss a putt inside 4 feet, you cannot score mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-010,No Safe Plays,Layups do not count for mission rewards unless card explicitly allows it.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,CHA-011,Birdie Bounty,Any birdie is worth +2 extra game points.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-012,Bogey Tax,Any player making double bogey or worse gets -1 game point.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-013,Long Putt Special,Any made putt over 10 feet is worth +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-014,Target Golf,Approach shots on green earn +1 extra if player also avoids a 3-putt.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-015,Chaos Swap,Hole winner in game points may swap one point with any other player.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-016,Revenge Hole,Player with lowest game points on previous hole gets first tie-break rights on this hole.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,hard to verify
-mission_card,CHA-017,Team Trouble,"If one player finds water, every other player making bogey or better gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,course_specific,Selected for physical print run.
-mission_card,CHA-018,Jackpot Hole,All mission rewards on this hole are worth +1 extra.,chaos,chaos,neutral,Cut / App-Only,cut,,"Cut for overlap, complexity, or power-level trimming to reach 36-card pack."
-mission_card,CHA-019,Double Trouble,"If two or more players fail their missions, all successful players gain +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,"Cut for overlap, complexity, or power-level trimming to reach 36-card pack."
-mission_card,CHA-020,Rich Get Richer,Current game leader earns +1 if they complete any mission this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-021,Robin Hood,Current game leader loses 1 point if they fail; last place gains 1 if they succeed.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-022,Par 3 Panic,"On a par 3, anyone missing the green cannot earn mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-023,The Collector,Any player who completes their mission and makes par or better steals 1 point from the current leader.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,hard to verify
-mission_card,CHA-024,Heat Check,"If the same player succeeds on three holes in a row, they gain +2 extra here.",chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,hard to verify
-mission_card,CHA-025,Freeze Out,The previous hole's winner cannot earn bonus points from Chaos this hole.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,hard to verify
-mission_card,CHA-026,Mercy Rule,Any player in last place gets +1 just for completing a Common card this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,CHA-014,Target Golf,Approach shots on green earn +1 extra if player also avoids a 3-putt.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-015,Chaos Swap,Hole winner in game points may swap one point with any other player.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-016,Revenge Hole,Player with lowest game points on previous hole gets first tie-break rights on this hole.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,CHA-017,Team Trouble,"If one player finds water, every other player making bogey or better gets +1.",chaos,chaos,neutral,Cut / App-Only,cut,course_specific,Cut from final Party Pack 36.
+mission_card,CHA-018,Jackpot Hole,All mission rewards on this hole are worth +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-019,Double Trouble,"If two or more players fail their missions, all successful players gain +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-020,Rich Get Richer,Current game leader earns +1 if they complete any mission this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-021,Robin Hood,Current game leader loses 1 point if they fail; last place gains 1 if they succeed.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-022,Par 3 Panic,"On a par 3, anyone missing the green cannot earn mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-023,The Collector,Any player who completes their mission and makes par or better steals 1 point from the current leader.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,CHA-024,Heat Check,"If the same player succeeds on three holes in a row, they gain +2 extra here.",chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,CHA-025,Freeze Out,The previous hole's winner cannot earn bonus points from Chaos this hole.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,CHA-026,Mercy Rule,Any player in last place gets +1 just for completing a Common card this hole.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-027,Group Project,"If everyone in the group makes bogey or better, everyone gets +1.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-028,Disaster Dividend,"If any player cards triple bogey or worse, all other players get +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-029,Clutch Multiplier,Any made putt over 12 feet is worth +2 instead of +1 bonus.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-030,Fairway Tax,Any player missing the fairway on a par 4 or 5 loses 1 game point unless their mission specifically involves recovery.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-031,Bonus for Bravery,Any player completing a Risk card this hole gets +1 extra.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-032,Commoner's Relief,Any player completing a Common card this hole gets +1 extra if they are currently last in game points.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,hard to verify
+mission_card,CHA-029,Clutch Multiplier,Any made putt over 12 feet is worth +2 instead of +1 bonus.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-030,Fairway Tax,Any player missing the fairway on a par 4 or 5 loses 1 game point unless their mission specifically involves recovery.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-031,Bonus for Bravery,Any player completing a Risk card this hole gets +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,CHA-032,Commoner's Relief,Any player completing a Common card this hole gets +1 extra if they are currently last in game points.,chaos,chaos,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
 mission_card,CHA-033,Clean Card Bonus,Any player who completes the hole avoiding a penalty stroke gets +1 extra.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-034,Shared Glory,"If every player gets bogey or better, everyone gets +2.",chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-035,Only Pars Matter,"Any player making par or better earns +1 game point, even if they fail their mission.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,CHA-034,Shared Glory,"If every player gets bogey or better, everyone gets +2.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-035,Only Pars Matter,"Any player making par or better earns +1 game point, even if they fail their mission.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,CHA-036,Miss and Pay,Any player who 3-putts loses 1 game point.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CHA-037,Kingmaker,The player with the best real score on the hole may give +1 to any other player.,chaos,chaos,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,CHA-038,Tight Race,"If two or more players tie for best game points on the hole, all tied players get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,CHA-039,Fail Forward,Any player who fails their mission but still makes bogey or better gains +1.,chaos,chaos,neutral,Cut / App-Only,cut,,"Cut for overlap, complexity, or power-level trimming to reach 36-card pack."
-mission_card,CHA-040,Spotlight Hole,The current real-score leader cannot earn Chaos bonus points this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,CHA-038,Tight Race,"If two or more players tie for best game points on the hole, all tied players get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-039,Fail Forward,Any player who fails their mission but still makes bogey or better gains +1.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,CHA-040,Spotlight Hole,The current real-score leader cannot earn Chaos bonus points this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,PRP-001,Somebody Birdies,Will anyone in the group make birdie?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-002,Longest Drive Leader,Pick who has the longest drive in play.,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-003,Green Hit (Player Pick),Pick any active player: will they hit the green in regulation?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-004,Clutch Putt (Player Pick),Pick any active player: will they make a putt over 8 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-005,Fairway Bet (Player Pick),Pick any active player: will they hit the fairway?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-005,Fairway Bet (Player Pick),Pick any active player: will they hit the fairway?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,PRP-006,Safe Hole,Will nobody in the group take a penalty stroke?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-007,Trouble Hole,Will at least one player hit bunker or water?,prop,props,neutral,Expansion 1 Party,selected,course_specific,Selected for physical print run.
 mission_card,PRP-008,Par 3 Dart,Will anyone finish inside 20 feet on the tee shot?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-009,No Three-Putts,Will the group combine for zero 3-putts on this hole?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-010,Blow-Up Alert,Will any player make double bogey or worse?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-011,Scramble Save,Will anyone miss the green and still save par?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,PRP-011,Scramble Save,Will anyone miss the green and still save par?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,PRP-012,Bomb Watch,Will anyone drive it 260+ in play?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-013,Birdie Player Pick,Pick one player most likely to make birdie.,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-014,Bounce Back Call,Will the player with worst real score last hole make bogey or better here?,prop,props,neutral,Cut / App-Only,cut,hard_verify,hard to verify
+mission_card,PRP-013,Birdie Player Pick,Pick one player most likely to make birdie.,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-014,Bounce Back Call,Will the player with worst real score last hole make bogey or better here?,prop,props,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
 mission_card,PRP-015,Two-Putt Field,Will every player who reaches the green take two putts or fewer?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-016,Hero Shot,Will someone attempt an aggressive line/carry/recovery and pull it off?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-017,Closest to Pin Pick,Pick who will finish closest on a par 3 after the tee shot.,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-018,Chaos Prediction,Will the hole public Chaos card affect at least two players?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,PRP-016,Hero Shot,Will someone attempt an aggressive line/carry/recovery and pull it off?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-017,Closest to Pin Pick,Pick who will finish closest on a par 3 after the tee shot.,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-018,Chaos Prediction,Will the hole public Chaos card affect at least two players?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,PRP-019,Fairway Sweep,Will at least half the group hit the fairway?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,PRP-020,Green Sweep,Will at least half the group hit the green in regulation?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-021,Sand Visit,Will anyone visit a bunker and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,course_specific,too course-specific
+mission_card,PRP-021,Sand Visit,Will anyone visit a bunker and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,course_specific,Cut from final Party Pack 36.
 mission_card,PRP-022,Long Putt Drop,Will any player make a putt over 15 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-023,Clean Card,Will the entire group avoid penalty strokes this hole?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-024,Lone Birdie,Will exactly one player make birdie?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-025,All Safe,Will every player keep their tee shot in play?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-026,Blowup Pair,Will at least two players make double bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-027,Best Ball Brain,Pick the player most likely to record the lowest real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-028,Sand Save Alert,Will anyone get up-and-down from a bunker?,prop,props,neutral,Cut / App-Only,cut,course_specific,too course-specific
-mission_card,PRP-029,Hero or Zero,Will someone attempt a risky aggressive shot and pay for it with bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-030,Mission Monster,Will at least three players complete their personal mission this hole?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,PRP-023,Clean Card,Will the entire group avoid penalty strokes this hole?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-024,Lone Birdie,Will exactly one player make birdie?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-025,All Safe,Will every player keep their tee shot in play?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-026,Blowup Pair,Will at least two players make double bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-027,Best Ball Brain,Pick the player most likely to record the lowest real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-028,Sand Save Alert,Will anyone get up-and-down from a bunker?,prop,props,neutral,Cut / App-Only,cut,course_specific,Cut from final Party Pack 36.
+mission_card,PRP-029,Hero or Zero,Will someone attempt a risky aggressive shot and pay for it with bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-030,Mission Monster,Will at least three players complete their personal mission this hole?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,PRP-031,Par Train,Will at least two players make par or better?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
-mission_card,PRP-032,Risk Pays Off,Will any player complete a Risk card this hole?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-033,Clean Tee Shots,Will every player keep their first shot in play?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-034,Mission Fail Rate,Will more players fail their mission than complete it?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-035,One-Putt Club,Will anyone one-putt from outside 6 feet?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-036,Best Score Pick,Pick which player will post the best real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-037,Bounce-Back Hole,Will any player who made double bogey or worse on the last hole make par or better here?,prop,props,neutral,Cut / App-Only,cut,hard_verify,hard to verify
-mission_card,PRP-038,Green Parade,Will at least two players hit the green in regulation?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-039,Trouble and Recovery,Will anyone find trouble and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
-mission_card,PRP-040,Bonus Chaos,Will the Chaos card award or remove points from more than one player?,prop,props,neutral,Cut / App-Only,cut,,over target count for physical pack
+mission_card,PRP-032,Risk Pays Off,Will any player complete a Risk card this hole?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-033,Clean Tee Shots,Will every player keep their first shot in play?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-034,Mission Fail Rate,Will more players fail their mission than complete it?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-035,One-Putt Club,Will anyone one-putt from outside 6 feet?,prop,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-036,Best Score Pick,Pick which player will post the best real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-037,Bounce-Back Hole,Will any player who made double bogey or worse on the last hole make par or better here?,prop,props,neutral,Cut / App-Only,cut,hard_verify,Cut from final Party Pack 36.
+mission_card,PRP-038,Green Parade,Will at least two players hit the green in regulation?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-039,Trouble and Recovery,Will anyone find trouble and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
+mission_card,PRP-040,Bonus Chaos,Will the Chaos card award or remove points from more than one player?,prop,props,neutral,Cut / App-Only,cut,,Cut from final Party Pack 36.
 mission_card,CUR-001,No Warm Blanket,You cannot use your favorite club on the hole.,curse,curse,hard,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CUR-002,Pressure Tee,You must tee off first regardless of honors.,curse,curse,medium,Expansion 1 Party,selected,,Selected for physical print run.
 mission_card,CUR-003,No Practice Swing,No practice swings on any full shot this hole.,curse,curse,medium,Expansion 1 Party,selected,,Selected for physical print run.

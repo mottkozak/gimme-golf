@@ -1,0 +1,191 @@
+source,code_or_id,name,challenge_description,type,current_pack,difficulty,assigned_deck,selected_status,flags,notes
+mission_card,CHA-001,Score Doubler,"If any player makes birdie, they choose one opponent whose game points are canceled or doubled negatively.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-006,Copycat,"If two players complete the same style of achievement, both get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-008,Comeback Card,Player currently last in game score gets +1 bonus if they complete any mission.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-009,Pressure Cooker,"If you miss a putt inside 4 feet, you cannot score mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-010,No Safe Plays,Layups do not count for mission rewards unless card explicitly allows it.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-014,Target Golf,Approach shots on green earn +1 extra if player also avoids a 3-putt.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-016,Revenge Hole,Player with lowest game points on previous hole gets first tie-break rights on this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-017,Team Trouble,"If one player finds water, every other player making bogey or better gets +1.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-019,Double Trouble,"If two or more players fail their missions, all successful players gain +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-020,Rich Get Richer,Current game leader earns +1 if they complete any mission this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-022,Par 3 Panic,"On a par 3, anyone missing the green cannot earn mission points.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-023,The Collector,Any player who completes their mission and makes par or better steals 1 point from the current leader.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-024,Heat Check,"If the same player succeeds on three holes in a row, they gain +2 extra here.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-025,Freeze Out,The previous hole's winner cannot earn bonus points from Chaos this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-029,Clutch Multiplier,Any made putt over 12 feet is worth +2 instead of +1 bonus.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-030,Fairway Tax,Any player missing the fairway on a par 4 or 5 loses 1 game point unless their mission specifically involves recovery.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-032,Commoner's Relief,Any player completing a Common card this hole gets +1 extra if they are currently last in game points.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-034,Shared Glory,"If every player completes their personal mission, everyone gets +2.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-035,Only Pars Matter,"Any player making par or better earns +1 game point, even if they fail their mission.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-038,Tight Race,"If two or more players tie for best game points on the hole, all tied players get +1 extra.",chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-039,Fail Forward,Any player who fails their mission but still makes bogey or better gains +1.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CHA-040,Spotlight Hole,The current real-score leader cannot earn Chaos bonus points this hole.,chaos,chaos,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-007,No Sand Trouble,Avoid all bunkers on the hole.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-009,Safe Layup,"On a par 5, do not go for the green in two, then make bogey or better.",common,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-010,First-Putt Friend,Your first putt finishes within 3 feet of the hole.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-011,Straight Ball,No shot on the hole ends out of bounds or in a hazard.,common,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-012,Par 3 Survivor,"On a par 3, make bogey or better.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-016,Stress-Free Finish,Hole out with one putt from inside 6 feet.,common,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-017,No Big Number,Score double bogey or better.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-018,Respectable Hole,"Hit either the fairway or green, and make bogey or better.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-020,Safe Green,"Miss the green, but leave yourself a chip or putt from a makeable position.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-021,Advance and Survive,No full shot travels backward or sideways more than forward.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-024,Good Number,Make net par relative to your normal level for the hole.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-025,Fairway or Fringe,"Finish in either the fairway, fringe, or green with your approach sequence.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-028,Calm Hole,No penalty strokes and no putt longer than three attempts.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-029,Green-Side Safety,"If you miss the green, miss it green-side rather than short-sided or hazard-side.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-033,No Reload,Do not hit any shot that requires an immediate re-hit.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-034,Green-Side Exit,"If you miss the green, leave your ball in a playable green-side position.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-035,One Good Putt,"Make at least one confident, cleanly struck putt on the hole, regardless of length.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-036,No Cheap Mistakes,"No penalty strokes, no whiffs, and no missed tap-ins.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-037,Advance the Ball,Every full swing must clearly improve your position.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-038,Soft Landing,Finish any approach or chip on the green or fringe.,common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,COM-040,Routine Hole,"Play the hole without a rules debate, ball search longer than a minute, or a second-guess meltdown.",common,classic,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-001,No Warm Blanket,You cannot use your favorite club on the hole.,curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-002,Pressure Tee,You must tee off first regardless of honors.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-003,No Practice Swing,No practice swings on any full shot this hole.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-004,Putter Nerves,Any putt inside 5 feet must be holed cleanly with no gimmies.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-005,One-Club Down,You must club down by one on one full swing this hole.,curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-006,One-Club Up,"On one full swing this hole, you must take one extra club and choke down or swing easy.",curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-007,Silent Swing,"No talking through your setup, shot, or immediate result. Stay silent until the ball stops.",curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-008,Commit or Else,You must choose your club within 10 seconds once it is your turn.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-009,No Rangefinder,You may not use a rangefinder or GPS on the hole.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-010,Blind Confidence,You must pick your club before hearing anyone else's yardage or advice.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-011,Texas Hold'em,"If your ball is on the fringe, you must putt it rather than chip it.",curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-012,Fairway Wood Jail,"On one non-tee full swing, you must use a fairway wood or hybrid.",curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-013,No Hero Clause,"If you get into trouble, you must take the safe punch-out instead of a miracle shot.",curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-014,Bare Minimum,"You must make bogey or better or lose 1 game point. If you do, gain the listed reward.",curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-015,Clean Finish,"Once you reach the green, you may not leave any putt short of the hole.",curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-016,No Driver Day,You may not use driver on this hole.,curse,curse,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-017,No Free Drops,You may not take optional free relief on this hole (mandatory relief still applies).,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,CUR-018,One Ball Only,You may not hit a provisional or second ball on this hole.,curse,curse,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,HYB-002,Spoiler Alert,Beat at least one player who is ahead of you in game points on this hole's real score.,hybrid,hybrid,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,HYB-003,Chase Mode,"If the player before you completes their mission, complete yours too.",hybrid,hybrid,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,HYB-007,Outplay the Bombers,Have a shorter drive than someone else in the group but still tie or beat them on the hole.,hybrid,hybrid,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,HYB-009,Turn the Tables,"After losing to at least one player on the previous hole, beat them here.",hybrid,hybrid,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,HYB-010,Shadow Game,Match your own mission and also beat your previous hole's real score.,hybrid,hybrid,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-005,Knockdown Artist,"Declare one shot a low punch or knockdown before hitting it, then pull it off and finish bogey or better.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-006,Caddie's Choice,"Let another player choose your club for one shot, then finish double bogey or better.",novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-007,"No Glove, No Problem",Play the entire hole without a glove and finish bogey or better.,novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-008,Three-Quarter Specialist,"On one full swing, intentionally hit a three-quarter shot and keep it in play. Finish double bogey or better.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-009,Texas Wedge Life,Use putter from off the green at least once and finish bogey or better.,novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-010,Called Bank Shot,"Call that your chip or putt will use a slope, bank, or side contour, then execute it well enough to finish within 4 feet or hole it.",novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-011,Eyes on the Prize,"On one short putt inside 4 feet, hold your finish dramatically until the ball drops. Still make bogey or better.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-012,Hero Pose,"After one shot, hold a ridiculously confident pose until the ball lands. If the shot is acceptable and you finish double bogey or better, score it.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-014,Club Flip Approved,"After one clearly good shot, do a club twirl or flip. If the group agrees the shot earned it and you finish double bogey or better, score it.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-019,Putt With Personality,"Use an exaggeratedly serious pre-putt routine on one putt, then make it from 5 feet or more.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-020,The Listener,"You must take swing advice from another player on one shot. If you follow it and still finish double bogey or better, score it.",novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-021,Flighted Finish,Hit one intentionally flighted wedge or short iron and keep it under control. Finish bogey or better.,novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-022,Barely Legal,Use the strangest club in your bag for one reasonable shot and still finish double bogey or better.,novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-026,Lucky Bounce Believer,"Before one shot, call for a generous bounce or kick. If the ball gets one and you still finish double bogey or better, score it.",novelty,novelty,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-028,No Stepping Off,"On one full shot, once you address the ball, you may not step off. Hit it and keep it in play. Finish double bogey or better.",novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,NOV-030,Art Project,"Attempt one intentionally shaped or creative shot that the group agrees was legitimate. If you pull it off and finish double bogey or better, score it.",novelty,novelty,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-005,Fairway Bet (Player Pick),Pick any active player: will they hit the fairway?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-011,Scramble Save,Will anyone miss the green and still save par?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-013,Birdie Player Pick,Pick one player most likely to make birdie.,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-014,Bounce Back Call,Will the player with worst real score last hole make bogey or better here?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-016,Hero Shot,Will someone attempt an aggressive line/carry/recovery and pull it off?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-018,Chaos Prediction,Will the hole public Chaos card affect at least two players?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-021,Sand Visit,Will anyone visit a bunker and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-023,Clean Card,Will the entire group avoid penalty strokes this hole?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-025,All Safe,Will every player keep their tee shot in play?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-026,Blowup Pair,Will at least two players make double bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-027,Best Ball Brain,Pick the player most likely to record the lowest real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-028,Sand Save Alert,Will anyone get up-and-down from a bunker?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-029,Hero or Zero,Will someone attempt a risky aggressive shot and pay for it with bogey or worse?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-030,Mission Monster,Will at least three players complete their personal mission this hole?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-032,Risk Pays Off,Will any player complete a Risk card this hole?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-033,Clean Tee Shots,Will every player keep their first shot in play?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-034,Mission Fail Rate,Will more players fail their mission than complete it?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-036,Best Score Pick,Pick which player will post the best real score on the hole.,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-037,Bounce-Back Hole,Will any player who made double bogey or worse on the last hole make par or better here?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-038,Green Parade,Will at least two players hit the green in regulation?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-039,Trouble and Recovery,Will anyone find trouble and still make bogey or better?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,PRP-040,Bonus Chaos,Will the Chaos card award or remove points from more than one player?,prop,props,neutral,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-001,Bombs Away,Drive 260+ yards in play.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-003,Hero Recovery,"After a recovery shot from trouble, still make bogey or better.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-004,Go For It,"On a par 5, attempt to reach in two and finish double bogey or better.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-006,Sand Wizard,Hole out from bunker or finish bunker shot inside 6 feet and make the putt.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-009,No Fear,Carry water or a forced hazard and still make bogey or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-011,Putt for Glory,Make your first putt from outside 20 feet.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-012,Tight Window,Play through a narrow gap or intentional shape and finish without penalty.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-015,Three Great Shots,Hit three consecutive quality shots on the hole.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-016,Pressure Player,"After another player completes a mission, complete yours too.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-017,Risk It for the Biscuit,Use one extra-aggressive club choice and still make bogey or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-018,Clean Bird,"Make birdie with no bunker, no hazard, no penalty, and no lip-out misses.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-019,Attack the Flag,Hit an approach inside 8 feet.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-023,Hero Carry,Carry the most dangerous visible hazard on the hole and still make bogey or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-024,Bunker Assassin,Get out of a bunker and finish inside 4 feet.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-026,Full Send,Be longest in the group off the tee by a clear margin and stay in play.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-027,Bounce-Back Birdie,"After making bogey or worse on the previous hole, make birdie here.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-028,Zero Panic,Recover from a terrible lie and still make bogey or better without a penalty.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-029,Kill Shot,Have the best approach shot in the group and still convert par or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-030,No Regrets,"Take the aggressive line everyone says not to take, and succeed.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-031,Par 5 Predator,"On a par 5, put yourself in eagle-range by the time you reach the green.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-032,Pure Strike Bonus,Hit the best-feeling full swing of the group and still make bogey or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-033,Drain the Snake,Make a putt from 18 feet or longer for par or better.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-034,Recovery Rope,"From serious trouble, hit a recovery shot that both escapes danger and advances meaningfully.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-035,Short-Sided Savior,Get up-and-down after leaving yourself short-sided around the green.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-036,Carry Commander,"Choose to carry the trouble instead of laying back, and pull it off.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-037,One-Swing Turnaround,"After a poor shot, immediately hit a great one and still make bogey or better.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-038,Drivable Dream,"On a drivable hole, take the aggressive tee shot and finish double bogey or better.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-039,Laser Beam,Hit a full swing that finishes on your intended starting line and stays there.,risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,RSK-040,Pin Seeker,"On an approach where the safe miss is obvious, ignore it and attack the pin successfully.",risk,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-009,Fairway Sniper,Hit fairway and finish drive in the longest third of the group.,skill,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-010,Clutch Scramble,Get up-and-down from sand for par or bogey.,skill,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-012,Aggressive Line,Carry a hazard or cut a corner intentionally and make bogey or better.,skill,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-014,Pure Tee Ball,Drive 240+ yards in play.,skill,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-015,Smart Golf,Hit the correct miss side on approach and still make par or bogey.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-016,Bounce Back,"After a bad tee shot, still make bogey or better.",skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-018,Par 5 Pressure,"On a par 5, reach the green in regulation and avoid a 3-putt.",skill,classic,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-019,Dart Board,Hit any approach inside 15 feet.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-020,Fringe Genius,Miss the green but get down in two shots or fewer from just off the surface.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-023,Pin High,"Finish your approach pin-high, regardless of left/right miss.",skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-025,Scramble Touch,"Miss the green, chip inside 6 feet, then make the putt.",skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-026,Big Putt Energy,Make a putt between 8 and 15 feet.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-027,Fairway Pressure,Hit the fairway after another player already completed a drive-related mission.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-029,Drive for Show,Finish with one of the two longest drives in the group and still make bogey or better.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-030,Green Window,Hit the correct tier/section of the green as agreed by the group before the shot.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-034,Scramble to Par,Miss the green and still make par with a chip and putt sequence.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-035,Tee Shot Trust,Hit your tee ball in play and finish with one of the better two tee shots in the group.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-036,Controlled Aggression,Take an aggressive line on one shot and execute it without penalty or disaster.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-038,Long Putt Touch,"From outside 20 feet, avoid both a 3-putt and leaving the second putt outside 3 feet.",skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-039,Trouble Conversion,"After finding rough, trees, or an awkward lie, still get the next shot onto a safe target.",skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,SKL-040,Smart Birdie Look,Create a realistic birdie chance without taking on unnecessary danger.,skill,classic,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-001,Called Shot,"Before one shot, call your intended shape or landing zone. Pull it off to score.",style,style,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-002,Deadpan,No celebration allowed if you complete your mission. Break character and lose the bonus.,style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-003,Finger Guns,"After a made putt, celebrate like a complete dork.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-004,Commentary Mode,"Another player narrates your next shot. If you succeed, both earn +1.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-005,Walk-Off Energy,"After your final putt, do not watch it. Start walking immediately. It still has to drop.",style,style,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-006,Club Twirl Tax,"After your best full swing of the hole, you must club twirl. If the group agrees it was worthy, score it.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-007,PGA Interview,"After the hole, explain one shot as if you're in a post-round interview. Group votes if you committed to the bit.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-008,Villain Arc,"For one shot, openly announce an absurdly aggressive intention. If you pull it off, score it.",style,style,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-009,Caddie for a Moment,"Let another player choose your club for one shot. If the result is acceptable and you still make bogey or better, score it.",style,style,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-010,Respect the Line,"Before a putt, dramatically squat and read it like it contains the secrets of the universe. Then make it.",style,style,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-011,Signature Move,"Declare one shot your ""signature shot"" before hitting it. If the group agrees it looked pure, score it.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-012,Broadcaster Voice,"Call your own shot in a golf-commentator voice before hitting it. If successful, score it.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-013,Stone Face Par,Make par or better and react like it meant absolutely nothing.,style,style,medium,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-014,Cartoon Confidence,"On one putt outside 8 feet, confidently say ""that's in"" before the stroke. If it drops, score it.",style,style,hard,Cut / App-Only,cut,,Not in current physical packs.
+mission_card,STY-015,Group Approval,"Do one ridiculous but harmless celebration after completing your mission. If the group gives it a thumbs-up, score it.",style,style,easy,Cut / App-Only,cut,,Not in current physical packs.
+power_up_card,CUR-019,Putter Grip Lock,Any putt inside 5 feet must be holed cleanly with no gimmies.,curse,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,CUR-020,First Off The Tee,You must tee off first regardless of honors.,curse,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,CUR-021,Silent Setup,"No talking during your setup, swing, or immediate result.",curse,power-ups,easy,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,CUR-022,No Lie Improvement,Ball must be played exactly as it lies unless required by safety rules.,curse,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,CUR-023,Three-Putt Punisher,"If you three-putt, add one extra stroke penalty.",curse,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,CUR-024,No Cart Assist,No cart ride to your ball after tee shot; walk to your next shot.,curse,power-ups,easy,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-004,Gimme Magnet – Medium,Any putt inside 12 feet automatically counts as holed.,power_up,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-005,Gimme Magnet – Long,Any putt inside 18 feet automatically counts as holed.,power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-008,The Clutch,"If you miss a putt inside 4 feet, tap it again and it still counts as one stroke.",power_up,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-009,Laser Line,Walk the exact putt line once with your putter touching the ground.,power_up,power-ups,easy,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-013,Foot Wedge – Deluxe,Move your ball 3 club lengths to improve the lie.,power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-021,Power Drive – Rocket,"After your drive, move the ball 3 club lengths forward.",power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-024,Tree Friendly,"If your ball hits a tree but stays in play, move it 10 yards forward.",power_up,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-033,Time Warp,"Replay your previous shot, even if good. You must use the second result.",power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-037,The Glide,"If approach finishes within one club length of green, drop onto the surface.",power_up,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-038,The Walk-Off,"If your ball finishes within 2 feet of hole, the putt is automatic.",power_up,power-ups,medium,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-044,Gravity Off,Your ball cannot roll backward away from the hole on this hole.,power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-045,Tiger Vision,"Once this hole, place your ball exactly where your shot should have landed.",power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-046,The Crowd Goes Wild,"Others cheer before your shot; if they do, move your ball 10 yards forward.",power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-047,The Time Loop,Replay any one shot after seeing the result.,power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.
+power_up_card,PWR-049,Ice Rink,All bunker shots on this hole slide directly onto the green.,power_up,power-ups,hard,Cut / App-Only,cut,inactive,Inactive app card and not in current physical packs.

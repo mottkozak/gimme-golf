@@ -1,0 +1,3 @@
+code_or_id,name,challenge_description,type,difficulty,selected_status,assigned_deck
+equalizer,Equalizer,"If another player outdrives you by 30+ yards, move your ball 10 yards forward.",power_up:distance-boost,medium,selected,Expansion 2 Power Up
+cart-golf,Cart Golf,"If someone outdrives you on the hole, place your ball at their drive location.",power_up:distance-boost,medium,selected,Expansion 2 Power Up

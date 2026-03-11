@@ -1,0 +1,19 @@
+source,code_or_id,name,challenge_description,type,category,current_pack,difficulty,assigned_deck,selected_status,flags,notes
+mission_card,PRP-001,Somebody Birdies,Will anyone in the group make birdie?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-002,Longest Drive Leader,Pick who has the longest drive in play.,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-003,Green Hit (Player Pick),Pick any active player: will they hit the green in regulation?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-004,Clutch Putt (Player Pick),Pick any active player: will they make a putt over 8 feet?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-006,Safe Hole,Will nobody in the group take a penalty stroke?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-007,Trouble Hole,Will at least one player hit bunker or water?,prop,,props,neutral,Expansion 1 Party,selected,course_specific,Selected for physical print run.
+mission_card,PRP-008,Par 3 Dart,Will anyone finish inside 20 feet on the tee shot?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-009,No Three-Putts,Will the group combine for zero 3-putts on this hole?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-010,Blow-Up Alert,Will any player make double bogey or worse?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-012,Bomb Watch,Will anyone drive it 260+ in play?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-015,Two-Putt Field,Will every player who reaches the green take two putts or fewer?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-017,Closest to Pin Pick,Pick who will finish closest on a par 3 after the tee shot.,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-019,Fairway Sweep,Will at least half the group hit the fairway?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-020,Green Sweep,Will at least half the group hit the green in regulation?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-022,Long Putt Drop,Will any player make a putt over 15 feet?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-024,Lone Birdie,Will exactly one player make birdie?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-031,Par Train,Will at least two players make par or better?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.
+mission_card,PRP-035,One-Putt Club,Will anyone one-putt from outside 6 feet?,prop,,props,neutral,Expansion 1 Party,selected,,Selected for physical print run.

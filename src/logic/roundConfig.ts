@@ -7,6 +7,9 @@ import type { RoundConfig } from '../types/game.ts'
 
 function isPackIdUnlocked(packId: CardPackId): boolean {
   const pack = CARD_PACKS_BY_ID[packId]
+  if (!pack) {
+    return false
+  }
   return isPackUnlocked(pack.id, pack.premiumTier)
 }
 

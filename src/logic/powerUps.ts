@@ -1,4 +1,4 @@
-import { BAD_POWER_UPS, POWER_UPS, POWER_UPS_BY_ID, type PowerUp } from '../data/powerUps.ts'
+import { CURSE_CARDS, POWER_UPS, POWER_UPS_BY_ID, type PowerUp } from '../data/powerUps.ts'
 import type { HoleDefinition, HolePowerUpState, HoleResultState, Player } from '../types/game.ts'
 
 function shufflePowerUps(powerUps: PowerUp[]): PowerUp[] {
@@ -20,12 +20,9 @@ export function createEmptyHolePowerUpState(
 ): HolePowerUpState {
   return {
     holeNumber,
-    assignedPowerUpIdByPlayerId: Object.fromEntries(
-      players.map((player) => [player.id, null]),
-    ),
-    usedPowerUpByPlayerId: Object.fromEntries(
-      players.map((player) => [player.id, false]),
-    ),
+    assignedPowerUpIdByPlayerId: Object.fromEntries(players.map((player) => [player.id, null])),
+    assignedCurseIdByPlayerId: Object.fromEntries(players.map((player) => [player.id, null])),
+    usedPowerUpByPlayerId: Object.fromEntries(players.map((player) => [player.id, false])),
   }
 }
 
@@ -47,18 +44,15 @@ function assignPowerUpsFromPool(
 
   const shuffled = shufflePowerUps(powerUpPool)
   const assignedPowerUpIdByPlayerId: HolePowerUpState['assignedPowerUpIdByPlayerId'] = {}
-  const usedPowerUpByPlayerId: HolePowerUpState['usedPowerUpByPlayerId'] = {}
 
   players.forEach((player, playerIndex) => {
     const powerUp = shuffled[playerIndex % shuffled.length]
     assignedPowerUpIdByPlayerId[player.id] = powerUp?.id ?? null
-    usedPowerUpByPlayerId[player.id] = false
   })
 
   return {
-    holeNumber,
+    ...createEmptyHolePowerUpState(players, holeNumber),
     assignedPowerUpIdByPlayerId,
-    usedPowerUpByPlayerId,
   }
 }
 
@@ -69,39 +63,31 @@ function isHoleScoredForAllPlayers(
   return players.every((player) => typeof holeResult.strokesByPlayerId[player.id] === 'number')
 }
 
-export function getLeaderIdsBeforeHole(
+export function getPreviousHoleWinnerIds(
   players: Player[],
   holeResults: HoleResultState[],
   currentHoleIndex: number,
 ): string[] {
-  const totalsByPlayerId = Object.fromEntries(players.map((player) => [player.id, 0]))
-  let hasCompletedHole = false
-
-  for (let holeIndex = 0; holeIndex < currentHoleIndex; holeIndex += 1) {
-    const holeResult = holeResults[holeIndex]
-    if (!holeResult || !isHoleScoredForAllPlayers(holeResult, players)) {
-      continue
-    }
-
-    hasCompletedHole = true
-    players.forEach((player) => {
-      const strokes = holeResult.strokesByPlayerId[player.id]
-      if (typeof strokes === 'number') {
-        totalsByPlayerId[player.id] += strokes
-      }
-    })
+  if (currentHoleIndex <= 0) {
+    return []
   }
 
-  if (!hasCompletedHole) {
+  const previousHoleResult = holeResults[currentHoleIndex - 1]
+  if (!previousHoleResult || !isHoleScoredForAllPlayers(previousHoleResult, players)) {
     return []
   }
 
   const lowestScore = players.reduce((lowest, player) => {
-    return Math.min(lowest, totalsByPlayerId[player.id] ?? Number.POSITIVE_INFINITY)
+    const strokes = previousHoleResult.strokesByPlayerId[player.id]
+    return typeof strokes === 'number' ? Math.min(lowest, strokes) : lowest
   }, Number.POSITIVE_INFINITY)
 
+  if (!Number.isFinite(lowestScore)) {
+    return []
+  }
+
   return players
-    .filter((player) => totalsByPlayerId[player.id] === lowestScore)
+    .filter((player) => previousHoleResult.strokesByPlayerId[player.id] === lowestScore)
     .map((player) => player.id)
 }
 
@@ -113,50 +99,34 @@ export function assignPowerUpsForHole(
   return assignPowerUpsFromPool(players, holeNumber, powerUpPool)
 }
 
-export function assignPowerUpsForHoleWithLeaderHandicap(
+export function assignPowerUpsForHoleWithCurses(
   players: Player[],
   holeNumber: number,
   holeResults: HoleResultState[],
   currentHoleIndex: number,
-  goodPowerUpPool: PowerUp[] = POWER_UPS,
-  badPowerUpPool: PowerUp[] = BAD_POWER_UPS,
+  positivePowerUpPool: PowerUp[] = POWER_UPS,
+  cursePool: PowerUp[] = CURSE_CARDS,
 ): HolePowerUpState {
-  if (goodPowerUpPool.length === 0 && badPowerUpPool.length === 0) {
-    return createEmptyHolePowerUpState(players, holeNumber)
+  const positiveAssignments = assignPowerUpsFromPool(players, holeNumber, positivePowerUpPool)
+  const previousHoleWinnerIds = getPreviousHoleWinnerIds(players, holeResults, currentHoleIndex)
+
+  if (previousHoleWinnerIds.length === 0 || cursePool.length === 0) {
+    return positiveAssignments
   }
 
-  const leaderIds = new Set(getLeaderIdsBeforeHole(players, holeResults, currentHoleIndex))
-  const shuffledGoodPowerUps = goodPowerUpPool.length > 0 ? shufflePowerUps(goodPowerUpPool) : []
-  const shuffledBadPowerUps = badPowerUpPool.length > 0 ? shufflePowerUps(badPowerUpPool) : []
+  const shuffledCurses = shufflePowerUps(cursePool)
+  const assignedCurseIdByPlayerId: HolePowerUpState['assignedCurseIdByPlayerId'] = {
+    ...positiveAssignments.assignedCurseIdByPlayerId,
+  }
 
-  const assignedPowerUpIdByPlayerId: HolePowerUpState['assignedPowerUpIdByPlayerId'] = {}
-  const usedPowerUpByPlayerId: HolePowerUpState['usedPowerUpByPlayerId'] = {}
-
-  let goodIndex = 0
-  let badIndex = 0
-
-  players.forEach((player) => {
-    const assignBadPowerUp = leaderIds.has(player.id) && shuffledBadPowerUps.length > 0
-    const primaryPool = assignBadPowerUp ? shuffledBadPowerUps : shuffledGoodPowerUps
-    const fallbackPool = assignBadPowerUp ? shuffledGoodPowerUps : shuffledBadPowerUps
-    const sourcePool = primaryPool.length > 0 ? primaryPool : fallbackPool
-    const currentIndex = assignBadPowerUp ? badIndex : goodIndex
-    const assignedPowerUp = sourcePool[currentIndex % sourcePool.length]
-
-    if (assignBadPowerUp) {
-      badIndex += 1
-    } else {
-      goodIndex += 1
-    }
-
-    assignedPowerUpIdByPlayerId[player.id] = assignedPowerUp?.id ?? null
-    usedPowerUpByPlayerId[player.id] = false
+  previousHoleWinnerIds.forEach((playerId, playerIndex) => {
+    const curse = shuffledCurses[playerIndex % shuffledCurses.length]
+    assignedCurseIdByPlayerId[playerId] = curse?.id ?? null
   })
 
   return {
-    holeNumber,
-    assignedPowerUpIdByPlayerId,
-    usedPowerUpByPlayerId,
+    ...positiveAssignments,
+    assignedCurseIdByPlayerId,
   }
 }
 
@@ -174,4 +144,20 @@ export function getAssignedPowerUp(
   }
 
   return POWER_UPS_BY_ID[powerUpId] ?? null
+}
+
+export function getAssignedCurse(
+  holePowerUpState: HolePowerUpState | undefined,
+  playerId: string,
+): PowerUp | null {
+  if (!holePowerUpState) {
+    return null
+  }
+
+  const curseId = holePowerUpState.assignedCurseIdByPlayerId[playerId]
+  if (!curseId) {
+    return null
+  }
+
+  return POWER_UPS_BY_ID[curseId] ?? null
 }
