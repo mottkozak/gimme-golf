@@ -2,7 +2,6 @@ import { ICONS } from '../app/icons.ts'
 import { useEffect, useMemo, useState } from 'react'
 import AppIcon from '../components/AppIcon.tsx'
 import HoleActionPanel from '../components/HoleActionPanel.tsx'
-import HoleInfoCard from '../components/HoleInfoCard.tsx'
 import RecapBreakdownPanel from '../components/RecapBreakdownPanel.tsx'
 import RecapHeroCard from '../components/RecapHeroCard.tsx'
 import RecapLeaderboardCard from '../components/RecapLeaderboardCard.tsx'
@@ -14,9 +13,9 @@ import { trackSummaryScreenViewed } from '../logic/analytics.ts'
 import {
   buildHoleRecapData,
   formatWinnerSummary,
-  type HoleRecapPlayerRow,
 } from '../logic/holeRecap.ts'
 import { buildLeaderboardEntries, type LeaderboardSortMode } from '../logic/leaderboard.ts'
+import { formatPlayerNames } from '../logic/playerNames.ts'
 import type { ScreenProps } from './types.ts'
 
 function formatSignedPoints(value: number): string {
@@ -37,59 +36,6 @@ function formatDuration(ms: number | null): string {
   }
 
   return `${minutes}m ${seconds}s`
-}
-
-function getPointDriverTone(value: number): 'positive' | 'negative' | 'neutral' {
-  if (value > 0) {
-    return 'positive'
-  }
-
-  if (value < 0) {
-    return 'negative'
-  }
-
-  return 'neutral'
-}
-
-function getMissionStatusChipTone(status: HoleRecapPlayerRow['missionStatus']): 'success' | 'failed' | 'subtle' {
-  if (status === 'success') {
-    return 'success'
-  }
-
-  if (status === 'failed') {
-    return 'failed'
-  }
-
-  return 'subtle'
-}
-
-function formatMissionStatusLabel(status: HoleRecapPlayerRow['missionStatus']): string {
-  if (!status) {
-    return 'Pending'
-  }
-
-  return `${status.charAt(0).toUpperCase()}${status.slice(1)}`
-}
-
-function buildPointDrivers(row: HoleRecapPlayerRow): Array<{
-  label: string
-  value: number
-  tone: 'positive' | 'negative' | 'neutral'
-}> {
-  const drivers = [
-    { label: 'Card', value: row.baseCardPoints },
-    { label: 'Featured', value: row.featuredBonusPoints },
-    { label: 'Momentum', value: row.momentumBonusPoints },
-    { label: 'Public', value: row.publicBonusPoints },
-    { label: 'Rivalry', value: row.rivalryBonus },
-    { label: 'Balance Cap', value: row.balanceCapAdjustment },
-    { label: 'Hole Total', value: row.holePoints },
-  ]
-
-  return drivers.map((driver) => ({
-    ...driver,
-    tone: getPointDriverTone(driver.value),
-  }))
 }
 
 function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
@@ -159,6 +105,19 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const holeWinnerScore = recapData.gamePointHoleWinners.score
   const bestStrokeScore = recapData.bestRealScoreHoleWinners.score
   const roundLeaderScore = recapData.leaderSnapshot.adjusted.score
+  const isHolePointsTie = recapData.gamePointHoleWinners.playerNames.length > 1
+  const holeWinnerNames =
+    recapData.gamePointHoleWinners.playerNames.length > 0
+      ? formatPlayerNames(recapData.gamePointHoleWinners.playerNames)
+      : '-'
+  const bestMomentHeadline = isHolePointsTie
+    ? `${holeWinnerNames} tied the hole`
+    : recapData.highlightLine
+  const holeOutcomeLabel = isHolePointsTie ? 'Hole Leaders' : 'Hole Winner'
+  const holeOutcomeDetail =
+    typeof holeWinnerScore === 'number'
+      ? `${isHolePointsTie ? 'Tied at' : 'Won with'} ${formatSignedPoints(holeWinnerScore)} points`
+      : 'No score'
 
   const progressRound = () => {
     if (isLastHole) {
@@ -175,42 +134,30 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
   return (
     <section className="screen stack-sm hole-recap-screen hole-recap-screen--editorial">
-      <header className="screen__header recap-header recap-header--editorial">
-        <div className="row-between recap-header__title-row">
-          <div className="screen-title">
-            <AppIcon className="screen-title__icon" icon={ICONS.holeRecap} />
-            <h2>Hole {recapData.holeNumber} Recap</h2>
-          </div>
-          <div className="recap-header__chips">
-            <RecapStatusChip tone="count">
-              Hole {recapData.holeNumber} of {roundState.holes.length}
-            </RecapStatusChip>
-            <RecapStatusChip tone="subtle">Par {recapData.holePar}</RecapStatusChip>
-          </div>
+      <header className="screen__header recap-header">
+        <div className="screen-title">
+          <AppIcon className="screen-title__icon" icon={ICONS.holeRecap} />
+          <h2>Hole {recapData.holeNumber} Recap</h2>
         </div>
-        <p className="muted">A polished between-holes snapshot before the next tee.</p>
+        <p className="muted">
+          Hole {recapData.holeNumber} of {roundState.holes.length} • Par {recapData.holePar}
+        </p>
       </header>
 
       <RecapHeroCard
         label="Best Moment"
-        headline={recapData.highlightLine}
-        supportingText={`Hole winner: ${formatWinnerSummary(recapData.gamePointHoleWinners)}${
-          typeof holeWinnerScore === 'number' ? ` (${formatSignedPoints(holeWinnerScore)})` : ''
-        }`}
+        headline={bestMomentHeadline}
+        supportingText={isHolePointsTie
+          ? `Hole leaders: ${holeWinnerNames}${
+              typeof holeWinnerScore === 'number' ? ` (${formatSignedPoints(holeWinnerScore)})` : ''
+            }`
+          : `Hole winner: ${formatWinnerSummary(recapData.gamePointHoleWinners)}${
+              typeof holeWinnerScore === 'number' ? ` (${formatSignedPoints(holeWinnerScore)})` : ''
+            }`}
       />
 
-      <HoleInfoCard title="Scoring Clarity" className="recap-score-clarity">
-        <p className="muted">
-          Real = golf strokes only (never modified). Points = side-game outcomes. Adjusted = real
-          score minus game points.
-        </p>
-      </HoleInfoCard>
-
       <section className="panel recap-section recap-why-card stack-xs">
-        <div className="row-between">
-          <h3>Why This Hole Moved</h3>
-          <RecapStatusChip tone="quick">Quick Read</RecapStatusChip>
-        </div>
+        <h3>Hole Story</h3>
         <ul className="list-reset recap-why-list">
           {holeMovementRows.map((entry) => (
             <li key={entry.label} className="recap-why-list__item">
@@ -222,15 +169,12 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       </section>
 
       <section className="panel stack-xs recap-section recap-outcome-section">
-        <div className="row-between">
-          <h3>Hole Outcome</h3>
-          <RecapStatusChip tone="snapshot">Snapshot</RecapStatusChip>
-        </div>
+        <h3>Hole Outcome</h3>
         <div className="end-summary-grid recap-outcome-grid">
           <RecapSummaryStatCard
-            label="Hole Winner"
-            value={formatWinnerSummary(recapData.gamePointHoleWinners)}
-            detail={typeof holeWinnerScore === 'number' ? `${formatSignedPoints(holeWinnerScore)} points` : 'No score'}
+            label={holeOutcomeLabel}
+            value={holeWinnerNames}
+            detail={holeOutcomeDetail}
           />
           <RecapSummaryStatCard
             label="Best Stroke"
@@ -250,12 +194,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         rows={roundLeaderboardRows}
         sortMode={roundSortMode}
         onSortChange={setRoundSortMode}
-        badge={<RecapStatusChip tone="snapshot">#{roundLeaderboardRows[0]?.playerName ?? '-'}</RecapStatusChip>}
+        badge={null}
       />
 
       <HoleActionPanel
         summary={isLastHole ? 'Round wrap-up is ready' : `Hole ${recapData.holeNumber} saved`}
-        statusSlot={<RecapStatusChip tone="quick">Next Step</RecapStatusChip>}
         buttonLabel={isLastHole ? 'Finish Round' : `Set Up Hole ${recapData.holeNumber + 1}`}
         buttonIcon={<AppIcon className="button-icon" icon={isLastHole ? ICONS.leaderboard : ICONS.golfFlag} />}
         disabled={false}
@@ -270,12 +213,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       <RecapBreakdownPanel
         expanded={breakdownExpanded}
         onToggle={() => setBreakdownExpanded((current) => !current)}
-        summary="Open for detailed card, momentum, and public-card scoring."
-        statusChip={
-          <RecapStatusChip tone={breakdownExpanded ? 'expanded' : 'optional'}>
-            {breakdownExpanded ? 'Expanded' : 'Optional'}
-          </RecapStatusChip>
-        }
+        summary="Open for each golfer's mission card and result."
       />
 
       {breakdownExpanded && (
@@ -324,24 +262,29 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 }
                 playerName={row.playerName}
                 chips={
-                  <>
-                    {row.isHoleWinnerByPoints && <RecapStatusChip tone="winner">Winner</RecapStatusChip>}
-                    {!isPowerUpsMode && (
-                      <RecapStatusChip tone={getMissionStatusChipTone(row.missionStatus)}>
-                        {formatMissionStatusLabel(row.missionStatus)}
-                      </RecapStatusChip>
-                    )}
-                    {!isPowerUpsMode && (
-                      <RecapStatusChip>Card {formatSignedPoints(row.baseCardPoints)}</RecapStatusChip>
-                    )}
-                    {!isPowerUpsMode && (
-                      <RecapStatusChip>Momentum {formatSignedPoints(row.momentumBonusPoints)}</RecapStatusChip>
-                    )}
-                    {!isPowerUpsMode && (
-                      <RecapStatusChip>Public {formatSignedPoints(row.publicBonusPoints)}</RecapStatusChip>
-                    )}
-                    <RecapStatusChip tone="total">Total {formatSignedPoints(row.holePoints)}</RecapStatusChip>
-                  </>
+                  isPowerUpsMode ? (
+                    <>
+                      {row.isHoleWinnerByPoints && <RecapStatusChip tone="winner">Winner</RecapStatusChip>}
+                      <RecapStatusChip tone="total">Total {formatSignedPoints(row.holePoints)}</RecapStatusChip>
+                    </>
+                  ) : (
+                    <div className="stack-xs recap-player-outcome-card__summary-lines">
+                      <span className="recap-player-outcome-card__summary-line">
+                        {row.selectedCardCode && row.selectedCardName
+                          ? `${row.selectedCardCode} - ${row.selectedCardName}`
+                          : 'No personal card selected'}
+                      </span>
+                      <span
+                        className={`recap-player-outcome-card__summary-line ${
+                          row.missionStatus === 'success'
+                            ? 'recap-player-outcome-card__summary-line--success'
+                            : 'recap-player-outcome-card__summary-line--failed'
+                        }`}
+                      >
+                        {row.missionStatus === 'success' ? 'Completed' : 'Failed'}
+                      </span>
+                    </div>
+                  )
                 }
               >
                 <div className="stack-xs">
@@ -368,45 +311,14 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                   ) : (
                     <>
                       <p className="recap-card-line">
+                        Card:{' '}
                         {row.selectedCardCode && row.selectedCardName
-                          ? `${row.selectedCardCode}: ${row.selectedCardName}`
+                          ? `${row.selectedCardCode} - ${row.selectedCardName}`
                           : 'No personal card selected'}
                       </p>
-                      <section className="recap-driver-grid">
-                        {buildPointDrivers(row).map((driver) => (
-                          <div key={`${row.playerId}-${driver.label}`} className="recap-driver-cell">
-                            <span className="label">{driver.label}</span>
-                            <strong className={`recap-driver-value recap-driver-value--${driver.tone}`}>
-                              {formatSignedPoints(driver.value)}
-                            </strong>
-                          </div>
-                        ))}
-                      </section>
-                      <div className="recap-metrics recap-metrics--totals">
-                        {row.featuredBonusPoints !== 0 && (
-                          <RecapStatusChip tone="snapshot">
-                            Featured {formatSignedPoints(row.featuredBonusPoints)}
-                          </RecapStatusChip>
-                        )}
-                        {row.rivalryBonus !== 0 && (
-                          <RecapStatusChip tone="winner">
-                            Rivalry {formatSignedPoints(row.rivalryBonus)}
-                          </RecapStatusChip>
-                        )}
-                        {row.balanceCapAdjustment !== 0 && (
-                          <RecapStatusChip>
-                            Balance Cap {formatSignedPoints(row.balanceCapAdjustment)}
-                          </RecapStatusChip>
-                        )}
-                        {row.momentumTierJumped && (
-                          <RecapStatusChip tone="quick">
-                            {row.momentumBeforeLabel} to {row.momentumAfterLabel}
-                          </RecapStatusChip>
-                        )}
-                        <RecapStatusChip tone="total">
-                          Round Points {formatSignedPoints(row.totalGamePoints)}
-                        </RecapStatusChip>
-                      </div>
+                      <p className="recap-card-line">
+                        Result: {row.missionStatus === 'success' ? 'Completed' : 'Failed'}
+                      </p>
                     </>
                   )}
                 </div>

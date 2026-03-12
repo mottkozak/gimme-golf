@@ -2,6 +2,7 @@ import type { AwardId } from '../data/awards.ts'
 import type { RoundState } from '../types/game.ts'
 import { computeRoundAwards } from './awards.ts'
 import { buildLeaderboardEntries } from './leaderboard.ts'
+import { resolveLandingModeIdFromConfig, type LandingModeId } from './landingModes.ts'
 import { formatPlayerNames, getDisplayPlayerName } from './playerNames.ts'
 
 export const LOCAL_IDENTITY_STORAGE_KEY = 'gimme-golf-local-identity-v1'
@@ -36,6 +37,7 @@ export interface LocalRoundHistoryEntry {
   completedAtMs: number
   holeCount: number
   gameMode: RoundState['config']['gameMode']
+  modeId: LandingModeId
   winnerNames: string
   playerNames: string[]
   groupLabel: string
@@ -54,6 +56,7 @@ export interface LocalIdentityState {
   roundHistory: LocalRoundHistoryEntry[]
   recentPlayerNames: string[]
   playerProfiles: Record<string, LocalPlayerProfile>
+  favoriteCardCountsById: Record<string, number>
 }
 
 export interface PlayerIdentityBadge {
@@ -65,6 +68,7 @@ interface PersistedLocalIdentityState {
   roundHistory: LocalRoundHistoryEntry[]
   recentPlayerNames: string[]
   playerProfiles: Record<string, LocalPlayerProfile>
+  favoriteCardCountsById: Record<string, number>
 }
 
 function createEmptyLocalIdentityState(): LocalIdentityState {
@@ -72,6 +76,7 @@ function createEmptyLocalIdentityState(): LocalIdentityState {
     roundHistory: [],
     recentPlayerNames: [],
     playerProfiles: {},
+    favoriteCardCountsById: {},
   }
 }
 
@@ -236,10 +241,37 @@ function sanitizeRoundHistoryEntry(value: unknown): LocalRoundHistoryEntry | nul
     completedAtMs: Math.round(value.completedAtMs),
     holeCount: Math.max(1, Math.round(value.holeCount)),
     gameMode: value.gameMode,
+    modeId:
+      value.modeId === 'classic' ||
+      value.modeId === 'novelty' ||
+      value.modeId === 'chaos' ||
+      value.modeId === 'props' ||
+      value.modeId === 'powerUps'
+        ? value.modeId
+        : value.gameMode === 'powerUps'
+          ? 'powerUps'
+          : 'classic',
     winnerNames: value.winnerNames,
     playerNames: dedupeNames(playerNames),
     groupLabel: value.groupLabel,
   }
+}
+
+function sanitizeFavoriteCardCountsById(value: unknown): Record<string, number> {
+  if (!isRecord(value)) {
+    return {}
+  }
+
+  const sanitizedEntries: Array<[string, number]> = []
+  for (const [cardId, count] of Object.entries(value)) {
+    if (typeof cardId !== 'string' || typeof count !== 'number' || count <= 0) {
+      continue
+    }
+
+    sanitizedEntries.push([cardId, Math.round(count)])
+  }
+
+  return Object.fromEntries(sanitizedEntries)
 }
 
 function sanitizeAwardWinsById(value: unknown): Partial<Record<AwardId, number>> {
@@ -322,6 +354,7 @@ function sanitizeIdentityState(value: unknown): LocalIdentityState {
     roundHistory,
     recentPlayerNames,
     playerProfiles,
+    favoriteCardCountsById: sanitizeFavoriteCardCountsById(value.favoriteCardCountsById),
   }
 }
 
@@ -331,6 +364,7 @@ function saveLocalIdentityState(state: LocalIdentityState): void {
       roundHistory: state.roundHistory,
       recentPlayerNames: state.recentPlayerNames,
       playerProfiles: state.playerProfiles,
+      favoriteCardCountsById: state.favoriteCardCountsById,
     }
 
     localStorage.setItem(LOCAL_IDENTITY_STORAGE_KEY, JSON.stringify(persistedState))
@@ -472,12 +506,33 @@ export function recordCompletedRoundIdentity(roundState: RoundState): LocalIdent
       completedAtMs,
       holeCount: getRoundHoleCount(roundState),
       gameMode: roundState.config.gameMode,
+      modeId: resolveLandingModeIdFromConfig(roundState.config),
       winnerNames,
       playerNames,
       groupLabel: createGroupLabel(playerNames),
     },
     ...currentState.roundHistory.filter((entry) => entry.roundSignature !== roundSignature),
   ].slice(0, MAX_ROUND_HISTORY_ITEMS)
+
+  const nextFavoriteCardCountsById: Record<string, number> = {
+    ...currentState.favoriteCardCountsById,
+  }
+
+  for (const holeCardState of roundState.holeCards) {
+    for (const selectedCardId of Object.values(holeCardState.selectedCardIdByPlayerId)) {
+      if (!selectedCardId) {
+        continue
+      }
+
+      nextFavoriteCardCountsById[selectedCardId] =
+        (nextFavoriteCardCountsById[selectedCardId] ?? 0) + 1
+    }
+
+    for (const publicCard of holeCardState.publicCards) {
+      nextFavoriteCardCountsById[publicCard.id] =
+        (nextFavoriteCardCountsById[publicCard.id] ?? 0) + 1
+    }
+  }
 
   const nextRecentPlayerNames = dedupeNames([
     ...playerNames,
@@ -488,6 +543,7 @@ export function recordCompletedRoundIdentity(roundState: RoundState): LocalIdent
     roundHistory: nextRoundHistory,
     recentPlayerNames: nextRecentPlayerNames,
     playerProfiles: nextProfiles,
+    favoriteCardCountsById: nextFavoriteCardCountsById,
   }
 
   saveLocalIdentityState(nextState)

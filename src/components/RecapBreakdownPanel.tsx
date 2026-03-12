@@ -4,7 +4,7 @@ interface RecapBreakdownPanelProps {
   expanded: boolean
   onToggle: () => void
   summary: string
-  statusChip: ReactNode
+  statusChip?: ReactNode
 }
 
 function RecapBreakdownPanel({ expanded, onToggle, summary, statusChip }: RecapBreakdownPanelProps) {
@@ -12,7 +12,7 @@ function RecapBreakdownPanel({ expanded, onToggle, summary, statusChip }: RecapB
     <section className="panel stack-xs recap-breakdown-panel">
       <div className="row-between">
         <h3>Breakdown</h3>
-        {statusChip}
+        {statusChip ?? null}
       </div>
       <p className="muted">{summary}</p>
       <button

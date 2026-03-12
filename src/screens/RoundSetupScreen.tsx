@@ -304,6 +304,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         <div className="mode-config-mode-card__title">
           <AppIcon className="mode-config-mode-card__icon" icon={activeMode.icon} />
           <strong>{activeMode.name}</strong>
+          {activeMode.isPremium && <span className="chip mode-config-mode-card__premium-chip">Premium</span>}
         </div>
         <p className="muted">{activeMode.description}</p>
       </section>

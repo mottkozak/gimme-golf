@@ -30,7 +30,9 @@ const SAVED_ROUND_UNAVAILABLE_WARNING =
   'Saved round was unavailable. Start a new round to continue.'
 
 const SCREEN_TRANSITIONS: Record<AppScreen, ReadonlySet<AppScreen>> = {
-  home: new Set(['home', 'roundSetup', 'holePlay']),
+  home: new Set(['home', 'profile', 'settings', 'roundSetup', 'holePlay']),
+  profile: new Set(['home', 'profile', 'settings']),
+  settings: new Set(['home', 'profile', 'settings']),
   roundSetup: new Set(['home', 'roundSetup', 'holePlay']),
   holePlay: new Set(['home', 'holePlay', 'holeResults']),
   holeResults: new Set(['home', 'holeResults', 'leaderboard']),

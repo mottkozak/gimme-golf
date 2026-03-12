@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
 import BadgeChip from '../components/BadgeChip.tsx'
@@ -6,8 +6,6 @@ import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import GolferScoreModule from '../components/GolferScoreModule.tsx'
 import HoleActionPanel from '../components/HoleActionPanel.tsx'
 import HoleInfoCard from '../components/HoleInfoCard.tsx'
-import HoleResultsProgressBoard, { type HoleResultsProgressItem } from '../components/HoleResultsProgressBoard.tsx'
-import MissionResultCard from '../components/MissionResultCard.tsx'
 import MissionStatusPill from '../components/MissionStatusPill.tsx'
 import PublicCardResolutionPanel from '../components/PublicCardResolutionPanel.tsx'
 import ScoreButtonGroup from '../components/ScoreButtonGroup.tsx'
@@ -33,13 +31,11 @@ import {
   markPublicResolutionCompletedAt,
   markPublicResolutionStartedAt,
 } from '../logic/uxMetrics.ts'
-import { isResolvedMissionStatus } from '../logic/missionStatus.ts'
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type { MissionStatus, PublicCardResolutionState, RoundState } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
 
-const QUICK_STROKE_OFFSETS = [-2, -1, 0, 1, 2, 3] as const
-const HIGH_STROKE_OPTIONS = [7, 8, 9, 10, 12] as const
+const QUICK_STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
@@ -55,22 +51,6 @@ function parseStrokeInput(rawValue: string): number | null {
   }
 
   return Math.round(parsed)
-}
-
-function buildQuickStrokeOptions(par: number): number[] {
-  return Array.from(
-    new Set(
-      QUICK_STROKE_OFFSETS
-        .map((offset) => par + offset)
-        .filter((strokeOption) => strokeOption > 0),
-    ),
-  )
-}
-
-function buildHighStrokeOptions(
-  quickStrokeOptions: number[],
-): number[] {
-  return HIGH_STROKE_OPTIONS.filter((strokeOption) => !quickStrokeOptions.includes(strokeOption))
 }
 
 function sortPlayersByGamePoints(
@@ -118,11 +98,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     playerName: string
     card: PersonalCard
   } | null>(null)
-  const [missionSectionExpanded, setMissionSectionExpanded] = useState(false)
   const [publicSectionExpanded, setPublicSectionExpanded] = useState(false)
   const [manualStrokeInputByPlayerId, setManualStrokeInputByPlayerId] = useState<
     Record<string, boolean>
   >({})
+  const strokesSectionRef = useRef<HTMLElement | null>(null)
+  const challengeSectionRef = useRef<HTMLDivElement | null>(null)
+  const publicSectionRef = useRef<HTMLElement | null>(null)
 
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
@@ -150,6 +132,17 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
+
+  const scrollToSection = (element: HTMLElement | null) => {
+    if (!element) {
+      return
+    }
+
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
 
   const getSuggestedTargetPlayerId = (pointsDelta: number): string | null => {
     const fallbackPlayerId = roundState.players[0]?.id ?? null
@@ -448,12 +441,8 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     nextStrokes: number | null,
     inputMethod:
       | 'quick_button'
-      | 'high_button'
-      | 'adjust_minus'
-      | 'adjust_plus'
       | 'quick_9_plus'
-      | 'manual_input'
-      | 'manual_reset' = 'manual_input',
+      | 'manual_input' = 'manual_input',
   ) => {
     trackScoreEntered(roundState, currentHole.holeNumber, playerId, nextStrokes, inputMethod)
     const nextStrokesByPlayerId = {
@@ -464,11 +453,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       (player) => typeof nextStrokesByPlayerId[player.id] === 'number',
     )
     if (nextStrokesStepComplete) {
-      if (hasMissionStep && !missionStepComplete && !missionSectionExpanded) {
-        setMissionSectionExpanded(true)
-      }
-
-      if (!hasMissionStep && hasPublicStep && !publicStepComplete && !publicSectionExpanded) {
+      if (hasPublicStep && !publicStepComplete && !publicSectionExpanded) {
         setPublicSectionExpanded(true)
       }
     }
@@ -493,15 +478,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   }
 
   const setMissionStatus = (playerId: string, status: Extract<MissionStatus, 'success' | 'failed'>) => {
-    const nextMissionStatusByPlayerId = {
-      ...currentResult.missionStatusByPlayerId,
-      [playerId]: status,
-    }
-    const nextMissionStepComplete = missionRequiredPlayerIds.every((requiredPlayerId) =>
-      isResolvedMissionStatus(nextMissionStatusByPlayerId[requiredPlayerId]),
-    )
-
-    if (nextMissionStepComplete && hasPublicStep && !publicStepComplete && !publicSectionExpanded) {
+    if (hasPublicStep && strokesStepComplete && !publicStepComplete && !publicSectionExpanded) {
       setPublicSectionExpanded(true)
     }
 
@@ -521,22 +498,6 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         ...currentState,
         holeResults,
       }
-    })
-  }
-
-  const onToggleMissionSection = () => {
-    setMissionSectionExpanded((current) => {
-      const nextExpanded = !current
-
-      onUpdateRoundState((currentState) => ({
-        ...currentState,
-        holeUxMetrics: incrementHoleTapCount(
-          currentState.holeUxMetrics,
-          currentState.currentHoleIndex,
-        ),
-      }))
-
-      return nextExpanded
     })
   }
 
@@ -563,21 +524,30 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     })
   }
 
+  const missionRequiredPlayerIds = roundState.players
+    .filter((player) => {
+      const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
+      return dealtCards.length > 0
+    })
+    .map((player) => player.id)
+  const hasMissionStep = !isPowerUpsMode && missionRequiredPlayerIds.length > 0
+  const effectiveMissionStatusByPlayerId: Record<string, Extract<MissionStatus, 'success' | 'failed'>> =
+    Object.fromEntries(
+      roundState.players.map((player) => [
+        player.id,
+        currentResult.missionStatusByPlayerId[player.id] === 'success' ? 'success' : 'failed',
+      ]),
+    )
+  const firstChallengePlayerId = hasMissionStep
+    ? roundState.players.find((player) => {
+        const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
+        return typeof selectedCardId === 'string' && selectedCardId.length > 0
+      })?.id ?? null
+    : null
+
   const isHoleDataReady = roundState.players.every((player) => {
     const strokes = currentResult.strokesByPlayerId[player.id]
-    if (typeof strokes !== 'number') {
-      return false
-    }
-
-    if (isPowerUpsMode) {
-      return true
-    }
-
-    const missionStatus = currentResult.missionStatusByPlayerId[player.id]
-    const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
-    const requiresMissionResolution = dealtCards.length > 0
-
-    return !requiresMissionResolution || isResolvedMissionStatus(missionStatus)
+    return typeof strokes === 'number'
   })
 
   const arePublicCardsResolved = currentHoleCards.publicCards.every((card) =>
@@ -591,25 +561,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     typeof currentResult.strokesByPlayerId[player.id] === 'number',
   ).length
 
-  const missionRequiredPlayerIds = roundState.players
-    .filter((player) => {
-      const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
-      return dealtCards.length > 0
-    })
-    .map((player) => player.id)
-  const missionResolvedCount = missionRequiredPlayerIds.filter((playerId) =>
-    isResolvedMissionStatus(currentResult.missionStatusByPlayerId[playerId]),
-  ).length
-  const hasMissionStep = !isPowerUpsMode && missionRequiredPlayerIds.length > 0
-
   const resolvedPublicCardsCount = currentHoleCards.publicCards.filter((card) =>
     isPublicCardResolutionComplete(card, currentResolutions[card.id], playerIds),
   ).length
   const hasPublicStep = !isPowerUpsMode && currentHoleCards.publicCards.length > 0
 
   const strokesStepComplete = strokesCompletedCount === roundState.players.length
-  const missionStepComplete =
-    !hasMissionStep || missionResolvedCount === missionRequiredPlayerIds.length
+  const missionStepComplete = !hasMissionStep || strokesStepComplete
   const publicStepComplete =
     !hasPublicStep || resolvedPublicCardsCount === currentHoleCards.publicCards.length
 
@@ -619,38 +577,8 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     (hasMissionStep && missionStepComplete ? 1 : 0) +
     (hasPublicStep && publicStepComplete ? 1 : 0)
 
-  const missionCanExpand = strokesStepComplete
-  const publicCanExpand = strokesStepComplete && missionStepComplete
-
-  const missionStepNumber = 2
-  const publicStepNumber = hasMissionStep ? 3 : 2
-
-  const stepItems: HoleResultsProgressItem[] = [
-    {
-      id: 'strokes',
-      label: 'Strokes',
-      complete: strokesStepComplete,
-      progressText: `${strokesCompletedCount}/${roundState.players.length} entered`,
-    },
-  ]
-
-  if (hasMissionStep) {
-    stepItems.push({
-      id: 'challenge',
-      label: 'Challenge',
-      complete: missionStepComplete,
-      progressText: `${missionResolvedCount}/${missionRequiredPlayerIds.length} resolved`,
-    })
-  }
-
-  if (hasPublicStep) {
-    stepItems.push({
-      id: 'public-card',
-      label: 'Public Card',
-      complete: publicStepComplete,
-      progressText: `${resolvedPublicCardsCount}/${currentHoleCards.publicCards.length} resolved`,
-    })
-  }
+  const publicCanExpand = strokesStepComplete
+  const publicStepNumber = 2
 
   const continueToRecap = () => {
     if (!canContinueToRecap) {
@@ -662,7 +590,20 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
     onUpdateRoundState((currentState) => {
       const holeIndex = currentState.currentHoleIndex
+      const holeCardState = currentState.holeCards[holeIndex]
+      const holeResultState = currentState.holeResults[holeIndex]
+      const holeResults = [...currentState.holeResults]
       const hasPublicCards = currentState.holeCards[holeIndex].publicCards.length > 0
+      const nextMissionStatusByPlayerId = {
+        ...holeResultState.missionStatusByPlayerId,
+      }
+
+      for (const player of currentState.players) {
+        const dealtCards = holeCardState.dealtPersonalCardsByPlayerId[player.id] ?? []
+        if (dealtCards.length > 0 && nextMissionStatusByPlayerId[player.id] !== 'success') {
+          nextMissionStatusByPlayerId[player.id] = 'failed'
+        }
+      }
 
       let nextHoleUxMetrics = incrementHoleTapCount(currentState.holeUxMetrics, holeIndex)
       if (!isPowerUpsMode && hasPublicCards) {
@@ -670,8 +611,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       }
       nextHoleUxMetrics = markHoleCompletedAt(nextHoleUxMetrics, holeIndex, now)
 
+      holeResults[holeIndex] = {
+        ...holeResultState,
+        missionStatusByPlayerId: nextMissionStatusByPlayerId,
+      }
+
       return {
         ...currentState,
+        holeResults,
         holeUxMetrics: nextHoleUxMetrics,
       }
     })
@@ -682,26 +629,68 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   return (
     <section className="screen stack-sm hole-results-screen hole-results-screen--editorial">
       <header className="screen__header hole-results-header hole-results-header--editorial">
-        <div className="row-between hole-results-header__title-row">
-          <div className="screen-title">
-            <AppIcon className="screen-title__icon" icon={ICONS.holeResults} />
-            <h2>Hole Results</h2>
-          </div>
-          <BadgeChip tone="count" className="hole-results-progress-chip">
-            Hole {currentHole.holeNumber} of {roundState.holes.length}
-          </BadgeChip>
+        <div className="screen-title">
+          <AppIcon className="screen-title__icon" icon={ICONS.holeResults} />
+          <h2>Hole Results</h2>
         </div>
-        <p className="muted">Step 2 of 2: enter strokes first, then resolve required cards.</p>
+        <p className="muted">Enter strokes first, then resolve required cards.</p>
       </header>
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
+      <p className="muted hole-results-progress-text">
+        {completedSteps}/{totalSteps} required sections complete.
+      </p>
 
-      <HoleResultsProgressBoard
-        items={stepItems}
-        helperText="Only required sections appear for this hole."
-      />
+      <nav className="button-row row-wrap hole-results-jump-nav" aria-label="Hole results quick navigation">
+        <button
+          type="button"
+          className="hole-results-toggle-button"
+          onClick={() => scrollToSection(strokesSectionRef.current)}
+        >
+          Strokes
+        </button>
+        {hasMissionStep && (
+          <button
+            type="button"
+            className="hole-results-toggle-button"
+            onClick={() => scrollToSection(challengeSectionRef.current ?? strokesSectionRef.current)}
+          >
+            Challenge
+          </button>
+        )}
+        {hasPublicStep && (
+          <button
+            type="button"
+            className={`hole-results-toggle-button ${
+              publicSectionExpanded ? 'hole-results-toggle-button--active' : ''
+            }`}
+            onClick={() => {
+              if (!publicSectionExpanded) {
+                setPublicSectionExpanded(true)
+                window.setTimeout(() => {
+                  scrollToSection(publicSectionRef.current)
+                }, 0)
+                return
+              }
 
-      <section className="panel stack-xs hole-results-entry-panel">
+              scrollToSection(publicSectionRef.current)
+            }}
+          >
+            Public
+          </button>
+        )}
+      </nav>
+
+      {currentHole.holeNumber === 1 && (
+        <HoleInfoCard title="Scoring Clarity" className="hole-results-trust-note">
+          <p className="muted">
+            Real score tracks strokes only and is never modified by cards or power-ups. Game
+            points come from side-game outcomes. Adjusted score updates automatically after you save.
+          </p>
+        </HoleInfoCard>
+      )}
+
+      <section ref={strokesSectionRef} className="panel stack-xs hole-results-entry-panel">
         <div className="row-between hole-results-step-header">
           <strong>1. Strokes</strong>
           <MissionStatusPill
@@ -713,7 +702,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             tone={strokesStepComplete ? 'ready' : 'pending'}
           />
         </div>
-        <p className="muted">Tap a common score, or use Other score for anything else.</p>
+        <p className="muted">Select 1-8, or tap 9+ to enter a higher score.</p>
 
         {roundState.players.map((player) => {
           const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
@@ -724,10 +713,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const assignedCurse = getAssignedCurse(currentHolePowerUps, player.id)
           const powerUpUsed = currentHolePowerUps?.usedPowerUpByPlayerId[player.id] ?? false
           const strokes = currentResult.strokesByPlayerId[player.id]
-          const quickStrokeOptions = buildQuickStrokeOptions(currentHole.par)
-          const highStrokeOptions = buildHighStrokeOptions(quickStrokeOptions)
-          const hasManualValue =
-            typeof strokes === 'number' && !quickStrokeOptions.includes(strokes)
+          const requiresMissionResolution = !isPowerUpsMode && Boolean(selectedCard)
+          const effectiveMissionStatus = requiresMissionResolution
+            ? effectiveMissionStatusByPlayerId[player.id]
+            : null
+          const shouldAttachChallengeAnchor =
+            requiresMissionResolution && player.id === firstChallengePlayerId
+
+          const hasManualValue = typeof strokes === 'number' && strokes >= 9
           const showManualInput = manualStrokeInputByPlayerId[player.id] || hasManualValue
           const scoreStatusLabel = typeof strokes === 'number' ? `${strokes} strokes` : 'Pending'
           const scoreStatusTone = typeof strokes === 'number' ? 'ready' : 'pending'
@@ -739,18 +732,53 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               statusSlot={<MissionStatusPill label={scoreStatusLabel} tone={scoreStatusTone} />}
               missionSlot={
                 selectedCard ? (
-                  <button
-                    type="button"
-                    className="chip chip-button badge-chip badge-chip--subtle hole-score-module__mission-chip"
-                    onClick={() =>
-                      setActiveCardPreview({
-                        playerName: playerNameById[player.id],
-                        card: selectedCard,
-                      })
-                    }
+                  <div
+                    ref={shouldAttachChallengeAnchor ? challengeSectionRef : undefined}
+                    className="stack-xs hole-score-module__mission-inline"
                   >
-                    {selectedCard.code} - {selectedCard.name}
-                  </button>
+                    <button
+                      type="button"
+                      className="chip chip-button badge-chip badge-chip--subtle hole-score-module__mission-chip"
+                      onClick={() =>
+                        setActiveCardPreview({
+                          playerName: playerNameById[player.id],
+                          card: selectedCard,
+                        })
+                      }
+                    >
+                      {selectedCard.code} - {selectedCard.name}
+                    </button>
+                    {requiresMissionResolution && (
+                      <div
+                        className="segmented-control hole-result-toggle-group hole-score-module__mission-toggle"
+                        role="group"
+                        aria-label={`${playerNameById[player.id]} challenge result`}
+                      >
+                        <button
+                          type="button"
+                          className={`segmented-control__button ${
+                            effectiveMissionStatus === 'failed'
+                              ? 'segmented-control__button--active'
+                              : ''
+                          }`}
+                          onClick={() => setMissionStatus(player.id, 'failed')}
+                        >
+                          Failed
+                        </button>
+                        <button
+                          type="button"
+                          className={`segmented-control__button ${
+                            effectiveMissionStatus === 'success'
+                              ? 'segmented-control__button--active'
+                              : ''
+                          }`}
+                          onClick={() => setMissionStatus(player.id, 'success')}
+                        >
+                          Completed
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <BadgeChip tone="subtle">{isPowerUpsMode ? 'Power Ups Mode' : 'No card'}</BadgeChip>
                 )
@@ -770,7 +798,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             >
               <span className="label">Strokes</span>
               <ScoreButtonGroup
-                options={quickStrokeOptions}
+                options={QUICK_STROKE_OPTIONS}
                 selectedScore={strokes}
                 onToggle={(strokeOption, isSelected) => {
                   const nextStrokeValue = isSelected ? null : strokeOption
@@ -784,58 +812,13 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 }}
               />
 
-              {highStrokeOptions.length > 0 && (
-                <ScoreButtonGroup
-                  options={highStrokeOptions}
-                  selectedScore={strokes}
-                  variant="high"
-                  onToggle={(strokeOption, isSelected) => {
-                    const nextStrokeValue = isSelected ? null : strokeOption
-                    setStrokes(player.id, nextStrokeValue, 'high_button')
-                    if (!isSelected && strokeOption >= 9) {
-                      setManualStrokeInputByPlayerId((current) => ({
-                        ...current,
-                        [player.id]: true,
-                      }))
-                    }
-                  }}
-                />
-              )}
-
-              <div className="button-row hole-score-adjust-row">
+              <div className="button-row">
                 <button
                   type="button"
-                  className="chip chip-button badge-chip badge-chip--subtle hole-score-adjust-button"
-                  onClick={() => {
-                    const baseStrokes = typeof strokes === 'number' ? strokes : currentHole.par
-                    setStrokes(player.id, Math.max(1, baseStrokes - 1), 'adjust_minus')
-                  }}
-                >
-                  -1 stroke
-                </button>
-                <button
-                  type="button"
-                  className="chip chip-button badge-chip badge-chip--subtle hole-score-adjust-button"
-                  onClick={() => {
-                    const baseStrokes = typeof strokes === 'number' ? strokes : currentHole.par
-                    const nextStrokeValue = baseStrokes + 1
-                    setStrokes(player.id, nextStrokeValue, 'adjust_plus')
-                    if (nextStrokeValue >= 9) {
-                      setManualStrokeInputByPlayerId((current) => ({
-                        ...current,
-                        [player.id]: true,
-                      }))
-                    }
-                  }}
-                >
-                  +1 stroke
-                </button>
-                <button
-                  type="button"
-                  className="chip chip-button badge-chip badge-chip--subtle hole-score-adjust-button"
+                  className={`hole-score-button ${showManualInput ? 'hole-score-button--selected' : ''}`}
                   onClick={() => {
                     const nextStrokeValue =
-                      typeof strokes === 'number' ? Math.max(strokes, 9) : 9
+                      typeof strokes === 'number' && strokes >= 9 ? strokes : 9
                     setStrokes(player.id, nextStrokeValue, 'quick_9_plus')
                     setManualStrokeInputByPlayerId((current) => ({
                       ...current,
@@ -843,29 +826,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     }))
                   }}
                 >
-                  9+ quick
+                  9+
                 </button>
               </div>
-
-              {!showManualInput && (
-                <button
-                  type="button"
-                  className="chip chip-button badge-chip badge-chip--subtle hole-score-manual-toggle"
-                  onClick={() =>
-                    setManualStrokeInputByPlayerId((current) => ({
-                      ...current,
-                      [player.id]: true,
-                    }))
-                  }
-                >
-                  Other score
-                </button>
-              )}
 
               {showManualInput && (
                 <div className="stack-xs hole-score-manual-entry">
                   <label className="field field--inline hole-score-manual-field">
-                    <span className="label">Other score</span>
+                    <span className="label">9+ score</span>
                     <input
                       type="number"
                       inputMode="numeric"
@@ -884,31 +852,6 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       }}
                     />
                   </label>
-                  <div className="button-row">
-                    {typeof strokes === 'number' && (
-                      <button
-                        type="button"
-                        className="chip chip-button badge-chip badge-chip--subtle hole-score-reset-button"
-                        onClick={() => setStrokes(player.id, null, 'manual_reset')}
-                      >
-                        Reset
-                      </button>
-                    )}
-                    {!hasManualValue && (
-                      <button
-                        type="button"
-                        className="chip chip-button badge-chip badge-chip--subtle hole-score-reset-button"
-                        onClick={() =>
-                          setManualStrokeInputByPlayerId((current) => ({
-                            ...current,
-                            [player.id]: false,
-                          }))
-                        }
-                      >
-                        Hide
-                      </button>
-                    )}
-                  </div>
                 </div>
               )}
             </GolferScoreModule>
@@ -916,76 +859,11 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         })}
       </section>
 
-      {hasMissionStep && (
-        <section className="panel stack-xs hole-results-step-panel hole-results-step-panel--mission">
-          <div className="row-between hole-results-step-header">
-            <strong>{missionStepNumber}. Mission Results</strong>
-            <MissionStatusPill
-              label={
-                missionStepComplete
-                  ? 'Missions resolved'
-                  : `${missionResolvedCount}/${missionRequiredPlayerIds.length} resolved`
-              }
-              tone={missionStepComplete ? 'ready' : 'pending'}
-            />
-          </div>
-          <div className="row-between hole-results-step-actions">
-            <p className="muted">Mark each selected mission as completed or failed.</p>
-            <button
-              type="button"
-              className={`hole-results-toggle-button ${
-                missionSectionExpanded ? 'hole-results-toggle-button--active' : ''
-              }`}
-              onClick={onToggleMissionSection}
-              aria-expanded={missionSectionExpanded}
-              aria-controls="mission-resolution-section"
-              disabled={!missionCanExpand}
-            >
-              {missionSectionExpanded ? 'Hide' : missionStepComplete ? 'Review' : 'Resolve'}
-            </button>
-          </div>
-
-          {!missionCanExpand && <p className="muted">Finish Step 1 to unlock this section.</p>}
-
-          {missionSectionExpanded && (
-            <section
-              id="mission-resolution-section"
-              className="stack-xs hole-results-resolution-list"
-              role="region"
-              aria-label="Mission resolution"
-            >
-              {roundState.players.map((player) => {
-                const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
-                const selectedCard = (currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []).find(
-                  (card) => card.id === selectedCardId,
-                )
-                const missionStatus = currentResult.missionStatusByPlayerId[player.id]
-
-                return (
-                  <MissionResultCard
-                    key={player.id}
-                    playerName={playerNameById[player.id]}
-                    missionLabel={
-                      selectedCard ? `${selectedCard.code} - ${selectedCard.name}` : undefined
-                    }
-                    missionStatus={missionStatus}
-                    onSetStatus={
-                      selectedCard
-                        ? (status) => {
-                            setMissionStatus(player.id, status)
-                          }
-                        : undefined
-                    }
-                  />
-                )
-              })}
-            </section>
-          )}
-        </section>
-      )}
-
       {hasPublicStep && (
-        <section className="panel stack-xs hole-results-step-panel hole-results-step-panel--public">
+        <section
+          ref={publicSectionRef}
+          className="panel stack-xs hole-results-step-panel hole-results-step-panel--public"
+        >
           <div className="row-between hole-results-step-header">
             <strong>{publicStepNumber}. Public Card Resolution</strong>
             <MissionStatusPill
@@ -1232,13 +1110,6 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           )}
         </section>
       )}
-
-      <HoleInfoCard title="Scoring Clarity" className="hole-results-trust-note">
-        <p className="muted">
-          Real score tracks strokes only and is never modified by cards or power-ups. Game points
-          come from side-game outcomes. Adjusted score updates automatically after you save.
-        </p>
-      </HoleInfoCard>
 
       <HoleActionPanel
         summary={`${completedSteps}/${totalSteps} steps complete`}

@@ -1,1 +1,9 @@
-export type AppScreen = 'home' | 'roundSetup' | 'holePlay' | 'holeResults' | 'leaderboard' | 'endRound'
+export type AppScreen =
+  | 'home'
+  | 'profile'
+  | 'settings'
+  | 'roundSetup'
+  | 'holePlay'
+  | 'holeResults'
+  | 'leaderboard'
+  | 'endRound'

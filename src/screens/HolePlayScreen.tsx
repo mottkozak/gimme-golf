@@ -237,7 +237,11 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
       </p>
 
       {!isHolePrepared && (
-        <section className="panel stack-xs hole-setup-card">
+        <section
+          className={`${isPowerUpsMode ? 'panel' : ''} stack-xs hole-setup-card ${
+            !isPowerUpsMode ? 'hole-setup-card--inline' : ''
+          }`}
+        >
           <div className="hole-setup-control-group">
             <span className="label hole-setup-label">Par</span>
             <div className="segmented-control segmented-control--four" role="group" aria-label="Par selection">
@@ -393,16 +397,18 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
             })}
           </section>
 
-          <HolePublicCardSection
-            title="Public Cards"
-            count={currentHoleCards.publicCards.length}
-            emptyMessage="No public cards for this hole."
-            helperText="Preview only. Public cards are resolved on Hole Results."
-          >
-            {currentHoleCards.publicCards.map((card) => (
-              <PublicCardView key={card.id} card={card} />
-            ))}
-          </HolePublicCardSection>
+          {currentHoleCards.publicCards.length > 0 && (
+            <HolePublicCardSection
+              title="Public Cards"
+              count={currentHoleCards.publicCards.length}
+              emptyMessage="No public cards for this hole."
+              helperText="Preview only. Public cards are resolved on Hole Results."
+            >
+              {currentHoleCards.publicCards.map((card) => (
+                <PublicCardView key={card.id} card={card} />
+              ))}
+            </HolePublicCardSection>
+          )}
 
           <HoleActionPanel
             summary={readinessSummary}

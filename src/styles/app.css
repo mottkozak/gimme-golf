@@ -1209,6 +1209,20 @@ main {
     );
 }
 
+.hole-setup-card--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-play-screen--missions .hole-setup-card--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .hole-setup-control-group {
   display: flex;
   flex-direction: column;
@@ -1422,6 +1436,14 @@ main {
   overflow: hidden;
 }
 
+.mode-card__premium-chip {
+  justify-self: start;
+  margin-top: 0.12rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .mode-card__copy strong {
   font-family: var(--font-display);
   font-size: 1.58rem;
@@ -1632,6 +1654,19 @@ main {
   gap: 0.82rem;
   text-align: center;
   padding-block: var(--space-2) var(--space-3);
+}
+
+.mode-spotlight__back--floating {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 3;
+}
+
+.mode-spotlight__premium-chip {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
 }
 
 .mode-spotlight__context {
@@ -1881,6 +1916,7 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 0.54rem;
+  flex-wrap: wrap;
 }
 
 .mode-config-mode-card__title strong {
@@ -1899,6 +1935,12 @@ main {
   border: 1.5px solid color-mix(in srgb, var(--color-border) 22%, transparent);
 }
 
+.mode-config-mode-card__premium-chip {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .home-screen__header {
   gap: var(--space-1);
   padding: 0;
@@ -1915,6 +1957,32 @@ main {
 .home-screen__header > p {
   color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
   max-width: 36ch;
+}
+
+.home-resume-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border: 1px dashed color-mix(in srgb, var(--accent) 50%, var(--border-subtle));
+  border-radius: var(--radius-sm);
+  padding: 0.72rem 0.84rem;
+  background: color-mix(in srgb, var(--accent-soft) 34%, var(--surface-panel));
+}
+
+.home-resume-inline__cancel {
+  min-height: 2.25rem;
+  padding: 0.2rem 0.72rem;
+  border-radius: var(--radius-pill);
+  border-color: color-mix(in srgb, var(--danger) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-danger) 36%, var(--surface-panel));
+  color: var(--text-danger);
+  font-size: 0.8rem;
+}
+
+.home-resume-inline__cancel:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 68%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-danger) 48%, var(--surface-panel));
 }
 
 .home-screen__support {
@@ -2038,6 +2106,119 @@ main {
 .home-history-list__meta {
   margin-top: 0.12rem;
   font-size: 0.8rem;
+}
+
+.profile-header,
+.settings-header {
+  gap: var(--space-2);
+}
+
+.profile-screen,
+.settings-screen {
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+}
+
+.profile-hero-card__archetype {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.profile-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.profile-metric {
+  border: 1px solid color-mix(in srgb, var(--color-border) 38%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.62rem 0.7rem;
+  background: color-mix(in srgb, var(--surface-panel) 90%, #ffffff 10%);
+}
+
+.profile-metric__label {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.profile-metric__value {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.profile-metric__value--text {
+  font-size: 1.05rem;
+  line-height: 1.22;
+}
+
+.profile-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.profile-favorite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+}
+
+.profile-favorite-list__row {
+  border: 1px solid color-mix(in srgb, var(--color-border) 32%, transparent);
+  border-radius: var(--radius-xs);
+  padding: 0.45rem 0.56rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: color-mix(in srgb, var(--surface-panel) 92%, #ffffff 8%);
+}
+
+.profile-premium-scroll {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 0.18rem;
+  scroll-snap-type: x proximity;
+}
+
+.profile-premium-card {
+  min-width: 166px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 34%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.62rem 0.68rem;
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--color-blush) 32%, transparent),
+      color-mix(in srgb, var(--color-lavender) 28%, transparent)
+    ),
+    var(--surface-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 0.36rem;
+  scroll-snap-align: start;
+}
+
+.profile-premium-card__name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.settings-link-row {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  border-color: color-mix(in srgb, var(--color-border) 32%, transparent);
 }
 
 .home-history-modal {
@@ -2953,6 +3134,27 @@ main {
 
 .recap-player-outcome-card__chips {
   gap: 0.32rem;
+}
+
+.recap-player-outcome-card__summary-lines {
+  width: 100%;
+  gap: 0.16rem;
+}
+
+.recap-player-outcome-card__summary-line {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--text-secondary) 90%, var(--accent-strong));
+}
+
+.recap-player-outcome-card__summary-line--success {
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+  font-weight: 700;
+}
+
+.recap-player-outcome-card__summary-line--failed {
+  color: color-mix(in srgb, var(--text-danger) 84%, var(--accent-strong));
+  font-weight: 700;
 }
 
 .recap-player-outcome-card__details {
@@ -4137,6 +4339,21 @@ main {
   color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
 }
 
+.hole-results-progress-text {
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: 0.9rem;
+}
+
+.hole-results-jump-nav {
+  margin-top: calc(var(--space-2) * -1);
+  gap: 0.4rem;
+}
+
+.hole-results-jump-nav .hole-results-toggle-button {
+  min-height: 36px;
+  padding: 0.34rem 0.66rem;
+}
+
 .hole-results-progress-board {
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--results-panel-border);
@@ -4355,6 +4572,10 @@ main {
   align-items: flex-start;
 }
 
+.hole-score-module__mission-inline {
+  width: 100%;
+}
+
 .hole-score-module__mission-chip,
 .hole-score-module__mission-button {
   display: inline-flex;
@@ -4375,6 +4596,17 @@ main {
 .hole-score-module__mission-chip:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--results-ready-border) 50%, var(--results-chip-border));
   background: color-mix(in srgb, var(--results-chip-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-score-module__mission-toggle {
+  width: 100%;
+  max-width: 260px;
+}
+
+.hole-score-module__mission-toggle .segmented-control__button {
+  min-height: 36px;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
 }
 
 .hole-score-module__helper {
@@ -4945,6 +5177,17 @@ main {
     box-shadow: var(--glow-accent);
   }
 
+  .home-resume-inline {
+    border-color: color-mix(in srgb, var(--accent) 74%, var(--color-border));
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+
+  .home-resume-inline__cancel {
+    border-color: color-mix(in srgb, var(--danger) 74%, var(--color-border));
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    color: #ffc2bc;
+  }
+
   .home-section-head .label {
     color: color-mix(in srgb, var(--accent) 68%, #ffffff);
   }
@@ -4966,6 +5209,25 @@ main {
   .home-history-list__item {
     background: var(--surface-elevated);
     border-color: var(--color-border);
+  }
+
+  .profile-metric,
+  .profile-favorite-list__row,
+  .profile-premium-card,
+  .settings-link-row {
+    background: var(--surface-elevated);
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .profile-premium-card {
+    background:
+      linear-gradient(
+        156deg,
+        color-mix(in srgb, var(--accent) 20%, transparent),
+        color-mix(in srgb, var(--novelty) 16%, transparent)
+      ),
+      var(--surface-elevated);
   }
 
   .home-history-modal {
@@ -5375,6 +5637,13 @@ main {
   .hole-play-screen--missions .hole-action-panel {
     background: color-mix(in srgb, var(--hole-mission-surface) 68%, var(--surface-elevated));
     border-color: color-mix(in srgb, var(--hole-mission-border) 78%, var(--color-border));
+  }
+
+  .hole-play-screen--missions .hole-setup-card--inline {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
   }
 
   .hole-play-screen--missions .hole-info-card--accent,

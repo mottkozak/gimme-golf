@@ -17,23 +17,20 @@ function ModeDetailScreen({
   return (
     <section className="screen mode-detail-screen">
       <article className={`mode-spotlight mode-tone--${mode.toneClassName}`}>
-        <header className="mode-spotlight__header">
-          <button
-            type="button"
-            className="mode-spotlight__back"
-            aria-label="Back"
-            onClick={onBack}
-          >
-            <AppIcon className="mode-spotlight__back-icon" icon="arrow_back" />
-          </button>
-          <p className="mode-spotlight__header-label">Game Mode</p>
-          <span className="mode-spotlight__header-spacer" aria-hidden="true" />
-        </header>
+        <button
+          type="button"
+          className="mode-spotlight__back mode-spotlight__back--floating"
+          aria-label="Back"
+          onClick={onBack}
+        >
+          <AppIcon className="mode-spotlight__back-icon" icon="arrow_back" />
+        </button>
 
         <section className="mode-spotlight__hero" aria-label={`${mode.name} mode details`}>
           <div className="mode-spotlight__emblem" aria-hidden="true">
             <AppIcon className="mode-spotlight__icon" icon={mode.icon} />
           </div>
+          {mode.isPremium && <span className="chip mode-spotlight__premium-chip">Premium</span>}
           <h2 className="mode-spotlight__title">{mode.name}</h2>
           <p className="mode-spotlight__summary">{mode.tagline}</p>
           <p className="mode-spotlight__description">{mode.description}</p>

@@ -4,7 +4,6 @@ import AppIcon from '../components/AppIcon.tsx'
 import ModeDetailScreen from '../components/ModeDetailScreen.tsx'
 import { trackHomeAction } from '../logic/analytics.ts'
 import { applyLandingModeToRound, getLandingModeById, LANDING_MODES, type LandingModeId } from '../logic/landingModes.ts'
-import { loadLocalIdentityState } from '../logic/localIdentity.ts'
 import { hasRoundProgress } from '../logic/roundProgress.ts'
 import type { ScreenProps } from './types.ts'
 
@@ -36,23 +35,11 @@ function formatSavedRoundLabel(savedAtMs: number | null): string {
   })}.`
 }
 
-function formatRoundHistoryDate(completedAtMs: number): string {
-  const completedDate = new Date(completedAtMs)
-
-  return completedDate.toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
 function getDefaultLandingModeId(): LandingModeId {
   return LANDING_MODES[0]?.id ?? 'classic'
 }
 
 interface HomeScreenProps extends ScreenProps {
-  isPastRoundsOpen: boolean
-  onPastRoundsOpenChange: (isOpen: boolean) => void
   onModeDetailOpenChange: (isOpen: boolean) => void
 }
 
@@ -64,9 +51,8 @@ function HomeScreen({
   roundSaveWarning,
   onNavigate,
   onResumeSavedRound,
+  onAbandonRound,
   onUpdateRoundState,
-  isPastRoundsOpen,
-  onPastRoundsOpenChange,
   onModeDetailOpenChange,
 }: HomeScreenProps) {
   const [activeModeId, setActiveModeId] = useState<LandingModeId | null>(null)
@@ -94,54 +80,10 @@ function HomeScreen({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [pendingModeId])
 
-  useEffect(() => {
-    if (!isPastRoundsOpen) {
-      return
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onPastRoundsOpenChange(false)
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [isPastRoundsOpen, onPastRoundsOpenChange])
-
   const hasSavedRoundProgress = hasSavedRound && hasRoundProgress(roundState)
-  const totalHoles = roundState.holes.length || roundState.config.holeCount
-  const currentHole = Math.min(roundState.currentHoleIndex + 1, totalHoles)
   const saveStatusLabel = isRoundSavePending
     ? 'Saving latest updates locally...'
     : formatSavedRoundLabel(savedRoundUpdatedAtMs)
-
-  const continueRound = () => {
-    trackHomeAction({
-      action: 'continue_round',
-      hasSavedRound,
-      currentScreen: 'home',
-    })
-    const didResumeRound = onResumeSavedRound()
-    setResumeError(didResumeRound ? null : 'Saved round is no longer available.')
-  }
-
-  const startReadyRound = () => {
-    setResumeError(null)
-    trackHomeAction({
-      action: 'continue_round',
-      hasSavedRound,
-      currentScreen: 'home',
-    })
-    onNavigate('holePlay')
-  }
-
-  const openModeDetails = (modeId: LandingModeId) => {
-    setResumeError(null)
-    setSelectedModeId(modeId)
-    onModeDetailOpenChange(true)
-    setActiveModeId(modeId)
-  }
 
   const launchModeFlow = (modeId: LandingModeId) => {
     trackHomeAction({
@@ -164,23 +106,37 @@ function HomeScreen({
     launchModeFlow(modeId)
   }
 
-  const startSelectedMode = () => {
-    playMode(selectedModeId)
-  }
-
-  const openRoundSetup = () => {
+  const handlePrimaryPlay = () => {
     setResumeError(null)
-    onNavigate('roundSetup')
+
+    if (hasSavedRoundProgress) {
+      trackHomeAction({
+        action: 'continue_round',
+        hasSavedRound,
+        currentScreen: 'home',
+      })
+      const didResumeRound = onResumeSavedRound()
+      setResumeError(didResumeRound ? null : 'Saved round is no longer available.')
+      return
+    }
+
+    launchModeFlow('classic')
   }
 
-  const openPastRounds = () => {
-    setPendingModeId(null)
-    onPastRoundsOpenChange(true)
+  const cancelSavedRound = () => {
+    onAbandonRound()
+    setResumeError(null)
+  }
+
+  const openModeDetails = (modeId: LandingModeId) => {
+    setResumeError(null)
+    setSelectedModeId(modeId)
+    onModeDetailOpenChange(true)
+    setActiveModeId(modeId)
   }
 
   const activeMode = activeModeId ? getLandingModeById(activeModeId) : null
   const pendingMode = pendingModeId ? getLandingModeById(pendingModeId) : null
-  const roundHistory = isPastRoundsOpen ? loadLocalIdentityState().roundHistory : []
 
   if (activeMode) {
     return (
@@ -206,36 +162,27 @@ function HomeScreen({
         {roundSaveWarning && <p className="home-warning-text">{roundSaveWarning}</p>}
       </header>
 
-      {hasSavedRound && (
-        <section className="panel home-resume-card stack-xs">
-          <div className="row-between setup-row-wrap">
-            <p className="label">Saved Round</p>
-            <span className="chip">
-              Hole {currentHole} / {totalHoles}
-            </span>
-          </div>
-          <p className="muted">{saveStatusLabel}</p>
-          {hasSavedRoundProgress ? (
-            <button type="button" className="button-primary" onClick={continueRound}>
-              Continue Current Round
-            </button>
-          ) : (
-            <button type="button" className="button-primary" onClick={startReadyRound}>
-              Start Hole 1 With Saved Setup
-            </button>
-          )}
-          {resumeError && (
-            <p className="home-warning-text" role="status" aria-live="polite">
-              {resumeError}
-            </p>
-          )}
+      {hasSavedRoundProgress && (
+        <section className="home-resume-inline">
+          <p className="muted">
+            Play will resume your previous round. {saveStatusLabel}
+          </p>
+          <button type="button" className="home-resume-inline__cancel" onClick={cancelSavedRound}>
+            Cancel Saved Round
+          </button>
         </section>
+      )}
+
+      {resumeError && (
+        <p className="home-warning-text" role="status" aria-live="polite">
+          {resumeError}
+        </p>
       )}
 
       <section className="panel stack-xs mode-list-panel">
         <div className="row-between setup-row-wrap">
           <p className="label">Modes</p>
-          <span className="chip mode-list-panel__chip">Curated selection</span>
+          <span className="chip mode-list-panel__chip">Choose your style</span>
         </div>
 
         <div className="mode-list-grid" role="list" aria-label="Game modes">
@@ -257,6 +204,7 @@ function HomeScreen({
               <span className="mode-card__copy">
                 <strong>{mode.name}</strong>
                 <span className="mode-card__tagline">{mode.tagline}</span>
+                {mode.isPremium && <span className="chip mode-card__premium-chip">Premium</span>}
               </span>
             </button>
           ))}
@@ -267,77 +215,28 @@ function HomeScreen({
         <button
           type="button"
           className="home-floating-dock__button"
-          aria-label="Open account and past rounds"
-          onClick={openPastRounds}
+          aria-label="Open profile"
+          onClick={() => onNavigate('profile')}
         >
           <AppIcon className="home-floating-dock__icon" icon={ICONS.account} />
         </button>
         <button
           type="button"
           className="home-floating-dock__button home-floating-dock__button--play"
-          aria-label={`Play ${getLandingModeById(selectedModeId).name}`}
-          onClick={startSelectedMode}
+          aria-label={hasSavedRoundProgress ? 'Resume previous round' : 'Start classic round setup'}
+          onClick={handlePrimaryPlay}
         >
           <AppIcon className="home-floating-dock__icon home-floating-dock__icon--play" icon={ICONS.play} />
         </button>
         <button
           type="button"
           className="home-floating-dock__button"
-          aria-label="Open setup settings"
-          onClick={openRoundSetup}
+          aria-label="Open settings"
+          onClick={() => onNavigate('settings')}
         >
           <AppIcon className="home-floating-dock__icon" icon={ICONS.settings} />
         </button>
       </nav>
-
-      {isPastRoundsOpen && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onClick={() => onPastRoundsOpenChange(false)}
-        >
-          <section
-            className="panel modal-card home-history-modal stack-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="home-history-modal-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="row-between home-history-modal__header">
-              <div className="stack-xs">
-                <p className="label">Past Rounds</p>
-                <h3 id="home-history-modal-title">Recent local rounds</h3>
-              </div>
-              <button
-                type="button"
-                className="home-history-modal__close"
-                aria-label="Close past rounds"
-                onClick={() => onPastRoundsOpenChange(false)}
-              >
-                <AppIcon className="home-history-modal__close-icon" icon="close" />
-              </button>
-            </div>
-
-            {roundHistory.length > 0 ? (
-              <ol className="list-reset home-history-list">
-                {roundHistory.map((historyEntry) => (
-                  <li key={historyEntry.roundSignature} className="home-history-list__item">
-                    <p className="home-history-list__winner">{historyEntry.winnerNames}</p>
-                    <p className="muted home-history-list__meta">
-                      {formatRoundHistoryDate(historyEntry.completedAtMs)} • {historyEntry.holeCount} holes •{' '}
-                      {historyEntry.gameMode === 'powerUps' ? 'Power Ups' : 'Cards'} • {historyEntry.groupLabel}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="muted home-history-modal__empty">
-                No completed rounds yet. Finish a round and it will show up here.
-              </p>
-            )}
-          </section>
-        </div>
-      )}
 
       {pendingMode && (
         <div
@@ -369,7 +268,6 @@ function HomeScreen({
             <p id="home-mode-confirm-description" className="muted home-confirm-modal__description">
               This replaces your in-progress local round and opens setup for course type, golfers, and scores.
             </p>
-            <p className="home-confirm-modal__footnote">You can still back out on the setup screen.</p>
             <div className="onboarding-modal__actions home-confirm-modal__actions">
               <button type="button" onClick={() => setPendingModeId(null)}>
                 Keep Saved Round

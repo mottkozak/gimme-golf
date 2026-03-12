@@ -12,6 +12,7 @@ export interface LandingModeDefinition {
   name: string
   tagline: string
   description: string
+  isPremium: boolean
   icon: AppIconName
   toneClassName: string
   ctaLabel: string
@@ -23,45 +24,50 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     name: 'Classic',
     tagline: 'Balanced missions with clean pacing.',
     description: 'A clear, easy-to-teach mode with low randomness and steady scoring.',
+    isPremium: false,
     icon: 'sports_golf',
     toneClassName: 'classic',
     ctaLabel: 'Play Classic',
   },
   {
     id: 'novelty',
-    name: 'Novelty',
-    tagline: 'Playful missions with more variety.',
-    description: 'Quirky card outcomes that keep rounds light, social, and less predictable.',
+    name: 'Showtime',
+    tagline: 'Playful missions with extra flair.',
+    description: 'Creative card twists and crowd-pleasing moments for lively group rounds.',
+    isPremium: true,
     icon: 'auto_awesome',
     toneClassName: 'novelty',
-    ctaLabel: 'Play Novelty',
+    ctaLabel: 'Play Showtime',
   },
   {
     id: 'chaos',
-    name: 'Chaos',
-    tagline: 'Big swings from public cards.',
-    description: 'High-volatility public effects that can flip momentum on any hole.',
+    name: 'Wildcard',
+    tagline: 'High-volatility momentum swings.',
+    description: 'Unpredictable public effects that can reshape the leaderboard at any time.',
+    isPremium: true,
     icon: 'bolt',
     toneClassName: 'chaos',
-    ctaLabel: 'Play Chaos',
+    ctaLabel: 'Play Wildcard',
   },
   {
     id: 'props',
-    name: 'Props',
+    name: 'Forecast',
     tagline: 'Prediction-based side bets.',
-    description: 'Pre-hole prop picks that reward reads, strategy, and table talk.',
+    description: 'Pre-hole prediction cards for strategic calls, banter, and bonus points.',
+    isPremium: true,
     icon: 'flag',
     toneClassName: 'props',
-    ctaLabel: 'Play Props',
+    ctaLabel: 'Play Forecast',
   },
   {
     id: 'powerUps',
-    name: 'Power Up',
-    tagline: 'Arcade-style boosts and curses.',
-    description: 'No mission cards. Use power-ups aggressively while leaders handle curses.',
+    name: 'Arcade',
+    tagline: 'Boosts, curses, and fast swings.',
+    description: 'No mission cards. Lean into aggressive power-ups while leaders absorb curses.',
+    isPremium: true,
     icon: 'auto_fix_high',
     toneClassName: 'power-ups',
-    ctaLabel: 'Play Power Up',
+    ctaLabel: 'Play Arcade',
   },
 ] as const
 
