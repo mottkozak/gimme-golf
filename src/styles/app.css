@@ -1788,6 +1788,36 @@ main {
   color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
 }
 
+.mode-spotlight__sample {
+  width: min(100%, 31rem);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.58rem;
+}
+
+.mode-spotlight__sample-label {
+  margin: 0;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.mode-spotlight__sample-card {
+  width: 100%;
+}
+
+.mode-spotlight__sample-card .challenge-card,
+.mode-spotlight__sample-card .public-card,
+.mode-spotlight__sample-card .power-up-card {
+  margin: 0;
+  box-shadow: 0 14px 24px -24px color-mix(in srgb, var(--mode-border) 74%, transparent);
+}
+
 .mode-spotlight__meta {
   margin: 0;
   max-width: 34ch;
