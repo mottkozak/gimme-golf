@@ -2,8 +2,8 @@
   color-scheme: light;
 
   /* Typography */
-  --font-ui: 'Manrope', 'Avenir Next', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Bodoni Moda', 'Iowan Old Style', 'Times New Roman', serif;
+  --font-ui: 'Figtree', 'Avenir Next', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Neuton', 'Iowan Old Style', 'Times New Roman', serif;
   --font-numeric: var(--font-ui);
 
   /* Editorial pastel palette */
@@ -63,6 +63,56 @@
   --mode-props-border: #62866f;
   --mode-power-bg: #c9b0e3;
   --mode-power-border: #7a6296;
+
+  /* Hole setup mission screen */
+  --hole-mission-paper: #fbf4e9;
+  --hole-mission-surface: #f6eddf;
+  --hole-mission-surface-muted: #f3e8d8;
+  --hole-mission-border: #a99682;
+  --hole-mission-border-strong: #6f8f79;
+  --hole-mission-ready-bg: #e5efe7;
+  --hole-mission-ready-border: #6a8e76;
+  --hole-mission-pending-bg: #ecefe8;
+  --hole-mission-pending-border: #91a090;
+  --hole-mission-chip-bg: #fff7ed;
+  --hole-mission-chip-border: #b8ab9a;
+  --hole-mission-selected-bg: #e9f2e7;
+  --hole-mission-selected-border: #6f9278;
+  --hole-public-preview-bg: #edf1f4;
+  --hole-public-preview-border: #8a9aab;
+  --hole-action-bg: #243f36;
+  --hole-action-text: #f7efe4;
+  --hole-action-disabled-bg: #d8d0c4;
+  --hole-action-disabled-text: #6d665f;
+
+  /* Hole results screen */
+  --hole-results-paper: #f8f1e6;
+  --hole-results-surface: #f3eadc;
+  --hole-results-surface-muted: #efe4d4;
+  --hole-results-border: #a3917e;
+  --hole-results-border-strong: #6b8c74;
+  --hole-results-ready-bg: #e3eee6;
+  --hole-results-ready-border: #6b9078;
+  --hole-results-pending-bg: #ebece5;
+  --hole-results-pending-border: #97a596;
+  --hole-results-chip-bg: #fdf6eb;
+  --hole-results-chip-border: #b8a99b;
+  --hole-results-target-bg: #fff9ef;
+  --hole-results-target-border: #b2a191;
+
+  /* Hole recap screen */
+  --hole-recap-paper: #f8f1e7;
+  --hole-recap-surface: #f3e9dc;
+  --hole-recap-surface-muted: #efe3d5;
+  --hole-recap-border: #a28f7d;
+  --hole-recap-border-strong: #6b8c74;
+  --hole-recap-hero-bg: #ecdcc3;
+  --hole-recap-hero-border: #8e7c66;
+  --hole-recap-chip-bg: #fdf5ea;
+  --hole-recap-chip-border: #b8a796;
+  --hole-recap-table-head-bg: #ece1d1;
+  --hole-recap-table-row-leader-bg: #e3eee7;
+  --hole-recap-breakdown-bg: #f6ecde;
 
   /* Legacy aliases to keep existing class names stable */
   --bg-app: var(--surface-app);
@@ -157,6 +207,53 @@
     --mode-props-border: #8fb49d;
     --mode-power-bg: #56416f;
     --mode-power-border: #a68cc2;
+
+    --hole-mission-paper: #26211d;
+    --hole-mission-surface: #302924;
+    --hole-mission-surface-muted: #382f29;
+    --hole-mission-border: #7b6f66;
+    --hole-mission-border-strong: #7ea28b;
+    --hole-mission-ready-bg: #2f4036;
+    --hole-mission-ready-border: #85aa93;
+    --hole-mission-pending-bg: #3a3d37;
+    --hole-mission-pending-border: #9ba99b;
+    --hole-mission-chip-bg: #3a322c;
+    --hole-mission-chip-border: #7e7066;
+    --hole-mission-selected-bg: #334237;
+    --hole-mission-selected-border: #86a88f;
+    --hole-public-preview-bg: #30373e;
+    --hole-public-preview-border: #8ea2b7;
+    --hole-action-bg: #192922;
+    --hole-action-text: #f5eee3;
+    --hole-action-disabled-bg: #4a443e;
+    --hole-action-disabled-text: #cbc2b5;
+
+    --hole-results-paper: #2b2521;
+    --hole-results-surface: #342c26;
+    --hole-results-surface-muted: #3b312a;
+    --hole-results-border: #7e7167;
+    --hole-results-border-strong: #85a890;
+    --hole-results-ready-bg: #314138;
+    --hole-results-ready-border: #89ad94;
+    --hole-results-pending-bg: #3d4039;
+    --hole-results-pending-border: #9ca99c;
+    --hole-results-chip-bg: #3a312a;
+    --hole-results-chip-border: #807265;
+    --hole-results-target-bg: #332b25;
+    --hole-results-target-border: #8f7f70;
+
+    --hole-recap-paper: #2c2520;
+    --hole-recap-surface: #352c26;
+    --hole-recap-surface-muted: #3d322b;
+    --hole-recap-border: #7e7065;
+    --hole-recap-border-strong: #84a78f;
+    --hole-recap-hero-bg: #3a3128;
+    --hole-recap-hero-border: #8b7a66;
+    --hole-recap-chip-bg: #3c322b;
+    --hole-recap-chip-border: #807264;
+    --hole-recap-table-head-bg: #3a3028;
+    --hole-recap-table-row-leader-bg: #314037;
+    --hole-recap-breakdown-bg: #322920;
 
     --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.45);
     --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.35);

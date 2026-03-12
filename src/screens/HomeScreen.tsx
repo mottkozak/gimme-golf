@@ -185,7 +185,7 @@ function HomeScreen({
       <section className="panel stack-xs mode-list-panel">
         <div className="row-between setup-row-wrap">
           <p className="label">Modes</p>
-          <span className="chip">Tap for details</span>
+          <span className="chip mode-list-panel__chip">Curated selection</span>
         </div>
 
         <div className="mode-list-grid" role="list" aria-label="Game modes">

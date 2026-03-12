@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Neuton:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
 
 * {
@@ -202,7 +202,6 @@ strong {
 }
 
 .player-card > header strong,
-.hole-results-player-card > .row-between > strong,
 .hole-summary-player-row > strong {
   font-family: var(--font-display);
   font-size: 1.3rem;
@@ -264,9 +263,9 @@ main {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 700;
-  font-size: clamp(2.25rem, 6.6vw, 3rem);
+  font-size: clamp(2rem, 5.8vw, 2.56rem);
   line-height: 1;
-  letter-spacing: 0.004em;
+  letter-spacing: 0.002em;
   color: color-mix(in srgb, var(--text-primary) 94%, var(--accent-strong));
 }
 
@@ -783,93 +782,399 @@ main {
 }
 
 .hole-play-screen {
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
+
+.hole-play-screen--missions {
+  --mission-panel-bg: color-mix(in srgb, var(--hole-mission-paper) 86%, var(--surface-panel));
+  --mission-panel-border: color-mix(in srgb, var(--hole-mission-border) 58%, var(--border-subtle));
+  --mission-module-bg: color-mix(in srgb, var(--hole-mission-surface) 78%, var(--surface-panel));
+  --mission-module-border: color-mix(in srgb, var(--hole-mission-border) 52%, var(--border-subtle));
+  --mission-inset-bg: color-mix(in srgb, var(--hole-mission-surface-muted) 82%, #ffffff 18%);
+  --mission-inset-border: color-mix(in srgb, var(--hole-mission-border) 42%, var(--border-subtle));
+  --mission-card-bg: color-mix(in srgb, var(--surface-panel) 90%, var(--hole-mission-surface-muted) 10%);
+  --mission-card-border: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  --mission-card-selected-bg: color-mix(in srgb, var(--hole-mission-selected-bg) 86%, #ffffff 14%);
+  --mission-card-selected-border: color-mix(in srgb, var(--hole-mission-selected-border) 60%, var(--border-subtle));
+  --mission-public-bg: color-mix(in srgb, var(--hole-public-preview-bg) 66%, var(--surface-panel));
+  --mission-public-border: color-mix(in srgb, var(--hole-public-preview-border) 52%, var(--border-subtle));
 }
 
 .hole-play-header {
-  gap: var(--space-1);
+  gap: var(--space-2);
+}
+
+.hole-play-header--missions {
+  border: 1.5px solid var(--mission-panel-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  background:
+    linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--mission-panel-bg) 82%, var(--color-butter) 18%),
+      color-mix(in srgb, var(--mission-panel-bg) 90%, var(--color-blush) 10%)
+    );
+  box-shadow: var(--shadow-card);
+}
+
+.hole-play-header--missions .screen-title {
+  gap: 0.66rem;
+}
+
+.hole-play-header--missions .screen-title h2 {
+  font-size: clamp(2rem, 7vw, 2.62rem);
+}
+
+.hole-play-header--missions .screen-title__icon {
+  width: 1.72rem;
+  height: 1.72rem;
+  font-size: 1.68rem;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border) 34%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-panel-bg) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--accent-strong) 76%, var(--text-primary));
 }
 
 .hole-play-header .muted {
-  font-size: 0.94rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
 }
 
 .hole-cards-helper {
-  margin-top: calc(var(--space-2) * -1);
-  margin-bottom: calc(var(--space-1) * -1);
-  font-size: 0.94rem;
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: 0.91rem;
+  line-height: 1.44;
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.hole-info-card {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-inset-border);
+  background: var(--mission-inset-bg);
+  padding: var(--space-4);
+  box-shadow: none;
+}
+
+.hole-info-card--accent {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--mission-inset-bg) 84%, var(--hole-mission-selected-bg) 16%),
+      color-mix(in srgb, var(--mission-inset-bg) 90%, #ffffff 10%)
+    );
+}
+
+.hole-info-card__label {
+  letter-spacing: 0.09em;
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.hole-info-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hole-info-card__content > p {
+  margin: 0;
 }
 
 .hole-flow-note {
-  border-color: color-mix(in srgb, var(--accent) 24%, var(--border-subtle));
-  border-left: 3px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--hole-mission-border-strong) 56%, transparent);
 }
 
 .hole-draft-list {
+  gap: var(--space-4);
+}
+
+.hole-golfer-module {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-module-border);
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--mission-module-bg) 88%, #ffffff 12%),
+      color-mix(in srgb, var(--mission-module-bg) 94%, var(--hole-mission-paper) 6%)
+    );
+  padding: var(--space-4);
   gap: var(--space-3);
+  box-shadow: var(--shadow-soft);
 }
 
-.hole-draft-player {
-  padding: var(--space-3);
-  gap: var(--space-2);
+.hole-golfer-module__header {
+  align-items: flex-start;
 }
 
-.hole-draft-player__fairness {
+.hole-golfer-module__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.hole-golfer-module__name {
+  font-family: var(--font-ui);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.12;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.hole-golfer-module__summary {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
+  line-height: 1.34;
+}
+
+.hole-golfer-module__mission-stack {
+  gap: 0.68rem;
+}
+
+.mission-status-pill {
+  min-height: 30px;
+  padding: 0.16rem 0.62rem;
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mission-status-pill--ready {
+  border-color: color-mix(in srgb, var(--hole-mission-ready-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-ready-bg) 84%, #ffffff 16%);
+  color: color-mix(in srgb, var(--text-success) 86%, var(--accent-strong));
+}
+
+.mission-status-pill--pending {
+  border-color: color-mix(in srgb, var(--hole-mission-pending-border) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-pending-bg) 82%, #ffffff 18%);
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
 }
 
 .hole-draft-options {
-  gap: 0.55rem;
+  gap: 0.62rem;
 }
 
 .hole-fairness-note {
-  border-color: color-mix(in srgb, var(--accent) 34%, var(--border-subtle));
+  border-left: 2px solid color-mix(in srgb, var(--hole-mission-border) 52%, transparent);
 }
 
-.hole-public-preview {
+.hole-play-screen--missions .mission-card {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--mission-card-border);
+  background: var(--mission-card-bg);
   padding: var(--space-3);
-  gap: var(--space-2);
+  gap: 0.62rem;
+  box-shadow: none;
 }
 
-.hole-public-preview > h3,
-.hole-public-preview .row-between > h3 {
-  font-size: 1rem;
+.hole-play-screen--missions .mission-card strong {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.004em;
 }
 
-.hole-public-preview__list {
-  gap: 0.55rem;
+.hole-play-screen--missions .challenge-card__meta {
+  gap: 0.3rem;
 }
 
-.hole-public-preview__helper {
-  font-size: 0.82rem;
+.hole-play-screen--missions .mission-card .challenge-card__description {
+  line-height: 1.4;
+  font-size: 0.94rem;
 }
 
-.hole-cards-footer {
-  padding: var(--space-3);
-  gap: var(--space-2);
+.hole-play-screen--missions .mission-card .challenge-card__offer-detail {
+  margin-top: 0.04rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
 }
 
-.hole-cards-footer__readiness {
-  font-size: 0.98rem;
-  font-weight: 700;
+.hole-play-screen--missions .mission-card .challenge-card__badges {
+  gap: 0.36rem;
+}
+
+.hole-play-screen--missions .mission-card.selected {
+  border-color: var(--mission-card-selected-border);
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--mission-card-selected-bg) 82%, #ffffff 18%),
+      color-mix(in srgb, var(--mission-card-selected-bg) 94%, var(--hole-mission-surface-muted) 6%)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--mission-card-selected-border) 38%, transparent),
+    var(--shadow-soft);
+}
+
+.hole-play-screen--missions .challenge-card--selectable:hover {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-card-bg) 76%, var(--mission-card-selected-bg) 24%);
+}
+
+.hole-play-screen--missions .challenge-card--selectable:focus-visible {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 70%, var(--border-subtle));
+  box-shadow: var(--shadow-focus);
+}
+
+.badge-chip {
+  background: color-mix(in srgb, var(--hole-mission-chip-bg) 90%, #ffffff 10%);
+  border-color: color-mix(in srgb, var(--hole-mission-chip-border) 54%, var(--border-subtle));
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.badge-chip--subtle {
+  background: color-mix(in srgb, var(--hole-mission-chip-bg) 84%, #ffffff 16%);
+}
+
+.badge-chip--reward {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 48%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-ready-bg) 72%, #ffffff 28%);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-family: var(--font-numeric);
+}
+
+.badge-chip--selected {
+  border-color: color-mix(in srgb, var(--mission-card-selected-border) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-card-selected-bg) 80%, #ffffff 20%);
   color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
 }
 
-.hole-cards-footer__cta {
+.badge-chip--safe {
+  border-color: color-mix(in srgb, var(--hole-mission-ready-border) 56%, var(--border-subtle));
+}
+
+.badge-chip--hard {
+  border-color: color-mix(in srgb, var(--warning) 54%, var(--border-subtle));
+}
+
+.badge-chip--auto {
+  border-color: color-mix(in srgb, var(--hole-mission-border) 56%, var(--border-subtle));
+}
+
+.badge-chip--count {
+  border-color: color-mix(in srgb, var(--mission-public-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-public-bg) 74%, #ffffff 26%);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-public-section {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-public-border);
+  background:
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--mission-public-bg) 72%, #ffffff 28%),
+      color-mix(in srgb, var(--mission-public-bg) 86%, var(--mission-panel-bg) 14%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+.hole-public-section__header h3 {
+  font-size: 1.08rem;
+}
+
+.hole-public-section__list {
+  gap: 0.62rem;
+}
+
+.hole-public-section__helper {
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.public-preview-card {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid color-mix(in srgb, var(--mission-public-border) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-public-bg) 62%, #ffffff 38%);
+  padding: var(--space-3);
+  gap: 0.5rem;
+}
+
+.public-preview-card strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.hole-action-panel {
+  position: sticky;
+  bottom: var(--space-2);
+  z-index: 7;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border-strong) 60%, var(--border-subtle));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--mission-panel-bg) 84%, var(--hole-mission-selected-bg) 16%),
+      color-mix(in srgb, var(--mission-panel-bg) 94%, #ffffff 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-2);
+}
+
+.hole-action-panel__summary-row {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hole-action-panel__summary {
+  font-size: 1.03rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.hole-action-panel__button {
   width: 100%;
-  min-height: 58px;
+  min-height: 64px;
+  border-radius: 1.06rem;
+  border: 1.5px solid color-mix(in srgb, var(--hole-action-bg) 90%, var(--border-subtle));
+  background: var(--hole-action-bg);
+  color: var(--hole-action-text);
+  font-size: 1.08rem;
   font-weight: 800;
+  letter-spacing: 0.008em;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 56%, transparent),
-    0 8px 18px -16px color-mix(in srgb, var(--accent-strong) 48%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+    0 10px 22px -16px color-mix(in srgb, var(--hole-action-bg) 64%, transparent);
+}
+
+.hole-action-panel__button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 88%, #ffffff 12%);
+  background: color-mix(in srgb, var(--hole-action-bg) 88%, #ffffff 12%);
+}
+
+.hole-action-panel__button:disabled {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--hole-action-disabled-bg) 68%, var(--border-subtle));
+  background: var(--hole-action-disabled-bg);
+  color: var(--hole-action-disabled-text);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.hole-action-panel__helper {
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
 }
 
 .hole-setup-card {
-  padding: var(--space-3);
-  gap: var(--space-2);
-  border-color: color-mix(in srgb, var(--accent) 34%, var(--border-subtle));
+  padding: var(--space-4);
+  gap: var(--space-3);
+  border-radius: var(--radius-lg);
+  border-color: color-mix(in srgb, var(--hole-mission-border) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--hole-mission-surface) 70%, #ffffff 30%),
+      color-mix(in srgb, var(--hole-mission-surface-muted) 84%, var(--surface-panel) 16%)
+    );
 }
 
 .hole-setup-control-group {
@@ -879,8 +1184,9 @@ main {
 }
 
 .hole-setup-label {
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
 }
 
 .hole-setup-label--optional {
@@ -888,12 +1194,14 @@ main {
 }
 
 .hole-setup-card .segmented-control {
-  padding: 0.24rem;
-  gap: 0.28rem;
+  padding: 0.28rem;
+  gap: 0.3rem;
+  border-color: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-paper) 78%, #ffffff 22%);
 }
 
 .hole-setup-card .segmented-control__button {
-  min-height: 44px;
+  min-height: 46px;
   padding: 0.5rem;
   font-size: 0.98rem;
 }
@@ -903,13 +1211,13 @@ main {
 }
 
 .hole-setup-tag-pill {
-  min-height: 36px;
+  min-height: 38px;
   padding: 0.25rem 0.58rem;
-  border-color: color-mix(in srgb, var(--border-subtle) 92%, var(--accent) 8%);
-  background: color-mix(in srgb, var(--bg-inset) 64%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-paper) 74%, #ffffff 26%);
   color: var(--text-secondary);
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .hole-setup-tag-pill .tag-pill__icon {
@@ -921,10 +1229,10 @@ main {
 }
 
 .hole-setup-tag-pill.active {
-  border-color: color-mix(in srgb, var(--accent) 68%, var(--border-subtle));
-  background: color-mix(in srgb, var(--accent) 20%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 68%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-selected-bg) 74%, #ffffff 26%);
   color: var(--accent-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 48%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hole-mission-border-strong) 42%, transparent);
 }
 
 .hole-setup-tag-pill.active .tag-pill__icon {
@@ -939,13 +1247,14 @@ main {
 
 .hole-setup-deal-button {
   width: 100%;
-  min-height: 60px;
+  min-height: 62px;
   padding: 0.88rem 1rem;
-  font-size: 1rem;
+  font-size: 1.04rem;
   font-weight: 800;
+  border-radius: 1rem;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 56%, transparent),
-    0 8px 18px -15px color-mix(in srgb, var(--accent-strong) 52%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
+    0 10px 20px -14px color-mix(in srgb, var(--accent-strong) 56%, transparent);
 }
 
 .home-screen {
@@ -954,42 +1263,54 @@ main {
 }
 
 .mode-list-header {
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 30%, var(--accent) 18%);
+  border: 1px solid color-mix(in srgb, var(--color-border) 16%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--surface-panel) 90%, var(--color-butter) 10%),
+      color-mix(in srgb, var(--surface-panel) 94%, var(--color-blush) 6%)
+    );
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border) 22%, transparent);
+  padding: var(--space-4) var(--space-5);
+}
+
+.mode-list-header .screen-title {
+  gap: 0.68rem;
+}
+
+.mode-list-header .screen-title h2 {
+  font-size: clamp(2rem, 6.8vw, 2.52rem);
+}
+
+.mode-list-header .screen-title__icon {
+  width: 1.72rem;
+  height: 1.72rem;
+  font-size: 1.62rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-blush) 44%, #ffffff 56%);
+  color: color-mix(in srgb, var(--accent-strong) 68%, var(--text-primary));
+  border: 1px solid color-mix(in srgb, var(--color-border) 20%, transparent);
+}
+
+.mode-list-panel {
+  border-width: 1.5px;
+  border-color: color-mix(in srgb, var(--color-border) 42%, var(--accent) 16%);
   border-radius: var(--radius-lg);
   background:
     linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--surface-panel) 78%, var(--color-butter) 22%),
-      color-mix(in srgb, var(--surface-panel) 88%, var(--color-blush) 12%)
+      150deg,
+      color-mix(in srgb, var(--surface-panel) 84%, var(--color-butter) 16%),
+      color-mix(in srgb, var(--surface-panel) 92%, var(--color-paper) 8%)
     );
   box-shadow: var(--shadow-card);
   padding: var(--space-5);
 }
 
-.mode-list-header .screen-title {
-  gap: 0.74rem;
-}
-
-.mode-list-header .screen-title h2 {
-  font-size: clamp(2.1rem, 7.4vw, 2.8rem);
-}
-
-.mode-list-header .screen-title__icon {
-  width: 1.9rem;
-  height: 1.9rem;
-  font-size: 1.86rem;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--color-blush) 62%, #ffffff 38%);
-  color: color-mix(in srgb, var(--accent-strong) 76%, var(--text-primary));
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 26%, transparent);
-}
-
-.mode-list-panel {
-  border-width: 1.5px;
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--surface-panel) 92%, var(--color-paper));
-  box-shadow: var(--shadow-soft);
-  padding: var(--space-4);
+.mode-list-panel__chip {
+  background: color-mix(in srgb, var(--surface-panel) 82%, #ffffff 18%);
+  border-color: color-mix(in srgb, var(--color-border) 34%, transparent);
+  color: color-mix(in srgb, var(--text-secondary) 74%, var(--accent-strong));
 }
 
 .mode-list-grid {
@@ -999,16 +1320,21 @@ main {
 }
 
 .mode-card {
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 68%, var(--bg-panel));
+  --mode-card-icon-border: color-mix(in srgb, var(--color-border) 28%, transparent);
+  --mode-card-icon-color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  --mode-card-chevron-color: color-mix(in srgb, var(--text-secondary) 64%, var(--accent-strong));
+
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: stretch;
-  gap: 0.84rem;
+  gap: 0.9rem;
   height: 132px;
   border-radius: 22px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 38%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 40%, transparent);
   background: color-mix(in srgb, var(--bg-panel) 95%, var(--bg-inset));
   text-align: left;
-  padding: 0.94rem 1rem;
+  padding: 0.96rem 1.04rem;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }
@@ -1031,30 +1357,30 @@ main {
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 0.9rem;
-  background: color-mix(in srgb, #ffffff 74%, transparent);
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 24%, transparent);
+  background: var(--mode-card-icon-bg);
+  border: 1.5px solid var(--mode-card-icon-border);
 }
 
 .mode-card__icon {
   width: 1.4rem;
   height: 1.4rem;
   font-size: 1.4rem;
+  color: var(--mode-card-icon-color);
 }
 
 .mode-card__copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.2rem;
+  display: grid;
+  align-content: center;
+  gap: 0.28rem;
   min-width: 0;
   overflow: hidden;
 }
 
 .mode-card__copy strong {
   font-family: var(--font-display);
-  font-size: 1.62rem;
+  font-size: 1.58rem;
   font-weight: 600;
-  line-height: 1.05;
+  line-height: 1;
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -1062,8 +1388,9 @@ main {
 }
 
 .mode-card__tagline {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  line-height: 1.28;
   color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
   display: -webkit-box;
   overflow: hidden;
@@ -1072,8 +1399,9 @@ main {
 }
 
 .mode-card__meta {
-  font-size: 0.78rem;
-  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
+  font-size: 0.74rem;
+  letter-spacing: 0.012em;
+  color: color-mix(in srgb, var(--text-secondary) 68%, var(--accent-strong));
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -1081,17 +1409,21 @@ main {
 }
 
 .mode-card__chevron {
-  width: 1.2rem;
-  height: 1.2rem;
-  font-size: 1.2rem;
-  color: color-mix(in srgb, var(--text-secondary) 70%, var(--accent-strong));
+  width: 1.02rem;
+  height: 1.02rem;
+  font-size: 1.02rem;
+  justify-self: end;
+  align-self: center;
+  color: var(--mode-card-chevron-color);
+  opacity: 0.78;
 }
 
 .mode-detail-screen {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  min-height: calc(100vh - 206px);
+  gap: var(--space-3);
+  min-height: calc(100vh - 194px);
+  margin-top: calc(var(--space-2) * -1);
   padding-bottom: var(--space-3);
 }
 
@@ -1100,15 +1432,18 @@ main {
   --mode-border: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-classic-bg));
   --mode-emblem-border: color-mix(in srgb, var(--mode-classic-border) 46%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-classic-border) 44%, #ffffff);
   --mode-callout-bg: color-mix(in srgb, var(--mode-classic-bg) 20%, #ffffff);
   --mode-callout-border: color-mix(in srgb, var(--mode-classic-border) 42%, var(--border-subtle));
+  --mode-title-size: clamp(2.92rem, 11.7vw, 4.32rem);
+  --mode-title-tracking: 0.004em;
 
   border-radius: var(--radius-xl);
   border: 1.5px solid var(--mode-border);
   background: var(--mode-panel);
   box-shadow: var(--shadow-card);
-  padding: var(--space-5);
-  min-height: clamp(560px, 72vh, 760px);
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  min-height: clamp(520px, 68vh, 720px);
   flex: 1;
   isolation: isolate;
   position: relative;
@@ -1142,6 +1477,7 @@ main {
   --mode-border: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 58%, var(--mode-classic-bg));
   --mode-emblem-border: color-mix(in srgb, var(--mode-classic-border) 46%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-classic-border) 44%, #ffffff);
   --mode-callout-bg: color-mix(in srgb, var(--mode-classic-bg) 24%, #ffffff);
   --mode-callout-border: color-mix(in srgb, var(--mode-classic-border) 42%, var(--border-subtle));
 }
@@ -1151,6 +1487,7 @@ main {
   --mode-border: color-mix(in srgb, var(--mode-novelty-border) 54%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-novelty-bg));
   --mode-emblem-border: color-mix(in srgb, var(--mode-novelty-border) 44%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-novelty-border) 44%, #ffffff);
   --mode-callout-bg: color-mix(in srgb, var(--mode-novelty-bg) 26%, #ffffff);
   --mode-callout-border: color-mix(in srgb, var(--mode-novelty-border) 42%, var(--border-subtle));
 }
@@ -1160,6 +1497,7 @@ main {
   --mode-border: color-mix(in srgb, var(--mode-chaos-border) 54%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-chaos-bg));
   --mode-emblem-border: color-mix(in srgb, var(--mode-chaos-border) 44%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-chaos-border) 44%, #ffffff);
   --mode-callout-bg: color-mix(in srgb, var(--mode-chaos-bg) 24%, #ffffff);
   --mode-callout-border: color-mix(in srgb, var(--mode-chaos-border) 42%, var(--border-subtle));
 }
@@ -1169,17 +1507,21 @@ main {
   --mode-border: color-mix(in srgb, var(--mode-props-border) 52%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-props-bg));
   --mode-emblem-border: color-mix(in srgb, var(--mode-props-border) 42%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-props-border) 42%, #ffffff);
   --mode-callout-bg: color-mix(in srgb, var(--mode-props-bg) 28%, #ffffff);
   --mode-callout-border: color-mix(in srgb, var(--mode-props-border) 40%, var(--border-subtle));
 }
 
 .mode-spotlight.mode-tone--power-ups {
-  --mode-panel: color-mix(in srgb, var(--mode-power-bg) 64%, #fbf4ff);
-  --mode-border: color-mix(in srgb, var(--mode-power-border) 52%, var(--border-subtle));
-  --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-power-bg));
-  --mode-emblem-border: color-mix(in srgb, var(--mode-power-border) 44%, transparent);
-  --mode-callout-bg: color-mix(in srgb, var(--mode-power-bg) 25%, #ffffff);
-  --mode-callout-border: color-mix(in srgb, var(--mode-power-border) 42%, var(--border-subtle));
+  --mode-panel: color-mix(in srgb, var(--mode-power-bg) 68%, #f7ecff);
+  --mode-border: color-mix(in srgb, var(--mode-power-border) 56%, var(--border-subtle));
+  --mode-emblem-bg: color-mix(in srgb, #ffffff 56%, var(--mode-power-bg));
+  --mode-emblem-border: color-mix(in srgb, var(--mode-power-border) 48%, transparent);
+  --mode-emblem-accent: color-mix(in srgb, var(--mode-power-border) 52%, #ffffff);
+  --mode-callout-bg: color-mix(in srgb, var(--mode-power-bg) 20%, #ffffff);
+  --mode-callout-border: color-mix(in srgb, var(--mode-power-border) 38%, var(--border-subtle));
+  --mode-title-size: clamp(2.62rem, 10.6vw, 3.94rem);
+  --mode-title-tracking: 0.002em;
 }
 
 .mode-spotlight__header {
@@ -1249,10 +1591,10 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
+  justify-content: flex-start;
+  gap: 0.82rem;
   text-align: center;
-  padding-block: var(--space-4);
+  padding-block: var(--space-2) var(--space-3);
 }
 
 .mode-spotlight__context {
@@ -1267,76 +1609,115 @@ main {
 
 .mode-spotlight__title {
   margin: 0;
-  font-size: clamp(3rem, 12.5vw, 4.7rem);
+  font-size: var(--mode-title-size);
   line-height: 0.9;
-  letter-spacing: 0.005em;
+  letter-spacing: var(--mode-title-tracking);
   color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
 }
 
 .mode-spotlight__emblem {
+  position: relative;
   width: clamp(9.2rem, 31vw, 12.2rem);
   height: clamp(9.2rem, 31vw, 12.2rem);
   border-radius: 2.1rem;
   border: 1.5px solid var(--mode-emblem-border);
-  background: var(--mode-emblem-bg);
+  background:
+    radial-gradient(
+      120% 96% at 20% 14%,
+      color-mix(in srgb, #ffffff 52%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      86% 74% at 76% 82%,
+      color-mix(in srgb, var(--mode-emblem-accent) 26%, transparent),
+      transparent 62%
+    ),
+    var(--mode-emblem-bg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 62%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 66%, transparent),
+    inset 0 -12px 20px -18px color-mix(in srgb, var(--mode-emblem-border) 62%, transparent),
+    0 10px 20px -18px color-mix(in srgb, var(--mode-border) 62%, transparent);
+  overflow: hidden;
+}
+
+.mode-spotlight__emblem::before {
+  content: '';
+  position: absolute;
+  inset: 0.62rem;
+  border-radius: 1.52rem;
+  border: 1px solid color-mix(in srgb, var(--mode-emblem-border) 66%, transparent);
+}
+
+.mode-spotlight__emblem::after {
+  content: '';
+  position: absolute;
+  inset: 1.16rem;
+  border-radius: 1.18rem;
+  border: 1px dashed color-mix(in srgb, var(--mode-emblem-border) 52%, transparent);
+  opacity: 0.55;
 }
 
 .mode-spotlight__icon {
+  position: relative;
+  z-index: 1;
   width: clamp(5.6rem, 18vw, 7.2rem);
   height: clamp(5.6rem, 18vw, 7.2rem);
   font-size: clamp(5.6rem, 18vw, 7.2rem);
   margin: 0 auto;
-  color: color-mix(in srgb, var(--text-primary) 90%, transparent);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--mode-emblem-accent));
 }
 
 .mode-spotlight__summary {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 800;
-  line-height: 1.28;
-  max-width: 30ch;
+  font-size: 1.04rem;
+  font-weight: 780;
+  line-height: 1.26;
+  max-width: 28ch;
   color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
 }
 
 .mode-spotlight__description {
   margin: 0;
-  max-width: 34ch;
-  font-size: 0.98rem;
-  line-height: 1.46;
-  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  max-width: 32ch;
+  font-size: 0.95rem;
+  line-height: 1.44;
+  color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
 }
 
 .mode-spotlight__meta {
   margin: 0;
   max-width: 34ch;
-  font-size: 0.86rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.34;
+  letter-spacing: 0.014em;
   color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
 }
 
 .mode-spotlight__callout {
-  border: 1.5px solid var(--mode-callout-border);
+  border: 1.25px solid color-mix(in srgb, var(--mode-callout-border) 78%, transparent);
   border-radius: var(--radius-md);
-  background: var(--mode-callout-bg);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-soft);
+  background: color-mix(in srgb, var(--mode-callout-bg) 62%, var(--mode-panel));
+  padding: var(--space-3);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0.44rem;
 }
 
 .mode-spotlight__callout .label {
-  color: var(--text-primary);
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
 }
 
 .mode-spotlight__callout p {
   margin: 0;
-  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
-  line-height: 1.4;
+  color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
+  line-height: 1.36;
+  font-size: 0.9rem;
 }
 
 .mode-spotlight__footer {
@@ -1385,39 +1766,54 @@ main {
 .mode-config-mode-card.mode-tone--classic {
   background: color-mix(in srgb, var(--mode-classic-bg) 52%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 58%, var(--mode-classic-bg));
+  --mode-card-icon-border: color-mix(in srgb, var(--mode-classic-border) 38%, transparent);
+  --mode-card-chevron-color: color-mix(in srgb, var(--mode-classic-border) 56%, var(--text-secondary));
 }
 
 .mode-card.mode-tone--novelty,
 .mode-config-mode-card.mode-tone--novelty {
   background: color-mix(in srgb, var(--mode-novelty-bg) 54%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-novelty-border) 54%, var(--border-subtle));
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-novelty-bg));
+  --mode-card-icon-border: color-mix(in srgb, var(--mode-novelty-border) 36%, transparent);
+  --mode-card-chevron-color: color-mix(in srgb, var(--mode-novelty-border) 52%, var(--text-secondary));
 }
 
 .mode-card.mode-tone--chaos,
 .mode-config-mode-card.mode-tone--chaos {
   background: color-mix(in srgb, var(--mode-chaos-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-chaos-border) 54%, var(--border-subtle));
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-chaos-bg));
+  --mode-card-icon-border: color-mix(in srgb, var(--mode-chaos-border) 36%, transparent);
+  --mode-card-chevron-color: color-mix(in srgb, var(--mode-chaos-border) 52%, var(--text-secondary));
 }
 
 .mode-card.mode-tone--props,
 .mode-config-mode-card.mode-tone--props {
   background: color-mix(in srgb, var(--mode-props-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-props-border) 52%, var(--border-subtle));
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-props-bg));
+  --mode-card-icon-border: color-mix(in srgb, var(--mode-props-border) 34%, transparent);
+  --mode-card-chevron-color: color-mix(in srgb, var(--mode-props-border) 56%, var(--text-secondary));
 }
 
 .mode-card.mode-tone--power-ups,
 .mode-config-mode-card.mode-tone--power-ups {
   background: color-mix(in srgb, var(--mode-power-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-power-border) 54%, var(--border-subtle));
+  --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-power-bg));
+  --mode-card-icon-border: color-mix(in srgb, var(--mode-power-border) 36%, transparent);
+  --mode-card-chevron-color: color-mix(in srgb, var(--mode-power-border) 54%, var(--text-secondary));
 }
 
 @media (max-width: 520px) {
   .mode-detail-screen {
-    min-height: calc(100vh - 184px);
+    min-height: calc(100vh - 176px);
   }
 
   .mode-spotlight {
-    min-height: calc(100vh - 268px);
+    min-height: calc(100vh - 236px);
     padding: var(--space-4);
   }
 
@@ -1467,22 +1863,22 @@ main {
 }
 
 .home-screen__header {
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 32%, transparent);
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--color-border) 18%, transparent);
   border-radius: var(--radius-lg);
   background:
     linear-gradient(
       148deg,
-      color-mix(in srgb, var(--color-blush) 22%, var(--surface-panel)),
-      color-mix(in srgb, var(--color-butter) 20%, var(--surface-panel))
+      color-mix(in srgb, var(--color-blush) 14%, var(--surface-panel)),
+      color-mix(in srgb, var(--color-butter) 12%, var(--surface-panel))
     ),
     var(--bg-panel);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border) 18%, transparent);
 }
 
 .home-screen__header > p {
-  color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
+  color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
 }
 
 .home-screen__support {
@@ -1490,22 +1886,16 @@ main {
 }
 
 .home-resume-card {
-  border-width: 1.5px;
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border-subtle));
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(
-      140deg,
-      color-mix(in srgb, var(--accent-soft) 58%, var(--surface-panel)),
-      color-mix(in srgb, var(--surface-panel) 90%, var(--color-butter) 10%)
-    ),
-    var(--bg-panel);
-  box-shadow: var(--shadow-soft);
+  background: color-mix(in srgb, var(--surface-panel) 94%, var(--accent-soft) 6%);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border) 18%, transparent);
 }
 
 .home-resume-card .chip {
-  background: color-mix(in srgb, var(--accent-soft) 44%, #ffffff 56%);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-soft) 30%, #ffffff 70%);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border-subtle));
 }
 
 .home-resume-card .button-primary {
@@ -1517,6 +1907,11 @@ main {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
     0 10px 20px -16px color-mix(in srgb, var(--accent-strong) 54%, transparent);
+}
+
+.home-screen .label {
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
 }
 
 .home-ready-card {
@@ -1685,121 +2080,251 @@ main {
 }
 
 .hole-recap-screen {
-  gap: var(--space-3);
-  padding-bottom: calc(var(--space-5) + 4.25rem);
+  gap: var(--space-4);
+  padding-bottom: calc(var(--space-5) + 4.4rem);
 }
 
 .recap-header {
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
-.recap-highlight-label {
-  font-size: 0.77rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  font-weight: 700;
+.hole-recap-screen--editorial {
+  --recap-panel-bg: color-mix(in srgb, var(--hole-recap-surface) 80%, var(--surface-panel));
+  --recap-panel-border: color-mix(in srgb, var(--hole-recap-border) 54%, var(--border-subtle));
+  --recap-panel-inset-bg: color-mix(in srgb, var(--hole-recap-surface-muted) 84%, #ffffff 16%);
+  --recap-panel-inset-border: color-mix(in srgb, var(--hole-recap-border) 46%, var(--border-subtle));
+  --recap-hero-bg: color-mix(in srgb, var(--hole-recap-hero-bg) 84%, #ffffff 16%);
+  --recap-hero-border: color-mix(in srgb, var(--hole-recap-hero-border) 58%, var(--border-subtle));
+  --recap-chip-bg: color-mix(in srgb, var(--hole-recap-chip-bg) 88%, #ffffff 12%);
+  --recap-chip-border: color-mix(in srgb, var(--hole-recap-chip-border) 56%, var(--border-subtle));
 }
 
-.recap-highlight {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
-  font-weight: 700;
-  font-size: clamp(1.26rem, 4.8vw, 1.44rem);
-  line-height: 1.24;
-}
-
-.recap-hero {
-  border-color: color-mix(in srgb, var(--accent) 56%, var(--border-subtle));
+.recap-header--editorial {
+  border: 1.5px solid var(--recap-panel-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
   background:
     linear-gradient(
-      130deg,
-      color-mix(in srgb, var(--accent) 14%, transparent),
-      color-mix(in srgb, var(--bg-panel) 86%, transparent)
-    ),
-    var(--bg-panel);
+      156deg,
+      color-mix(in srgb, var(--recap-panel-bg) 84%, var(--color-butter) 16%),
+      color-mix(in srgb, var(--recap-panel-bg) 92%, var(--color-blush) 8%)
+    );
+  box-shadow: var(--shadow-card);
 }
 
-.recap-hero__headline {
-  margin-top: -0.15rem;
+.recap-header__title-row {
+  align-items: flex-start;
+  gap: var(--space-2);
 }
 
-.recap-hero__sub {
+.recap-header__title-row .screen-title {
+  gap: 0.68rem;
+}
+
+.recap-header__title-row .screen-title h2 {
+  font-size: clamp(2rem, 7vw, 2.54rem);
+}
+
+.recap-header__title-row .screen-title__icon {
+  width: 1.72rem;
+  height: 1.72rem;
+  font-size: 1.66rem;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--hole-recap-border) 40%, var(--border-subtle));
+  background: color-mix(in srgb, var(--recap-panel-bg) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--accent-strong) 74%, var(--text-primary));
+}
+
+.recap-header__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.34rem;
+}
+
+.recap-hero-card {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-hero-border);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--recap-hero-bg) 84%, #ffffff 16%),
+      color-mix(in srgb, var(--recap-hero-bg) 94%, var(--recap-panel-bg) 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-2);
+}
+
+.recap-hero-card__label {
+  letter-spacing: 0.09em;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.recap-hero-card__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.56rem, 6.6vw, 2.12rem);
+  line-height: 1.08;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.recap-hero-card__supporting {
   font-size: 0.88rem;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  line-height: 1.38;
+  color: color-mix(in srgb, var(--text-primary) 84%, var(--accent-strong));
 }
 
 .recap-why-card {
-  gap: var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-panel-border);
+  background: var(--recap-panel-bg);
+  padding: var(--space-4);
+  gap: var(--space-3);
 }
 
 .recap-why-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.52rem;
 }
 
 .recap-why-list__item {
-  padding-left: 0.7rem;
-  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1.5px solid var(--recap-panel-inset-border);
+  border-radius: var(--radius-sm);
+  background: var(--recap-panel-inset-bg);
+  padding: 0.55rem 0.68rem;
+  font-size: 0.88rem;
+  line-height: 1.34;
+}
+
+.recap-why-list__item strong {
+  font-family: var(--font-ui);
   font-size: 0.9rem;
-  line-height: 1.36;
+  font-weight: 760;
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
 }
 
 .recap-outcome-grid {
   gap: var(--space-2);
 }
 
-.recap-outcome-card {
-  border-color: color-mix(in srgb, var(--border-subtle) 78%, var(--accent) 18%);
+.recap-outcome-section {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-panel-border);
+  background: var(--recap-panel-bg);
+  padding: var(--space-4);
+}
+
+.recap-summary-stat-card {
+  border: 1.5px solid var(--recap-panel-inset-border);
+  border-radius: var(--radius-sm);
+  background: var(--recap-panel-inset-bg);
+  padding: var(--space-3);
+  gap: 0.45rem;
+}
+
+.recap-summary-stat-card > .label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.recap-summary-stat-card > strong {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 600;
+  line-height: 1.08;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
 }
 
 .recap-score-clarity {
-  border-color: color-mix(in srgb, var(--accent) 24%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--recap-panel-border) 78%, transparent);
+  background: color-mix(in srgb, var(--recap-panel-inset-bg) 86%, #ffffff 14%);
 }
 
-.recap-breakdown-toggle {
-  border-top: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
-}
-
-.recap-breakdown-toggle > button {
-  width: 100%;
-}
-
-.recap-next {
-  margin-top: 0;
-}
-
-.recap-next__helper {
-  font-size: 0.84rem;
-}
-
-.recap-next--sticky {
-  position: sticky;
-  bottom: var(--space-2);
-  z-index: 6;
-  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border-subtle));
+.recap-leaderboard-card {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-panel-border);
   background:
     linear-gradient(
-      120deg,
-      color-mix(in srgb, var(--accent) 10%, transparent),
-      color-mix(in srgb, var(--bg-panel) 88%, transparent)
-    ),
-    var(--bg-panel);
-  backdrop-filter: blur(2px);
-  box-shadow: var(--shadow-card);
+      154deg,
+      color-mix(in srgb, var(--recap-panel-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--recap-panel-bg) 94%, var(--hole-recap-paper) 6%)
+    );
+  padding: var(--space-4);
 }
 
-.recap-next--sticky > button {
+.hole-recap-screen--editorial .hole-action-panel {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 56%, var(--recap-panel-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--recap-panel-bg) 84%, var(--hole-recap-table-row-leader-bg) 16%),
+      color-mix(in srgb, var(--recap-panel-bg) 92%, #ffffff 8%)
+    );
+}
+
+.hole-recap-screen--editorial .hole-action-panel__summary {
+  font-size: 1rem;
+}
+
+.recap-breakdown-panel {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-panel-border);
+  background: var(--recap-panel-bg);
+  padding: var(--space-4);
+}
+
+.recap-breakdown-panel__toggle {
   width: 100%;
-  min-height: 58px;
-  font-size: 1.01rem;
-  font-weight: 800;
+  min-height: 48px;
+  border-radius: 15px;
+  border: 1.5px solid var(--recap-chip-border);
+  background: var(--recap-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  font-weight: 740;
+  box-shadow: none;
+}
+
+.recap-breakdown-panel__toggle:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 54%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--recap-chip-bg) 80%, var(--hole-recap-table-row-leader-bg) 20%);
+}
+
+.recap-breakdown-panel__toggle--active,
+.recap-breakdown-panel__toggle--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 70%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 78%, #ffffff 22%);
+}
+
+.recap-breakdown-content {
+  gap: var(--space-3);
+}
+
+.recap-section {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--recap-panel-border);
+  background: var(--recap-panel-bg);
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+@media (max-width: 520px) {
+  .recap-header__title-row {
+    flex-direction: column;
+  }
+
+  .recap-header__chips {
+    justify-content: flex-start;
+  }
+
+  .recap-why-list__item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .featured-hole-banner {
@@ -2172,89 +2697,73 @@ main {
 .recap-list {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.62rem;
 }
 
 .recap-item {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.62rem 0.72rem;
-  border: 1px solid var(--border-subtle);
+  gap: 0.5rem;
+  padding: 0.7rem 0.78rem;
+  border: 1.5px solid var(--recap-panel-inset-border);
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--bg-inset) 82%, var(--bg-panel));
+  background: var(--recap-panel-inset-bg);
 }
 
 .recap-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.48rem;
+  gap: 0.4rem;
   align-items: center;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 
-.recap-player-card {
-  border-color: color-mix(in srgb, var(--border-subtle) 80%, var(--accent) 10%);
+.recap-player-outcome-card {
+  padding: 0;
+  overflow: hidden;
 }
 
-.recap-player-card--success {
-  border-color: color-mix(in srgb, var(--accent) 62%, var(--border-subtle));
+.recap-player-outcome-card--success {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 60%, var(--recap-panel-inset-border));
+  background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 66%, #ffffff 34%);
 }
 
-.recap-player-card--failed {
-  border-color: color-mix(in srgb, var(--danger) 56%, var(--border-subtle));
+.recap-player-outcome-card--failed {
+  border-color: color-mix(in srgb, var(--danger) 44%, var(--recap-panel-inset-border));
+  background: color-mix(in srgb, var(--surface-danger) 42%, var(--recap-panel-inset-bg));
 }
 
 .recap-card-line {
-  padding-bottom: 0.16rem;
-  border-bottom: 1px dashed color-mix(in srgb, var(--border-subtle) 70%, transparent);
-}
-
-.recap-section {
-  gap: var(--space-3);
-}
-
-.recap-section > .row-between {
-  align-items: flex-end;
-}
-
-.recap-section .recap-item {
-  gap: 0.58rem;
-}
-
-.recap-player-card .recap-metrics {
-  justify-content: flex-end;
-}
-
-.recap-player-card .recap-card-line {
+  padding-bottom: 0.18rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--recap-panel-inset-border) 76%, transparent);
   font-weight: 600;
 }
 
 .recap-driver-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  gap: 0.42rem;
 }
 
 .recap-driver-cell {
   display: flex;
   flex-direction: column;
   gap: 0.12rem;
-  padding: 0.46rem 0.52rem;
-  border: 1px solid var(--border-subtle);
+  padding: 0.48rem 0.54rem;
+  border: 1.5px solid var(--recap-panel-inset-border);
   border-radius: var(--radius-xs);
-  background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-inset));
+  background: color-mix(in srgb, var(--recap-panel-inset-bg) 72%, #ffffff 28%);
 }
 
 .recap-driver-cell .label {
   font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 .recap-driver-value {
   font-family: var(--font-numeric);
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 760;
+  font-size: 0.96rem;
 }
 
 .recap-driver-value--positive {
@@ -2269,57 +2778,112 @@ main {
   color: var(--text-secondary);
 }
 
-.recap-player-summary {
-  padding: 0;
-  overflow: hidden;
+.recap-player-outcome-card[open] {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 60%, var(--recap-panel-inset-border));
 }
 
-.recap-player-summary[open] {
-  border-color: color-mix(in srgb, var(--accent) 56%, var(--border-subtle));
-}
-
-.recap-player-summary__summary {
+.recap-player-outcome-card__summary {
   list-style: none;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.72rem;
+  gap: 0.42rem;
+  padding: 0.74rem;
 }
 
-.recap-player-summary__summary::-webkit-details-marker {
+.recap-player-outcome-card__summary::-webkit-details-marker {
   display: none;
 }
 
-.recap-player-summary__name {
+.recap-player-outcome-card__name {
   font-family: var(--font-ui);
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 760;
   color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
 }
 
-.recap-player-summary__chips {
-  gap: 0.36rem;
+.recap-player-outcome-card__chips {
+  gap: 0.32rem;
 }
 
-.recap-player-summary__details {
-  border-top: 1px dashed color-mix(in srgb, var(--border-subtle) 72%, transparent);
+.recap-player-outcome-card__details {
+  border-top: 1px dashed color-mix(in srgb, var(--recap-panel-inset-border) 78%, transparent);
   padding: 0.66rem 0.72rem 0.72rem;
 }
 
 .recap-public-impact {
-  border-color: color-mix(in srgb, var(--info) 56%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--hole-recap-border) 56%, var(--recap-panel-border));
   background:
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--surface-info) 16%, transparent),
-      color-mix(in srgb, var(--bg-panel) 92%, transparent)
-    ),
-    var(--bg-panel);
+      140deg,
+      color-mix(in srgb, var(--surface-info) 12%, transparent),
+      color-mix(in srgb, var(--recap-panel-bg) 90%, transparent)
+    );
 }
 
-.recap-public-impact__item {
-  border-color: color-mix(in srgb, var(--info) 45%, var(--border-subtle));
+.recap-public-impact-card {
+  border-color: color-mix(in srgb, var(--hole-recap-border) 48%, var(--recap-panel-inset-border));
+}
+
+.recap-status-chip {
+  min-height: 30px;
+  padding: 0.16rem 0.58rem;
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  border-style: solid;
+  border-color: var(--recap-chip-border);
+  background: var(--recap-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 84%, var(--accent-strong));
+  font-size: 0.75rem;
+  font-weight: 680;
+  letter-spacing: 0.02em;
+}
+
+.recap-status-chip--subtle {
+  background: color-mix(in srgb, var(--recap-chip-bg) 72%, var(--recap-panel-bg) 28%);
+}
+
+.recap-status-chip--count {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 62%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 76%, #ffffff 24%);
+}
+
+.recap-status-chip--quick,
+.recap-status-chip--snapshot {
+  border-color: color-mix(in srgb, var(--hole-recap-border) 62%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--hole-recap-paper) 58%, var(--recap-chip-bg));
+}
+
+.recap-status-chip--winner {
+  border-color: color-mix(in srgb, var(--warning) 58%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--surface-warning) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--text-warning) 86%, var(--text-primary));
+}
+
+.recap-status-chip--success {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 66%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--surface-success) 78%, #ffffff 22%);
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+}
+
+.recap-status-chip--failed {
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--surface-danger) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--text-danger) 82%, var(--text-primary));
+}
+
+.recap-status-chip--total {
+  border-color: color-mix(in srgb, var(--recap-panel-border) 86%, transparent);
+  background: color-mix(in srgb, var(--recap-panel-inset-bg) 70%, #ffffff 30%);
+}
+
+.recap-status-chip--optional {
+  border-color: color-mix(in srgb, var(--recap-chip-border) 88%, transparent);
+}
+
+.recap-status-chip--expanded {
+  border-color: color-mix(in srgb, var(--hole-recap-border-strong) 70%, var(--recap-chip-border));
+  background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 72%, #ffffff 28%);
 }
 
 .badge-success {
@@ -2351,52 +2915,6 @@ main {
   border-color: color-mix(in srgb, var(--novelty) 70%, var(--border-subtle));
   background: color-mix(in srgb, var(--novelty) 14%, var(--bg-panel));
   color: color-mix(in srgb, var(--text-primary) 80%, var(--novelty));
-}
-
-.recap-metrics--primary,
-.recap-metrics--momentum,
-.recap-metrics--totals {
-  gap: 0.44rem;
-}
-
-.recap-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0.15rem 0.56rem;
-  border-radius: 999px;
-  border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg-panel) 90%, transparent);
-  font-size: 0.82rem;
-}
-
-.recap-pill--success {
-  border-color: color-mix(in srgb, var(--accent) 70%, var(--border-subtle));
-}
-
-.recap-pill--failed {
-  border-color: color-mix(in srgb, var(--danger) 74%, var(--border-subtle));
-}
-
-.recap-pill--bonus {
-  border-color: color-mix(in srgb, var(--warning) 72%, var(--border-subtle));
-}
-
-.recap-pill--featured {
-  border-color: color-mix(in srgb, var(--info) 62%, var(--border-subtle));
-}
-
-.recap-pill--hole {
-  border-color: color-mix(in srgb, var(--info) 70%, var(--border-subtle));
-  font-family: var(--font-numeric);
-}
-
-.recap-pill--total {
-  border-color: color-mix(in srgb, var(--text-secondary) 45%, var(--border-subtle));
-}
-
-.recap-pill--momentum-up {
-  border-color: color-mix(in srgb, var(--novelty) 72%, var(--border-subtle));
 }
 
 .recap-impact-row {
@@ -2648,6 +3166,11 @@ main {
   font-size: 0.83rem;
 }
 
+.leaderboard-table__legend--compact {
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 .table-sort-button {
   min-height: 34px;
   padding: 0.18rem 0.32rem;
@@ -2671,6 +3194,46 @@ main {
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 0.22rem;
+}
+
+.recap-leaderboard-card .leaderboard-table {
+  border-width: 1.5px;
+  border-color: color-mix(in srgb, var(--recap-panel-border) 82%, var(--border-subtle));
+  border-radius: var(--radius-md);
+  min-width: 380px;
+}
+
+.recap-leaderboard-card .leaderboard-table__th,
+.recap-leaderboard-card .leaderboard-table__cell {
+  padding: 0.66rem 0.56rem;
+  border-bottom-color: color-mix(in srgb, var(--recap-panel-inset-border) 82%, transparent);
+}
+
+.recap-leaderboard-card .leaderboard-table__th {
+  background: color-mix(in srgb, var(--hole-recap-table-head-bg) 78%, #ffffff 22%);
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.recap-leaderboard-card .leaderboard-table tbody tr:nth-child(even) .leaderboard-table__cell {
+  background: color-mix(in srgb, var(--recap-panel-inset-bg) 40%, transparent);
+}
+
+.recap-leaderboard-card .leaderboard-table__row--leader .leaderboard-table__cell {
+  background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 74%, #ffffff 26%);
+  border-bottom-color: color-mix(in srgb, var(--hole-recap-border-strong) 46%, transparent);
+}
+
+.recap-leaderboard-card .leaderboard-table__cell--metric:last-child {
+  font-weight: 800;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.recap-leaderboard-card .table-sort-button {
+  min-height: 30px;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
 }
 
 .end-summary-grid {
@@ -3351,135 +3914,195 @@ main {
 }
 
 .hole-results-screen {
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
+
+.hole-results-screen--editorial {
+  --results-header-bg: color-mix(in srgb, var(--hole-results-paper) 86%, var(--surface-panel));
+  --results-panel-bg: color-mix(in srgb, var(--hole-results-surface) 80%, var(--surface-panel));
+  --results-panel-border: color-mix(in srgb, var(--hole-results-border) 54%, var(--border-subtle));
+  --results-inset-bg: color-mix(in srgb, var(--hole-results-surface-muted) 84%, #ffffff 16%);
+  --results-inset-border: color-mix(in srgb, var(--hole-results-border) 46%, var(--border-subtle));
+  --results-ready-bg: color-mix(in srgb, var(--hole-results-ready-bg) 84%, #ffffff 16%);
+  --results-ready-border: color-mix(in srgb, var(--hole-results-ready-border) 60%, var(--border-subtle));
+  --results-pending-bg: color-mix(in srgb, var(--hole-results-pending-bg) 82%, #ffffff 18%);
+  --results-pending-border: color-mix(in srgb, var(--hole-results-pending-border) 56%, var(--border-subtle));
+  --results-chip-bg: color-mix(in srgb, var(--hole-results-chip-bg) 88%, #ffffff 12%);
+  --results-chip-border: color-mix(in srgb, var(--hole-results-chip-border) 58%, var(--border-subtle));
+  --results-target-bg: color-mix(in srgb, var(--hole-results-target-bg) 82%, #ffffff 18%);
+  --results-target-border: color-mix(in srgb, var(--hole-results-target-border) 58%, var(--border-subtle));
 }
 
 .hole-results-header {
-  gap: var(--space-1);
+  gap: var(--space-2);
+}
+
+.hole-results-header--editorial {
+  padding: var(--space-4) var(--space-5);
+  border: 1.5px solid var(--results-panel-border);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--results-header-bg) 78%, var(--color-butter) 22%),
+      color-mix(in srgb, var(--results-header-bg) 90%, var(--color-blush) 10%)
+    );
+  box-shadow: var(--shadow-card);
+}
+
+.hole-results-header--editorial .screen-title {
+  gap: 0.68rem;
+}
+
+.hole-results-header--editorial .screen-title h2 {
+  font-size: clamp(1.96rem, 7vw, 2.54rem);
+}
+
+.hole-results-header--editorial .screen-title__icon {
+  width: 1.74rem;
+  height: 1.74rem;
+  font-size: 1.7rem;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--hole-results-border) 40%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-panel-bg) 70%, #ffffff 30%);
+  color: color-mix(in srgb, var(--accent-strong) 78%, var(--text-primary));
 }
 
 .hole-results-header .muted {
-  font-size: 0.94rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
 }
 
 .hole-results-header__title-row {
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--space-2);
 }
 
 .hole-results-progress-chip {
   font-family: var(--font-numeric);
   font-weight: 700;
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 60%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 70%, var(--surface-panel));
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
 }
 
-.hole-results-stepper {
-  padding: var(--space-3);
-  border-color: color-mix(in srgb, var(--accent) 34%, var(--border-subtle));
+.hole-results-progress-board {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--results-panel-border);
   background:
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--accent) 8%, transparent),
-      color-mix(in srgb, var(--bg-panel) 90%, transparent)
-    ),
-    var(--bg-panel);
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 84%, #ffffff 16%),
+      color-mix(in srgb, var(--results-panel-bg) 94%, var(--hole-results-paper) 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-3);
 }
 
-.hole-results-stepper__list {
+.hole-results-progress-board__list {
   display: grid;
-  gap: 0.52rem;
+  gap: 0.62rem;
 }
 
-.hole-results-stepper__item {
+.hole-results-progress-board__item {
   display: flex;
   align-items: center;
-  gap: 0.58rem;
-  padding: 0.4rem 0.48rem;
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent);
+  gap: 0.66rem;
+  padding: 0.48rem 0.56rem;
+  border: 1.5px solid var(--results-inset-border);
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--bg-inset) 84%, var(--bg-panel));
+  background: var(--results-inset-bg);
 }
 
-.hole-results-stepper__item--complete {
-  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-panel));
+.hole-results-progress-board__item--complete {
+  border-color: var(--results-ready-border);
+  background: var(--results-ready-bg);
 }
 
-.hole-results-stepper__index {
+.hole-results-progress-board__index {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.48rem;
-  height: 1.48rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--info) 54%, var(--border-subtle));
-  background: color-mix(in srgb, var(--surface-info) 72%, var(--bg-panel));
-  color: var(--text-info);
+  width: 1.56rem;
+  height: 1.56rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid color-mix(in srgb, var(--results-pending-border) 80%, transparent);
+  background: color-mix(in srgb, var(--results-pending-bg) 84%, #ffffff 16%);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
   font-family: var(--font-numeric);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
-.hole-results-stepper__item--complete .hole-results-stepper__index {
-  border-color: var(--accent-strong);
-  background: var(--accent);
-  color: var(--text-on-primary);
+.hole-results-progress-board__item--complete .hole-results-progress-board__index {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 74%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-results-ready-bg) 84%, var(--accent-soft));
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
 }
 
-.hole-results-stepper__copy {
+.hole-results-progress-board__copy {
   display: flex;
   flex-direction: column;
   gap: 0.08rem;
 }
 
-.hole-results-stepper__label {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+.hole-results-progress-board__label {
+  font-size: 0.9rem;
+  font-weight: 760;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
 }
 
-.hole-results-stepper__detail {
+.hole-results-progress-board__detail {
   font-size: 0.78rem;
-  color: var(--text-secondary);
+  color: color-mix(in srgb, var(--text-secondary) 90%, var(--accent-strong));
 }
 
-.hole-results-stepper__helper {
-  margin-top: 0.12rem;
+.hole-results-progress-board__helper {
+  margin-top: 0;
   font-size: 0.82rem;
 }
 
 .hole-results-entry-panel,
-.hole-results-step-panel,
-.public-resolution-panel,
-.hole-results-next {
-  padding: var(--space-3);
-  gap: var(--space-2);
+.hole-results-step-panel {
+  border-radius: var(--radius-lg);
+  border-width: 1.5px;
+  border-style: solid;
+  padding: var(--space-4);
+  gap: var(--space-3);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-panel-bg) 94%, var(--hole-results-paper) 6%)
+    );
 }
 
 .hole-results-entry-panel {
-  border-top: 2px solid color-mix(in srgb, var(--accent) 44%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--accent) 44%, transparent);
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 56%, var(--results-panel-border));
 }
 
 .hole-results-step-panel {
-  border-top: 2px solid color-mix(in srgb, var(--warning) 48%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--warning) 48%, transparent);
+  border-color: var(--results-panel-border);
 }
 
-.public-resolution-panel {
-  border-top: 2px solid color-mix(in srgb, var(--info) 50%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--info) 50%, transparent);
+.hole-results-step-panel--mission {
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 84%, var(--hole-results-ready-bg) 16%),
+      color-mix(in srgb, var(--results-panel-bg) 92%, #ffffff 8%)
+    );
 }
 
-.public-resolution-panel > .panel.inset {
-  border-style: solid;
-}
-
-.hole-results-next {
-  border-top: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--accent) 50%, transparent);
+.hole-results-step-panel--public {
+  background:
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--results-panel-bg) 82%, var(--surface-info) 18%),
+      color-mix(in srgb, var(--results-panel-bg) 92%, #ffffff 8%)
+    );
 }
 
 .hole-results-step-header {
@@ -3487,145 +4110,254 @@ main {
 }
 
 .hole-results-step-header > strong {
-  font-family: var(--font-ui);
-  font-size: 1.04rem;
-  letter-spacing: 0.002em;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: 1.42rem;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1.08;
 }
 
 .hole-results-step-actions {
   align-items: flex-start;
+  gap: var(--space-2);
 }
 
 .hole-results-step-actions .muted {
-  font-size: 0.85rem;
-  line-height: 1.32;
+  font-size: 0.84rem;
+  line-height: 1.36;
 }
 
-.hole-results-step-actions > button {
-  min-height: 42px;
-  padding: 0.48rem 0.76rem;
-  font-size: 0.88rem;
+.hole-results-toggle-button {
+  min-height: 40px;
+  padding: 0.45rem 0.72rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-inset-border);
+  background: var(--results-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-size: 0.82rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  box-shadow: none;
 }
 
-.hole-results-resolution-list {
-  gap: 0.58rem;
+.hole-results-toggle-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 52%, var(--results-inset-border));
+  background: color-mix(in srgb, var(--results-chip-bg) 78%, var(--results-ready-bg) 22%);
 }
 
-.hole-results-resolution-card {
-  padding: 0.78rem 0.84rem;
-  gap: 0.48rem;
-  border-color: color-mix(in srgb, var(--border-subtle) 84%, var(--accent) 14%);
+.hole-results-toggle-button--active,
+.hole-results-toggle-button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 72%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 82%, #ffffff 18%);
 }
 
-.hole-results-player-card {
-  gap: var(--space-2);
-  padding: 0.82rem 0.88rem;
-  border-top: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+.hole-results-screen--editorial .mission-status-pill {
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  min-height: 30px;
+  padding: 0.16rem 0.62rem;
+  font-size: 0.74rem;
 }
 
-.hole-results-player-card > .row-between {
+.hole-results-screen--editorial .mission-status-pill--ready {
+  border-color: var(--results-ready-border);
+  background: var(--results-ready-bg);
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .mission-status-pill--pending {
+  border-color: var(--results-pending-border);
+  background: var(--results-pending-bg);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
+}
+
+.hole-score-module {
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--results-inset-border);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-3);
+  gap: 0.7rem;
+  box-shadow: none;
+}
+
+.hole-score-module__header {
   align-items: flex-start;
 }
 
-.hole-results-player-card > .muted {
-  font-size: 0.84rem;
-  line-height: 1.32;
+.hole-score-module__name {
+  font-family: var(--font-display);
+  font-size: 1.34rem;
+  font-weight: 600;
+  line-height: 1.04;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
 }
 
-.hole-results-strokes-row {
-  flex-wrap: nowrap;
-  gap: 0.45rem;
-  overflow-x: auto;
-  padding-bottom: 0.16rem;
-}
-
-.hole-results-strokes-row--high {
-  padding-top: 0.08rem;
-}
-
-.hole-results-stroke-button {
-  min-width: 56px;
-  min-height: 56px;
-  padding: 0;
-  border-radius: 999px;
+.hole-score-module__status {
   flex: 0 0 auto;
-  font-family: var(--font-numeric);
-  font-size: 1.03rem;
+}
+
+.hole-score-module__mission {
+  display: flex;
+  align-items: flex-start;
+}
+
+.hole-score-module__mission-chip,
+.hole-score-module__mission-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.18rem 0.58rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-chip-border);
+  background: var(--results-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.022em;
+  text-transform: uppercase;
+  box-shadow: none;
 }
 
-.hole-results-stroke-button.button-primary {
+.hole-score-module__mission-chip:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 50%, var(--results-chip-border));
+  background: color-mix(in srgb, var(--results-chip-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-score-module__helper {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.36;
+}
+
+.hole-score-module__controls {
+  gap: 0.58rem;
+}
+
+.hole-score-button-group {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hole-score-button-group--high {
+  margin-top: 0.1rem;
+}
+
+.hole-score-button {
+  min-width: 3.12rem;
+  min-height: 3.12rem;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-target-border);
+  background: var(--results-target-bg);
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+  font-family: var(--font-numeric);
+  font-size: 1.02rem;
+  font-weight: 760;
+  box-shadow: none;
+}
+
+.hole-score-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 54%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-score-button--selected,
+.hole-score-button--selected:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 88%, var(--results-ready-border));
+  background: var(--hole-action-bg);
+  color: var(--hole-action-text);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 75%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
-    0 8px 14px -14px color-mix(in srgb, var(--accent-strong) 70%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+    0 8px 16px -14px color-mix(in srgb, var(--hole-action-bg) 68%, transparent);
 }
 
-.hole-results-stroke-adjust-row {
-  gap: 0.34rem;
+.hole-score-adjust-row {
+  gap: 0.36rem;
   flex-wrap: wrap;
 }
 
-.hole-results-adjust-button {
+.hole-score-adjust-button,
+.hole-score-manual-toggle,
+.hole-score-reset-button {
   min-height: 36px;
-  font-size: 0.73rem;
+  padding: 0.2rem 0.62rem;
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  font-size: 0.76rem;
+  letter-spacing: 0.012em;
+  box-shadow: none;
 }
 
-.hole-results-manual-toggle {
+.hole-score-manual-toggle {
   align-self: flex-start;
 }
 
-.hole-results-manual-entry {
-  padding: 0.48rem 0.56rem;
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 90%, transparent);
-  border-radius: var(--radius-xs);
-  background: color-mix(in srgb, var(--bg-inset) 75%, var(--bg-panel));
+.hole-score-manual-entry {
+  padding: 0.56rem 0.62rem;
+  border: 1.5px solid var(--results-inset-border);
+  border-radius: var(--radius-sm);
+  background: var(--results-inset-bg);
 }
 
-.hole-results-manual-field {
+.hole-score-manual-field {
   align-items: center;
 }
 
-.hole-results-manual-field .label {
+.hole-score-manual-field .label {
   font-size: 0.73rem;
 }
 
-.hole-results-manual-field input {
+.hole-score-manual-field input {
   width: 5.8rem;
   min-height: 42px;
   text-align: center;
   font-family: var(--font-numeric);
 }
 
-.hole-results-reset-button {
-  min-height: 32px;
-  padding: 0.16rem 0.56rem;
-  font-size: 0.74rem;
+.hole-results-resolution-list {
+  gap: 0.6rem;
 }
 
-.hole-results-mission-row {
+.hole-mission-result-card,
+.hole-public-resolution-card {
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--results-inset-border);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-3);
+  gap: 0.58rem;
+  box-shadow: none;
+}
+
+.hole-result-toggle-group {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.3rem;
+  gap: 0.32rem;
   padding: 0.24rem;
+  border-radius: var(--radius-sm);
+  border-color: var(--results-target-border);
+  background: var(--results-target-bg);
 }
 
-.hole-results-mission-row .segmented-control__button {
-  min-height: 46px;
+.hole-result-toggle-group .segmented-control__button {
+  min-height: 44px;
 }
 
-.hole-results-public-card {
-  padding: 0.82rem 0.88rem;
-  gap: 0.52rem;
+.hole-public-resolution-card__meta {
+  gap: 0.34rem;
 }
 
-.hole-results-public-meta {
-  gap: 0.35rem;
-}
-
-.hole-results-public-meta .chip {
-  font-size: 0.72rem;
+.hole-public-resolution-card__controls {
+  gap: 0.54rem;
 }
 
 .hole-results-public-field {
@@ -3637,34 +4369,95 @@ main {
 }
 
 .hole-results-public-field .muted {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
+}
+
+.hole-public-target-button {
+  min-height: 38px;
+  padding: 0.26rem 0.66rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-target-border);
+  background: var(--results-target-bg);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.hole-public-target-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 52%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 74%, var(--results-ready-bg) 26%);
+}
+
+.hole-public-target-button--selected,
+.hole-public-target-button--selected:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 82%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 82%, #ffffff 18%);
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+}
+
+.hole-results-public-summary-card {
+  border-color: color-mix(in srgb, var(--results-ready-border) 44%, var(--results-panel-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-ready-bg) 56%, #ffffff 44%),
+      color-mix(in srgb, var(--results-inset-bg) 82%, var(--results-ready-bg) 18%)
+    );
 }
 
 .hole-results-public-summary {
-  gap: 0.36rem;
+  gap: 0.34rem;
 }
 
 .hole-results-public-summary-row {
   font-family: var(--font-numeric);
-  font-size: 0.96rem;
-}
-
-.hole-results-next__summary > strong {
-  font-size: 0.93rem;
-}
-
-.hole-results-next__button {
-  width: 100%;
-  min-height: 60px;
-  font-weight: 800;
-  font-size: 1.02rem;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 58%, transparent),
-    0 10px 18px -16px color-mix(in srgb, var(--accent-strong) 56%, transparent);
+  font-size: 0.97rem;
 }
 
 .hole-results-trust-note {
-  border-color: color-mix(in srgb, var(--accent) 24%, var(--border-subtle));
+  border-color: color-mix(in srgb, var(--results-panel-border) 84%, transparent);
+  background: color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%);
+}
+
+.hole-results-screen--editorial .badge-chip {
+  background: var(--results-chip-bg);
+  border-color: var(--results-chip-border);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .badge-chip--subtle {
+  background: color-mix(in srgb, var(--results-chip-bg) 74%, var(--results-panel-bg) 26%);
+}
+
+.hole-results-screen--editorial .badge-chip--reward {
+  border-color: color-mix(in srgb, var(--results-ready-border) 62%, var(--results-chip-border));
+  background: color-mix(in srgb, var(--results-ready-bg) 72%, #ffffff 28%);
+  color: color-mix(in srgb, var(--text-success) 82%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .badge-chip--count {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 62%, var(--results-panel-border));
+  background: color-mix(in srgb, var(--results-ready-bg) 68%, var(--results-panel-bg));
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .hole-action-panel {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 58%, var(--results-panel-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 84%, var(--hole-results-ready-bg) 16%),
+      color-mix(in srgb, var(--results-panel-bg) 94%, #ffffff 6%)
+    );
+}
+
+.hole-results-screen--editorial .hole-action-panel__summary {
+  font-size: 1rem;
+}
+
+.hole-results-screen--editorial .hole-action-panel__button {
+  min-height: 62px;
 }
 
 .modal-backdrop {
@@ -4306,7 +5099,6 @@ main {
   .public-card,
   .power-up-card,
   .hole-summary-card,
-  .hole-results-player-card,
   .featured-hole-preview-row {
     background: var(--surface-elevated);
     border-color: var(--color-border);
@@ -4315,7 +5107,6 @@ main {
   .chip,
   .chip-button,
   .status-pill,
-  .recap-pill,
   .tag-pill,
   .featured-hole-banner__chip {
     background: var(--surface-elevated);
@@ -4360,6 +5151,108 @@ main {
     border-color: color-mix(in srgb, var(--accent) 70%, var(--color-border));
   }
 
+  .hole-play-screen--missions .hole-play-header--missions {
+    border-color: color-mix(in srgb, var(--hole-mission-border) 68%, var(--color-border));
+    background:
+      linear-gradient(
+        155deg,
+        color-mix(in srgb, var(--hole-mission-paper) 84%, var(--surface-elevated)),
+        color-mix(in srgb, var(--hole-mission-surface) 78%, var(--surface-elevated))
+      );
+  }
+
+  .hole-play-screen--missions .hole-info-card,
+  .hole-play-screen--missions .hole-golfer-module,
+  .hole-play-screen--missions .hole-setup-card,
+  .hole-play-screen--missions .hole-public-section,
+  .hole-play-screen--missions .hole-action-panel {
+    background: color-mix(in srgb, var(--hole-mission-surface) 68%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-mission-border) 78%, var(--color-border));
+  }
+
+  .hole-play-screen--missions .hole-info-card--accent,
+  .hole-play-screen--missions .hole-action-panel {
+    background:
+      linear-gradient(
+        148deg,
+        color-mix(in srgb, var(--hole-mission-selected-bg) 54%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
+      ),
+      color-mix(in srgb, var(--hole-mission-surface) 64%, var(--surface-elevated));
+  }
+
+  .hole-play-screen--missions .hole-setup-card .segmented-control {
+    background: color-mix(in srgb, var(--hole-mission-paper) 72%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-mission-border) 74%, var(--color-border));
+  }
+
+  .hole-play-screen--missions .hole-setup-card .segmented-control__button:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--hole-mission-selected-border) 70%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-mission-selected-bg) 34%, transparent);
+  }
+
+  .hole-play-screen--missions .hole-setup-card .segmented-control__button--active,
+  .hole-play-screen--missions .hole-setup-card .segmented-control__button--active:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--hole-mission-selected-border) 82%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-mission-selected-bg) 64%, transparent);
+    color: var(--text-primary);
+  }
+
+  .hole-play-screen--missions .mission-card {
+    background: color-mix(in srgb, var(--surface-elevated) 90%, var(--hole-mission-surface-muted) 10%);
+    border-color: color-mix(in srgb, var(--hole-mission-border) 70%, var(--color-border));
+  }
+
+  .hole-play-screen--missions .mission-card.selected {
+    border-color: color-mix(in srgb, var(--hole-mission-selected-border) 78%, var(--color-border));
+    background:
+      linear-gradient(
+        140deg,
+        color-mix(in srgb, var(--hole-mission-selected-bg) 52%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      var(--surface-elevated);
+  }
+
+  .hole-play-screen--missions .public-preview-card {
+    background: color-mix(in srgb, var(--mission-public-bg) 52%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--mission-public-border) 74%, var(--color-border));
+  }
+
+  .hole-play-screen--missions .badge-chip {
+    background: color-mix(in srgb, var(--hole-mission-chip-bg) 72%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-mission-chip-border) 78%, var(--color-border));
+    color: var(--text-primary);
+  }
+
+  .hole-play-screen--missions .mission-status-pill--ready {
+    background: color-mix(in srgb, var(--hole-mission-ready-bg) 58%, transparent);
+    border-color: color-mix(in srgb, var(--hole-mission-ready-border) 82%, var(--color-border));
+    color: var(--text-primary);
+  }
+
+  .hole-play-screen--missions .mission-status-pill--pending {
+    background: color-mix(in srgb, var(--hole-mission-pending-bg) 58%, transparent);
+    border-color: color-mix(in srgb, var(--hole-mission-pending-border) 80%, var(--color-border));
+    color: var(--text-primary);
+  }
+
+  .hole-play-screen--missions .hole-action-panel__button {
+    border-color: color-mix(in srgb, var(--hole-action-bg) 76%, var(--color-border));
+    background: var(--hole-action-bg);
+    color: var(--hole-action-text);
+  }
+
+  .hole-play-screen--missions .hole-action-panel__button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--hole-action-bg) 90%, #ffffff 10%);
+  }
+
+  .hole-play-screen--missions .hole-action-panel__button:disabled {
+    border-color: color-mix(in srgb, var(--hole-action-disabled-bg) 78%, var(--color-border));
+    background: var(--hole-action-disabled-bg);
+    color: var(--hole-action-disabled-text);
+  }
+
   .power-up-card {
     background:
       linear-gradient(
@@ -4370,44 +5263,90 @@ main {
       var(--surface-elevated);
   }
 
-  .hole-results-progress-chip {
-    border-color: color-mix(in srgb, var(--accent) 75%, var(--color-border));
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  .hole-results-screen--editorial .hole-results-header--editorial,
+  .hole-results-screen--editorial .hole-results-progress-board,
+  .hole-results-screen--editorial .hole-results-entry-panel,
+  .hole-results-screen--editorial .hole-results-step-panel,
+  .hole-results-screen--editorial .hole-score-module,
+  .hole-results-screen--editorial .hole-mission-result-card,
+  .hole-results-screen--editorial .hole-public-resolution-card,
+  .hole-results-screen--editorial .hole-results-public-summary-card,
+  .hole-results-screen--editorial .hole-results-trust-note,
+  .hole-results-screen--editorial .hole-score-manual-entry,
+  .hole-results-screen--editorial .hole-action-panel {
+    border-color: color-mix(in srgb, var(--hole-results-border) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-surface) 68%, var(--surface-elevated));
+  }
+
+  .hole-results-screen--editorial .hole-results-header--editorial,
+  .hole-results-screen--editorial .hole-results-progress-board,
+  .hole-results-screen--editorial .hole-action-panel {
+    background:
+      linear-gradient(
+        154deg,
+        color-mix(in srgb, var(--hole-results-ready-bg) 38%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      color-mix(in srgb, var(--hole-results-surface) 62%, var(--surface-elevated));
+  }
+
+  .hole-results-screen--editorial .hole-results-progress-chip {
+    border-color: color-mix(in srgb, var(--hole-results-border-strong) 82%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-ready-bg) 52%, transparent);
     color: var(--text-primary);
   }
 
-  .hole-results-stepper,
-  .hole-results-stepper__item,
-  .hole-results-manual-entry,
-  .hole-results-resolution-card,
-  .hole-results-public-card,
-  .hole-results-public-summary {
-    background: var(--surface-elevated);
-    border-color: var(--color-border);
+  .hole-results-screen--editorial .hole-results-progress-board__item {
+    background: color-mix(in srgb, var(--hole-results-surface-muted) 68%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-results-border) 74%, var(--color-border));
   }
 
-  .hole-results-stepper__item--complete {
-    border-color: color-mix(in srgb, var(--accent) 78%, var(--color-border));
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
+  .hole-results-screen--editorial .hole-results-progress-board__item--complete {
+    background: color-mix(in srgb, var(--hole-results-ready-bg) 54%, transparent);
+    border-color: color-mix(in srgb, var(--hole-results-ready-border) 82%, var(--color-border));
   }
 
-  .hole-results-stepper__index {
-    border-color: color-mix(in srgb, var(--info) 72%, var(--color-border));
-    background: color-mix(in srgb, var(--info) 20%, transparent);
+  .hole-results-screen--editorial .hole-results-progress-board__index {
+    border-color: color-mix(in srgb, var(--hole-results-pending-border) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-pending-bg) 56%, transparent);
     color: var(--text-primary);
   }
 
-  .hole-results-stepper__item--complete .hole-results-stepper__index {
-    border-color: color-mix(in srgb, var(--accent) 82%, var(--color-border));
-    background: color-mix(in srgb, var(--accent) 82%, transparent);
-    color: #0b0b0b;
+  .hole-results-screen--editorial .hole-results-progress-board__item--complete .hole-results-progress-board__index {
+    border-color: color-mix(in srgb, var(--hole-results-ready-border) 84%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-ready-bg) 68%, transparent);
+    color: var(--text-primary);
   }
 
-  .hole-results-entry-panel,
-  .hole-results-step-panel,
-  .public-resolution-panel,
-  .hole-results-next {
-    border-top-color: color-mix(in srgb, var(--accent) 68%, var(--color-border));
+  .hole-results-screen--editorial .hole-score-button,
+  .hole-results-screen--editorial .hole-public-target-button,
+  .hole-results-screen--editorial .hole-result-toggle-group,
+  .hole-results-screen--editorial .hole-result-toggle-group .segmented-control__button {
+    background: color-mix(in srgb, var(--hole-results-target-bg) 66%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-results-target-border) 74%, var(--color-border));
+    color: var(--text-primary);
+  }
+
+  .hole-results-screen--editorial .hole-score-button--selected,
+  .hole-results-screen--editorial .hole-score-button--selected:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--hole-action-bg) 76%, var(--color-border));
+    background: var(--hole-action-bg);
+    color: var(--hole-action-text);
+  }
+
+  .hole-results-screen--editorial .hole-public-target-button--selected,
+  .hole-results-screen--editorial .hole-public-target-button--selected:hover:not(:disabled),
+  .hole-results-screen--editorial .hole-result-toggle-group .segmented-control__button--active,
+  .hole-results-screen--editorial .hole-result-toggle-group .segmented-control__button--active:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--hole-results-ready-border) 84%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-ready-bg) 64%, transparent);
+    color: var(--text-primary);
+  }
+
+  .hole-results-screen--editorial .hole-results-toggle-button {
+    border-color: color-mix(in srgb, var(--hole-results-border) 78%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-results-chip-bg) 62%, var(--surface-elevated));
+    color: var(--text-primary);
   }
 
   .power-up-chip {
@@ -4514,53 +5453,62 @@ main {
     color: #ffb5ad;
   }
 
-  .recap-hero {
-    border-color: color-mix(in srgb, var(--accent) 74%, var(--color-border));
-    background:
-      linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--accent) 18%, transparent),
-        color-mix(in srgb, var(--surface-elevated) 88%, transparent)
-      ),
-      var(--surface-elevated);
-    box-shadow: var(--glow-accent);
+  .hole-recap-screen--editorial .recap-header--editorial,
+  .hole-recap-screen--editorial .recap-hero-card,
+  .hole-recap-screen--editorial .recap-why-card,
+  .hole-recap-screen--editorial .recap-outcome-section,
+  .hole-recap-screen--editorial .recap-leaderboard-card,
+  .hole-recap-screen--editorial .recap-breakdown-panel,
+  .hole-recap-screen--editorial .recap-section,
+  .hole-recap-screen--editorial .recap-score-clarity,
+  .hole-recap-screen--editorial .hole-action-panel {
+    border-color: color-mix(in srgb, var(--hole-recap-border) 80%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-recap-surface) 68%, var(--surface-elevated));
   }
 
-  .recap-hero__sub,
-  .recap-highlight {
+  .hole-recap-screen--editorial .recap-hero-card {
+    background:
+      linear-gradient(
+        150deg,
+        color-mix(in srgb, var(--hole-recap-hero-bg) 56%, transparent),
+        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
+      ),
+      color-mix(in srgb, var(--hole-recap-surface) 66%, var(--surface-elevated));
+  }
+
+  .hole-recap-screen--editorial .recap-status-chip {
+    background: color-mix(in srgb, var(--hole-recap-chip-bg) 72%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--hole-recap-chip-border) 80%, var(--color-border));
     color: var(--text-primary);
   }
 
-  .recap-next--sticky {
-    border-color: color-mix(in srgb, var(--accent) 75%, var(--color-border));
-    background:
-      linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--accent) 14%, transparent),
-        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
-      ),
-      var(--surface-elevated);
+  .hole-recap-screen--editorial .recap-player-outcome-card,
+  .hole-recap-screen--editorial .recap-public-impact-card,
+  .hole-recap-screen--editorial .recap-summary-stat-card,
+  .hole-recap-screen--editorial .recap-why-list__item,
+  .hole-recap-screen--editorial .recap-driver-cell {
+    border-color: color-mix(in srgb, var(--hole-recap-border) 76%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-recap-surface-muted) 66%, var(--surface-elevated));
   }
 
-  .recap-player-summary,
-  .recap-public-impact__item {
-    border-color: var(--color-border);
-    background: var(--surface-elevated);
+  .hole-recap-screen--editorial .recap-player-outcome-card--success,
+  .hole-recap-screen--editorial .recap-leaderboard-card .leaderboard-table__row--leader .leaderboard-table__cell {
+    border-color: color-mix(in srgb, var(--hole-recap-border-strong) 82%, var(--color-border));
+    background: color-mix(in srgb, var(--hole-recap-table-row-leader-bg) 62%, transparent);
   }
 
-  .recap-player-summary[open] {
-    border-color: color-mix(in srgb, var(--accent) 78%, var(--color-border));
+  .hole-recap-screen--editorial .recap-player-outcome-card--failed {
+    border-color: color-mix(in srgb, var(--danger) 66%, var(--color-border));
+    background: color-mix(in srgb, var(--surface-danger) 38%, transparent);
   }
 
-  .recap-public-impact {
-    border-color: color-mix(in srgb, var(--info) 78%, var(--color-border));
-    background:
-      linear-gradient(
-        130deg,
-        color-mix(in srgb, var(--info) 18%, transparent),
-        color-mix(in srgb, var(--surface-elevated) 90%, transparent)
-      ),
-      var(--surface-elevated);
+  .hole-recap-screen--editorial .recap-leaderboard-card .leaderboard-table {
+    border-color: color-mix(in srgb, var(--hole-recap-border) 78%, var(--color-border));
+  }
+
+  .hole-recap-screen--editorial .recap-leaderboard-card .leaderboard-table__th {
+    background: color-mix(in srgb, var(--hole-recap-table-head-bg) 70%, var(--surface-elevated));
+    border-bottom-color: color-mix(in srgb, var(--hole-recap-border) 66%, var(--color-border));
   }
 
   .featured-hole-banner {
@@ -4593,7 +5541,6 @@ main {
   }
 
   .player-card > header strong,
-  .hole-results-player-card > .row-between > strong,
   .hole-summary-player-row > strong,
   .challenge-card > header strong,
   .public-card > header strong,
@@ -4621,19 +5568,6 @@ main {
     text-decoration-color: var(--accent);
   }
 
-  .hole-results-stroke-button {
-    background: var(--surface-elevated);
-    border-color: var(--color-border);
-    color: var(--text-primary);
-  }
-
-  .hole-results-stroke-button.button-primary {
-    color: #0b0b0b;
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--accent-strong) 75%, transparent),
-      var(--glow-accent);
-  }
-
   .modal-backdrop {
     background: rgba(6, 6, 6, 0.72);
   }
@@ -4650,7 +5584,6 @@ main {
   }
 
   .status-pill,
-  .recap-pill,
   .chip {
     border-width: 2px;
     font-weight: 700;
@@ -4671,7 +5604,6 @@ main {
 
 @media (forced-colors: active) {
   .status-pill,
-  .recap-pill,
   .chip {
     border: 1px solid ButtonText;
   }

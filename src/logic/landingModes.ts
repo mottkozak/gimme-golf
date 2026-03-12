@@ -70,7 +70,7 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     tagline: 'Arcade mode with power-ups and curses.',
     description: 'No mission cards. Each golfer gets power-ups; current leader(s) get curses.',
     packsLabel: 'Standalone power-up mode',
-    icon: 'electric_bolt',
+    icon: 'auto_fix_high',
     toneClassName: 'power-ups',
     contextLabel: 'Today',
     ctaLabel: 'Play Power Up',

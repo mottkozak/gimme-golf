@@ -1,4 +1,5 @@
 import type { PersonalCard } from '../types/cards.ts'
+import BadgeChip from './BadgeChip.tsx'
 
 interface ChallengeCardViewProps {
   card: PersonalCard
@@ -32,10 +33,18 @@ function ChallengeCardView({ card, selected, offerKind, offerDetail, onSelect }:
   const offerKindLabel = getOfferKindLabel(offerKind)
   const isSelectable = typeof onSelect === 'function'
   const pointsLabel = `${card.points >= 0 ? '+' : ''}${card.points} pts`
+  const offerChipTone =
+    offerKind === 'safe'
+      ? 'safe'
+      : offerKind === 'hard'
+        ? 'hard'
+        : offerKind === 'single'
+          ? 'auto'
+          : 'default'
 
   return (
     <article
-      className={`panel challenge-card ${selected ? 'selected' : ''} ${
+      className={`panel challenge-card mission-card ${selected ? 'selected' : ''} ${
         isSelectable ? 'challenge-card--selectable' : ''
       } offer-${offerKind ?? 'none'}`}
       role={isSelectable ? 'button' : undefined}
@@ -56,20 +65,29 @@ function ChallengeCardView({ card, selected, offerKind, offerDetail, onSelect }:
       <header className="row-between setup-row-wrap">
         <strong>{card.name}</strong>
         <div className="button-row challenge-card__meta">
-          {selected && <span className="chip challenge-card__selected-chip">✓ Selected</span>}
-          <span className="chip challenge-card__points-chip">{pointsLabel}</span>
+          {selected && (
+            <BadgeChip tone="selected" className="challenge-card__selected-chip">
+              ✓ Selected
+            </BadgeChip>
+          )}
+          <BadgeChip tone="reward" className="challenge-card__points-chip">
+            {pointsLabel}
+          </BadgeChip>
         </div>
       </header>
       <p className="challenge-card__description">{card.description}</p>
       {offerDetail && <p className="muted challenge-card__offer-detail">{offerDetail}</p>}
       <div className="challenge-card__badges">
-        <span className="chip">{toLabel(card.cardType)}</span>
+        <BadgeChip tone="subtle">{toLabel(card.cardType)}</BadgeChip>
         {offerKindLabel && (
-          <span className={`chip challenge-card__offer-chip challenge-card__offer-chip--${offerKind}`}>
+          <BadgeChip
+            tone={offerChipTone}
+            className={`challenge-card__offer-chip challenge-card__offer-chip--${offerKind}`}
+          >
             {offerKindLabel}
-          </span>
+          </BadgeChip>
         )}
-        <span className="chip">{toLabel(card.difficulty)}</span>
+        <BadgeChip tone="subtle">{toLabel(card.difficulty)}</BadgeChip>
       </div>
     </article>
   )

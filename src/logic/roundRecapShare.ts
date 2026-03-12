@@ -200,10 +200,10 @@ export function renderRoundRecapCanvas(
   context.fill()
 
   context.fillStyle = '#1a3b28'
-  context.font = '700 54px Inter, Arial, sans-serif'
+  context.font = '700 54px Neuton, Georgia, serif'
   context.fillText('Gimme Golf Round Recap', panelX + 54, panelY + 102)
 
-  context.font = '600 34px Inter, Arial, sans-serif'
+  context.font = '600 34px Figtree, Arial, sans-serif'
   context.fillStyle = '#234832'
   const winnerText = `Winner: ${payload.winnerNames}`
   const winnerBottomY = drawWrappedText(
@@ -216,7 +216,7 @@ export function renderRoundRecapCanvas(
     2,
   )
 
-  context.font = '500 28px Inter, Arial, sans-serif'
+  context.font = '500 28px Figtree, Arial, sans-serif'
   context.fillStyle = '#2b5a3f'
   context.fillText(
     `${payload.gameModeLabel} mode · ${payload.holeCount} holes`,
@@ -228,7 +228,7 @@ export function renderRoundRecapCanvas(
   const rowHeight = 114
   const rowsToDraw = payload.topLeaderboardRows.length > 0 ? payload.topLeaderboardRows : []
 
-  context.font = '700 30px Inter, Arial, sans-serif'
+  context.font = '700 30px Figtree, Arial, sans-serif'
   context.fillStyle = '#1a3b28'
   context.fillText('Top 3', panelX + 54, rowStartY - 18)
 
@@ -240,13 +240,13 @@ export function renderRoundRecapCanvas(
     context.fill()
 
     context.fillStyle = '#1f4730'
-    context.font = '700 30px Inter, Arial, sans-serif'
+    context.font = '700 30px Figtree, Arial, sans-serif'
     context.fillText(`#${row.rank}`, panelX + 72, rowY + 66)
 
-    context.font = '700 32px Inter, Arial, sans-serif'
+    context.font = '700 32px Figtree, Arial, sans-serif'
     context.fillText(row.playerName, panelX + 168, rowY + 54)
 
-    context.font = '500 26px Inter, Arial, sans-serif'
+    context.font = '500 26px Figtree, Arial, sans-serif'
     context.fillStyle = '#2b5a3f'
     context.fillText(`Adjusted: ${row.adjustedScore}`, panelX + 168, rowY + 90)
     context.fillText(
@@ -258,7 +258,7 @@ export function renderRoundRecapCanvas(
 
   const footerUrl = appUrl.length > 64 ? `${appUrl.slice(0, 61)}...` : appUrl
   context.fillStyle = '#2b5a3f'
-  context.font = '500 24px Inter, Arial, sans-serif'
+  context.font = '500 24px Figtree, Arial, sans-serif'
   context.fillText(`Play: ${footerUrl}`, panelX + 54, panelY + panelHeight - 58)
 
   return canvas

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { LeaderboardSortMode } from '../logic/leaderboard.ts'
 import type { LeaderboardEntry } from '../types/game.ts'
 
@@ -13,6 +14,9 @@ interface LeaderboardTableProps {
   onSortChange?: (sortMode: LeaderboardSortMode) => void
   momentumByPlayerId?: Record<string, LeaderboardMomentumValue>
   showMomentum?: boolean
+  className?: string
+  headerBadge?: ReactNode
+  compactLegend?: boolean
 }
 
 function LeaderboardTable({
@@ -22,6 +26,9 @@ function LeaderboardTable({
   onSortChange,
   momentumByPlayerId,
   showMomentum,
+  className,
+  headerBadge,
+  compactLegend = false,
 }: LeaderboardTableProps) {
   const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
   const formatSignedPoints = (value: number): string => `${value > 0 ? '+' : ''}${value}`
@@ -43,10 +50,10 @@ function LeaderboardTable({
   }
 
   return (
-    <div className="panel stack-xs">
+    <div className={['panel', 'stack-xs', className ?? ''].filter(Boolean).join(' ')}>
       <div className="row-between">
         <strong>{title}</strong>
-        <span className="chip">#{rows[0]?.playerName ?? '-'}</span>
+        {headerBadge ?? <span className="chip">#{rows[0]?.playerName ?? '-'}</span>}
       </div>
       <div className="leaderboard-scroll">
         <table className="leaderboard-table">
@@ -97,7 +104,7 @@ function LeaderboardTable({
           </tbody>
         </table>
       </div>
-      <p className="muted leaderboard-table__legend">
+      <p className={`muted leaderboard-table__legend ${compactLegend ? 'leaderboard-table__legend--compact' : ''}`}>
         Real score is pure golf strokes. Game points come from side-game outcomes. Adjusted score
         equals real score minus game points.
       </p>

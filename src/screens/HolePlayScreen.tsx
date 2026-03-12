@@ -3,6 +3,10 @@ import { HOLE_TAG_ICON_BY_TAG, ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
 import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
+import GolferMissionModule from '../components/GolferMissionModule.tsx'
+import HoleActionPanel from '../components/HoleActionPanel.tsx'
+import HoleInfoCard from '../components/HoleInfoCard.tsx'
+import HolePublicCardSection from '../components/HolePublicCardSection.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
 import { trackCardSelected, trackHoleStarted } from '../logic/analytics.ts'
@@ -222,8 +226,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   }
 
   return (
-    <section className="screen stack-sm hole-play-screen">
-      <header className="screen__header hole-play-header">
+    <section className={`screen stack-sm hole-play-screen ${isPowerUpsMode ? 'hole-play-screen--power-ups' : 'hole-play-screen--missions'}`}>
+      <header className={`screen__header hole-play-header ${isPowerUpsMode ? '' : 'hole-play-header--missions'}`}>
         <div className="screen-title">
           <AppIcon
             className="screen-title__icon"
@@ -238,14 +242,13 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
 
-      <section className="panel inset stack-xs hole-flow-note">
-        <p className="label">What Happens Next</p>
+      <HoleInfoCard title="What Happens Next" tone="accent" className="hole-flow-note">
         <p className="muted">
           {!isHolePrepared
             ? `Confirm par, optionally tag the hole, then ${isPowerUpsMode ? 'deal power-ups' : 'deal cards'}.`
             : 'Play the hole, then go to Hole Results to enter strokes and resolve outcomes.'}
         </p>
-      </section>
+      </HoleInfoCard>
 
       {!isHolePrepared && (
         <section className="panel stack-xs hole-setup-card">
@@ -369,13 +372,12 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           <p className="muted hole-cards-helper">{missionHelperCopy}</p>
 
           {canSelectCards && isDynamicDifficultyEnabled && (
-            <section className="panel inset stack-xs hole-fairness-note">
-              <p className="label">Fair Play Offers</p>
+            <HoleInfoCard title="Fair Play Offers" className="hole-fairness-note">
               <p className="muted">
                 Expected score sets reward ceilings so mixed-skill groups stay competitive. Real
                 strokes are never modified by mission cards.
               </p>
-            </section>
+            </HoleInfoCard>
           )}
 
           <section className="stack-sm hole-draft-list">
@@ -395,21 +397,17 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               )
 
               return (
-                <article key={player.id} className="panel stack-xs hole-draft-player">
-                  <header className="row-between setup-row-wrap">
-                    <strong>{playerNameById[player.id]}</strong>
-                    {canSelectCards && (
-                      <span className={`status-pill ${isPlayerReady ? 'status-success' : 'status-pending'}`}>
-                        {isPlayerReady ? 'Ready' : 'Pending'}
-                      </span>
-                    )}
-                  </header>
-                  {canSelectCards && isDynamicDifficultyEnabled && (
-                    <p className="muted hole-draft-player__fairness">
-                      {skillBandLabel} band • Safe {safeRange} • Upside {hardRange}
-                    </p>
-                  )}
-
+                <GolferMissionModule
+                  key={player.id}
+                  golferName={playerNameById[player.id]}
+                  statusTone={canSelectCards ? (isPlayerReady ? 'ready' : 'pending') : undefined}
+                  statusLabel={canSelectCards ? (isPlayerReady ? 'Ready' : 'Pending') : undefined}
+                  summaryLine={
+                    canSelectCards && isDynamicDifficultyEnabled
+                      ? `${skillBandLabel} band • Safe ${safeRange} • Upside ${hardRange}`
+                      : undefined
+                  }
+                >
                   <div className="stack-xs hole-draft-options">
                     {dealtCards.map((card) => {
                       const offerKind =
@@ -447,47 +445,29 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                       <p className="muted">No missions available from enabled packs for this golfer.</p>
                     )}
                   </div>
-                </article>
+                </GolferMissionModule>
               )
             })}
           </section>
 
-          <section className="panel stack-xs hole-public-preview">
-            <div className="row-between setup-row-wrap">
-              <h3>Public Cards</h3>
-              <span className="chip">{currentHoleCards.publicCards.length}</span>
-            </div>
-            {currentHoleCards.publicCards.length === 0 && (
-              <p className="muted">No public cards for this hole.</p>
-            )}
-            {currentHoleCards.publicCards.length > 0 && (
-              <>
-                <div className="stack-xs hole-public-preview__list">
-                  {currentHoleCards.publicCards.map((card) => (
-                    <PublicCardView key={card.id} card={card} />
-                  ))}
-                </div>
-                <p className="muted hole-public-preview__helper">
-                  Preview only. Public cards are resolved on Hole Results.
-                </p>
-              </>
-            )}
-          </section>
+          <HolePublicCardSection
+            title="Public Cards"
+            count={currentHoleCards.publicCards.length}
+            emptyMessage="No public cards for this hole."
+            helperText="Preview only. Public cards are resolved on Hole Results."
+          >
+            {currentHoleCards.publicCards.map((card) => (
+              <PublicCardView key={card.id} card={card} />
+            ))}
+          </HolePublicCardSection>
 
-          <section className="panel stack-xs hole-cards-footer">
-            <p className="value hole-cards-footer__readiness">{readinessSummary}</p>
-            <button
-              type="button"
-              className="button-primary hole-cards-footer__cta"
-              disabled={!allPlayersHaveSelection}
-              onClick={continueToResults}
-            >
-              Go To Hole Results
-            </button>
-            {!allPlayersHaveSelection && (
-              <p className="muted">Pick one mission for each golfer before continuing.</p>
-            )}
-          </section>
+          <HoleActionPanel
+            summary={readinessSummary}
+            buttonLabel="Go To Hole Results"
+            disabled={!allPlayersHaveSelection}
+            helperText={!allPlayersHaveSelection ? 'Pick one mission for each golfer before continuing.' : undefined}
+            onContinue={continueToResults}
+          />
         </>
       )}
     </section>

@@ -1,4 +1,5 @@
 import type { PublicCard } from '../types/cards.ts'
+import BadgeChip from './BadgeChip.tsx'
 
 interface PublicCardViewProps {
   card: PublicCard
@@ -10,16 +11,16 @@ function toLabel(value: string): string {
 
 function PublicCardView({ card }: PublicCardViewProps) {
   return (
-    <article className="panel public-card public-card--compact">
+    <article className="panel public-card public-card--compact public-preview-card">
       <header className="row-between setup-row-wrap public-card__header">
         <strong>{card.name}</strong>
         <div className="button-row">
-          <span className="chip">{toLabel(card.cardType)}</span>
+          <BadgeChip tone="subtle">{toLabel(card.cardType)}</BadgeChip>
           {card.points !== 0 && (
-            <span className="chip">
+            <BadgeChip tone="reward">
               {card.points >= 0 ? '+' : ''}
               {card.points} pts
-            </span>
+            </BadgeChip>
           )}
         </div>
       </header>
