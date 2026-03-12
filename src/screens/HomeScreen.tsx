@@ -36,14 +36,6 @@ function formatSavedRoundLabel(savedAtMs: number | null): string {
   })}.`
 }
 
-function formatEditorialTodayLabel(): string {
-  return new Date().toLocaleDateString([], {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-}
-
 function formatRoundHistoryDate(completedAtMs: number): string {
   const completedDate = new Date(completedAtMs)
 
@@ -61,6 +53,7 @@ function getDefaultLandingModeId(): LandingModeId {
 interface HomeScreenProps extends ScreenProps {
   isPastRoundsOpen: boolean
   onPastRoundsOpenChange: (isOpen: boolean) => void
+  onModeDetailOpenChange: (isOpen: boolean) => void
 }
 
 function HomeScreen({
@@ -74,6 +67,7 @@ function HomeScreen({
   onUpdateRoundState,
   isPastRoundsOpen,
   onPastRoundsOpenChange,
+  onModeDetailOpenChange,
 }: HomeScreenProps) {
   const [activeModeId, setActiveModeId] = useState<LandingModeId | null>(null)
   const [pendingModeId, setPendingModeId] = useState<LandingModeId | null>(null)
@@ -121,7 +115,6 @@ function HomeScreen({
   const saveStatusLabel = isRoundSavePending
     ? 'Saving latest updates locally...'
     : formatSavedRoundLabel(savedRoundUpdatedAtMs)
-  const todayLabel = formatEditorialTodayLabel()
 
   const continueRound = () => {
     trackHomeAction({
@@ -146,6 +139,7 @@ function HomeScreen({
   const openModeDetails = (modeId: LandingModeId) => {
     setResumeError(null)
     setSelectedModeId(modeId)
+    onModeDetailOpenChange(true)
     setActiveModeId(modeId)
   }
 
@@ -161,6 +155,8 @@ function HomeScreen({
 
   const playMode = (modeId: LandingModeId) => {
     if (hasSavedRoundProgress) {
+      onModeDetailOpenChange(false)
+      setActiveModeId(null)
       setPendingModeId(modeId)
       return
     }
@@ -190,10 +186,11 @@ function HomeScreen({
     return (
       <ModeDetailScreen
         mode={activeMode}
-        stepLabel="Step 2 of 3"
-        contextLabel={todayLabel || activeMode.contextLabel}
         hasSavedRoundProgress={hasSavedRoundProgress}
-        onBack={() => setActiveModeId(null)}
+        onBack={() => {
+          onModeDetailOpenChange(false)
+          setActiveModeId(null)
+        }}
         onPlay={() => playMode(activeMode.id)}
       />
     )
@@ -204,7 +201,7 @@ function HomeScreen({
       <header className="screen__header home-screen__header">
         <h2>Choose Game Mode</h2>
         <p className="muted">
-          Step 1 of 3: pick a mode, review it, then set course and golfers.
+          Pick a mode to match your round, then set course and golfers.
         </p>
         {roundSaveWarning && <p className="home-warning-text">{roundSaveWarning}</p>}
       </header>
@@ -260,7 +257,6 @@ function HomeScreen({
               <span className="mode-card__copy">
                 <strong>{mode.name}</strong>
                 <span className="mode-card__tagline">{mode.tagline}</span>
-                <span className="mode-card__meta">{mode.packsLabel}</span>
               </span>
             </button>
           ))}

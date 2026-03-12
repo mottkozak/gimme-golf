@@ -26,6 +26,7 @@ function App() {
   )
   const [initialRoundSnapshot] = useState(() => loadRoundStateSnapshot())
   const [isPastRoundsOpen, setIsPastRoundsOpen] = useState(false)
+  const [isModeDetailOpen, setIsModeDetailOpen] = useState(false)
   const [appState, dispatch] = useReducer(
     reduceAppState,
     undefined,
@@ -77,6 +78,7 @@ function App() {
   const onNavigate: ScreenProps['onNavigate'] = (screen: AppScreen) => {
     if (screen !== 'home') {
       setIsPastRoundsOpen(false)
+      setIsModeDetailOpen(false)
     }
     dispatch({ type: 'navigate', screen })
   }
@@ -112,6 +114,7 @@ function App() {
             {...sharedScreenProps}
             isPastRoundsOpen={isPastRoundsOpen}
             onPastRoundsOpenChange={setIsPastRoundsOpen}
+            onModeDetailOpenChange={setIsModeDetailOpen}
           />
         )
       case 'roundSetup':
@@ -130,6 +133,7 @@ function App() {
             {...sharedScreenProps}
             isPastRoundsOpen={isPastRoundsOpen}
             onPastRoundsOpenChange={setIsPastRoundsOpen}
+            onModeDetailOpenChange={setIsModeDetailOpen}
           />
         )
     }
@@ -140,8 +144,9 @@ function App() {
     Math.max(appState.roundState.holes.length - 1, 0),
   )
   const currentHole = appState.roundState.holes[safeCurrentHoleIndex]
-  const shouldShowProgressChip = appState.activeScreen !== 'home'
+  const shouldShowProgressChip = appState.activeScreen !== 'home' && appState.activeScreen !== 'roundSetup'
   const shouldShowPastRoundsButton = appState.activeScreen === 'home'
+  const shouldShowWordmark = !(appState.activeScreen === 'home' && isModeDetailOpen)
 
   return (
     <div className="app-shell">
@@ -158,7 +163,7 @@ function App() {
         ) : (
           <span className="app-shell__header-spacer" aria-hidden="true" />
         )}
-        <h1 className="app-wordmark">Gimme Golf</h1>
+        <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>Gimme Golf</h1>
         {shouldShowProgressChip ? (
           <span className="chip app-shell__progress-chip">
             Hole {currentHole?.holeNumber ?? 1} of {appState.roundState.config.holeCount}

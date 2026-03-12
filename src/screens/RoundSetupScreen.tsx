@@ -286,7 +286,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           <h2>Round Config</h2>
         </div>
         <p className="muted round-setup-header__support">
-          Step 3 of 3: set course and golfers, then hit Play.
+          Set your course and golfers, then press Play.
         </p>
       </header>
 
@@ -306,7 +306,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           <strong>{activeMode.name}</strong>
         </div>
         <p className="muted">{activeMode.description}</p>
-        <p className="muted">Includes: {activeMode.packsLabel}</p>
       </section>
 
       <section className="panel stack-sm setup-step setup-step--basics">
@@ -379,7 +378,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
             </span>
           </div>
           <p className="muted setup-step__support">
-            Add golfers and expected score so offers stay fair for mixed-skill groups.
+            Add your golfers and optional expected scores.
           </p>
         </header>
 

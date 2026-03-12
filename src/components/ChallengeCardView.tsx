@@ -11,15 +11,15 @@ interface ChallengeCardViewProps {
 
 function getOfferKindLabel(offerKind: ChallengeCardViewProps['offerKind']): string | null {
   if (offerKind === 'safe') {
-    return 'Safe Line'
+    return 'Option A'
   }
 
   if (offerKind === 'hard') {
-    return 'Upside Line'
+    return 'Option B'
   }
 
   if (offerKind === 'single') {
-    return 'Auto Line'
+    return 'Assigned'
   }
 
   return null

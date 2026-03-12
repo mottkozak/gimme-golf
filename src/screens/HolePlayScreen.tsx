@@ -5,19 +5,11 @@ import ChallengeCardView from '../components/ChallengeCardView.tsx'
 import FeaturedHoleBanner from '../components/FeaturedHoleBanner.tsx'
 import GolferMissionModule from '../components/GolferMissionModule.tsx'
 import HoleActionPanel from '../components/HoleActionPanel.tsx'
-import HoleInfoCard from '../components/HoleInfoCard.tsx'
 import HolePublicCardSection from '../components/HolePublicCardSection.tsx'
 import PowerUpCard from '../components/PowerUpCard.tsx'
 import PublicCardView from '../components/PublicCardView.tsx'
 import { trackCardSelected, trackHoleStarted } from '../logic/analytics.ts'
 import { createEmptyHoleCardsState } from '../logic/dealCards.ts'
-import {
-  formatOfferPointRangeLabel,
-  getOfferPointRange,
-  getSkillBandForExpectedScore,
-  getSkillBandLabel,
-  getSkillBandSummaryLine,
-} from '../logic/gameBalance.ts'
 import { prepareCurrentHoleForPlay } from '../logic/holeFlow.ts'
 import { getDisplayPlayerName } from '../logic/playerNames.ts'
 import {
@@ -44,7 +36,6 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   )
   const isDrawTwoPickOne =
     roundState.config.toggles.drawTwoPickOne && !roundState.config.toggles.autoAssignOne
-  const isDynamicDifficultyEnabled = roundState.config.toggles.dynamicDifficulty
 
   const hasAnyPersonalCardsDealt = roundState.players.some((player) => {
     const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
@@ -80,9 +71,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
       ? `Selections ready: ${readyPlayersCount} / ${playersRequiringSelection.length}`
       : 'All selections ready'
   const missionHelperCopy = canSelectCards
-    ? isDynamicDifficultyEnabled
-      ? 'Each golfer gets a Safe line and an Upside line tuned by expected score band.'
-      : 'Each golfer picks one mission card before you continue.'
+    ? 'Pick one mission card for each golfer before continuing.'
     : isNoMercyHole
       ? 'No Mercy is active, so harder missions were auto-assigned this hole.'
       : 'Missions are auto-assigned this hole.'
@@ -236,19 +225,16 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           <h2>{isPowerUpsMode ? 'Hole Setup: Power Ups' : 'Hole Setup: Missions'}</h2>
         </div>
         <p className="muted">
-          Hole {currentHole.holeNumber} | Par {currentHole.par} | Step 1 of 2
+          Hole {currentHole.holeNumber} • Par {currentHole.par}
         </p>
       </header>
 
       <FeaturedHoleBanner featuredHoleType={currentHole.featuredHoleType} compact />
-
-      <HoleInfoCard title="What Happens Next" tone="accent" className="hole-flow-note">
-        <p className="muted">
-          {!isHolePrepared
-            ? `Confirm par, optionally tag the hole, then ${isPowerUpsMode ? 'deal power-ups' : 'deal cards'}.`
-            : 'Play the hole, then go to Hole Results to enter strokes and resolve outcomes.'}
-        </p>
-      </HoleInfoCard>
+      <p className="muted hole-play-intro">
+        {!isHolePrepared
+          ? `Confirm par, optionally add tags, then ${isPowerUpsMode ? 'deal power-ups' : 'deal cards'}.`
+          : 'Review assignments, play the hole, then continue to Hole Results.'}
+      </p>
 
       {!isHolePrepared && (
         <section className="panel stack-xs hole-setup-card">
@@ -298,7 +284,6 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               ? `Deal Hole ${currentHole.holeNumber} Power Ups`
               : `Deal Hole ${currentHole.holeNumber} Cards`}
           </button>
-          <p className="muted">After dealing, you can go straight to Hole Results.</p>
         </section>
       )}
 
@@ -371,30 +356,12 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
         <>
           <p className="muted hole-cards-helper">{missionHelperCopy}</p>
 
-          {canSelectCards && isDynamicDifficultyEnabled && (
-            <HoleInfoCard title="Fair Play Offers" className="hole-fairness-note">
-              <p className="muted">
-                Expected score sets reward ceilings so mixed-skill groups stay competitive. Real
-                strokes are never modified by mission cards.
-              </p>
-            </HoleInfoCard>
-          )}
-
           <section className="stack-sm hole-draft-list">
             {roundState.players.map((player) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
-              const offerState = currentHoleCards.personalCardOfferByPlayerId[player.id]
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
               const isPlayerReady =
                 typeof selectedCardId === 'string' && selectedCardId.length > 0
-              const skillBand = getSkillBandForExpectedScore(player.expectedScore18)
-              const skillBandLabel = getSkillBandLabel(skillBand)
-              const safeRange = formatOfferPointRangeLabel(
-                getOfferPointRange(player.expectedScore18, isDynamicDifficultyEnabled, 'safe'),
-              )
-              const hardRange = formatOfferPointRangeLabel(
-                getOfferPointRange(player.expectedScore18, isDynamicDifficultyEnabled, 'hard'),
-              )
 
               return (
                 <GolferMissionModule
@@ -402,38 +369,14 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                   golferName={playerNameById[player.id]}
                   statusTone={canSelectCards ? (isPlayerReady ? 'ready' : 'pending') : undefined}
                   statusLabel={canSelectCards ? (isPlayerReady ? 'Ready' : 'Pending') : undefined}
-                  summaryLine={
-                    canSelectCards && isDynamicDifficultyEnabled
-                      ? `${skillBandLabel} band • Safe ${safeRange} • Upside ${hardRange}`
-                      : undefined
-                  }
                 >
                   <div className="stack-xs hole-draft-options">
                     {dealtCards.map((card) => {
-                      const offerKind =
-                        offerState?.safeCardId === card.id && offerState?.hardCardId === null
-                          ? 'single'
-                          : offerState?.safeCardId === card.id
-                            ? 'safe'
-                            : offerState?.hardCardId === card.id
-                              ? 'hard'
-                              : undefined
-                      const offerDetail =
-                        offerKind === 'safe'
-                          ? `Safe line target: ${safeRange}`
-                          : offerKind === 'hard'
-                            ? `Upside line target: ${hardRange}`
-                            : offerKind === 'single' && isDynamicDifficultyEnabled
-                              ? `Auto line target: ${getSkillBandSummaryLine(skillBand)}`
-                              : undefined
-
                       return (
                         <ChallengeCardView
                           key={card.id}
                           card={card}
                           selected={selectedCardId === card.id}
-                          offerKind={offerKind}
-                          offerDetail={offerDetail}
                           onSelect={
                             canSelectCards ? () => selectCard(player.id, card.id) : undefined
                           }

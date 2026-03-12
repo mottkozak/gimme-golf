@@ -12,10 +12,8 @@ export interface LandingModeDefinition {
   name: string
   tagline: string
   description: string
-  packsLabel: string
   icon: AppIconName
   toneClassName: string
-  contextLabel: string
   ctaLabel: string
 }
 
@@ -23,56 +21,46 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
   {
     id: 'classic',
     name: 'Classic',
-    tagline: 'Steady, readable mission golf.',
-    description: 'Core mission flow with minimal chaos. Great first game for most groups.',
-    packsLabel: 'Classic personal missions',
+    tagline: 'Balanced missions with clean pacing.',
+    description: 'A clear, easy-to-teach mode with low randomness and steady scoring.',
     icon: 'sports_golf',
     toneClassName: 'classic',
-    contextLabel: 'Today',
     ctaLabel: 'Play Classic',
   },
   {
     id: 'novelty',
     name: 'Novelty',
-    tagline: 'Creative missions and higher variance.',
-    description: 'Adds oddball mission cards for playful, less predictable holes.',
-    packsLabel: 'Classic + Novelty packs',
+    tagline: 'Playful missions with more variety.',
+    description: 'Quirky card outcomes that keep rounds light, social, and less predictable.',
     icon: 'auto_awesome',
     toneClassName: 'novelty',
-    contextLabel: 'Today',
     ctaLabel: 'Play Novelty',
   },
   {
     id: 'chaos',
     name: 'Chaos',
-    tagline: 'Public swing cards for everyone.',
-    description: 'Includes one public chaos lane that can flip point momentum on any hole.',
-    packsLabel: 'Classic + Chaos packs',
+    tagline: 'Big swings from public cards.',
+    description: 'High-volatility public effects that can flip momentum on any hole.',
     icon: 'bolt',
     toneClassName: 'chaos',
-    contextLabel: 'Today',
     ctaLabel: 'Play Chaos',
   },
   {
     id: 'props',
     name: 'Props',
-    tagline: 'Prediction-style public cards.',
-    description: 'Adds pre-hole prop picks for table-talk heavy rounds.',
-    packsLabel: 'Classic + Props packs',
+    tagline: 'Prediction-based side bets.',
+    description: 'Pre-hole prop picks that reward reads, strategy, and table talk.',
     icon: 'flag',
     toneClassName: 'props',
-    contextLabel: 'Today',
     ctaLabel: 'Play Props',
   },
   {
     id: 'powerUps',
     name: 'Power Up',
-    tagline: 'Arcade mode with power-ups and curses.',
-    description: 'No mission cards. Each golfer gets power-ups; current leader(s) get curses.',
-    packsLabel: 'Standalone power-up mode',
+    tagline: 'Arcade-style boosts and curses.',
+    description: 'No mission cards. Use power-ups aggressively while leaders handle curses.',
     icon: 'auto_fix_high',
     toneClassName: 'power-ups',
-    contextLabel: 'Today',
     ctaLabel: 'Play Power Up',
   },
 ] as const

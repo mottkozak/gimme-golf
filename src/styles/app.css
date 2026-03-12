@@ -291,6 +291,10 @@ main {
   color: color-mix(in srgb, var(--text-primary) 94%, var(--accent-strong));
 }
 
+.app-wordmark--hidden {
+  visibility: hidden;
+}
+
 .app-shell__progress-chip {
   justify-self: end;
   border-color: color-mix(in srgb, var(--accent) 36%, var(--border-subtle));
@@ -864,8 +868,14 @@ main {
   color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
 }
 
-.hole-cards-helper {
+.hole-play-intro {
   margin: calc(var(--space-2) * -1) 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.hole-cards-helper {
+  margin: 0;
   font-size: 0.91rem;
   line-height: 1.44;
   color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
@@ -1601,7 +1611,8 @@ main {
   vertical-align: middle;
 }
 
-.mode-spotlight__step {
+.mode-spotlight__step,
+.mode-spotlight__header-label {
   margin: 0;
   justify-self: center;
   font-family: var(--font-ui);

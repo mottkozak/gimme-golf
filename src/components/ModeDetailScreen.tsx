@@ -3,8 +3,6 @@ import type { LandingModeDefinition } from '../logic/landingModes.ts'
 
 interface ModeDetailScreenProps {
   mode: LandingModeDefinition
-  stepLabel: string
-  contextLabel: string
   hasSavedRoundProgress: boolean
   onBack: () => void
   onPlay: () => void
@@ -12,8 +10,6 @@ interface ModeDetailScreenProps {
 
 function ModeDetailScreen({
   mode,
-  stepLabel,
-  contextLabel,
   hasSavedRoundProgress,
   onBack,
   onPlay,
@@ -30,19 +26,17 @@ function ModeDetailScreen({
           >
             <AppIcon className="mode-spotlight__back-icon" icon="arrow_back" />
           </button>
-          <p className="mode-spotlight__step">{stepLabel}</p>
+          <p className="mode-spotlight__header-label">Game Mode</p>
           <span className="mode-spotlight__header-spacer" aria-hidden="true" />
         </header>
 
         <section className="mode-spotlight__hero" aria-label={`${mode.name} mode details`}>
-          <p className="mode-spotlight__context">{contextLabel}</p>
-          <h2 className="mode-spotlight__title">{mode.name}</h2>
           <div className="mode-spotlight__emblem" aria-hidden="true">
             <AppIcon className="mode-spotlight__icon" icon={mode.icon} />
           </div>
+          <h2 className="mode-spotlight__title">{mode.name}</h2>
           <p className="mode-spotlight__summary">{mode.tagline}</p>
           <p className="mode-spotlight__description">{mode.description}</p>
-          <p className="mode-spotlight__meta">Includes: {mode.packsLabel}</p>
         </section>
 
         {hasSavedRoundProgress && (
@@ -55,9 +49,6 @@ function ModeDetailScreen({
         )}
 
         <section className="mode-spotlight__footer">
-          <p className="mode-spotlight__footnote">
-            Next: open course + golfer config before tee-off.
-          </p>
           <button
             type="button"
             className="mode-spotlight__cta"

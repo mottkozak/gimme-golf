@@ -1,10 +1,4 @@
 import { useId, useState } from 'react'
-import {
-  formatOfferPointRangeLabel,
-  getOfferPointRange,
-  getSkillBandForExpectedScore,
-  getSkillBandLabel,
-} from '../logic/gameBalance.ts'
 import { normalizeExpectedScore } from '../logic/roundSetup.ts'
 import type { Player } from '../types/game.ts'
 
@@ -34,14 +28,6 @@ function PlayerSetupRow({
   const [expectedScoreInput, setExpectedScoreInput] = useState(() =>
     String(player.expectedScore18),
   )
-  const skillBand = getSkillBandForExpectedScore(player.expectedScore18)
-  const safeRangeLabel = formatOfferPointRangeLabel(
-    getOfferPointRange(player.expectedScore18, true, 'safe'),
-  )
-  const hardRangeLabel = formatOfferPointRangeLabel(
-    getOfferPointRange(player.expectedScore18, true, 'hard'),
-  )
-  const skillBandLabel = getSkillBandLabel(skillBand)
 
   const parseExpectedScore = (rawValue: string): number | null => {
     const digitsOnly = rawValue.replace(/[^\d]/g, '')
@@ -117,8 +103,7 @@ function PlayerSetupRow({
           }}
         />
         <p className="muted setup-player-field__helper">
-          Used only for fair card offers. {skillBandLabel} band: Safe {safeRangeLabel} • Upside {hardRangeLabel}.
-          Real golf strokes are never modified.
+          Used to tune mission difficulty only. Real golf strokes are never modified.
         </p>
       </label>
     </article>
