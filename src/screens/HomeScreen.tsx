@@ -4,6 +4,7 @@ import AppIcon from '../components/AppIcon.tsx'
 import ModeDetailScreen from '../components/ModeDetailScreen.tsx'
 import { trackHomeAction } from '../logic/analytics.ts'
 import { applyLandingModeToRound, getLandingModeById, LANDING_MODES, type LandingModeId } from '../logic/landingModes.ts'
+import { loadLocalIdentityState } from '../logic/localIdentity.ts'
 import { hasRoundProgress } from '../logic/roundProgress.ts'
 import type { ScreenProps } from './types.ts'
 
@@ -43,6 +44,25 @@ function formatEditorialTodayLabel(): string {
   })
 }
 
+function formatRoundHistoryDate(completedAtMs: number): string {
+  const completedDate = new Date(completedAtMs)
+
+  return completedDate.toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+function getDefaultLandingModeId(): LandingModeId {
+  return LANDING_MODES[0]?.id ?? 'classic'
+}
+
+interface HomeScreenProps extends ScreenProps {
+  isPastRoundsOpen: boolean
+  onPastRoundsOpenChange: (isOpen: boolean) => void
+}
+
 function HomeScreen({
   roundState,
   hasSavedRound,
@@ -52,9 +72,14 @@ function HomeScreen({
   onNavigate,
   onResumeSavedRound,
   onUpdateRoundState,
-}: ScreenProps) {
+  isPastRoundsOpen,
+  onPastRoundsOpenChange,
+}: HomeScreenProps) {
   const [activeModeId, setActiveModeId] = useState<LandingModeId | null>(null)
   const [pendingModeId, setPendingModeId] = useState<LandingModeId | null>(null)
+  const [selectedModeId, setSelectedModeId] = useState<LandingModeId>(() =>
+    getDefaultLandingModeId(),
+  )
   const [resumeError, setResumeError] = useState<string | null>(null)
   const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
 
@@ -74,6 +99,21 @@ function HomeScreen({
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [pendingModeId])
+
+  useEffect(() => {
+    if (!isPastRoundsOpen) {
+      return
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onPastRoundsOpenChange(false)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isPastRoundsOpen, onPastRoundsOpenChange])
 
   const hasSavedRoundProgress = hasSavedRound && hasRoundProgress(roundState)
   const totalHoles = roundState.holes.length || roundState.config.holeCount
@@ -105,6 +145,7 @@ function HomeScreen({
 
   const openModeDetails = (modeId: LandingModeId) => {
     setResumeError(null)
+    setSelectedModeId(modeId)
     setActiveModeId(modeId)
   }
 
@@ -127,8 +168,23 @@ function HomeScreen({
     launchModeFlow(modeId)
   }
 
+  const startSelectedMode = () => {
+    playMode(selectedModeId)
+  }
+
+  const openRoundSetup = () => {
+    setResumeError(null)
+    onNavigate('roundSetup')
+  }
+
+  const openPastRounds = () => {
+    setPendingModeId(null)
+    onPastRoundsOpenChange(true)
+  }
+
   const activeMode = activeModeId ? getLandingModeById(activeModeId) : null
   const pendingMode = pendingModeId ? getLandingModeById(pendingModeId) : null
+  const roundHistory = isPastRoundsOpen ? loadLocalIdentityState().roundHistory : []
 
   if (activeMode) {
     return (
@@ -145,11 +201,8 @@ function HomeScreen({
 
   return (
     <section className="screen home-screen stack-sm">
-      <header className="screen__header home-screen__header mode-list-header">
-        <div className="screen-title">
-          <AppIcon className="screen-title__icon" icon={ICONS.golfFlag} />
-          <h2>Choose Game Mode</h2>
-        </div>
+      <header className="screen__header home-screen__header">
+        <h2>Choose Game Mode</h2>
         <p className="muted">
           Step 1 of 3: pick a mode, review it, then set course and golfers.
         </p>
@@ -193,23 +246,102 @@ function HomeScreen({
             <button
               key={mode.id}
               type="button"
-              className={`mode-card mode-tone--${mode.toneClassName}`}
+              className={`mode-card mode-tone--${mode.toneClassName} ${
+                selectedModeId === mode.id ? 'mode-card--selected' : ''
+              }`}
               onClick={() => openModeDetails(mode.id)}
               aria-label={`${mode.name}. ${mode.tagline}`}
             >
-              <span className="mode-card__icon-wrap">
-                <AppIcon className="mode-card__icon" icon={mode.icon} />
+              <span className="mode-card__icon-column">
+                <span className="mode-card__icon-wrap">
+                  <AppIcon className="mode-card__icon" icon={mode.icon} />
+                </span>
               </span>
               <span className="mode-card__copy">
                 <strong>{mode.name}</strong>
                 <span className="mode-card__tagline">{mode.tagline}</span>
                 <span className="mode-card__meta">{mode.packsLabel}</span>
               </span>
-              <AppIcon className="mode-card__chevron" icon="chevron_right" />
             </button>
           ))}
         </div>
       </section>
+
+      <nav className="home-floating-dock" aria-label="Home quick actions">
+        <button
+          type="button"
+          className="home-floating-dock__button"
+          aria-label="Open account and past rounds"
+          onClick={openPastRounds}
+        >
+          <AppIcon className="home-floating-dock__icon" icon={ICONS.account} />
+        </button>
+        <button
+          type="button"
+          className="home-floating-dock__button home-floating-dock__button--play"
+          aria-label={`Play ${getLandingModeById(selectedModeId).name}`}
+          onClick={startSelectedMode}
+        >
+          <AppIcon className="home-floating-dock__icon home-floating-dock__icon--play" icon={ICONS.play} />
+        </button>
+        <button
+          type="button"
+          className="home-floating-dock__button"
+          aria-label="Open setup settings"
+          onClick={openRoundSetup}
+        >
+          <AppIcon className="home-floating-dock__icon" icon={ICONS.settings} />
+        </button>
+      </nav>
+
+      {isPastRoundsOpen && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => onPastRoundsOpenChange(false)}
+        >
+          <section
+            className="panel modal-card home-history-modal stack-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="home-history-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="row-between home-history-modal__header">
+              <div className="stack-xs">
+                <p className="label">Past Rounds</p>
+                <h3 id="home-history-modal-title">Recent local rounds</h3>
+              </div>
+              <button
+                type="button"
+                className="home-history-modal__close"
+                aria-label="Close past rounds"
+                onClick={() => onPastRoundsOpenChange(false)}
+              >
+                <AppIcon className="home-history-modal__close-icon" icon="close" />
+              </button>
+            </div>
+
+            {roundHistory.length > 0 ? (
+              <ol className="list-reset home-history-list">
+                {roundHistory.map((historyEntry) => (
+                  <li key={historyEntry.roundSignature} className="home-history-list__item">
+                    <p className="home-history-list__winner">{historyEntry.winnerNames}</p>
+                    <p className="muted home-history-list__meta">
+                      {formatRoundHistoryDate(historyEntry.completedAtMs)} • {historyEntry.holeCount} holes •{' '}
+                      {historyEntry.gameMode === 'powerUps' ? 'Power Ups' : 'Cards'} • {historyEntry.groupLabel}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="muted home-history-modal__empty">
+                No completed rounds yet. Finish a round and it will show up here.
+              </p>
+            )}
+          </section>
+        </div>
+      )}
 
       {pendingMode && (
         <div

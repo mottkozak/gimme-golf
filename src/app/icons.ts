@@ -3,9 +3,13 @@ import type { GameModePresetId } from '../types/game.ts'
 
 export const ICONS = {
   teeOff: 'sports_golf',
+  golfBall: 'sports_baseball',
   roundSetup: 'map',
   golfers: 'groups',
   gameOptions: 'tune',
+  account: 'account_circle',
+  settings: 'settings',
+  play: 'play_arrow',
   customPack: 'inventory_2',
   dealCards: 'style',
   holePlay: 'golf_course',

@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useState } from 'react'
+import { ICONS } from './icons.ts'
+import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
 import { trackRoundResumed } from '../logic/analytics.ts'
 import {
@@ -23,6 +25,7 @@ function App() {
     loadOnboardingCompletionStatus(),
   )
   const [initialRoundSnapshot] = useState(() => loadRoundStateSnapshot())
+  const [isPastRoundsOpen, setIsPastRoundsOpen] = useState(false)
   const [appState, dispatch] = useReducer(
     reduceAppState,
     undefined,
@@ -72,6 +75,9 @@ function App() {
   }
 
   const onNavigate: ScreenProps['onNavigate'] = (screen: AppScreen) => {
+    if (screen !== 'home') {
+      setIsPastRoundsOpen(false)
+    }
     dispatch({ type: 'navigate', screen })
   }
 
@@ -101,7 +107,13 @@ function App() {
   const content = (() => {
     switch (appState.activeScreen) {
       case 'home':
-        return <HomeScreen {...sharedScreenProps} />
+        return (
+          <HomeScreen
+            {...sharedScreenProps}
+            isPastRoundsOpen={isPastRoundsOpen}
+            onPastRoundsOpenChange={setIsPastRoundsOpen}
+          />
+        )
       case 'roundSetup':
         return <RoundSetupScreen {...sharedScreenProps} />
       case 'holePlay':
@@ -113,7 +125,13 @@ function App() {
       case 'endRound':
         return <EndRoundScreen {...sharedScreenProps} />
       default:
-        return <HomeScreen {...sharedScreenProps} />
+        return (
+          <HomeScreen
+            {...sharedScreenProps}
+            isPastRoundsOpen={isPastRoundsOpen}
+            onPastRoundsOpenChange={setIsPastRoundsOpen}
+          />
+        )
     }
   })()
 
@@ -123,11 +141,23 @@ function App() {
   )
   const currentHole = appState.roundState.holes[safeCurrentHoleIndex]
   const shouldShowProgressChip = appState.activeScreen !== 'home'
+  const shouldShowPastRoundsButton = appState.activeScreen === 'home'
 
   return (
     <div className="app-shell">
       <header className="app-shell__header">
-        <span className="app-shell__header-spacer" aria-hidden="true" />
+        {shouldShowPastRoundsButton ? (
+          <button
+            type="button"
+            className="app-shell__history-button"
+            aria-label={isPastRoundsOpen ? 'Close past rounds' : 'Open past rounds'}
+            onClick={() => setIsPastRoundsOpen((currentValue) => !currentValue)}
+          >
+            <AppIcon className="app-shell__history-button-icon" icon={ICONS.golfBall} />
+          </button>
+        ) : (
+          <span className="app-shell__header-spacer" aria-hidden="true" />
+        )}
         <h1 className="app-wordmark">Gimme Golf</h1>
         {shouldShowProgressChip ? (
           <span className="chip app-shell__progress-chip">
