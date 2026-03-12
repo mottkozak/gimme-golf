@@ -101,3 +101,33 @@ test('normalizeRoundConfig filters locked premium packs when premium mode is act
   assert.deepEqual(normalized.enabledPackIds.includes('curse'), false)
   assert.deepEqual(normalized.enabledPackIds.includes('classic'), true)
 })
+
+test('normalizeRoundConfig enforces two-card choice for card mode rounds', () => {
+  const config: RoundConfig = {
+    holeCount: 9,
+    courseStyle: 'standard',
+    gameMode: 'cards',
+    selectedPresetId: 'custom',
+    customModeName: 'Two Card Enforced',
+    enabledPackIds: ['classic'],
+    featuredHoles: {
+      enabled: true,
+      frequency: 'normal',
+      assignmentMode: 'auto',
+    },
+    toggles: {
+      dynamicDifficulty: true,
+      momentumBonuses: true,
+      drawTwoPickOne: false,
+      autoAssignOne: true,
+      enableChaosCards: false,
+      enablePropCards: false,
+    },
+  }
+
+  const normalized = normalizeRoundConfig(config)
+
+  assert.equal(normalized.gameMode, 'cards')
+  assert.equal(normalized.toggles.drawTwoPickOne, true)
+  assert.equal(normalized.toggles.autoAssignOne, false)
+})

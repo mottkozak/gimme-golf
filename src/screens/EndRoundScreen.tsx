@@ -13,6 +13,13 @@ import {
 } from '../logic/analytics.ts'
 import { buildLeaderboardEntries } from '../logic/leaderboard.ts'
 import {
+  buildGolfScoreToParByPlayerId,
+  describeGolfScoreToPar,
+  formatGolfScoreToPar,
+  getBestGolfScoreSummary,
+  getGolfScoreToneClass,
+} from '../logic/golfScore.ts'
+import {
   getPlayerIdentityBadge,
   getPlayerProfileByName,
   loadLocalIdentityState,
@@ -202,6 +209,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
     roundState.totalsByPlayerId,
     'adjustedScore',
   )
+  const golfScoreToParByPlayerId = useMemo(() => buildGolfScoreToParByPlayerId(roundState), [roundState])
   const realRows = buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, 'realScore')
   const pointsRows = buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, 'gamePoints')
 
@@ -228,6 +236,20 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
   )
   const heroWinnerNames = formatPlayerNames(adjustedWinnerRows.map((row) => row.playerName))
   const heroWinnerRow = adjustedWinnerRows[0] ?? leaderboardRows[0] ?? null
+  const heroWinnerGolfScore = heroWinnerRow ? golfScoreToParByPlayerId[heroWinnerRow.playerId] ?? null : null
+  const bestGolfScoreSummary = getBestGolfScoreSummary(golfScoreToParByPlayerId)
+  const displayNameByPlayerId = Object.fromEntries(
+    roundState.players.map((player, playerIndex) => [
+      player.id,
+      getDisplayPlayerName(player.name, playerIndex),
+    ]),
+  )
+  const bestGolfScoreNames =
+    bestGolfScoreSummary.playerIds.length > 0
+      ? formatPlayerNames(
+          bestGolfScoreSummary.playerIds.map((playerId) => displayNameByPlayerId[playerId] ?? playerId),
+        )
+      : '-'
   const leaderboardTopRows = leaderboardRows.slice(0, 3)
   const gameModeLabel = roundState.config.gameMode === 'powerUps' ? 'Power Ups' : 'Cards'
   const replayGroupLabel = formatPlayerNames(
@@ -473,6 +495,12 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
             <span className="label">Adjusted Score</span>
             <strong className="score-neutral">{heroWinnerRow ? heroWinnerRow.adjustedScore : '-'}</strong>
           </div>
+          <div className="end-round-hero__metric">
+            <span className="label">Golf (To Par)</span>
+            <strong className={getGolfScoreToneClass(heroWinnerGolfScore)}>
+              {formatGolfScoreToPar(heroWinnerGolfScore)}
+            </strong>
+          </div>
         </div>
       </section>
 
@@ -609,6 +637,17 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
               {adjustedWinner.names} {adjustedWinner.value !== null ? `(${adjustedWinner.value})` : ''}
             </span>
           </div>
+          <div className="end-round-results__row">
+            <span className="end-round-results__label">Best Golf Score (To Par)</span>
+            <span className={`end-round-results__value ${getGolfScoreToneClass(bestGolfScoreSummary.score)}`}>
+              {bestGolfScoreNames}{' '}
+              {bestGolfScoreSummary.score !== null
+                ? `(${formatGolfScoreToPar(bestGolfScoreSummary.score)} • ${describeGolfScoreToPar(
+                    bestGolfScoreSummary.score,
+                  )})`
+                : ''}
+            </span>
+          </div>
         </div>
       </section>
 
@@ -617,6 +656,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
         <p className="muted">
           Real score is your golf score and is never modified by cards. Game points come from
           side-game outcomes. Adjusted score combines both by subtracting points from real score.
+          Golf score tracks to-par as -X / +X / Even.
         </p>
       </section>
 
@@ -624,6 +664,7 @@ function EndRoundScreen({ roundState, onNavigate, onResetRound }: ScreenProps) {
         title="Round Leaderboard"
         rows={leaderboardRows}
         momentumByPlayerId={momentumByPlayerId}
+        golfScoreToParByPlayerId={golfScoreToParByPlayerId}
       />
 
       <section className="panel stack-xs end-round-awards-major">

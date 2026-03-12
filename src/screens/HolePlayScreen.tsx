@@ -50,7 +50,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   )
   const isHolePrepared = isPowerUpsMode ? hasAnyPowerUpsDealt : hasAnyCardsDealt
 
-  const playersRequiringSelection = isDrawTwoPickOne && !isNoMercyHole
+  const playersRequiringSelection = isDrawTwoPickOne
     ? roundState.players.filter((player) => {
         const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
         return dealtCards.length > 0
@@ -65,7 +65,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
     return typeof selectedCardId === 'string' && selectedCardId.length > 0
   }).length
-  const canSelectCards = isDrawTwoPickOne && !isNoMercyHole
+  const canSelectCards = isDrawTwoPickOne
   const readinessSummary =
     playersRequiringSelection.length > 0
       ? `Selections ready: ${readyPlayersCount} / ${playersRequiringSelection.length}`
@@ -73,7 +73,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
   const missionHelperCopy = canSelectCards
     ? 'Pick one mission card for each golfer before continuing.'
     : isNoMercyHole
-      ? 'No Mercy is active, so harder missions were auto-assigned this hole.'
+      ? 'No Mercy is active, so safe missions are removed this hole.'
       : 'Missions are auto-assigned this hole.'
 
   useEffect(() => {

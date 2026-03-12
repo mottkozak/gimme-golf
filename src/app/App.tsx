@@ -164,10 +164,7 @@ function App() {
     Math.max(appState.roundState.holes.length - 1, 0),
   )
   const currentHole = appState.roundState.holes[safeCurrentHoleIndex]
-  const shouldShowProgressChip =
-    appState.activeScreen === 'holePlay' ||
-    appState.activeScreen === 'leaderboard' ||
-    appState.activeScreen === 'endRound'
+  const shouldShowProgressChip = appState.activeScreen === 'endRound'
   const shouldShowGlobalHeader = !(appState.activeScreen === 'home' && isModeDetailOpen)
   const shouldShowWordmark = !(appState.activeScreen === 'home' && isModeDetailOpen)
   const isModePreviewActive = appState.activeScreen === 'home' && isModeDetailOpen

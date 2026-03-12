@@ -132,8 +132,8 @@ export const GAME_MODE_PRESET_CATALOG: GameModePresetDefinition[] = [
     name: 'Quick Start',
     shortDescription: 'Best first round for mixed-skill groups. Fast setup and low friction.',
     longDescription:
-      'Quick Start is the easiest way to tee off. It runs the Core mission set, keeps dealing automatic, and turns off extra systems that add overhead in a first round.',
-    includesLabel: 'Core missions only, auto-assigned cards',
+      'Quick Start is the easiest way to tee off. It runs the Core mission set, uses two-card mission picks, and turns off extra systems that add overhead in a first round.',
+    includesLabel: 'Core missions only, choose 1 of 2 cards',
     bestForLabel: 'First rounds, mixed-skill groups, and pace-of-play focus',
     includedFeatureIds: ['classic'],
     sortOrder: 1,
@@ -145,7 +145,7 @@ export const GAME_MODE_PRESET_CATALOG: GameModePresetDefinition[] = [
       momentumBonuses: false,
       featuredEnabled: false,
       dynamicDifficulty: true,
-      personalCardMode: 'autoAssignOne',
+      personalCardMode: 'drawTwoPickOne',
     }),
   },
   {

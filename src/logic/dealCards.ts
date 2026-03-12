@@ -528,7 +528,7 @@ function chooseSingleCardForPlayer(
   }
 }
 
-function chooseNoMercyCardForPlayer(
+function chooseNoMercyCardsForPlayer(
   cards: PersonalCard[],
   player: Player,
   hole: HoleDefinition,
@@ -537,7 +537,7 @@ function chooseNoMercyCardForPlayer(
   recentPersonalCardIds: Set<string>,
   recentPlayerCardIds: Set<string>,
 ): { cards: PersonalCard[]; offer: PersonalCardOfferState } {
-  const candidatePool = filterCardsForOfferPointRange(
+  const firstCandidatePool = filterCardsForOfferPointRange(
     getPersonalCandidatePool(
       cards,
       usedPersonalCardIds,
@@ -549,29 +549,59 @@ function chooseNoMercyCardForPlayer(
     'hard',
     dynamicDifficultyEnabled,
   )
-  const hardRanked = rankCardsForOffer(
-    candidatePool,
+  const firstHardRanked = rankCardsForOffer(
+    firstCandidatePool,
     player,
     hole,
     'hard',
     dynamicDifficultyEnabled,
   )
-  const selectedCard = pickWeightedPersonalCardFromRanked(hardRanked)
+  const firstCard = pickWeightedPersonalCardFromRanked(firstHardRanked)
 
-  if (!selectedCard) {
+  if (firstCard) {
+    usedPersonalCardIds.add(firstCard.id)
+    recentPlayerCardIds.add(firstCard.id)
+  }
+
+  const remaining = firstCard ? cards.filter((card) => card.id !== firstCard.id) : cards
+  const secondCandidatePool = filterCardsForOfferPointRange(
+    getPersonalCandidatePool(
+      remaining,
+      usedPersonalCardIds,
+      recentPersonalCardIds,
+      recentPlayerCardIds,
+      1,
+    ),
+    player,
+    'hard',
+    dynamicDifficultyEnabled,
+  )
+  const secondHardRanked = rankCardsForOffer(
+    secondCandidatePool,
+    player,
+    hole,
+    'hard',
+    dynamicDifficultyEnabled,
+  )
+  const secondCard = pickWeightedPersonalCardFromRanked(secondHardRanked)
+  if (secondCard) {
+    usedPersonalCardIds.add(secondCard.id)
+    recentPlayerCardIds.add(secondCard.id)
+  }
+
+  const orderedCards = [firstCard, secondCard].filter((card): card is PersonalCard => Boolean(card))
+  if (orderedCards.length === 0) {
     return {
       cards: [],
       offer: createEmptyOfferState(),
     }
   }
-  usedPersonalCardIds.add(selectedCard.id)
-  recentPlayerCardIds.add(selectedCard.id)
 
   return {
-    cards: [selectedCard],
+    cards: orderedCards,
     offer: {
-      safeCardId: null,
-      hardCardId: selectedCard.id,
+      safeCardId: orderedCards[0]?.id ?? null,
+      hardCardId: orderedCards[1]?.id ?? orderedCards[0]?.id ?? null,
     },
   }
 }
@@ -660,10 +690,6 @@ export function createDealtHoleCardsState(
         return [player.id, defaultSelectionId]
       }
 
-      if (isNoMercyFeaturedHole(hole.featuredHoleType)) {
-        return [player.id, dealtCards[0]?.id ?? null]
-      }
-
       return [player.id, null]
     }),
   )
@@ -702,7 +728,7 @@ export function dealPersonalCardsForHole(
 
   for (const player of players) {
     if (noMercyFeaturedHole) {
-      const offer = chooseNoMercyCardForPlayer(
+      const offer = chooseNoMercyCardsForPlayer(
         eligibleDeck,
         player,
         hole,

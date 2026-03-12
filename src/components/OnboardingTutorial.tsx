@@ -28,7 +28,7 @@ const TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Round Setup: Players, Mode, and Packs',
     description: 'Quick Start is the best first-round mode for mixed-skill groups.',
     detail:
-      'Dynamic Difficulty helps balance skill gaps, Auto-pick keeps pace, and public/featured extras stay optional.',
+      'Dynamic Difficulty helps balance skill gaps, each golfer chooses 1 of 2 mission cards, and public/featured extras stay optional.',
     icon: ICONS.roundSetup,
   },
   {

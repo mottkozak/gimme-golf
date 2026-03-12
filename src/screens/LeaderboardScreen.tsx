@@ -11,11 +11,18 @@ import RecapStatusChip from '../components/RecapStatusChip.tsx'
 import RecapSummaryStatCard from '../components/RecapSummaryStatCard.tsx'
 import { trackSummaryScreenViewed } from '../logic/analytics.ts'
 import {
+  buildGolfScoreToParByPlayerId,
+  describeGolfScoreToPar,
+  formatGolfScoreToPar,
+  getBestGolfScoreSummary,
+  getGolfScoreToneClass,
+} from '../logic/golfScore.ts'
+import {
   buildHoleRecapData,
   formatWinnerSummary,
 } from '../logic/holeRecap.ts'
 import { buildLeaderboardEntries, type LeaderboardSortMode } from '../logic/leaderboard.ts'
-import { formatPlayerNames } from '../logic/playerNames.ts'
+import { formatPlayerNames, getDisplayPlayerName } from '../logic/playerNames.ts'
 import type { ScreenProps } from './types.ts'
 
 function formatSignedPoints(value: number): string {
@@ -28,6 +35,41 @@ function formatDifficultyLabel(value: string | null): string {
   }
 
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
+function formatCardTypeLabel(value: string | null): string {
+  if (!value) {
+    return 'Personal'
+  }
+
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
+function getMissionSummaryFlavor(status: 'success' | 'failed', holeNumber: number, playerName: string): string {
+  const successLines = [
+    `${playerName} cashed it in with calm tempo.`,
+    `${playerName} converted and grabbed the bonus clean.`,
+    `${playerName} stepped up and closed the mission.`,
+    `${playerName} played it like Sunday pressure.`,
+  ]
+  const failedLines = [
+    `${playerName} pushed it right and missed the bonus.`,
+    `${playerName} came up short on this one.`,
+    `${playerName} had the look but couldn’t convert.`,
+    `${playerName} left this mission on the table.`,
+  ]
+
+  const lines = status === 'success' ? successLines : failedLines
+  const seed = holeNumber + playerName.length
+  return lines[seed % lines.length]
+}
+
+function getMissionResultCallout(status: 'success' | 'failed', points: number): string {
+  if (status === 'success') {
+    return `Reward collected: ${formatSignedPoints(points)} points swing in the right direction.`
+  }
+
+  return `No reward collected: ${formatSignedPoints(points)} was available on completion.`
 }
 
 function formatDuration(ms: number | null): string {
@@ -64,6 +106,24 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     () => buildLeaderboardEntries(roundState.players, roundState.totalsByPlayerId, roundSortMode),
     [roundSortMode, roundState.players, roundState.totalsByPlayerId],
   )
+  const golfScoreToParByPlayerId = useMemo(
+    () => buildGolfScoreToParByPlayerId(roundState),
+    [roundState],
+  )
+  const bestGolfScoreSummary = useMemo(
+    () => getBestGolfScoreSummary(golfScoreToParByPlayerId),
+    [golfScoreToParByPlayerId],
+  )
+  const displayNameByPlayerId = useMemo(
+    () =>
+      Object.fromEntries(
+        roundState.players.map((player, playerIndex) => [
+          player.id,
+          getDisplayPlayerName(player.name, playerIndex),
+        ]),
+      ),
+    [roundState.players],
+  )
 
   useEffect(() => {
     trackSummaryScreenViewed(roundState, 'leaderboard', recapData.holeNumber)
@@ -82,6 +142,12 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     typeof holeWinnerScore === 'number'
       ? `${isHolePointsTie ? 'Tied at' : 'Won with'} ${formatSignedPoints(holeWinnerScore)} points`
       : 'No score'
+  const bestGolfScorePlayerNames =
+    bestGolfScoreSummary.playerIds.length > 0
+      ? formatPlayerNames(
+          bestGolfScoreSummary.playerIds.map((playerId) => displayNameByPlayerId[playerId] ?? playerId),
+        )
+      : '-'
 
   const progressRound = () => {
     if (isLastHole) {
@@ -133,6 +199,16 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             value={formatWinnerSummary(recapData.leaderSnapshot.adjusted)}
             detail={typeof roundLeaderScore === 'number' ? `Adjusted ${roundLeaderScore}` : 'No score'}
           />
+          <RecapSummaryStatCard
+            label="Best Golf Score (To Par)"
+            value={formatGolfScoreToPar(bestGolfScoreSummary.score)}
+            valueClassName={getGolfScoreToneClass(bestGolfScoreSummary.score)}
+            detail={
+              bestGolfScoreSummary.score !== null
+                ? `${bestGolfScorePlayerNames} • ${describeGolfScoreToPar(bestGolfScoreSummary.score)}`
+                : 'No strokes entered yet'
+            }
+          />
         </div>
       </section>
 
@@ -141,6 +217,7 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         rows={roundLeaderboardRows}
         sortMode={roundSortMode}
         onSortChange={setRoundSortMode}
+        golfScoreToParByPlayerId={golfScoreToParByPlayerId}
         badge={null}
       />
 
@@ -198,92 +275,165 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 ? "Shows each golfer's assigned power-up and curse, plus whether the power-up was used."
                 : "Shows each golfer's personal card for this hole and whether they completed it."}
             </p>
-            {recapData.playerRows.map((row) => (
-              <RecapPlayerOutcomeCard
-                key={row.playerId}
-                tone={
-                  row.missionStatus === 'success'
-                    ? 'success'
-                    : row.missionStatus === 'failed'
-                      ? 'failed'
-                      : 'default'
-                }
-                playerName={row.playerName}
-                chips={
-                  isPowerUpsMode ? (
-                    <>
-                      {row.isHoleWinnerByPoints && <RecapStatusChip tone="winner">Winner</RecapStatusChip>}
-                      <RecapStatusChip tone="total">Total {formatSignedPoints(row.holePoints)}</RecapStatusChip>
-                    </>
-                  ) : (
-                    <div className="stack-xs recap-player-outcome-card__summary-lines">
-                      <span className="recap-player-outcome-card__summary-line">
-                        {row.selectedCardCode && row.selectedCardName
-                          ? `${row.selectedCardCode} - ${row.selectedCardName}`
-                          : 'No personal card selected'}
-                      </span>
-                      <span
-                        className={`recap-player-outcome-card__summary-line ${
-                          row.missionStatus === 'success'
-                            ? 'recap-player-outcome-card__summary-line--success'
-                            : 'recap-player-outcome-card__summary-line--failed'
-                        }`}
-                      >
-                        {row.missionStatus === 'success' ? 'Completed' : 'Failed'}
-                      </span>
-                    </div>
-                  )
-                }
-              >
-                <div className="stack-xs">
-                  {isPowerUpsMode ? (
-                    <>
-                      <p className="recap-card-line">
-                        {row.powerUpTitle ? `Power Up: ${row.powerUpTitle}` : 'No Power Up assigned'}
-                      </p>
-                      <p className="recap-card-line">
-                        {row.curseTitle ? `Curse: ${row.curseTitle}` : 'No Curse assigned'}
-                      </p>
-                      <div className="recap-metrics recap-metrics--totals">
-                        <RecapStatusChip tone={row.powerUpUsed ? 'success' : 'subtle'}>
-                          {row.powerUpUsed ? 'Used' : 'Unused'}
-                        </RecapStatusChip>
-                        <RecapStatusChip tone="total">
-                          Round Points {formatSignedPoints(row.totalGamePoints)}
-                        </RecapStatusChip>
-                        <RecapStatusChip tone="total">
-                          Adjusted {row.totalAdjustedScore}
-                        </RecapStatusChip>
+            {recapData.playerRows.map((row) => {
+              const hasCard = Boolean(row.selectedCardCode && row.selectedCardName)
+              const missionStatusTone =
+                row.missionStatus === 'success'
+                  ? 'success'
+                  : row.missionStatus === 'failed'
+                    ? 'failed'
+                    : 'subtle'
+              const missionStatusLabel =
+                row.missionStatus === 'success'
+                  ? 'Completed'
+                  : row.missionStatus === 'failed'
+                    ? 'Failed'
+                    : 'Pending'
+              const missionSummaryFlavor =
+                row.missionStatus === 'pending'
+                  ? `${row.playerName} still has this mission pending.`
+                  : getMissionSummaryFlavor(
+                      row.missionStatus === 'success' ? 'success' : 'failed',
+                      recapData.holeNumber,
+                      row.playerName,
+                    )
+              const missionCallout =
+                row.missionStatus === 'pending'
+                  ? 'Mission is still pending resolution.'
+                  : getMissionResultCallout(
+                      row.missionStatus === 'success' ? 'success' : 'failed',
+                      row.selectedCardPoints,
+                    )
+              const missionCardToneClass =
+                row.missionStatus === 'success'
+                  ? 'recap-outcome-mission-card--success'
+                  : row.missionStatus === 'failed'
+                    ? 'recap-outcome-mission-card--failed'
+                    : 'recap-outcome-mission-card--pending'
+              const summaryFlavorToneClass =
+                row.missionStatus === 'success'
+                  ? 'recap-player-outcome-card__summary-flavor--success'
+                  : row.missionStatus === 'failed'
+                    ? 'recap-player-outcome-card__summary-flavor--failed'
+                    : 'recap-player-outcome-card__summary-flavor--pending'
+              const missionCalloutToneClass =
+                row.missionStatus === 'success'
+                  ? 'recap-outcome-mission-card__callout--success'
+                  : row.missionStatus === 'failed'
+                    ? 'recap-outcome-mission-card__callout--failed'
+                    : 'recap-outcome-mission-card__callout--pending'
+
+              return (
+                <RecapPlayerOutcomeCard
+                  key={row.playerId}
+                  tone={
+                    row.missionStatus === 'success'
+                      ? 'success'
+                      : row.missionStatus === 'failed'
+                        ? 'failed'
+                        : 'default'
+                  }
+                  playerName={row.playerName}
+                  toggleLabel={isPowerUpsMode ? 'Outcomes' : 'Card'}
+                  chips={
+                    isPowerUpsMode ? (
+                      <>
+                        {row.isHoleWinnerByPoints && <RecapStatusChip tone="winner">Winner</RecapStatusChip>}
+                        <RecapStatusChip tone="total">Total {formatSignedPoints(row.holePoints)}</RecapStatusChip>
+                      </>
+                    ) : (
+                      <div className="stack-xs recap-player-outcome-card__summary-block">
+                        <p className="recap-player-outcome-card__card-headline">
+                          {hasCard
+                            ? `${row.selectedCardCode} • ${row.selectedCardName}`
+                            : 'No personal card assigned'}
+                        </p>
+                        <p
+                          className={`recap-player-outcome-card__summary-flavor ${summaryFlavorToneClass}`}
+                        >
+                          {hasCard ? missionSummaryFlavor : 'No challenge was tracked for this golfer on this hole.'}
+                        </p>
+                        <div className="recap-metrics recap-player-outcome-card__summary-badges">
+                          {hasCard ? (
+                            <>
+                              <RecapStatusChip tone={missionStatusTone}>{missionStatusLabel}</RecapStatusChip>
+                              <RecapStatusChip tone="total">
+                                Reward {formatSignedPoints(row.selectedCardPoints)} pts
+                              </RecapStatusChip>
+                              <RecapStatusChip tone="subtle">
+                                {formatCardTypeLabel(row.selectedCardType)}
+                              </RecapStatusChip>
+                            </>
+                          ) : (
+                            <RecapStatusChip tone="subtle">No Card</RecapStatusChip>
+                          )}
+                        </div>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      {row.selectedCardCode && row.selectedCardName ? (
-                        <>
-                          <p className="recap-card-line">
-                            Challenge: {row.selectedCardCode} - {row.selectedCardName}
-                          </p>
-                          <p className="recap-card-line">
-                            Description: {row.selectedCardDescription ?? 'No description available'}
-                          </p>
-                          <p className="recap-card-line">
-                            Difficulty: {formatDifficultyLabel(row.selectedCardDifficulty)}
-                          </p>
-                          <p className="recap-card-line">
-                            Points: {formatSignedPoints(row.selectedCardPoints)}
-                          </p>
-                          <p className="recap-card-line">
-                            Result: {row.missionStatus === 'success' ? 'Successful' : 'Failed'}
-                          </p>
-                        </>
-                      ) : (
-                        <p className="recap-card-line">No personal card selected</p>
-                      )}
-                    </>
-                  )}
-                </div>
-              </RecapPlayerOutcomeCard>
-            ))}
+                    )
+                  }
+                >
+                  <div className="stack-xs">
+                    {isPowerUpsMode ? (
+                      <>
+                        <p className="recap-card-line">
+                          {row.powerUpTitle ? `Power Up: ${row.powerUpTitle}` : 'No Power Up assigned'}
+                        </p>
+                        <p className="recap-card-line">
+                          {row.curseTitle ? `Curse: ${row.curseTitle}` : 'No Curse assigned'}
+                        </p>
+                        <div className="recap-metrics recap-metrics--totals">
+                          <RecapStatusChip tone={row.powerUpUsed ? 'success' : 'subtle'}>
+                            {row.powerUpUsed ? 'Used' : 'Unused'}
+                          </RecapStatusChip>
+                          <RecapStatusChip tone="total">
+                            Round Points {formatSignedPoints(row.totalGamePoints)}
+                          </RecapStatusChip>
+                          <RecapStatusChip tone="total">
+                            Adjusted {row.totalAdjustedScore}
+                          </RecapStatusChip>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {row.selectedCardCode && row.selectedCardName ? (
+                          <article className={`recap-outcome-mission-card ${missionCardToneClass}`}>
+                            <header className="row-between setup-row-wrap recap-outcome-mission-card__header">
+                              <strong className="recap-outcome-mission-card__title">
+                                {row.selectedCardCode} - {row.selectedCardName}
+                              </strong>
+                              <RecapStatusChip tone={missionStatusTone}>{missionStatusLabel}</RecapStatusChip>
+                            </header>
+                            <p className="recap-outcome-mission-card__description">
+                              {row.selectedCardDescription ?? 'No description available'}
+                            </p>
+                            <div className="recap-outcome-mission-card__badges">
+                              <RecapStatusChip tone="snapshot">
+                                {formatDifficultyLabel(row.selectedCardDifficulty)} difficulty
+                              </RecapStatusChip>
+                              <RecapStatusChip tone="total">
+                                Reward {formatSignedPoints(row.selectedCardPoints)} pts
+                              </RecapStatusChip>
+                              <RecapStatusChip tone="subtle">
+                                {formatCardTypeLabel(row.selectedCardType)} card
+                              </RecapStatusChip>
+                            </div>
+                            <p className={`recap-outcome-mission-card__callout ${missionCalloutToneClass}`}>
+                              {missionCallout}
+                            </p>
+                          </article>
+                        ) : (
+                          <article className="recap-outcome-mission-card recap-outcome-mission-card--empty">
+                            <p className="recap-outcome-mission-card__description">
+                              No personal card selected for this golfer on this hole.
+                            </p>
+                          </article>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </RecapPlayerOutcomeCard>
+              )
+            })}
           </section>
 
           {!isPowerUpsMode && recapData.publicCardRecapItems.length > 0 && (

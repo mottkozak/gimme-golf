@@ -58,7 +58,10 @@ export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
   const enabledPackIds = gameMode === 'powerUps'
     ? []
     : filterEnabledPackIdsForEntitlements(normalizeEnabledPackIds(presetConfig.enabledPackIds))
-  const autoAssignOne = Boolean(presetConfig.toggles.autoAssignOne)
+  // Card mode is always pick-one-of-two. Auto-assign is only valid for Power Ups.
+  const autoAssignOne = gameMode === 'powerUps'
+    ? Boolean(presetConfig.toggles.autoAssignOne)
+    : false
   const momentumBonuses =
     typeof presetConfig.toggles.momentumBonuses === 'boolean'
       ? presetConfig.toggles.momentumBonuses
@@ -85,7 +88,7 @@ export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
     toggles: {
       ...presetConfig.toggles,
       momentumBonuses,
-      drawTwoPickOne: !autoAssignOne,
+      drawTwoPickOne: gameMode === 'cards',
       autoAssignOne,
       enableChaosCards: gameMode === 'cards' ? hasChaosPack : false,
       enablePropCards: gameMode === 'cards' ? hasPropsPack : false,

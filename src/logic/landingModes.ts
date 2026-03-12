@@ -100,6 +100,8 @@ function applyLandingModeToConfig(config: RoundConfig, modeId: LandingModeId): R
       enabledPackIds: ['classic'],
       toggles: {
         ...classicConfig.toggles,
+        drawTwoPickOne: true,
+        autoAssignOne: false,
         enableChaosCards: false,
         enablePropCards: false,
       },

@@ -1,4 +1,9 @@
 import type { ReactNode } from 'react'
+import {
+  formatGolfScoreToPar,
+  getGolfScoreToneClass,
+  type GolfScoreToParByPlayerId,
+} from '../logic/golfScore.ts'
 import type { LeaderboardSortMode } from '../logic/leaderboard.ts'
 import type { LeaderboardEntry } from '../types/game.ts'
 
@@ -14,6 +19,7 @@ interface LeaderboardTableProps {
   onSortChange?: (sortMode: LeaderboardSortMode) => void
   momentumByPlayerId?: Record<string, LeaderboardMomentumValue>
   showMomentum?: boolean
+  golfScoreToParByPlayerId?: GolfScoreToParByPlayerId
   className?: string
   headerBadge?: ReactNode
   compactLegend?: boolean
@@ -26,11 +32,13 @@ function LeaderboardTable({
   onSortChange,
   momentumByPlayerId,
   showMomentum,
+  golfScoreToParByPlayerId,
   className,
   headerBadge,
   compactLegend = false,
 }: LeaderboardTableProps) {
   const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
+  const shouldShowGolfScore = Boolean(golfScoreToParByPlayerId)
   const formatSignedPoints = (value: number): string => `${value > 0 ? '+' : ''}${value}`
 
   const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
@@ -71,6 +79,7 @@ function LeaderboardTable({
               <th className="leaderboard-table__th leaderboard-table__th--metric">
                 {renderSortButton('Adjusted', 'adjustedScore')}
               </th>
+              {shouldShowGolfScore && <th className="leaderboard-table__th leaderboard-table__th--metric">Golf</th>}
             </tr>
           </thead>
           <tbody>
@@ -99,14 +108,25 @@ function LeaderboardTable({
                 <td className="leaderboard-table__cell leaderboard-table__cell--metric">
                   {row.adjustedScore}
                 </td>
+                {shouldShowGolfScore && (
+                  <td
+                    className={`leaderboard-table__cell leaderboard-table__cell--metric ${getGolfScoreToneClass(
+                      golfScoreToParByPlayerId?.[row.playerId] ?? null,
+                    )}`}
+                  >
+                    {formatGolfScoreToPar(golfScoreToParByPlayerId?.[row.playerId] ?? null)}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p className={`muted leaderboard-table__legend ${compactLegend ? 'leaderboard-table__legend--compact' : ''}`}>
-        Real score is pure golf strokes. Game points come from side-game outcomes. Adjusted score
-        equals real score minus game points.
+        Real is pure strokes. Game points come from side-game outcomes. Adjusted = real minus game
+        points. Golf is strokes vs played par ({' '}
+        <span className="score-positive">-X under</span> / <span className="score-neutral">Even</span> /{' '}
+        <span className="score-negative">+X over</span>).
       </p>
     </div>
   )

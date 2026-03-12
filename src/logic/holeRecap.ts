@@ -144,27 +144,304 @@ function formatCardTypeLabel(cardType: string | null): string {
   return `${cardType.charAt(0).toUpperCase()}${cardType.slice(1)}`
 }
 
-function createTieBroadcastLine(playerNames: string[], holeNumber: number): string {
-  const formattedNames = formatPlayerNames(playerNames)
-  const tieLines = [
-    `${formattedNames} finished all square in a dead heat`,
-    `${formattedNames} traded haymakers and split the skins`,
-    `${formattedNames} carded a photo finish at the pin`,
-    `${formattedNames} walked off level after a back-nine style duel`,
-  ]
+const SOLO_WINNER_BROADCAST_TEMPLATES = [
+  '{winner} takes the hole.',
+  '{winner} claims the hole outright.',
+  '{winner} wins the hole clean.',
+  '{winner} edges the field and takes the hole.',
+  '{winner} posts the number that matters.',
+  '{winner} grabs the honors on this hole.',
+  '{winner} comes out on top.',
+  '{winner} snags the hole.',
+  '{winner} gets the job done and takes the hole.',
+  '{winner} walks away with the hole.',
+  '{winner} stands alone on this one.',
+  '{winner} takes care of business here.',
+  '{winner} cashes in and takes the hole.',
+  '{winner} finds the fairway to victory.',
+  '{winner} turns that hole into a highlight.',
+  '{winner} leaves no doubt and claims the hole.',
+  '{winner} shuts the door and takes it.',
+  '{winner} sneaks off with the hole.',
+  '{winner} steals the hole with some clutch golf.',
+  '{winner} scrambles home and wins the hole.',
+  '{winner} hangs on and wins the hole.',
+  '{winner} wins it with pure survival golf.',
+  '{winner} keeps the card clean enough and takes the hole.',
+  '{winner} grinds one out and wins the hole.',
+  '{winner} escapes with the hole like a bandit.',
+  '{winner} pipes one through the pressure and takes the hole.',
+  '{winner} flushes the moment and wins the hole.',
+  '{winner} stripes the hole and cashes in.',
+  '{winner} rolls it right in the heart and takes it.',
+  '{winner} pours one in and wins the hole.',
+  '{winner} drains the dagger and owns the hole.',
+  '{winner} wins the hole with some premium-grade nonsense.',
+  '{winner} takes the hole with broadcast-booth confidence.',
+  '{winner} just dropped a little Sunday swagger on that hole.',
+  '{winner} brings major-championship energy and takes it.',
+  '{winner} takes the hole like it’s the back nine on Sunday.',
+  '{winner} channels pure clubhouse confidence and takes it.',
+  '{winner} posts a number worthy of a polite Nantz whisper.',
+  '{winner} wins the hole with a “better than most” kind of vibe.',
+  '{winner} looked dead in the water and still won the hole.',
+  '{winner} survives bunkers, branches, and bad ideas to take it.',
+  '{winner} takes the hole through sheer chaos tolerance.',
+  '{winner} wins it ugly, which still absolutely counts.',
+  '{winner} survives the wreckage and comes out smiling.',
+  '{winner} turns chaos into points and points into bragging rights.',
+  '{winner} takes the hole and the golf gods sign off on the nonsense.',
+  '{winner} wins the hole with full “GET IN THE HOLE” energy.',
+  '{winner} just turned that hole into Saturday broadcast material.',
+  '{winner} wins the hole like the producer told the camera crew to stay tight.',
+  '{winner} wins the hole and immediately becomes unbearable in the group chat.',
+  '{winner} just went full Sunday Red and slammed the door.',
+  '{winner} brought Magnolia Lane energy and never looked back.',
+  '{winner} survived Amen Corner vibes and came out with the hole.',
+  "{winner} crossed their own Rae's Creek and still took the skin.",
+  '{winner} turned this into a Butler Cabin audition and took it.',
+  '{winner} brought 16-at-Augusta chip-in confidence and stole the hole.',
+  '{winner} hit this with a little "better than most" magic and won it.',
+  '{winner} gave it the old "in your life" finish and took the hole.',
+  '{winner} channeled peak Sawgrass-on-17 nerve and owned the moment.',
+  '{winner} found island-green composure and cashed this hole.',
+  '{winner} went St Andrews Road Hole mode and outlasted everyone.',
+  '{winner} turned this into a links-weather grind and still won the hole.',
+  '{winner} brought Open Championship grit and nicked the hole late.',
+  '{winner} went full Ryder Cup fist-pump and grabbed this one.',
+  '{winner} pulled a Miracle-at-Medinah style heist and took the hole.',
+  '{winner} delivered Duel-in-the-Sun energy and came out on top.',
+  '{winner} gave this hole 2008-Torrey resilience and finished it off.',
+  '{winner} found a pine-straw miracle and stole the hole anyway.',
+  '{winner} escaped like Seve from the car park and took it.',
+  '{winner} played this like Pebble on Sunday and cashed it in.',
+  '{winner} took the hole with a Bay Hill Sunday snarl.',
+  '{winner} rolled in a putt with full CBS-theme timing and took it.',
+  '{winner} finished this hole like the producer just called for slow-mo.',
+  '{winner} brought "hello friends" calm and took absolute control.',
+  '{winner} turned this hole into a Caddyshack highlight and won it.',
+  '{winner} went full Happy Gilmore swagger and took the hole.',
+  '{winner} won it with Tin Cup bravery and none of the regret.',
+]
 
-  return tieLines[(holeNumber - 1) % tieLines.length]
+const TWO_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} halve the hole.',
+  '{players} split the hole.',
+  '{players} finish all square on this one.',
+  '{players} share the hole.',
+  '{players} post matching numbers and split the honors.',
+  '{players} match cards and halve it.',
+  '{players} card the same number and call it even.',
+  '{players} end the hole in a dead heat.',
+  '{players} split the skin.',
+  '{players} trade punches and finish even.',
+  '{players} couldn’t be separated on that one.',
+  '{players} finish in a scorecard stalemate.',
+  '{players} settle for a split.',
+  '{players} deadlock the hole.',
+  '{players} split the honors and the chirping rights.',
+  '{players} make it a push.',
+  '{players} go toe-to-toe and come up even.',
+  '{players} both wanted it, neither gave an inch.',
+  '{players} match numbers and move on.',
+  '{players} split it with a gentleman’s ceasefire.',
+  '{players} trade blows and halve the hole.',
+  '{players} post twin numbers and share the hole.',
+  '{players} answer each other and split the result.',
+  '{players} finish tied with nothing between them but grass clippings.',
+  '{players} post a dead-even finish.',
+  '{players} split the hole and the imaginary TV coverage.',
+  '{players} go full match-play mode and halve it.',
+  '{players} finish all square — queue the polite golf applause.',
+  '{players} match cards with a little “hello, friends” energy.',
+  '{players} split the hole and head to the next tee still chirping.',
+  '{players} halve it with vintage match-play tension.',
+  '{players} dead heat the hole with pure Sunday broadcast energy.',
+  '{players} match numbers like they rehearsed it in the parking lot.',
+  '{players} halved it with pure Ryder Cup tension.',
+  '{players} went Presidents Cup mode and split the hole.',
+  '{players} finished all square with Sunday-at-Augusta pressure.',
+  '{players} posted matching numbers like it is 18 at Brookline.',
+  '{players} split this hole with proper match-play theater.',
+  '{players} matched cards with Amen Corner-level nerves.',
+  '{players} split the hole like a final-pairing stalemate at Sawgrass.',
+  '{players} dead-heated this one with St Andrews patience.',
+  '{players} traded blows like a links Sunday and halved it.',
+  '{players} made this a Butler Cabin-worthy standoff.',
+  '{players} split the hole with enough drama for a Netflix golf cutaway.',
+  '{players} halved it with Caddyshack chaos and real golf consequences.',
+  '{players} tied this hole like it was written by Happy Gilmore and a rules official.',
+  '{players} finished level with full back-nine broadcast energy.',
+  '{players} split it in a fairway-sized rerun of Medinah chaos.',
+  '{players} turned this hole into a leaderboard logjam and called truce.',
+]
+
+const THREE_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} finish in a three-way tie.',
+  '{players} split the hole three ways.',
+  '{players} all match cards on this one.',
+  '{players} crowd into a three-way deadlock.',
+  '{players} post the same number and share the hole.',
+  '{players} turn the hole into a three-way stalemate.',
+  '{players} finish in a proper traffic jam.',
+  '{players} make it a three-player split.',
+  '{players} leave the hole in total gridlock.',
+  '{players} finish all square in a three-way pileup.',
+  '{players} post a three-way dead heat.',
+  '{players} share the hole and the confusion.',
+  '{players} turn that hole into a small committee meeting.',
+  '{players} finish tied like a leaderboard logjam.',
+]
+
+const FOUR_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} make it a four-way split.',
+  '{players} all tie the hole.',
+  '{players} post matching numbers in a four-player pileup.',
+  '{players} turn the hole into a four-way traffic jam.',
+  '{players} leave the hole in full gridlock.',
+  '{players} crowd into a four-way deadlock.',
+  '{players} all land on the same number and split it.',
+  '{players} make the scorecard look copy-pasted.',
+  '{players} post a full-on four-player stalemate.',
+  '{players} split the hole like a gallery bottleneck around the green.',
+]
+
+const FIVE_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} make it a five-way tie on the hole.',
+  '{players} all post the same number — absolute chaos.',
+  '{players} turn the hole into a five-car pileup.',
+  '{players} leave the scorecard in five-way gridlock.',
+  '{players} all split the hole in a full-blown traffic jam.',
+  '{players} somehow all arrive at the exact same destination.',
+  '{players} make the hole look like rush hour at the clubhouse.',
+]
+
+const SIX_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} bring six names and one result to the card.',
+  '{players} all tie the hole in a six-way logjam.',
+  '{players} turn the hole into a golf traffic report.',
+  '{players} post matching numbers across six scorecards.',
+  '{players} leave absolutely no separation on that hole.',
+  '{players} make it a six-way stalemate.',
+]
+
+const SEVEN_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} somehow all tie the hole.',
+  '{players} turn the scorecard into a seven-way copy machine.',
+  '{players} post a seven-player deadlock.',
+  '{players} leave the hole in total and impressive nonsense.',
+  '{players} make it a seven-way split — deeply rude to variety.',
+]
+
+const EIGHT_WAY_TIE_BROADCAST_TEMPLATES = [
+  '{players} all tie the hole — pure democracy.',
+  '{players} post matching numbers across the entire group.',
+  '{players} turn the hole into an eight-way traffic apocalypse.',
+  '{players} make it a full-card stalemate.',
+  '{players} leave the hole with maximum gridlock and minimum separation.',
+  '{players} all land on the same number, which feels statistically disrespectful.',
+]
+
+const UNIVERSAL_ALL_TIED_BROADCAST_TEMPLATES = [
+  'Everybody ties the hole.',
+  'The whole group finishes all square.',
+  'Full-card stalemate — everyone ties the hole.',
+  'Nobody gains an inch — the whole group ties it.',
+  'Everybody matches cards on this one.',
+  'The hole belongs to absolutely no one.',
+  'Whole-group deadlock on the hole.',
+  'Everyone posts the same number and moves on slightly annoyed.',
+  'The entire group brings the same result to the scorecard.',
+  'Universal tie — pure golf democracy.',
+  'The whole group just went full Ryder Cup handshake line on this hole.',
+  'Everybody posted the same number and created a broadcast producer\'s dilemma.',
+  'Universal tie: someone cue the polite Masters applause.',
+  'Entire-card deadlock; this hole ends in pure golf democracy.',
+  'No winner, no loser, just full-group Sunday tension.',
+]
+
+function interpolateBroadcastTemplate(
+  template: string,
+  placeholders: { winner?: string; players?: string },
+): string {
+  return template
+    .replaceAll('{winner}', placeholders.winner ?? '')
+    .replaceAll('{players}', placeholders.players ?? '')
+}
+
+function getTemplateIndex(seedSource: string, holeNumber: number, templateCount: number): number {
+  let hash = holeNumber * 131
+  for (const character of seedSource) {
+    hash = (hash * 33 + character.charCodeAt(0)) % 2_147_483_647
+  }
+
+  return Math.abs(hash) % templateCount
+}
+
+function selectBroadcastTemplate(
+  templates: readonly string[],
+  seedSource: string,
+  holeNumber: number,
+): string {
+  if (templates.length === 0) {
+    return ''
+  }
+
+  return templates[getTemplateIndex(seedSource, holeNumber, templates.length)]
+}
+
+function getTieTemplatesByWinnerCount(
+  winnerCount: number,
+  totalPlayers: number,
+): readonly string[] {
+  const countSpecificTemplates: readonly string[] = (() => {
+    switch (winnerCount) {
+      case 2:
+        return TWO_WAY_TIE_BROADCAST_TEMPLATES
+      case 3:
+        return THREE_WAY_TIE_BROADCAST_TEMPLATES
+      case 4:
+        return FOUR_WAY_TIE_BROADCAST_TEMPLATES
+      case 5:
+        return FIVE_WAY_TIE_BROADCAST_TEMPLATES
+      case 6:
+        return SIX_WAY_TIE_BROADCAST_TEMPLATES
+      case 7:
+        return SEVEN_WAY_TIE_BROADCAST_TEMPLATES
+      case 8:
+        return EIGHT_WAY_TIE_BROADCAST_TEMPLATES
+      default:
+        return TWO_WAY_TIE_BROADCAST_TEMPLATES
+    }
+  })()
+
+  if (winnerCount === totalPlayers && winnerCount > 1) {
+    return [...countSpecificTemplates, ...UNIVERSAL_ALL_TIED_BROADCAST_TEMPLATES]
+  }
+
+  return countSpecificTemplates
+}
+
+function createTieBroadcastLine(
+  playerNames: string[],
+  holeNumber: number,
+  totalPlayers: number,
+): string {
+  const formattedNames = formatPlayerNames(playerNames)
+  const templates = getTieTemplatesByWinnerCount(playerNames.length, totalPlayers)
+  const template =
+    selectBroadcastTemplate(templates, formattedNames, holeNumber) ??
+    '{players} finish all square on this one.'
+
+  return interpolateBroadcastTemplate(template, { players: formattedNames })
 }
 
 function createWinnerBroadcastLine(playerName: string, holeNumber: number): string {
-  const winnerLines = [
-    `${playerName} striped it and stole the hole`,
-    `${playerName} drained the pressure putt and took the skin`,
-    `${playerName} owned the fairway and closed it out`,
-    `${playerName} brought Sunday-back-nine energy and won the hole`,
-  ]
+  const template =
+    selectBroadcastTemplate(SOLO_WINNER_BROADCAST_TEMPLATES, playerName, holeNumber) ??
+    '{winner} takes the hole.'
 
-  return winnerLines[(holeNumber - 1) % winnerLines.length]
+  return interpolateBroadcastTemplate(template, { winner: playerName })
 }
 
 function getPlayerNameById(players: Player[], playerId: string | null): string | null {
@@ -596,7 +873,7 @@ function createHighlightLine(
       return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber)
     }
 
-    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber)
+    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber, playerRows.length)
   }
 
   return 'Hole complete'
