@@ -4,6 +4,7 @@
   /* Typography */
   --font-ui: 'Figtree', 'Avenir Next', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Neuton', 'Iowan Old Style', 'Times New Roman', serif;
+  --font-logo: 'Space Grotesk', var(--font-ui);
   --font-numeric: var(--font-ui);
 
   /* Editorial pastel palette */

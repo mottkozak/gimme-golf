@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Neuton:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Neuton:wght@400;700&family=Space+Grotesk:wght@700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0');
 
 * {
@@ -260,8 +260,8 @@ main {
 .app-wordmark {
   margin: 0;
   justify-self: center;
-  font-family: var(--font-display);
-  font-style: italic;
+  font-family: var(--font-logo);
+  font-style: normal;
   font-weight: 700;
   font-size: clamp(2rem, 5.8vw, 2.56rem);
   line-height: 1;
