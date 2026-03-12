@@ -15,19 +15,11 @@ function FeaturedHoleBanner({ featuredHoleType, compact = false }: FeaturedHoleB
 
   return (
     <section className={`panel featured-hole-banner ${compact ? 'featured-hole-banner--compact' : ''}`}>
-      <div className="row-between">
-        <p className="featured-hole-banner__label">Featured Hole</p>
-        <div className="button-row">
-          <span className="chip featured-hole-banner__chip">{featuredHole.badgeLabel ?? 'Special'}</span>
-          <span className="chip featured-hole-banner__chip">{featuredHole.quickRule}</span>
-        </div>
-      </div>
+      <p className="featured-hole-banner__label">Featured Hole</p>
       <h3 className="featured-hole-banner__title">{featuredHole.name}</h3>
       <p className="featured-hole-banner__rule">{featuredHole.shortDescription}</p>
-      <div className="featured-hole-banner__meta">
-        <span className="chip">This hole only</span>
-        <span className="chip">Game points only</span>
-      </div>
+      <p className="muted">{featuredHole.badgeLabel ?? 'Special'} • {featuredHole.quickRule}</p>
+      <p className="muted">This hole only. Game points only.</p>
       <p className="muted">
         Featured-hole effects are applied automatically during deal and scoring for this hole.
       </p>

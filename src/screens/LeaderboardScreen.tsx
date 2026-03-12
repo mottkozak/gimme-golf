@@ -53,47 +53,6 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const [roundSortMode, setRoundSortMode] = useState<LeaderboardSortMode>('adjustedScore')
   const [breakdownExpanded, setBreakdownExpanded] = useState(false)
 
-  const momentumJumpCount = recapData.playerRows.filter((row) => row.momentumTierJumped).length
-  const publicSwingCount = recapData.publicCardRecapItems.reduce(
-    (total, item) => total + item.impactRows.length,
-    0,
-  )
-  const strongestHoleGain = [...recapData.playerRows].sort(
-    (rowA, rowB) => rowB.holePoints - rowA.holePoints,
-  )[0]
-  const holeMovementRows = [
-    !isPowerUpsMode && strongestHoleGain
-      ? {
-          label: 'Best hole gain',
-          value: `${strongestHoleGain.playerName} (${formatSignedPoints(strongestHoleGain.holePoints)})`,
-        }
-      : null,
-    !isPowerUpsMode
-      ? {
-          label: 'Momentum jumps',
-          value: String(momentumJumpCount),
-        }
-      : null,
-    !isPowerUpsMode && recapData.publicCardRecapItems.length > 0
-      ? {
-          label: 'Public-card swings',
-          value: String(publicSwingCount),
-        }
-      : null,
-    isPowerUpsMode
-      ? {
-          label: 'Power-ups used',
-          value: String(recapData.playerRows.filter((row) => row.powerUpUsed).length),
-        }
-      : null,
-    isPowerUpsMode
-      ? {
-          label: 'Curses assigned',
-          value: String(recapData.playerRows.filter((row) => row.curseTitle).length),
-        }
-      : null,
-  ].filter((entry): entry is { label: string; value: string } => entry !== null)
-
   const holeUxMetrics = roundState.holeUxMetrics[roundState.currentHoleIndex]
   const hasPublicCardsOnHole = roundState.holeCards[roundState.currentHoleIndex].publicCards.length > 0
   const debugRecapMetricsEnabled =
@@ -111,16 +70,13 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   }, [recapData.holeNumber, roundState])
 
   const holeWinnerScore = recapData.gamePointHoleWinners.score
-  const bestStrokeScore = recapData.bestRealScoreHoleWinners.score
   const roundLeaderScore = recapData.leaderSnapshot.adjusted.score
   const isHolePointsTie = recapData.gamePointHoleWinners.playerNames.length > 1
   const holeWinnerNames =
     recapData.gamePointHoleWinners.playerNames.length > 0
       ? formatPlayerNames(recapData.gamePointHoleWinners.playerNames)
       : '-'
-  const bestMomentHeadline = isHolePointsTie
-    ? `${holeWinnerNames} tied the hole`
-    : recapData.highlightLine
+  const bestMomentHeadline = recapData.highlightLine
   const holeOutcomeLabel = isHolePointsTie ? 'Hole Leaders' : 'Hole Winner'
   const holeOutcomeDetail =
     typeof holeWinnerScore === 'number'
@@ -164,33 +120,16 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             }`}
       />
 
-      <section className="panel recap-section recap-why-card stack-xs">
-        <h3>Hole Story</h3>
-        <ul className="list-reset recap-why-list">
-          {holeMovementRows.map((entry) => (
-            <li key={entry.label} className="recap-why-list__item">
-              <span>{entry.label}</span>
-              <strong>{entry.value}</strong>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <section className="panel stack-xs recap-section recap-outcome-section">
         <h3>Hole Outcome</h3>
         <div className="end-summary-grid recap-outcome-grid">
           <RecapSummaryStatCard
-            label={holeOutcomeLabel}
+            label={`${holeOutcomeLabel} (Game Points)`}
             value={holeWinnerNames}
             detail={holeOutcomeDetail}
           />
           <RecapSummaryStatCard
-            label="Best Stroke"
-            value={formatWinnerSummary(recapData.bestRealScoreHoleWinners)}
-            detail={typeof bestStrokeScore === 'number' ? `${bestStrokeScore} strokes` : 'No score'}
-          />
-          <RecapSummaryStatCard
-            label="Round Leader"
+            label="Round Leader (Adjusted)"
             value={formatWinnerSummary(recapData.leaderSnapshot.adjusted)}
             detail={typeof roundLeaderScore === 'number' ? `Adjusted ${roundLeaderScore}` : 'No score'}
           />
@@ -232,12 +171,8 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         >
           {recapData.featuredHoleRecap && (
             <section className="panel featured-hole-recap stack-xs">
-              <div className="row-between">
-                <h3>Featured Hole Impact</h3>
-                <RecapStatusChip tone="winner" className="featured-hole-chip">
-                  {recapData.featuredHoleRecap.name}
-                </RecapStatusChip>
-              </div>
+              <h3>Featured Hole Impact</h3>
+              <p className="label">{recapData.featuredHoleRecap.name}</p>
               <p>{recapData.featuredHoleRecap.shortDescription}</p>
               <p className="muted">{recapData.featuredHoleRecap.impactLine}</p>
               {recapData.featuredHoleRecap.topBeneficiaries.length > 0 && (

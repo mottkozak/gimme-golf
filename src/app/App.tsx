@@ -49,6 +49,23 @@ function App() {
     applyThemePreference(loadThemePreference())
   }, [])
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'auto',
+    })
+  }, [appState.activeScreen, isModeDetailOpen])
+
+  useEffect(() => {
+    if (appState.activeScreen !== 'endRound') {
+      return
+    }
+
+    clearRoundState()
+    dispatch({ type: 'clear_saved_round_flag' })
+  }, [appState.activeScreen])
+
   const onUpdateRoundState: ScreenProps['onUpdateRoundState'] = (updater) => {
     dispatch({ type: 'update_round_state', updater })
   }
@@ -153,9 +170,10 @@ function App() {
     appState.activeScreen === 'endRound'
   const shouldShowGlobalHeader = !(appState.activeScreen === 'home' && isModeDetailOpen)
   const shouldShowWordmark = !(appState.activeScreen === 'home' && isModeDetailOpen)
+  const isModePreviewActive = appState.activeScreen === 'home' && isModeDetailOpen
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isModePreviewActive ? 'app-shell--mode-preview' : ''}`}>
       {shouldShowGlobalHeader && (
         <header className="app-shell__header">
           <span className="app-shell__header-spacer" aria-hidden="true" />

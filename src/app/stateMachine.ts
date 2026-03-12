@@ -22,6 +22,7 @@ export type AppAction =
   | { type: 'resume_saved_round'; savedRoundState: RoundState | null; savedAtMs: number | null }
   | { type: 'reset_round' }
   | { type: 'abandon_round' }
+  | { type: 'clear_saved_round_flag' }
   | { type: 'mark_persisted'; savedAtMs: number | null }
 
 const ROUND_SAVE_WARNING =
@@ -344,6 +345,16 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       roundSaveWarning: null,
       shouldPersistRoundState: false,
       roundState: normalizeRoundState(createNewRoundState()),
+    }
+  }
+
+  if (action.type === 'clear_saved_round_flag') {
+    return {
+      ...state,
+      hasSavedRound: false,
+      savedRoundUpdatedAtMs: null,
+      roundSaveWarning: null,
+      shouldPersistRoundState: false,
     }
   }
 

@@ -144,6 +144,29 @@ function formatCardTypeLabel(cardType: string | null): string {
   return `${cardType.charAt(0).toUpperCase()}${cardType.slice(1)}`
 }
 
+function createTieBroadcastLine(playerNames: string[], holeNumber: number): string {
+  const formattedNames = formatPlayerNames(playerNames)
+  const tieLines = [
+    `${formattedNames} finished all square in a dead heat`,
+    `${formattedNames} traded haymakers and split the skins`,
+    `${formattedNames} carded a photo finish at the pin`,
+    `${formattedNames} walked off level after a back-nine style duel`,
+  ]
+
+  return tieLines[(holeNumber - 1) % tieLines.length]
+}
+
+function createWinnerBroadcastLine(playerName: string, holeNumber: number): string {
+  const winnerLines = [
+    `${playerName} striped it and stole the hole`,
+    `${playerName} drained the pressure putt and took the skin`,
+    `${playerName} owned the fairway and closed it out`,
+    `${playerName} brought Sunday-back-nine energy and won the hole`,
+  ]
+
+  return winnerLines[(holeNumber - 1) % winnerLines.length]
+}
+
 function getPlayerNameById(players: Player[], playerId: string | null): string | null {
   if (!playerId) {
     return null
@@ -454,6 +477,7 @@ function createHighlightLine(
   playerRows: HoleRecapPlayerRow[],
   publicCardRecapItems: PublicCardRecapItem[],
   gamePointHoleWinners: HoleWinnerSummary,
+  holeNumber: number,
 ): string {
   if (gameMode === 'powerUps') {
     const usedCount = playerRows.filter((row) => row.powerUpUsed === true).length
@@ -569,10 +593,10 @@ function createHighlightLine(
 
   if (gamePointHoleWinners.playerNames.length > 0) {
     if (gamePointHoleWinners.playerNames.length === 1) {
-      return `${gamePointHoleWinners.playerNames[0]} won the hole in points`
+      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber)
     }
 
-    return `${formatPlayerNames(gamePointHoleWinners.playerNames)} split the hole`
+    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber)
   }
 
   return 'Hole complete'
@@ -699,6 +723,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
       playerRowsWithWinnerFlags,
       publicCardRecapItems,
       gamePointHoleWinners,
+      currentHole.holeNumber,
     ),
     featuredHoleRecap,
     playerRows: playerRowsWithWinnerFlags,

@@ -236,6 +236,12 @@ main {
   padding: var(--space-5) var(--space-4) var(--space-6);
 }
 
+.app-shell--mode-preview {
+  max-width: none;
+  gap: 0;
+  padding: 0;
+}
+
 .app-shell__header,
 .panel,
 .screen {
@@ -1394,6 +1400,8 @@ main {
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 68%, var(--bg-panel));
   --mode-card-icon-border: color-mix(in srgb, var(--color-border) 28%, transparent);
   --mode-card-icon-color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  --mode-card-outline: color-mix(in srgb, var(--color-border) 46%, var(--border-subtle));
+  --mode-card-hover-bg: color-mix(in srgb, var(--bg-panel) 84%, var(--bg-inset));
 
   display: grid;
   grid-template-columns: 5rem 1fr;
@@ -1410,6 +1418,8 @@ main {
 }
 
 .mode-card:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--mode-card-outline) 70%, var(--border-subtle));
+  background: var(--mode-card-hover-bg);
   transform: translateY(-1px);
   box-shadow:
     0 1px 0 rgba(47, 41, 38, 0.08),
@@ -1518,6 +1528,12 @@ main {
   background: var(--mode-panel);
   overflow: hidden;
   gap: var(--space-4);
+}
+
+.app-shell--mode-preview .mode-detail-screen {
+  min-height: 100vh;
+  margin: 0;
+  padding: calc(var(--space-5) + 0.3rem) var(--space-4) calc(var(--space-6) + 5.3rem);
 }
 
 .mode-detail-screen::before {
@@ -1851,6 +1867,8 @@ main {
 .mode-config-mode-card.mode-tone--classic {
   background: color-mix(in srgb, var(--mode-classic-bg) 52%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
+  --mode-card-outline: var(--mode-classic-border);
+  --mode-card-hover-bg: color-mix(in srgb, var(--mode-classic-border) 24%, #fff8ef);
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 58%, var(--mode-classic-bg));
   --mode-card-icon-border: color-mix(in srgb, var(--mode-classic-border) 38%, transparent);
   --mode-card-chevron-color: color-mix(in srgb, var(--mode-classic-border) 56%, var(--text-secondary));
@@ -1860,6 +1878,8 @@ main {
 .mode-config-mode-card.mode-tone--novelty {
   background: color-mix(in srgb, var(--mode-novelty-bg) 54%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-novelty-border) 54%, var(--border-subtle));
+  --mode-card-outline: var(--mode-novelty-border);
+  --mode-card-hover-bg: color-mix(in srgb, var(--mode-novelty-border) 24%, #fff8ef);
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-novelty-bg));
   --mode-card-icon-border: color-mix(in srgb, var(--mode-novelty-border) 36%, transparent);
   --mode-card-chevron-color: color-mix(in srgb, var(--mode-novelty-border) 52%, var(--text-secondary));
@@ -1869,6 +1889,8 @@ main {
 .mode-config-mode-card.mode-tone--chaos {
   background: color-mix(in srgb, var(--mode-chaos-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-chaos-border) 54%, var(--border-subtle));
+  --mode-card-outline: var(--mode-chaos-border);
+  --mode-card-hover-bg: color-mix(in srgb, var(--mode-chaos-border) 24%, #fff8ef);
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-chaos-bg));
   --mode-card-icon-border: color-mix(in srgb, var(--mode-chaos-border) 36%, transparent);
   --mode-card-chevron-color: color-mix(in srgb, var(--mode-chaos-border) 52%, var(--text-secondary));
@@ -1878,6 +1900,8 @@ main {
 .mode-config-mode-card.mode-tone--props {
   background: color-mix(in srgb, var(--mode-props-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-props-border) 52%, var(--border-subtle));
+  --mode-card-outline: var(--mode-props-border);
+  --mode-card-hover-bg: color-mix(in srgb, var(--mode-props-border) 24%, #fff8ef);
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-props-bg));
   --mode-card-icon-border: color-mix(in srgb, var(--mode-props-border) 34%, transparent);
   --mode-card-chevron-color: color-mix(in srgb, var(--mode-props-border) 56%, var(--text-secondary));
@@ -1887,6 +1911,8 @@ main {
 .mode-config-mode-card.mode-tone--power-ups {
   background: color-mix(in srgb, var(--mode-power-bg) 56%, #fff8ef);
   border-color: color-mix(in srgb, var(--mode-power-border) 54%, var(--border-subtle));
+  --mode-card-outline: var(--mode-power-border);
+  --mode-card-hover-bg: color-mix(in srgb, var(--mode-power-border) 24%, #fff8ef);
   --mode-card-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-power-bg));
   --mode-card-icon-border: color-mix(in srgb, var(--mode-power-border) 36%, transparent);
   --mode-card-chevron-color: color-mix(in srgb, var(--mode-power-border) 54%, var(--text-secondary));
@@ -1896,6 +1922,12 @@ main {
   .mode-detail-screen {
     min-height: calc(100vh - (var(--space-5) * 2));
     margin: calc(var(--space-5) * -1) calc(var(--space-4) * -1) calc(var(--space-6) * -1);
+    padding: calc(var(--space-4) + 0.3rem) var(--space-3) calc(var(--space-6) + 4.9rem);
+  }
+
+  .app-shell--mode-preview .mode-detail-screen {
+    margin: 0;
+    min-height: 100vh;
     padding: calc(var(--space-4) + 0.3rem) var(--space-3) calc(var(--space-6) + 4.9rem);
   }
 
@@ -4608,6 +4640,7 @@ main {
 .hole-score-module__mission-button {
   display: inline-flex;
   align-items: center;
+  gap: 0.32rem;
   min-height: 32px;
   padding: 0.18rem 0.58rem;
   border-radius: var(--radius-pill);
@@ -4619,6 +4652,13 @@ main {
   letter-spacing: 0.022em;
   text-transform: uppercase;
   box-shadow: none;
+}
+
+.hole-score-module__mission-chip-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  font-size: 0.9rem;
+  opacity: 0.76;
 }
 
 .hole-score-module__mission-chip:hover:not(:disabled) {
@@ -4637,6 +4677,32 @@ main {
   letter-spacing: 0.02em;
 }
 
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--failed {
+  color: color-mix(in srgb, var(--text-danger) 84%, var(--text-primary));
+}
+
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--completed {
+  color: color-mix(in srgb, var(--text-success) 84%, var(--text-primary));
+}
+
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--failed.segmented-control__button--active,
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--failed.segmented-control__button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 80%, var(--border-subtle));
+  background: color-mix(in srgb, var(--danger) 84%, #ffffff 16%);
+  color: var(--text-on-primary);
+}
+
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--completed.segmented-control__button--active,
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--completed.segmented-control__button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-results-ready-border) 84%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-results-ready-border) 76%, #ffffff 24%);
+  color: var(--text-on-primary);
+}
+
 .hole-score-module__helper {
   margin: 0;
   font-size: 0.82rem;
@@ -4650,6 +4716,27 @@ main {
 .hole-score-button-group {
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.hole-score-button-group--wheel {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.22rem;
+}
+
+.hole-score-button-group--wheel .hole-score-button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.hole-score-button-group--wheel::-webkit-scrollbar {
+  height: 7px;
+}
+
+.hole-score-button-group--wheel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--results-ready-border) 54%, var(--results-chip-border));
 }
 
 .hole-score-button-group--high {
@@ -4683,6 +4770,17 @@ main {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
     0 8px 16px -14px color-mix(in srgb, var(--hole-action-bg) 68%, transparent);
+}
+
+.hole-score-button--manual {
+  min-width: 3.7rem;
+  padding-inline: 0.7rem;
+}
+
+.hole-card-preview__reward {
+  margin: 0;
+  font-weight: 760;
+  color: color-mix(in srgb, var(--text-success) 90%, var(--accent-strong));
 }
 
 .hole-score-adjust-row {
@@ -5084,6 +5182,10 @@ main {
 @media (min-width: 640px) {
   .app-shell {
     max-width: 900px;
+  }
+
+  .app-shell--mode-preview {
+    max-width: none;
   }
 
   .screen-nav {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
 import PlayerSetupRow from '../components/PlayerSetupRow.tsx'
@@ -60,8 +60,27 @@ function dedupeNames(names: string[]): string[] {
 
 function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [localIdentityState] = useState(() => loadLocalIdentityState())
+  const playerListRef = useRef<HTMLDivElement | null>(null)
+  const previousPlayerCountRef = useRef(roundState.players.length)
   const { config, players } = roundState
   const activeMode = resolveLandingModeFromConfig(config)
+
+  useEffect(() => {
+    if (players.length <= previousPlayerCountRef.current) {
+      previousPlayerCountRef.current = players.length
+      return
+    }
+
+    const listElement = playerListRef.current
+    if (listElement) {
+      listElement.scrollTo({
+        left: listElement.scrollWidth,
+        behavior: 'smooth',
+      })
+    }
+
+    previousPlayerCountRef.current = players.length
+  }, [players.length])
 
   const updateSetup = (updater: (draft: RoundSetupDraft) => RoundSetupDraft) => {
     onUpdateRoundState((currentState) => {
@@ -414,7 +433,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </section>
         )}
 
-        <div className="setup-player-list" role="list" aria-label="Golfer list">
+        <div ref={playerListRef} className="setup-player-list" role="list" aria-label="Golfer list">
           {players.map((player, index) => (
             <PlayerSetupRow
               key={player.id}

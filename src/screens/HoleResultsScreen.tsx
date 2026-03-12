@@ -8,7 +8,6 @@ import HoleActionPanel from '../components/HoleActionPanel.tsx'
 import HoleInfoCard from '../components/HoleInfoCard.tsx'
 import MissionStatusPill from '../components/MissionStatusPill.tsx'
 import PublicCardResolutionPanel from '../components/PublicCardResolutionPanel.tsx'
-import ScoreButtonGroup from '../components/ScoreButtonGroup.tsx'
 import {
   trackHoleCompleted,
   trackPublicCardResolution,
@@ -35,7 +34,8 @@ import type { PersonalCard, PublicCard } from '../types/cards.ts'
 import type { MissionStatus, PublicCardResolutionState, RoundState } from '../types/game.ts'
 import type { ScreenProps } from './types.ts'
 
-const QUICK_STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const
+const QUICK_STROKE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const
+const MANUAL_STROKE_MIN = 13
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
@@ -657,7 +657,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             ? effectiveMissionStatusByPlayerId[player.id]
             : null
 
-          const hasManualValue = typeof strokes === 'number' && strokes >= 9
+          const hasManualValue = typeof strokes === 'number' && strokes >= MANUAL_STROKE_MIN
           const showManualInput = manualStrokeInputByPlayerId[player.id] || hasManualValue
           const scoreStatusLabel = typeof strokes === 'number' ? `${strokes} strokes` : 'Pending'
           const scoreStatusTone = typeof strokes === 'number' ? 'ready' : 'pending'
@@ -681,6 +681,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       }
                     >
                       {selectedCard.code} - {selectedCard.name}
+                      <AppIcon className="hole-score-module__mission-chip-icon" icon="info" />
                     </button>
                     {requiresMissionResolution && (
                       <div
@@ -690,7 +691,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                       >
                         <button
                           type="button"
-                          className={`segmented-control__button ${
+                          className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--failed ${
                             effectiveMissionStatus === 'failed'
                               ? 'segmented-control__button--active'
                               : ''
@@ -701,7 +702,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                         </button>
                         <button
                           type="button"
-                          className={`segmented-control__button ${
+                          className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--completed ${
                             effectiveMissionStatus === 'success'
                               ? 'segmented-control__button--active'
                               : ''
@@ -731,28 +732,40 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               }
             >
               <span className="label">Strokes</span>
-              <ScoreButtonGroup
-                options={QUICK_STROKE_OPTIONS}
-                selectedScore={strokes}
-                onToggle={(strokeOption, isSelected) => {
-                  const nextStrokeValue = isSelected ? null : strokeOption
-                  setStrokes(player.id, nextStrokeValue, 'quick_button')
-                  if (!isSelected) {
-                    setManualStrokeInputByPlayerId((current) => ({
-                      ...current,
-                      [player.id]: false,
-                    }))
-                  }
-                }}
-              />
-
-              <div className="button-row">
+              <div className="button-row hole-score-button-group hole-score-button-group--wheel">
+                {QUICK_STROKE_OPTIONS.map((strokeOption) => {
+                  const isSelected = strokes === strokeOption
+                  return (
+                    <button
+                      key={strokeOption}
+                      type="button"
+                      className={`hole-score-button ${isSelected ? 'hole-score-button--selected' : ''}`}
+                      onClick={() => {
+                        const nextStrokeValue = isSelected ? null : strokeOption
+                        setStrokes(player.id, nextStrokeValue, 'quick_button')
+                        if (!isSelected) {
+                          setManualStrokeInputByPlayerId((current) => ({
+                            ...current,
+                            [player.id]: false,
+                          }))
+                        }
+                      }}
+                      aria-pressed={isSelected}
+                    >
+                      {strokeOption}
+                    </button>
+                  )
+                })}
                 <button
                   type="button"
-                  className={`hole-score-button ${showManualInput ? 'hole-score-button--selected' : ''}`}
+                  className={`hole-score-button hole-score-button--manual ${
+                    showManualInput ? 'hole-score-button--selected' : ''
+                  }`}
                   onClick={() => {
                     const nextStrokeValue =
-                      typeof strokes === 'number' && strokes >= 9 ? strokes : 9
+                      typeof strokes === 'number' && strokes >= MANUAL_STROKE_MIN
+                        ? strokes
+                        : MANUAL_STROKE_MIN
                     setStrokes(player.id, nextStrokeValue, 'quick_9_plus')
                     setManualStrokeInputByPlayerId((current) => ({
                       ...current,
@@ -760,14 +773,14 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     }))
                   }}
                 >
-                  9+
+                  {MANUAL_STROKE_MIN}+
                 </button>
               </div>
 
               {showManualInput && (
                 <div className="stack-xs hole-score-manual-entry">
                   <label className="field field--inline hole-score-manual-field">
-                    <span className="label">9+ score</span>
+                    <span className="label">{MANUAL_STROKE_MIN}+ score</span>
                     <input
                       type="number"
                       inputMode="numeric"
@@ -1081,7 +1094,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             </p>
             <p>{activeCardPreview.card.description}</p>
             <p className="muted">{activeCardPreview.card.rulesText}</p>
-            <p>
+            <p className="hole-card-preview__reward">
               Reward: {activeCardPreview.card.points > 0 ? '+' : ''}
               {activeCardPreview.card.points} points on success
             </p>
