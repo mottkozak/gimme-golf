@@ -22,6 +22,14 @@ function formatSignedPoints(value: number): string {
   return `${value > 0 ? '+' : ''}${value}`
 }
 
+function formatDifficultyLabel(value: string | null): string {
+  if (!value) {
+    return 'N/A'
+  }
+
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
 function formatDuration(ms: number | null): string {
   if (typeof ms !== 'number') {
     return 'Pending'
@@ -315,15 +323,27 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                     </>
                   ) : (
                     <>
-                      <p className="recap-card-line">
-                        Card:{' '}
-                        {row.selectedCardCode && row.selectedCardName
-                          ? `${row.selectedCardCode} - ${row.selectedCardName}`
-                          : 'No personal card selected'}
-                      </p>
-                      <p className="recap-card-line">
-                        Result: {row.missionStatus === 'success' ? 'Completed' : 'Failed'}
-                      </p>
+                      {row.selectedCardCode && row.selectedCardName ? (
+                        <>
+                          <p className="recap-card-line">
+                            Challenge: {row.selectedCardCode} - {row.selectedCardName}
+                          </p>
+                          <p className="recap-card-line">
+                            Description: {row.selectedCardDescription ?? 'No description available'}
+                          </p>
+                          <p className="recap-card-line">
+                            Difficulty: {formatDifficultyLabel(row.selectedCardDifficulty)}
+                          </p>
+                          <p className="recap-card-line">
+                            Points: {formatSignedPoints(row.selectedCardPoints)}
+                          </p>
+                          <p className="recap-card-line">
+                            Result: {row.missionStatus === 'success' ? 'Successful' : 'Failed'}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="recap-card-line">No personal card selected</p>
+                      )}
                     </>
                   )}
                 </div>

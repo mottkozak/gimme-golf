@@ -38,6 +38,7 @@ export interface HolePointBreakdown {
   selectedCardId: string | null
   selectedCardCode: string | null
   selectedCardName: string | null
+  selectedCardDescription: string | null
   selectedCardType: PersonalCard['cardType'] | null
   selectedCardDifficulty: PersonalCard['difficulty'] | null
   streakBefore: number
@@ -95,6 +96,7 @@ export function createEmptyHolePointBreakdown(): HolePointBreakdown {
     selectedCardId: null,
     selectedCardCode: null,
     selectedCardName: null,
+    selectedCardDescription: null,
     selectedCardType: null,
     selectedCardDifficulty: null,
     streakBefore: 0,
@@ -203,6 +205,7 @@ function computeHolePointBreakdownsByPlayerId(
         selectedCardId: selectedCard?.id ?? null,
         selectedCardCode: selectedCard?.code ?? null,
         selectedCardName: selectedCard?.name ?? null,
+        selectedCardDescription: selectedCard?.description ?? null,
         selectedCardType: selectedCard?.cardType ?? null,
         selectedCardDifficulty: selectedCard?.difficulty ?? null,
         streakBefore,

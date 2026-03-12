@@ -41,7 +41,10 @@ export interface HoleRecapPlayerRow {
   powerUpUsed: boolean | null
   selectedCardName: string | null
   selectedCardCode: string | null
+  selectedCardDescription: string | null
   selectedCardType: string | null
+  selectedCardDifficulty: string | null
+  selectedCardPoints: number
   missionStatus: MissionStatus
   baseCardPoints: number
   featuredBonusPoints: number
@@ -618,7 +621,10 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
       powerUpUsed: typeof powerUpUsed === 'boolean' ? powerUpUsed : null,
       selectedCardName: pointBreakdown.selectedCardName,
       selectedCardCode: pointBreakdown.selectedCardCode,
+      selectedCardDescription: pointBreakdown.selectedCardDescription,
       selectedCardType: pointBreakdown.selectedCardType,
+      selectedCardDifficulty: pointBreakdown.selectedCardDifficulty,
+      selectedCardPoints: pointBreakdown.selectedCardPoints,
       missionStatus: pointBreakdown.missionStatus,
       baseCardPoints: pointBreakdown.baseMissionPoints,
       featuredBonusPoints: pointBreakdown.featuredBonusPoints,

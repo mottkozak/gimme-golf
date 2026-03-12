@@ -606,11 +606,8 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
 
   return (
     <section className="screen stack-sm hole-results-screen hole-results-screen--editorial">
-      <header className="screen__header hole-results-header hole-results-header--editorial">
-        <div className="screen-title">
-          <AppIcon className="screen-title__icon" icon={ICONS.holeResults} />
-          <h2>Hole Results</h2>
-        </div>
+      <header className="screen__header">
+        <h2>Hole Results</h2>
         <p className="muted">Enter strokes first, then resolve required cards.</p>
       </header>
 

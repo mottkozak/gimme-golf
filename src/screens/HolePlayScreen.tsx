@@ -216,14 +216,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
 
   return (
     <section className={`screen stack-sm hole-play-screen ${isPowerUpsMode ? 'hole-play-screen--power-ups' : 'hole-play-screen--missions'}`}>
-      <header className={`screen__header hole-play-header ${isPowerUpsMode ? '' : 'hole-play-header--missions'}`}>
-        <div className="screen-title">
-          <AppIcon
-            className="screen-title__icon"
-            icon={isPowerUpsMode ? ICONS.holePlay : ICONS.dealCards}
-          />
-          <h2>{isPowerUpsMode ? 'Hole Setup: Power Ups' : 'Hole Setup: Missions'}</h2>
-        </div>
+      <header className="screen__header hole-play-header">
+        <h2>{isPowerUpsMode ? 'Hole Setup: Power Ups' : 'Hole Setup: Missions'}</h2>
         <p className="muted">
           Hole {currentHole.holeNumber} • Par {currentHole.par}
         </p>
