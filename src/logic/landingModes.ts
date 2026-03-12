@@ -15,6 +15,8 @@ export interface LandingModeDefinition {
   packsLabel: string
   icon: AppIconName
   toneClassName: string
+  contextLabel: string
+  ctaLabel: string
 }
 
 export const LANDING_MODES: readonly LandingModeDefinition[] = [
@@ -26,6 +28,8 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     packsLabel: 'Classic personal missions',
     icon: 'sports_golf',
     toneClassName: 'classic',
+    contextLabel: 'Today',
+    ctaLabel: 'Play Classic',
   },
   {
     id: 'novelty',
@@ -35,6 +39,8 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     packsLabel: 'Classic + Novelty packs',
     icon: 'auto_awesome',
     toneClassName: 'novelty',
+    contextLabel: 'Today',
+    ctaLabel: 'Play Novelty',
   },
   {
     id: 'chaos',
@@ -44,6 +50,8 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     packsLabel: 'Classic + Chaos packs',
     icon: 'bolt',
     toneClassName: 'chaos',
+    contextLabel: 'Today',
+    ctaLabel: 'Play Chaos',
   },
   {
     id: 'props',
@@ -53,6 +61,8 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     packsLabel: 'Classic + Props packs',
     icon: 'flag',
     toneClassName: 'props',
+    contextLabel: 'Today',
+    ctaLabel: 'Play Props',
   },
   {
     id: 'powerUps',
@@ -62,6 +72,8 @@ export const LANDING_MODES: readonly LandingModeDefinition[] = [
     packsLabel: 'Standalone power-up mode',
     icon: 'electric_bolt',
     toneClassName: 'power-ups',
+    contextLabel: 'Today',
+    ctaLabel: 'Play Power Up',
   },
 ] as const
 

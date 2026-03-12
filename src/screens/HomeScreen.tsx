@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
+import ModeDetailScreen from '../components/ModeDetailScreen.tsx'
 import { trackHomeAction } from '../logic/analytics.ts'
 import { applyLandingModeToRound, getLandingModeById, LANDING_MODES, type LandingModeId } from '../logic/landingModes.ts'
 import { hasRoundProgress } from '../logic/roundProgress.ts'
@@ -32,6 +33,14 @@ function formatSavedRoundLabel(savedAtMs: number | null): string {
     hour: 'numeric',
     minute: '2-digit',
   })}.`
+}
+
+function formatEditorialTodayLabel(): string {
+  return new Date().toLocaleDateString([], {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
 }
 
 function HomeScreen({
@@ -72,6 +81,7 @@ function HomeScreen({
   const saveStatusLabel = isRoundSavePending
     ? 'Saving latest updates locally...'
     : formatSavedRoundLabel(savedRoundUpdatedAtMs)
+  const todayLabel = formatEditorialTodayLabel()
 
   const continueRound = () => {
     trackHomeAction({
@@ -118,54 +128,18 @@ function HomeScreen({
   }
 
   const activeMode = activeModeId ? getLandingModeById(activeModeId) : null
+  const pendingMode = pendingModeId ? getLandingModeById(pendingModeId) : null
 
   if (activeMode) {
     return (
-      <section className={`screen stack-sm mode-detail-screen mode-tone--${activeMode.toneClassName}`}>
-        <header className="mode-detail-header">
-          <button
-            type="button"
-            className="mode-detail-back"
-            aria-label="Back"
-            onClick={() => setActiveModeId(null)}
-          >
-            <AppIcon className="mode-detail-back__icon" icon="arrow_back" />
-          </button>
-          <p className="mode-detail-step">Step 2 of 3</p>
-        </header>
-
-        <section className="mode-detail-hero" aria-label={`${activeMode.name} mode details`}>
-          <p className="mode-detail-date">Today</p>
-          <h2 className="mode-detail-title">{activeMode.name}</h2>
-          <AppIcon className="mode-detail-hero__icon" icon={activeMode.icon} />
-          <p className="mode-detail-hero__tagline">{activeMode.tagline}</p>
-          <p className="mode-detail-copy">{activeMode.description}</p>
-          <p className="mode-detail-copy mode-detail-copy--subtle">Includes: {activeMode.packsLabel}</p>
-        </section>
-
-        {hasSavedRoundProgress && (
-          <section className="mode-detail-warning stack-xs">
-            <p className="label">Saved Round In Progress</p>
-            <p>
-              Starting {activeMode.name} opens a new setup and replaces in-progress local hole data.
-            </p>
-          </section>
-        )}
-
-        <section className="mode-detail-cta stack-xs">
-          <p className="mode-detail-copy mode-detail-copy--subtle">
-            Step 3 opens course + golfer config before tee-off.
-          </p>
-          <button
-            type="button"
-            className="mode-detail-play"
-            onClick={() => playMode(activeMode.id)}
-          >
-            Play {activeMode.name}
-            <AppIcon className="button-icon" icon="play_arrow" />
-          </button>
-        </section>
-      </section>
+      <ModeDetailScreen
+        mode={activeMode}
+        stepLabel="Step 2 of 3"
+        contextLabel={todayLabel || activeMode.contextLabel}
+        hasSavedRoundProgress={hasSavedRoundProgress}
+        onBack={() => setActiveModeId(null)}
+        onPlay={() => playMode(activeMode.id)}
+      />
     )
   }
 
@@ -237,43 +211,51 @@ function HomeScreen({
         </div>
       </section>
 
-      {pendingModeId && (
+      {pendingMode && (
         <div
           className="modal-backdrop"
           role="presentation"
           onClick={() => setPendingModeId(null)}
         >
           <section
-            className="panel modal-card home-confirm-modal stack-sm"
+            className={`panel modal-card home-confirm-modal mode-tone--${pendingMode.toneClassName} stack-sm`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="home-mode-confirm-title"
             aria-describedby="home-mode-confirm-description"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="stack-xs">
-              <h3 id="home-mode-confirm-title">Start a new setup?</h3>
-              <p id="home-mode-confirm-description" className="muted">
-                This replaces your in-progress local round and opens setup for {getLandingModeById(pendingModeId).name}.
-              </p>
+            <div className="home-confirm-modal__header stack-xs">
+              <p className="label">Saved Round In Progress</p>
+              <h3 id="home-mode-confirm-title">Start {pendingMode.name} instead?</h3>
             </div>
-            <div className="onboarding-modal__actions">
-              <button
-                type="button"
-                onClick={() => setPendingModeId(null)}
-              >
-                Cancel
+            <div className="home-confirm-modal__mode">
+              <span className="home-confirm-modal__icon-wrap" aria-hidden="true">
+                <AppIcon className="home-confirm-modal__icon" icon={pendingMode.icon} />
+              </span>
+              <div className="stack-xs">
+                <p className="home-confirm-modal__mode-title">{pendingMode.name}</p>
+                <p className="home-confirm-modal__mode-copy">{pendingMode.tagline}</p>
+              </div>
+            </div>
+            <p id="home-mode-confirm-description" className="muted home-confirm-modal__description">
+              This replaces your in-progress local round and opens setup for course type, golfers, and scores.
+            </p>
+            <p className="home-confirm-modal__footnote">You can still back out on the setup screen.</p>
+            <div className="onboarding-modal__actions home-confirm-modal__actions">
+              <button type="button" onClick={() => setPendingModeId(null)}>
+                Keep Saved Round
               </button>
               <button
                 ref={confirmButtonRef}
                 type="button"
                 className="button-primary"
                 onClick={() => {
-                  launchModeFlow(pendingModeId)
+                  launchModeFlow(pendingMode.id)
                   setPendingModeId(null)
                 }}
               >
-                Continue
+                Continue to Setup
               </button>
             </div>
           </section>
