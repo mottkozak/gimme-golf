@@ -250,6 +250,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
               <h3>{isPowerUpsMode ? 'Power-Up Outcomes' : 'Card Outcomes'}</h3>
               <RecapStatusChip tone="count">{recapData.playerRows.length} golfers</RecapStatusChip>
             </div>
+            <p className="muted recap-card-outcomes-description">
+              {isPowerUpsMode
+                ? "Shows each golfer's assigned power-up and curse, plus whether the power-up was used."
+                : "Shows each golfer's personal card for this hole and whether they completed it."}
+            </p>
             {recapData.playerRows.map((row) => (
               <RecapPlayerOutcomeCard
                 key={row.playerId}

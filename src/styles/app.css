@@ -569,7 +569,31 @@ main {
 }
 
 .setup-player-list {
+  display: flex;
+  flex-direction: row;
   gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.25rem;
+}
+
+.setup-player-list > * {
+  flex: 0 0 min(19.6rem, 82vw);
+  scroll-snap-align: start;
+}
+
+.setup-player-list::-webkit-scrollbar {
+  height: 7px;
+}
+
+.setup-player-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 38%, var(--border-subtle));
+}
+
+.setup-player-list::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-panel) 84%, var(--surface-panel-muted));
 }
 
 .setup-player-card {
@@ -1477,15 +1501,6 @@ main {
 }
 
 .mode-detail-screen {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-height: calc(100vh - 194px);
-  margin-top: calc(var(--space-2) * -1);
-  padding-bottom: var(--space-3);
-}
-
-.mode-spotlight {
   --mode-panel: color-mix(in srgb, var(--surface-panel) 92%, var(--mode-classic-bg));
   --mode-border: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-classic-bg));
@@ -1496,26 +1511,19 @@ main {
   --mode-title-size: clamp(2.92rem, 11.7vw, 4.32rem);
   --mode-title-tracking: 0.004em;
 
-  border-radius: var(--radius-xl);
-  border: 1.5px solid var(--mode-border);
-  background: var(--mode-panel);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-4) var(--space-4) var(--space-5);
-  min-height: clamp(520px, 68vh, 720px);
-  flex: 1;
-  isolation: isolate;
   position: relative;
+  min-height: calc(100vh - (var(--space-5) * 2));
+  margin: calc(var(--space-5) * -1) calc(var(--space-4) * -1) calc(var(--space-6) * -1);
+  padding: calc(var(--space-5) + 0.3rem) var(--space-4) calc(var(--space-6) + 5.3rem);
+  background: var(--mode-panel);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   gap: var(--space-4);
 }
 
-.mode-spotlight::before {
+.mode-detail-screen::before {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 0;
   pointer-events: none;
   background:
     radial-gradient(
@@ -1525,12 +1533,17 @@ main {
     );
 }
 
-.mode-spotlight > * {
+.mode-spotlight {
+  min-height: 100%;
   position: relative;
   z-index: 1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.mode-spotlight.mode-tone--classic {
+.mode-detail-screen.mode-tone--classic {
   --mode-panel: color-mix(in srgb, var(--mode-classic-bg) 60%, #fff7eb);
   --mode-border: color-mix(in srgb, var(--mode-classic-border) 56%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 58%, var(--mode-classic-bg));
@@ -1540,7 +1553,7 @@ main {
   --mode-callout-border: color-mix(in srgb, var(--mode-classic-border) 42%, var(--border-subtle));
 }
 
-.mode-spotlight.mode-tone--novelty {
+.mode-detail-screen.mode-tone--novelty {
   --mode-panel: color-mix(in srgb, var(--mode-novelty-bg) 64%, #fff6f6);
   --mode-border: color-mix(in srgb, var(--mode-novelty-border) 54%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-novelty-bg));
@@ -1550,7 +1563,7 @@ main {
   --mode-callout-border: color-mix(in srgb, var(--mode-novelty-border) 42%, var(--border-subtle));
 }
 
-.mode-spotlight.mode-tone--chaos {
+.mode-detail-screen.mode-tone--chaos {
   --mode-panel: color-mix(in srgb, var(--mode-chaos-bg) 64%, #fff4f5);
   --mode-border: color-mix(in srgb, var(--mode-chaos-border) 54%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-chaos-bg));
@@ -1560,7 +1573,7 @@ main {
   --mode-callout-border: color-mix(in srgb, var(--mode-chaos-border) 42%, var(--border-subtle));
 }
 
-.mode-spotlight.mode-tone--props {
+.mode-detail-screen.mode-tone--props {
   --mode-panel: color-mix(in srgb, var(--mode-props-bg) 64%, #f6fcf6);
   --mode-border: color-mix(in srgb, var(--mode-props-border) 52%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 60%, var(--mode-props-bg));
@@ -1570,7 +1583,7 @@ main {
   --mode-callout-border: color-mix(in srgb, var(--mode-props-border) 40%, var(--border-subtle));
 }
 
-.mode-spotlight.mode-tone--power-ups {
+.mode-detail-screen.mode-tone--power-ups {
   --mode-panel: color-mix(in srgb, var(--mode-power-bg) 68%, #f7ecff);
   --mode-border: color-mix(in srgb, var(--mode-power-border) 56%, var(--border-subtle));
   --mode-emblem-bg: color-mix(in srgb, #ffffff 56%, var(--mode-power-bg));
@@ -1881,12 +1894,9 @@ main {
 
 @media (max-width: 520px) {
   .mode-detail-screen {
-    min-height: calc(100vh - 176px);
-  }
-
-  .mode-spotlight {
-    min-height: calc(100vh - 236px);
-    padding: var(--space-4);
+    min-height: calc(100vh - (var(--space-5) * 2));
+    margin: calc(var(--space-5) * -1) calc(var(--space-4) * -1) calc(var(--space-6) * -1);
+    padding: calc(var(--space-4) + 0.3rem) var(--space-3) calc(var(--space-6) + 4.9rem);
   }
 
   .mode-spotlight__title {
@@ -2640,6 +2650,11 @@ main {
   background: var(--recap-panel-bg);
   padding: var(--space-4);
   gap: var(--space-3);
+}
+
+.recap-card-outcomes-description {
+  margin: 0;
+  max-width: 54ch;
 }
 
 @media (max-width: 520px) {
@@ -4342,6 +4357,19 @@ main {
 .hole-results-progress-text {
   margin: calc(var(--space-2) * -1) 0 0;
   font-size: 0.9rem;
+}
+
+.hole-results-entry-copy {
+  gap: var(--space-2);
+}
+
+.hole-results-entry-copy .muted {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.hole-results-player-list {
+  gap: var(--space-3);
 }
 
 .hole-results-jump-nav {

@@ -414,7 +414,7 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
           </section>
         )}
 
-        <div className="stack-xs setup-player-list">
+        <div className="setup-player-list" role="list" aria-label="Golfer list">
           {players.map((player, index) => (
             <PlayerSetupRow
               key={player.id}

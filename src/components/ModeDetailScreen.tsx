@@ -15,8 +15,8 @@ function ModeDetailScreen({
   onPlay,
 }: ModeDetailScreenProps) {
   return (
-    <section className="screen mode-detail-screen">
-      <article className={`mode-spotlight mode-tone--${mode.toneClassName}`}>
+    <section className={`screen mode-detail-screen mode-tone--${mode.toneClassName}`}>
+      <article className="mode-spotlight">
         <button
           type="button"
           className="mode-spotlight__back mode-spotlight__back--floating"
