@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import useInViewport from '../hooks/useInViewport.ts'
 import type { PersonalCard } from '../types/cards.ts'
 import BadgeChip from './BadgeChip.tsx'
 
@@ -39,8 +40,14 @@ function ChallengeCardView({
   onSelect,
   entryOrder,
 }: ChallengeCardViewProps) {
+  const [setInViewportRef, isInViewport] = useInViewport<HTMLElement>({
+    once: true,
+    threshold: 0.24,
+    rootMargin: '0px 0px -8% 0px',
+  })
   const offerKindLabel = getOfferKindLabel(offerKind)
   const isSelectable = typeof onSelect === 'function'
+  const hasEntryAnimation = typeof entryOrder === 'number'
   const pointsLabel = `${card.points >= 0 ? '+' : ''}${card.points} pts`
   const offerChipTone =
     offerKind === 'safe'
@@ -61,8 +68,11 @@ function ChallengeCardView({
     <article
       className={`panel challenge-card mission-card ${selected ? 'selected' : ''} ${
         isSelectable ? 'challenge-card--selectable' : ''
-      } ${typeof entryOrder === 'number' ? 'challenge-card--deal-in' : ''} offer-${offerKind ?? 'none'}`}
+      } ${hasEntryAnimation ? 'challenge-card--deal-in' : ''} ${
+        hasEntryAnimation && isInViewport ? 'is-in-view' : ''
+      } offer-${offerKind ?? 'none'}`}
       style={entryStyle}
+      ref={hasEntryAnimation ? setInViewportRef : undefined}
       role={isSelectable ? 'button' : undefined}
       tabIndex={isSelectable ? 0 : undefined}
       aria-pressed={isSelectable ? selected : undefined}

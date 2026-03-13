@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import useInViewport from '../hooks/useInViewport.ts'
 import type { PublicCard } from '../types/cards.ts'
 import BadgeChip from './BadgeChip.tsx'
 
@@ -12,8 +13,14 @@ function toLabel(value: string): string {
 }
 
 function PublicCardView({ card, entryOrder }: PublicCardViewProps) {
+  const [setInViewportRef, isInViewport] = useInViewport<HTMLElement>({
+    once: true,
+    threshold: 0.24,
+    rootMargin: '0px 0px -8% 0px',
+  })
+  const hasEntryAnimation = typeof entryOrder === 'number'
   const entryStyle =
-    typeof entryOrder === 'number'
+    hasEntryAnimation
       ? ({
           '--deal-order': String(entryOrder),
         } as CSSProperties)
@@ -22,8 +29,9 @@ function PublicCardView({ card, entryOrder }: PublicCardViewProps) {
   return (
     <article
       className={`panel public-card public-card--compact public-preview-card ${
-        typeof entryOrder === 'number' ? 'public-preview-card--deal-in' : ''
-      }`}
+        hasEntryAnimation ? 'public-preview-card--deal-in' : ''
+      } ${hasEntryAnimation && isInViewport ? 'is-in-view' : ''}`}
+      ref={hasEntryAnimation ? setInViewportRef : undefined}
       style={entryStyle}
     >
       <header className="row-between setup-row-wrap public-card__header">

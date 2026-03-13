@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import useInViewport from '../hooks/useInViewport.ts'
 
 interface HoleActionPanelProps {
   summary: string
@@ -27,9 +28,30 @@ function HoleActionPanel({
   buttonIcon,
   onContinue,
 }: HoleActionPanelProps) {
+  const [setPanelRef, isPanelInViewport] = useInViewport<HTMLElement>({
+    threshold: 0.34,
+    rootMargin: '0px 0px -12% 0px',
+  })
   const [readyPulseRevision, setReadyPulseRevision] = useState(0)
   const previousDisabledRef = useRef(disabled)
   const pulseFrameRef = useRef<number | null>(null)
+  const pendingReadyPulseRef = useRef(false)
+
+  useEffect(() => {
+    const wasDisabled = previousDisabledRef.current
+    previousDisabledRef.current = disabled
+
+    if (disabled) {
+      pendingReadyPulseRef.current = false
+      return
+    }
+
+    if (!wasDisabled || prefersReducedMotion()) {
+      return
+    }
+
+    pendingReadyPulseRef.current = true
+  }, [disabled])
 
   useEffect(() => {
     if (pulseFrameRef.current !== null) {
@@ -37,14 +59,12 @@ function HoleActionPanel({
       pulseFrameRef.current = null
     }
 
-    const wasDisabled = previousDisabledRef.current
-    previousDisabledRef.current = disabled
-
-    if (disabled || !wasDisabled || prefersReducedMotion()) {
+    if (disabled || prefersReducedMotion() || !pendingReadyPulseRef.current || !isPanelInViewport) {
       return
     }
 
     pulseFrameRef.current = window.requestAnimationFrame(() => {
+      pendingReadyPulseRef.current = false
       setReadyPulseRevision((currentValue) => currentValue + 1)
       pulseFrameRef.current = null
     })
@@ -55,12 +75,15 @@ function HoleActionPanel({
         pulseFrameRef.current = null
       }
     }
-  }, [disabled])
+  }, [disabled, isPanelInViewport])
 
   const shouldAnimateReadyPulse = readyPulseRevision > 0 && !disabled
 
   return (
-    <section className={`panel stack-xs hole-action-panel ${shouldAnimateReadyPulse ? 'hole-action-panel--ready' : ''}`}>
+    <section
+      ref={setPanelRef}
+      className={`panel stack-xs hole-action-panel ${shouldAnimateReadyPulse ? 'hole-action-panel--ready' : ''}`}
+    >
       <div className="row-between hole-action-panel__summary-row">
         <p className="value hole-action-panel__summary">{summary}</p>
         {statusSlot}

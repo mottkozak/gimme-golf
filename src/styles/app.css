@@ -1308,21 +1308,27 @@ main {
 @media (prefers-reduced-motion: no-preference) {
   .challenge-card--deal-in,
   .public-preview-card--deal-in {
+    opacity: 0;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .challenge-card--deal-in.is-in-view {
+    transform-origin: 50% 14%;
+    animation-name: deal-card-enter;
     animation-duration: var(--motion-deal);
     animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     animation-fill-mode: both;
     animation-delay: calc(var(--deal-order, 0) * 52ms);
-    backface-visibility: hidden;
   }
 
-  .challenge-card--deal-in {
-    transform-origin: 50% 14%;
-    animation-name: deal-card-enter;
-  }
-
-  .public-preview-card--deal-in {
+  .public-preview-card--deal-in.is-in-view {
     transform-origin: 50% 34%;
     animation-name: deal-card-enter-soft;
+    animation-duration: var(--motion-deal);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--deal-order, 0) * 52ms);
   }
 }
 
