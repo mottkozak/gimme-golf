@@ -253,43 +253,39 @@ function App() {
           ) : (
             <span className="app-shell__header-spacer" aria-hidden="true" />
           )}
-          {shouldShowWordmark ? (
-            <h1 className="app-wordmark">
-              <img
-                className="app-wordmark__image"
-                src={gimmeGolfMainLogo}
-                alt="Gimme Golf"
-                onError={(event) => {
-                  const image = event.currentTarget
-                  const fallbackStage = Number.parseInt(image.dataset.fallbackStage ?? '0', 10)
-                  if (Number.isNaN(fallbackStage)) {
-                    image.dataset.fallbackStage = '0'
-                  }
+          <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>
+            <img
+              className="app-wordmark__image"
+              src={gimmeGolfMainLogo}
+              alt="Gimme Golf"
+              onError={(event) => {
+                const image = event.currentTarget
+                const fallbackStage = Number.parseInt(image.dataset.fallbackStage ?? '0', 10)
+                if (Number.isNaN(fallbackStage)) {
+                  image.dataset.fallbackStage = '0'
+                }
 
-                  if (fallbackStage === 0) {
-                    image.dataset.fallbackStage = '1'
-                    image.src = `${import.meta.env.BASE_URL}gimme-golf-leaderboard-logo-main.png`
-                    return
-                  }
+                if (fallbackStage === 0) {
+                  image.dataset.fallbackStage = '1'
+                  image.src = `${import.meta.env.BASE_URL}gimme-golf-leaderboard-logo-main.png`
+                  return
+                }
 
-                  if (fallbackStage === 1) {
-                    image.dataset.fallbackStage = '2'
-                    image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
-                    return
-                  }
+                if (fallbackStage === 1) {
+                  image.dataset.fallbackStage = '2'
+                  image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
+                  return
+                }
 
-                  if (image.dataset.fallbackApplied === 'true') {
-                    return
-                  }
+                if (image.dataset.fallbackApplied === 'true') {
+                  return
+                }
 
-                  image.dataset.fallbackApplied = 'true'
-                  image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
-                }}
-              />
-            </h1>
-          ) : (
-            <h1 className="app-shell__header-title">{getScreenLabel(appState.activeScreen)}</h1>
-          )}
+                image.dataset.fallbackApplied = 'true'
+                image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+              }}
+            />
+          </h1>
           {shouldShowProgressChip ? (
             <span className="chip app-shell__progress-chip">
               Hole {currentHole?.holeNumber ?? 1} of {appState.roundState.config.holeCount}

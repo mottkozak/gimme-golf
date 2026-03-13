@@ -237,7 +237,7 @@ main {
 }
 
 .app-shell--compact-header {
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .app-shell--mode-preview {
@@ -307,17 +307,6 @@ main {
   height: auto;
 }
 
-.app-shell__header-title {
-  margin: 0;
-  justify-self: center;
-  font-family: var(--font-display);
-  font-size: clamp(1.36rem, 4vw, 1.82rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: 0.01em;
-  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
-}
-
 .app-wordmark--hidden {
   visibility: hidden;
   width: 0;
@@ -327,9 +316,10 @@ main {
   overflow: hidden;
 }
 
-.app-shell--compact-header .screen > .screen__header > h2,
-.app-shell--compact-header .screen > .screen__header > .screen-title {
-  display: none;
+.app-shell__header--compact .app-shell__history-button {
+  position: relative;
+  top: 1rem;
+  z-index: 2;
 }
 
 .app-shell__progress-chip {
