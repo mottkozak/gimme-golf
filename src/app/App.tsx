@@ -242,7 +242,13 @@ function App() {
           ) : (
             <span className="app-shell__header-spacer" aria-hidden="true" />
           )}
-          <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>Gimme Golf</h1>
+          <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>
+            <img
+              className="app-wordmark__image"
+              src="/gimme-golf-main-logo.png"
+              alt="Gimme Golf"
+            />
+          </h1>
           {shouldShowProgressChip ? (
             <span className="chip app-shell__progress-chip">
               Hole {currentHole?.holeNumber ?? 1} of {appState.roundState.config.holeCount}

@@ -288,13 +288,14 @@ main {
 .app-wordmark {
   margin: 0;
   justify-self: center;
-  font-family: var(--font-logo);
-  font-style: normal;
-  font-weight: 700;
-  font-size: clamp(2rem, 5.8vw, 2.56rem);
-  line-height: 1;
-  letter-spacing: 0.002em;
-  color: color-mix(in srgb, var(--text-primary) 94%, var(--accent-strong));
+  line-height: 0;
+}
+
+.app-wordmark__image {
+  display: block;
+  width: clamp(8.8rem, 43vw, 13.6rem);
+  max-width: 100%;
+  height: auto;
 }
 
 .app-wordmark--hidden {
