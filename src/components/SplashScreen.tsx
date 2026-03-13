@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-const LETTER_REFRESH_INTERVAL_MS = 260
+const LETTER_REFRESH_INTERVAL_MS = 320
 const EXIT_FADE_DURATION_MS = 260
+const LETTERS_PER_ROW = 5
+const SMALL_UPDATE_COUNT = 1
+const LARGE_UPDATE_COUNT = 3
+const LARGE_UPDATE_EVERY_TICKS = 4
 const LETTER_FONT_VARIANTS = [
   'bungee',
   'bungee-inline',
@@ -42,64 +46,122 @@ function pickRandomFontVariant(variants: readonly LetterFontVariant[]): LetterFo
   return variants[Math.floor(Math.random() * variants.length)] ?? LETTER_FONT_VARIANTS[0]
 }
 
-function getColumnPairIndex(index: number): number | null {
-  if (index < 5) {
-    return index + 5
+function shuffleIndices(values: number[]): number[] {
+  const nextValues = [...values]
+  for (let index = nextValues.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    const currentValue = nextValues[index]
+    nextValues[index] = nextValues[swapIndex] ?? currentValue
+    nextValues[swapIndex] = currentValue
   }
-
-  return index >= 5 ? index - 5 : null
+  return nextValues
 }
 
-function createLetterFontLayout(
-  previousLayout: readonly LetterFontVariant[] | null,
+function getNeighborIndices(index: number): number[] {
+  const neighbors: number[] = []
+  const column = index % LETTERS_PER_ROW
+  const row = Math.floor(index / LETTERS_PER_ROW)
+
+  if (column > 0) {
+    neighbors.push(index - 1)
+  }
+
+  if (column < LETTERS_PER_ROW - 1) {
+    neighbors.push(index + 1)
+  }
+
+  const rowCount = Math.ceil(SPLASH_LETTER_CELLS.length / LETTERS_PER_ROW)
+  if (row > 0) {
+    neighbors.push(index - LETTERS_PER_ROW)
+  }
+  if (row < rowCount - 1) {
+    neighbors.push(index + LETTERS_PER_ROW)
+  }
+
+  return neighbors.filter((neighborIndex) => neighborIndex < SPLASH_LETTER_CELLS.length)
+}
+
+const LETTER_NEIGHBORS = SPLASH_LETTER_CELLS.map((_cell, index) => getNeighborIndices(index))
+
+function getAvailableVariants(
+  layout: readonly LetterFontVariant[],
+  index: number,
+  excludeCurrentValue: boolean,
 ): LetterFontVariant[] {
+  const currentVariant = layout[index]
+  return LETTER_FONT_VARIANTS.filter((variant) => {
+    if (excludeCurrentValue && variant === currentVariant) {
+      return false
+    }
+    return LETTER_NEIGHBORS[index]?.every((neighborIndex) => layout[neighborIndex] !== variant)
+  })
+}
+
+function createInitialLetterFontLayout(): LetterFontVariant[] {
   const nextLayout = new Array<LetterFontVariant>(SPLASH_LETTER_CELLS.length)
 
-  SPLASH_LETTER_CELLS.forEach((_cell, index) => {
-    const prohibitedVariants = new Set<LetterFontVariant>()
-    const hasLeftNeighbor = index % 5 !== 0
-    const leftNeighborIndex = hasLeftNeighbor ? index - 1 : null
-    const columnPairIndex = getColumnPairIndex(index)
-
-    if (leftNeighborIndex !== null && nextLayout[leftNeighborIndex]) {
-      prohibitedVariants.add(nextLayout[leftNeighborIndex])
-    }
-
-    if (columnPairIndex !== null && nextLayout[columnPairIndex]) {
-      prohibitedVariants.add(nextLayout[columnPairIndex])
-    }
-
-    const previousVariant = previousLayout?.[index]
-    if (previousVariant) {
-      prohibitedVariants.add(previousVariant)
-    }
-
-    const isNeighborConflict = (variant: LetterFontVariant) => {
-      const isLeftConflict =
-        leftNeighborIndex !== null && nextLayout[leftNeighborIndex] === variant
-      const isColumnConflict =
-        columnPairIndex !== null && nextLayout[columnPairIndex] === variant
-      return isLeftConflict || isColumnConflict
-    }
-
-    let availableVariants = LETTER_FONT_VARIANTS.filter(
-      (variant) => !prohibitedVariants.has(variant),
-    )
-
-    if (availableVariants.length === 0) {
-      availableVariants = LETTER_FONT_VARIANTS.filter(
-        (variant) => !isNeighborConflict(variant) && variant !== previousVariant,
-      )
-    }
-
-    if (availableVariants.length === 0) {
-      availableVariants = LETTER_FONT_VARIANTS.filter((variant) => !isNeighborConflict(variant))
-    }
-
+  for (let index = 0; index < SPLASH_LETTER_CELLS.length; index += 1) {
+    const availableVariants = getAvailableVariants(nextLayout, index, false)
     nextLayout[index] = pickRandomFontVariant(
       availableVariants.length > 0 ? availableVariants : LETTER_FONT_VARIANTS,
     )
-  })
+  }
+
+  return nextLayout
+}
+
+function getLetterIndexesForUpdate(changeCount: number): number[] {
+  const allIndexes = shuffleIndices(
+    Array.from({ length: SPLASH_LETTER_CELLS.length }, (_cell, index) => index),
+  )
+  const pickedIndexes: number[] = []
+
+  for (const candidateIndex of allIndexes) {
+    if (pickedIndexes.length >= changeCount) {
+      break
+    }
+
+    const hasAdjacentPickedIndex = pickedIndexes.some((pickedIndex) =>
+      LETTER_NEIGHBORS[pickedIndex]?.includes(candidateIndex),
+    )
+    if (!hasAdjacentPickedIndex) {
+      pickedIndexes.push(candidateIndex)
+    }
+  }
+
+  if (pickedIndexes.length < changeCount) {
+    for (const candidateIndex of allIndexes) {
+      if (pickedIndexes.includes(candidateIndex)) {
+        continue
+      }
+      pickedIndexes.push(candidateIndex)
+      if (pickedIndexes.length >= changeCount) {
+        break
+      }
+    }
+  }
+
+  return pickedIndexes
+}
+
+function evolveLetterFontLayout(
+  previousLayout: readonly LetterFontVariant[],
+  tickCount: number,
+): LetterFontVariant[] {
+  const nextLayout = [...previousLayout]
+  const changeCount =
+    tickCount % LARGE_UPDATE_EVERY_TICKS === 0 ? LARGE_UPDATE_COUNT : SMALL_UPDATE_COUNT
+  const changeIndexes = getLetterIndexesForUpdate(Math.min(changeCount, nextLayout.length))
+
+  for (const changeIndex of changeIndexes) {
+    const availableVariants = getAvailableVariants(nextLayout, changeIndex, true)
+    const fallbackVariants = LETTER_FONT_VARIANTS.filter(
+      (variant) => variant !== nextLayout[changeIndex],
+    )
+    nextLayout[changeIndex] = pickRandomFontVariant(
+      availableVariants.length > 0 ? availableVariants : fallbackVariants,
+    )
+  }
 
   return nextLayout
 }
@@ -107,8 +169,9 @@ function createLetterFontLayout(
 function SplashScreen({ backgroundImageSrc, blankLogoSrc, durationMs, onFinish }: SplashScreenProps) {
   const [isExiting, setIsExiting] = useState(false)
   const [letterFonts, setLetterFonts] = useState<LetterFontVariant[]>(() =>
-    createLetterFontLayout(null),
+    createInitialLetterFontLayout(),
   )
+  const updateTickRef = useRef(0)
 
   const prefersReducedMotion = useMemo(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -124,7 +187,10 @@ function SplashScreen({ backgroundImageSrc, blankLogoSrc, durationMs, onFinish }
     }
 
     const intervalId = window.setInterval(() => {
-      setLetterFonts((previousFonts) => createLetterFontLayout(previousFonts))
+      updateTickRef.current += 1
+      setLetterFonts((previousFonts) =>
+        evolveLetterFontLayout(previousFonts, updateTickRef.current),
+      )
     }, LETTER_REFRESH_INTERVAL_MS)
 
     return () => {
