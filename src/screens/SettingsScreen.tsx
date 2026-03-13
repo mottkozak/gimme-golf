@@ -60,14 +60,9 @@ function SettingsScreen({ onNavigate, onAbandonRound }: ScreenProps) {
   return (
     <section className="screen stack-sm settings-screen">
       <header className="screen__header settings-header">
-        <div className="row-between setup-row-wrap">
-          <div className="screen-title">
-            <AppIcon className="screen-title__icon" icon={ICONS.settings} />
-            <h2>Settings</h2>
-          </div>
-          <button type="button" onClick={() => onNavigate('home')}>
-            Back
-          </button>
+        <div className="screen-title">
+          <AppIcon className="screen-title__icon" icon={ICONS.settings} />
+          <h2>Settings</h2>
         </div>
         <p className="muted">Preferences, legal links, subscriptions, and account controls.</p>
       </header>

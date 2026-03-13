@@ -220,7 +220,11 @@ function App() {
   const currentHole = appState.roundState.holes[safeCurrentHoleIndex]
   const shouldShowProgressChip = appState.activeScreen === 'endRound'
   const shouldShowGlobalHeader = !(appState.activeScreen === 'home' && isModeDetailOpen)
-  const shouldShowWordmark = !(appState.activeScreen === 'home' && isModeDetailOpen)
+  const shouldShowWordmark =
+    shouldShowGlobalHeader &&
+    (appState.activeScreen === 'home' ||
+      appState.activeScreen === 'leaderboard' ||
+      appState.activeScreen === 'endRound')
   const isModePreviewActive = appState.activeScreen === 'home' && isModeDetailOpen
   const backTargetScreen =
     shouldShowGlobalHeader && !isModePreviewActive

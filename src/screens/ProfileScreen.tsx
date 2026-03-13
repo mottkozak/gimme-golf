@@ -76,6 +76,7 @@ function buildGoofyIdentity(
 }
 
 function ProfileScreen({ onNavigate }: ScreenProps) {
+  void onNavigate
   const localIdentity = useMemo(() => loadLocalIdentityState(), [])
 
   const profileRows = Object.values(localIdentity.playerProfiles).sort(
@@ -106,10 +107,7 @@ function ProfileScreen({ onNavigate }: ScreenProps) {
     .slice(0, 3)
     .map(([modeId]) => modeId)
 
-  const cardNameById = useMemo(
-    () => Object.fromEntries(ALL_CARDS.map((card) => [card.id, card.name])),
-    [],
-  )
+  const cardNameById = Object.fromEntries(ALL_CARDS.map((card) => [card.id, card.name]))
   const favoriteCards = Object.entries(localIdentity.favoriteCardCountsById)
     .sort((left, right) => right[1] - left[1])
     .slice(0, 3)
@@ -134,14 +132,9 @@ function ProfileScreen({ onNavigate }: ScreenProps) {
   return (
     <section className="screen stack-sm profile-screen">
       <header className="screen__header profile-header">
-        <div className="row-between setup-row-wrap">
-          <div className="screen-title">
-            <AppIcon className="screen-title__icon" icon={ICONS.account} />
-            <h2>Profile</h2>
-          </div>
-          <button type="button" onClick={() => onNavigate('home')}>
-            Back
-          </button>
+        <div className="screen-title">
+          <AppIcon className="screen-title__icon" icon={ICONS.account} />
+          <h2>Profile</h2>
         </div>
         <p className="muted">Local activity snapshot and identity overview.</p>
       </header>

@@ -254,7 +254,7 @@ main {
   align-items: center;
   gap: var(--space-4);
   padding: 0 0 var(--space-4);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 24%, transparent);
+  border-bottom: 0;
 }
 
 .app-shell__header-spacer {
