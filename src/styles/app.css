@@ -307,6 +307,17 @@ main {
   height: auto;
 }
 
+.app-shell__header-title {
+  margin: 0;
+  justify-self: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.36rem, 4vw, 1.82rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
 .app-wordmark--hidden {
   visibility: hidden;
   width: 0;
@@ -314,6 +325,11 @@ main {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+}
+
+.app-shell--compact-header .screen > .screen__header > h2,
+.app-shell--compact-header .screen > .screen__header > .screen-title {
+  display: none;
 }
 
 .app-shell__progress-chip {

@@ -261,12 +261,6 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             </p>
             {recapData.playerRows.map((row) => {
               const hasCard = Boolean(row.selectedCardCode && row.selectedCardName)
-              const missionStatusTone =
-                row.missionStatus === 'success'
-                  ? 'success'
-                  : row.missionStatus === 'failed'
-                    ? 'failed'
-                    : 'subtle'
               const missionStatusLabel =
                 row.missionStatus === 'success'
                   ? 'Completed'
@@ -337,14 +331,11 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                         >
                           {hasCard ? missionSummaryFlavor : 'No challenge was tracked for this golfer on this hole.'}
                         </p>
-                        <div className="recap-metrics recap-player-outcome-card__summary-badges">
+                        <div className="recap-player-outcome-card__summary-badges">
                           {hasCard ? (
-                            <>
-                              <RecapStatusChip tone={missionStatusTone}>{missionStatusLabel}</RecapStatusChip>
-                              <RecapStatusChip tone="total">
-                                Reward {formatSignedPoints(row.selectedCardPoints)} pts
-                              </RecapStatusChip>
-                            </>
+                            <p className="muted">
+                              Outcome: {missionStatusLabel} • Reward {formatSignedPoints(row.selectedCardPoints)} pts
+                            </p>
                           ) : (
                             <RecapStatusChip tone="subtle">No Card</RecapStatusChip>
                           )}
@@ -382,16 +373,13 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                               <strong className="recap-outcome-mission-card__title">
                                 {row.selectedCardCode} - {row.selectedCardName}
                               </strong>
-                              <RecapStatusChip tone={missionStatusTone}>{missionStatusLabel}</RecapStatusChip>
                             </header>
                             <p className="recap-outcome-mission-card__description">
                               {row.selectedCardDescription ?? 'No description available'}
                             </p>
-                            <div className="recap-outcome-mission-card__badges">
-                              <RecapStatusChip tone="total">
-                                Reward {formatSignedPoints(row.selectedCardPoints)} pts
-                              </RecapStatusChip>
-                            </div>
+                            <p className="muted">
+                              Outcome: {missionStatusLabel} • Reward {formatSignedPoints(row.selectedCardPoints)} pts
+                            </p>
                             <p className={`recap-outcome-mission-card__callout ${missionCalloutToneClass}`}>
                               {missionCallout}
                             </p>

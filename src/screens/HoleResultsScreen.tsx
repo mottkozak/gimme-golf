@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
 import BadgeChip from '../components/BadgeChip.tsx'
@@ -107,6 +107,10 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
   const [manualStrokeInputByPlayerId, setManualStrokeInputByPlayerId] = useState<
     Record<string, boolean>
   >({})
+  const playerSectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const publicCardSectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const publicResolutionSectionRef = useRef<HTMLElement | null>(null)
+  const actionPanelRef = useRef<HTMLDivElement | null>(null)
 
   const currentHole = roundState.holes[roundState.currentHoleIndex]
   const currentResult = roundState.holeResults[roundState.currentHoleIndex]
@@ -148,6 +152,112 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     currentHoleCards.publicCards,
     currentResult.publicCardResolutionsByCardId,
   )
+
+  const queueScrollTo = (getTarget: () => HTMLElement | null) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const target = getTarget()
+        if (!target) {
+          return
+        }
+
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
+    })
+  }
+
+  const getNextPlayerNeedingScore = (
+    currentPlayerId: string,
+    strokesByPlayerId: Record<string, number | null>,
+  ): string | null => {
+    const orderedPlayerIds = roundState.players.map((player) => player.id)
+    if (orderedPlayerIds.length === 0) {
+      return null
+    }
+
+    const currentPlayerIndex = orderedPlayerIds.indexOf(currentPlayerId)
+    const searchOrder =
+      currentPlayerIndex >= 0
+        ? [
+            ...orderedPlayerIds.slice(currentPlayerIndex + 1),
+            ...orderedPlayerIds.slice(0, currentPlayerIndex),
+          ]
+        : orderedPlayerIds
+
+    return (
+      searchOrder.find((playerId) => typeof strokesByPlayerId[playerId] !== 'number') ?? null
+    )
+  }
+
+  const getNextUnresolvedPublicCardId = (
+    resolutionsByCardId: Record<string, PublicCardResolutionState>,
+    currentCardId: string | null = null,
+  ): string | null => {
+    if (currentHoleCards.publicCards.length === 0) {
+      return null
+    }
+
+    const currentCardIndex =
+      currentCardId === null
+        ? -1
+        : currentHoleCards.publicCards.findIndex((card) => card.id === currentCardId)
+    const splitIndex = currentCardIndex >= 0 ? currentCardIndex + 1 : 0
+    const orderedCards = [
+      ...currentHoleCards.publicCards.slice(splitIndex),
+      ...currentHoleCards.publicCards.slice(0, splitIndex),
+    ]
+
+    const nextCard = orderedCards.find(
+      (card) => !isPublicCardResolutionComplete(card, resolutionsByCardId[card.id], playerIds),
+    )
+
+    return nextCard?.id ?? null
+  }
+
+  const scrollToPublicResolution = (cardId: string | null) => {
+    if (!publicSectionExpanded) {
+      setPublicSectionExpanded(true)
+    }
+
+    queueScrollTo(() => {
+      if (cardId) {
+        return publicCardSectionRefs.current[cardId] ?? publicResolutionSectionRef.current
+      }
+
+      return publicResolutionSectionRef.current
+    })
+  }
+
+  const autoAdvanceFromScoreEntry = (
+    currentPlayerId: string,
+    strokesByPlayerId: Record<string, number | null>,
+  ) => {
+    const nextPlayerId = getNextPlayerNeedingScore(currentPlayerId, strokesByPlayerId)
+    if (nextPlayerId) {
+      queueScrollTo(() => playerSectionRefs.current[nextPlayerId])
+      return
+    }
+
+    const allScoresEntered = roundState.players.every(
+      (player) => typeof strokesByPlayerId[player.id] === 'number',
+    )
+    if (!allScoresEntered) {
+      return
+    }
+
+    if (hasPublicStep) {
+      const nextPublicCardId = getNextUnresolvedPublicCardId(currentResolutions)
+      if (nextPublicCardId) {
+        scrollToPublicResolution(nextPublicCardId)
+        return
+      }
+    }
+
+    queueScrollTo(() => actionPanelRef.current)
+  }
 
   const updateCurrentHoleWithTap = (
     updater: (currentState: RoundState) => RoundState,
@@ -279,7 +389,40 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     updater: (
       currentResolutionsByCardId: Record<string, PublicCardResolutionState>,
     ) => Record<string, PublicCardResolutionState>,
+    options?: { sourceCardId?: string },
   ) => {
+    const nextResolutionsPreview = normalizePublicCardResolutions(
+      currentHoleCards.publicCards,
+      updater(currentResolutions),
+    )
+    const sourceCardId = options?.sourceCardId ?? null
+    let nextPublicCardIdToFocus: string | null = null
+    let shouldFocusActionPanel = false
+
+    if (sourceCardId) {
+      const sourceCard = currentHoleCards.publicCards.find((card) => card.id === sourceCardId)
+      if (sourceCard) {
+        const wasResolved = isPublicCardResolutionComplete(
+          sourceCard,
+          currentResolutions[sourceCardId],
+          playerIds,
+        )
+        const isResolvedNow = isPublicCardResolutionComplete(
+          sourceCard,
+          nextResolutionsPreview[sourceCardId],
+          playerIds,
+        )
+
+        if (!wasResolved && isResolvedNow) {
+          nextPublicCardIdToFocus = getNextUnresolvedPublicCardId(
+            nextResolutionsPreview,
+            sourceCardId,
+          )
+          shouldFocusActionPanel = !nextPublicCardIdToFocus
+        }
+      }
+    }
+
     updateCurrentHoleWithTap((currentState) => {
       const holeResults = [...currentState.holeResults]
       const currentHoleIndex = currentState.currentHoleIndex
@@ -316,6 +459,15 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         holeResults,
       }
     }, { markPublicStart: true })
+
+    if (nextPublicCardIdToFocus) {
+      scrollToPublicResolution(nextPublicCardIdToFocus)
+      return
+    }
+
+    if (shouldFocusActionPanel) {
+      queueScrollTo(() => actionPanelRef.current)
+    }
   }
 
   const setCardTriggered = (card: PublicCard, triggered: boolean) => {
@@ -343,7 +495,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         ...resolutionsByCardId,
         [card.id]: nextResolution,
       }
-    })
+    }, { sourceCardId: card.id })
   }
 
   const setCardWinner = (cardId: string, winningPlayerId: string) => {
@@ -361,7 +513,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           winningPlayerId,
         },
       }
-    })
+    }, { sourceCardId: cardId })
   }
 
   const setUnifiedVoteTarget = (cardId: string, targetPlayerId: string) => {
@@ -381,7 +533,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           ),
         },
       }
-    })
+    }, { sourceCardId: cardId })
   }
 
   const toggleAffectedPlayer = (cardId: string, playerId: string) => {
@@ -404,7 +556,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           affectedPlayerIds: nextAffectedPlayerIds,
         },
       }
-    })
+    }, { sourceCardId: cardId })
   }
 
   const setSelectedEffectOption = (card: PublicCard, effectOptionId: string) => {
@@ -424,7 +576,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         ...resolutionsByCardId,
         [card.id]: nextResolution,
       }
-    })
+    }, { sourceCardId: card.id })
   }
 
   const setStrokes = (
@@ -434,6 +586,9 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
       | 'quick_button'
       | 'quick_9_plus'
       | 'manual_input' = 'manual_input',
+    options?: {
+      autoAdvance?: boolean
+    },
   ) => {
     trackScoreEntered(roundState, currentHole.holeNumber, playerId, nextStrokes, inputMethod)
     const nextStrokesByPlayerId = {
@@ -466,6 +621,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         holeResults,
       }
     })
+
+    const shouldAutoAdvance =
+      options?.autoAdvance ?? (inputMethod === 'quick_button' && typeof nextStrokes === 'number')
+    if (shouldAutoAdvance && typeof nextStrokes === 'number') {
+      autoAdvanceFromScoreEntry(playerId, nextStrokesByPlayerId)
+    }
   }
 
   const setMissionStatus = (playerId: string, status: Extract<MissionStatus, 'success' | 'failed'>) => {
@@ -769,151 +930,166 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           const scoreStatusTone = typeof strokes === 'number' ? 'ready' : 'pending'
 
           return (
-            <GolferScoreModule
+            <div
               key={player.id}
-              playerName={playerNameById[player.id]}
-              statusSlot={<MissionStatusPill label={scoreStatusLabel} tone={scoreStatusTone} />}
-              missionSlot={
-                selectedCard ? (
-                  <div className="stack-xs hole-score-module__mission-inline">
-                    <button
-                      type="button"
-                      className="chip chip-button badge-chip badge-chip--subtle hole-score-module__mission-chip"
-                      onClick={() =>
-                        setActiveCardPreview({
-                          playerName: playerNameById[player.id],
-                          card: selectedCard,
-                        })
-                      }
-                    >
-                      {selectedCard.code} - {selectedCard.name}
-                      <AppIcon className="hole-score-module__mission-chip-icon" icon="info" />
-                    </button>
-                    {requiresMissionResolution && (
-                      <div
-                        className="segmented-control hole-result-toggle-group hole-score-module__mission-toggle"
-                        role="group"
-                        aria-label={`${playerNameById[player.id]} challenge result`}
-                      >
-                        <button
-                          type="button"
-                          className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--failed ${
-                            effectiveMissionStatus === 'failed'
-                              ? 'segmented-control__button--active'
-                              : ''
-                          }`}
-                          onClick={() => setMissionStatus(player.id, 'failed')}
-                        >
-                          Failed
-                        </button>
-                        <button
-                          type="button"
-                          className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--completed ${
-                            effectiveMissionStatus === 'success'
-                              ? 'segmented-control__button--active'
-                              : ''
-                          }`}
-                          onClick={() => setMissionStatus(player.id, 'success')}
-                        >
-                          Completed
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <BadgeChip tone="subtle">{isPowerUpsMode ? 'Power Ups Mode' : 'No card'}</BadgeChip>
-                )
-              }
-              helperText={
-                isPowerUpsMode
-                  ? [
-                      assignedPowerUp
-                        ? `Power Up: ${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
-                        : 'Power Up: none',
-                      assignedCurse ? `Curse: ${assignedCurse.title}` : 'Curse: none',
-                    ].join(' | ')
-                  : selectedCard
-                    ? `${selectedCard.name} (${selectedCard.points} pts on success)`
-                    : 'No personal card selected for this golfer.'
-              }
+              ref={(element) => {
+                playerSectionRefs.current[player.id] = element
+              }}
             >
-              <span className="label">Strokes</span>
-              <div className="button-row hole-score-button-group hole-score-button-group--wheel">
-                {QUICK_STROKE_OPTIONS.map((strokeOption) => {
-                  const isSelected = strokes === strokeOption
-                  return (
-                    <button
-                      key={strokeOption}
-                      type="button"
-                      className={`hole-score-button ${isSelected ? 'hole-score-button--selected' : ''}`}
-                      onClick={() => {
-                        const nextStrokeValue = isSelected ? null : strokeOption
-                        setStrokes(player.id, nextStrokeValue, 'quick_button')
-                        if (!isSelected) {
-                          setManualStrokeInputByPlayerId((current) => ({
-                            ...current,
-                            [player.id]: false,
-                          }))
+              <GolferScoreModule
+                playerName={playerNameById[player.id]}
+                statusSlot={<MissionStatusPill label={scoreStatusLabel} tone={scoreStatusTone} />}
+                missionSlot={
+                  selectedCard ? (
+                    <div className="stack-xs hole-score-module__mission-inline">
+                      <button
+                        type="button"
+                        className="chip chip-button badge-chip badge-chip--subtle hole-score-module__mission-chip"
+                        onClick={() =>
+                          setActiveCardPreview({
+                            playerName: playerNameById[player.id],
+                            card: selectedCard,
+                          })
                         }
-                      }}
-                      aria-pressed={isSelected}
-                    >
-                      {strokeOption}
-                    </button>
+                      >
+                        {selectedCard.code} - {selectedCard.name}
+                        <AppIcon className="hole-score-module__mission-chip-icon" icon="info" />
+                      </button>
+                      {requiresMissionResolution && (
+                        <div
+                          className="segmented-control hole-result-toggle-group hole-score-module__mission-toggle"
+                          role="group"
+                          aria-label={`${playerNameById[player.id]} challenge result`}
+                        >
+                          <button
+                            type="button"
+                            className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--failed ${
+                              effectiveMissionStatus === 'failed'
+                                ? 'segmented-control__button--active'
+                                : ''
+                            }`}
+                            onClick={() => setMissionStatus(player.id, 'failed')}
+                          >
+                            Failed
+                          </button>
+                          <button
+                            type="button"
+                            className={`segmented-control__button hole-score-module__mission-toggle-button hole-score-module__mission-toggle-button--completed ${
+                              effectiveMissionStatus === 'success'
+                                ? 'segmented-control__button--active'
+                                : ''
+                            }`}
+                            onClick={() => setMissionStatus(player.id, 'success')}
+                          >
+                            Completed
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <BadgeChip tone="subtle">{isPowerUpsMode ? 'Power Ups Mode' : 'No card'}</BadgeChip>
                   )
-                })}
-                <button
-                  type="button"
-                  className={`hole-score-button hole-score-button--manual ${
-                    showManualInput ? 'hole-score-button--selected' : ''
-                  }`}
-                  onClick={() => {
-                    const nextStrokeValue =
-                      typeof strokes === 'number' && strokes >= MANUAL_STROKE_MIN
-                        ? strokes
-                        : MANUAL_STROKE_MIN
-                    setStrokes(player.id, nextStrokeValue, 'quick_9_plus')
-                    setManualStrokeInputByPlayerId((current) => ({
-                      ...current,
-                      [player.id]: true,
-                    }))
-                  }}
-                >
-                  {MANUAL_STROKE_MIN}+
-                </button>
-              </div>
-
-              {showManualInput && (
-                <div className="stack-xs hole-score-manual-entry">
-                  <label className="field field--inline hole-score-manual-field">
-                    <span className="label">{MANUAL_STROKE_MIN}+ score</span>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      step={1}
-                      value={typeof strokes === 'number' ? String(strokes) : ''}
-                      placeholder="Score"
-                      onChange={(event) => {
-                        const parsedStrokes = parseStrokeInput(event.target.value)
-                        setStrokes(player.id, parsedStrokes, 'manual_input')
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.currentTarget.blur()
-                        }
-                      }}
-                    />
-                  </label>
+                }
+                helperText={
+                  isPowerUpsMode
+                    ? [
+                        assignedPowerUp
+                          ? `Power Up: ${assignedPowerUp.title} (${powerUpUsed ? 'Used' : 'Unused'})`
+                          : 'Power Up: none',
+                        assignedCurse ? `Curse: ${assignedCurse.title}` : 'Curse: none',
+                      ].join(' | ')
+                    : selectedCard
+                      ? `${selectedCard.name} (${selectedCard.points} pts on success)`
+                      : 'No personal card selected for this golfer.'
+                }
+              >
+                <span className="label">Strokes</span>
+                <div className="button-row hole-score-button-group hole-score-button-group--wheel">
+                  {QUICK_STROKE_OPTIONS.map((strokeOption) => {
+                    const isSelected = strokes === strokeOption
+                    return (
+                      <button
+                        key={strokeOption}
+                        type="button"
+                        className={`hole-score-button ${isSelected ? 'hole-score-button--selected' : ''}`}
+                        onClick={() => {
+                          const nextStrokeValue = isSelected ? null : strokeOption
+                          setStrokes(player.id, nextStrokeValue, 'quick_button')
+                          if (!isSelected) {
+                            setManualStrokeInputByPlayerId((current) => ({
+                              ...current,
+                              [player.id]: false,
+                            }))
+                          }
+                        }}
+                        aria-pressed={isSelected}
+                      >
+                        {strokeOption}
+                      </button>
+                    )
+                  })}
+                  <button
+                    type="button"
+                    className={`hole-score-button hole-score-button--manual ${
+                      showManualInput ? 'hole-score-button--selected' : ''
+                    }`}
+                    onClick={() => {
+                      const nextStrokeValue =
+                        typeof strokes === 'number' && strokes >= MANUAL_STROKE_MIN
+                          ? strokes
+                          : MANUAL_STROKE_MIN
+                      setStrokes(player.id, nextStrokeValue, 'quick_9_plus')
+                      setManualStrokeInputByPlayerId((current) => ({
+                        ...current,
+                        [player.id]: true,
+                      }))
+                    }}
+                  >
+                    {MANUAL_STROKE_MIN}+
+                  </button>
                 </div>
-              )}
-            </GolferScoreModule>
+
+                {showManualInput && (
+                  <div className="stack-xs hole-score-manual-entry">
+                    <label className="field field--inline hole-score-manual-field">
+                      <span className="label">{MANUAL_STROKE_MIN}+ score</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        step={1}
+                        value={typeof strokes === 'number' ? String(strokes) : ''}
+                        placeholder="Score"
+                        onChange={(event) => {
+                          const parsedStrokes = parseStrokeInput(event.target.value)
+                          setStrokes(player.id, parsedStrokes, 'manual_input', { autoAdvance: false })
+                        }}
+                        onBlur={(event) => {
+                          const parsedStrokes = parseStrokeInput(event.target.value)
+                          if (typeof parsedStrokes === 'number') {
+                            setStrokes(player.id, parsedStrokes, 'manual_input', { autoAdvance: true })
+                          }
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.currentTarget.blur()
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                )}
+              </GolferScoreModule>
+            </div>
           )
         })}
       </section>
 
       {hasPublicStep && (
-        <section className="panel stack-xs hole-results-step-panel hole-results-step-panel--public">
+        <section
+          className="panel stack-xs hole-results-step-panel hole-results-step-panel--public"
+          ref={publicResolutionSectionRef}
+        >
           <div className="row-between hole-results-step-header">
             <strong>Public Card Resolution</strong>
             <MissionStatusPill
@@ -973,167 +1149,173 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 const isCardResolved = isPublicCardResolutionComplete(card, guidedResolution, playerIds)
 
                 return (
-                  <PublicCardResolutionPanel
+                  <div
                     key={card.id}
-                    title={card.name}
-                    statusSlot={
-                      <MissionStatusPill
-                        label={isCardResolved ? 'Resolved' : 'Needs input'}
-                        tone={isCardResolved ? 'ready' : 'pending'}
-                      />
-                    }
-                    metadataSlot={
-                      <>
-                        <BadgeChip tone="subtle">{card.cardType.toUpperCase()}</BadgeChip>
-                        <BadgeChip tone="reward">
-                          {card.points > 0 ? '+' : ''}
-                          {card.points} pts
-                        </BadgeChip>
-                      </>
-                    }
-                    description={card.description}
+                    ref={(element) => {
+                      publicCardSectionRefs.current[card.id] = element
+                    }}
                   >
-                    <div className="stack-xs hole-results-public-field">
-                      <span className="label">{guidance.triggerPrompt}</span>
-                      <div className="segmented-control hole-result-toggle-group">
-                        <button
-                          type="button"
-                          className={`segmented-control__button ${
-                            guidedResolution.triggered ? 'segmented-control__button--active' : ''
-                          }`}
-                          onClick={() => setCardTriggered(card, true)}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          type="button"
-                          className={`segmented-control__button ${
-                            !guidedResolution.triggered ? 'segmented-control__button--active' : ''
-                          }`}
-                          onClick={() => setCardTriggered(card, false)}
-                        >
-                          No
-                        </button>
-                      </div>
-                      {guidance.triggerHelp && <p className="muted">{guidance.triggerHelp}</p>}
-                    </div>
-
-                    {guidedResolution.triggered && requirements.requiresVoteTarget && hasMultiplePlayers && (
+                    <PublicCardResolutionPanel
+                      title={card.name}
+                      statusSlot={
+                        <MissionStatusPill
+                          label={isCardResolved ? 'Resolved' : 'Needs input'}
+                          tone={isCardResolved ? 'ready' : 'pending'}
+                        />
+                      }
+                      metadataSlot={
+                        <>
+                          <BadgeChip tone="subtle">{card.cardType.toUpperCase()}</BadgeChip>
+                          <BadgeChip tone="reward">
+                            {card.points > 0 ? '+' : ''}
+                            {card.points} pts
+                          </BadgeChip>
+                        </>
+                      }
+                      description={card.description}
+                    >
                       <div className="stack-xs hole-results-public-field">
-                        <span className="label">{guidance.voteTargetLabel}</span>
-                        <div className="button-row row-wrap">
-                          {roundState.players.map((player) => (
-                            <button
-                              key={player.id}
-                              type="button"
-                              className={`hole-public-target-button ${
-                                unanimousVoteTargetPlayerId === player.id
-                                  ? 'hole-public-target-button--selected'
-                                  : ''
-                              }`}
-                              onClick={() => setUnifiedVoteTarget(card.id, player.id)}
-                            >
-                              {playerNameById[player.id]}
-                            </button>
-                          ))}
+                        <span className="label">{guidance.triggerPrompt}</span>
+                        <div className="segmented-control hole-result-toggle-group">
+                          <button
+                            type="button"
+                            className={`segmented-control__button ${
+                              guidedResolution.triggered ? 'segmented-control__button--active' : ''
+                            }`}
+                            onClick={() => setCardTriggered(card, true)}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            className={`segmented-control__button ${
+                              !guidedResolution.triggered ? 'segmented-control__button--active' : ''
+                            }`}
+                            onClick={() => setCardTriggered(card, false)}
+                          >
+                            No
+                          </button>
                         </div>
+                        {guidance.triggerHelp && <p className="muted">{guidance.triggerHelp}</p>}
                       </div>
-                    )}
 
-                    {guidedResolution.triggered && requirements.requiresVoteTarget && !hasMultiplePlayers && (
-                      <p className="muted">{guidance.autoResolvedHint}</p>
-                    )}
-
-                    {guidedResolution.triggered && requirements.requiresEffectChoice && (
-                      <div className="stack-xs hole-results-public-field">
-                        <span className="label">{guidance.effectChoiceLabel}</span>
-                        <div
-                          className={
-                            effectOptions.length === 2
-                              ? 'segmented-control hole-result-toggle-group'
-                              : 'button-row row-wrap'
-                          }
-                        >
-                          {effectOptions.map((effectOption) => {
-                            const isSelected = guidedResolution.selectedEffectOptionId === effectOption.id
-
-                            return (
-                              <button
-                                key={effectOption.id}
-                                type="button"
-                                className={
-                                  effectOptions.length === 2
-                                    ? `segmented-control__button ${
-                                        isSelected ? 'segmented-control__button--active' : ''
-                                      }`
-                                    : `hole-public-target-button ${
-                                        isSelected ? 'hole-public-target-button--selected' : ''
-                                      }`
-                                }
-                                onClick={() => setSelectedEffectOption(card, effectOption.id)}
-                              >
-                                {effectOption.label}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {guidedResolution.triggered && requirements.requiresTargetSelection && hasMultiplePlayers && (
-                      <div className="stack-xs hole-results-public-field">
-                        <span className="label">{guidance.targetLabel}</span>
-                        <div className="button-row row-wrap">
-                          {roundState.players.map((player) => (
-                            <button
-                              key={player.id}
-                              type="button"
-                              className={`hole-public-target-button ${
-                                guidedResolution.winningPlayerId === player.id
-                                  ? 'hole-public-target-button--selected'
-                                  : ''
-                              }`}
-                              onClick={() => setCardWinner(card.id, player.id)}
-                            >
-                              {playerNameById[player.id]}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {guidedResolution.triggered && requirements.requiresTargetSelection && !hasMultiplePlayers && (
-                      <p className="muted">{guidance.autoResolvedHint}</p>
-                    )}
-
-                    {guidedResolution.triggered && requirements.requiresAffectedSelection && hasMultiplePlayers && (
-                      <div className="stack-xs hole-results-public-field">
-                        <span className="label">{guidance.affectedLabel}</span>
-                        <div className="button-row row-wrap">
-                          {roundState.players.map((player) => {
-                            const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
-
-                            return (
+                      {guidedResolution.triggered && requirements.requiresVoteTarget && hasMultiplePlayers && (
+                        <div className="stack-xs hole-results-public-field">
+                          <span className="label">{guidance.voteTargetLabel}</span>
+                          <div className="button-row row-wrap">
+                            {roundState.players.map((player) => (
                               <button
                                 key={player.id}
                                 type="button"
                                 className={`hole-public-target-button ${
-                                  isAffected ? 'hole-public-target-button--selected' : ''
+                                  unanimousVoteTargetPlayerId === player.id
+                                    ? 'hole-public-target-button--selected'
+                                    : ''
                                 }`}
-                                onClick={() => toggleAffectedPlayer(card.id, player.id)}
+                                onClick={() => setUnifiedVoteTarget(card.id, player.id)}
                               >
                                 {playerNameById[player.id]}
                               </button>
-                            )
-                          })}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {guidedResolution.triggered && requirements.requiresAffectedSelection && !hasMultiplePlayers && (
-                      <p className="muted">{guidance.autoResolvedHint}</p>
-                    )}
-                  </PublicCardResolutionPanel>
+                      {guidedResolution.triggered && requirements.requiresVoteTarget && !hasMultiplePlayers && (
+                        <p className="muted">{guidance.autoResolvedHint}</p>
+                      )}
+
+                      {guidedResolution.triggered && requirements.requiresEffectChoice && (
+                        <div className="stack-xs hole-results-public-field">
+                          <span className="label">{guidance.effectChoiceLabel}</span>
+                          <div
+                            className={
+                              effectOptions.length === 2
+                                ? 'segmented-control hole-result-toggle-group'
+                                : 'button-row row-wrap'
+                            }
+                          >
+                            {effectOptions.map((effectOption) => {
+                              const isSelected = guidedResolution.selectedEffectOptionId === effectOption.id
+
+                              return (
+                                <button
+                                  key={effectOption.id}
+                                  type="button"
+                                  className={
+                                    effectOptions.length === 2
+                                      ? `segmented-control__button ${
+                                          isSelected ? 'segmented-control__button--active' : ''
+                                        }`
+                                      : `hole-public-target-button ${
+                                          isSelected ? 'hole-public-target-button--selected' : ''
+                                        }`
+                                  }
+                                  onClick={() => setSelectedEffectOption(card, effectOption.id)}
+                                >
+                                  {effectOption.label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {guidedResolution.triggered && requirements.requiresTargetSelection && hasMultiplePlayers && (
+                        <div className="stack-xs hole-results-public-field">
+                          <span className="label">{guidance.targetLabel}</span>
+                          <div className="button-row row-wrap">
+                            {roundState.players.map((player) => (
+                              <button
+                                key={player.id}
+                                type="button"
+                                className={`hole-public-target-button ${
+                                  guidedResolution.winningPlayerId === player.id
+                                    ? 'hole-public-target-button--selected'
+                                    : ''
+                                }`}
+                                onClick={() => setCardWinner(card.id, player.id)}
+                              >
+                                {playerNameById[player.id]}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {guidedResolution.triggered && requirements.requiresTargetSelection && !hasMultiplePlayers && (
+                        <p className="muted">{guidance.autoResolvedHint}</p>
+                      )}
+
+                      {guidedResolution.triggered && requirements.requiresAffectedSelection && hasMultiplePlayers && (
+                        <div className="stack-xs hole-results-public-field">
+                          <span className="label">{guidance.affectedLabel}</span>
+                          <div className="button-row row-wrap">
+                            {roundState.players.map((player) => {
+                              const isAffected = guidedResolution.affectedPlayerIds.includes(player.id)
+
+                              return (
+                                <button
+                                  key={player.id}
+                                  type="button"
+                                  className={`hole-public-target-button ${
+                                    isAffected ? 'hole-public-target-button--selected' : ''
+                                  }`}
+                                  onClick={() => toggleAffectedPlayer(card.id, player.id)}
+                                >
+                                  {playerNameById[player.id]}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {guidedResolution.triggered && requirements.requiresAffectedSelection && !hasMultiplePlayers && (
+                        <p className="muted">{guidance.autoResolvedHint}</p>
+                      )}
+                    </PublicCardResolutionPanel>
+                  </div>
                 )
               })}
 
@@ -1161,20 +1343,22 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
         </section>
       )}
 
-      <HoleActionPanel
-        summary={`${completedSteps}/${totalSteps} steps complete`}
-        statusSlot={
-          <MissionStatusPill
-            label={canContinueToRecap ? 'Ready to save' : 'In progress'}
-            tone={canContinueToRecap ? 'ready' : 'pending'}
-          />
-        }
-        buttonLabel="Save Hole & View Recap"
-        buttonIcon={<AppIcon className="button-icon" icon={ICONS.holeRecap} />}
-        disabled={!canContinueToRecap}
-        helperText={canContinueToRecap ? undefined : 'Complete required steps to save this hole.'}
-        onContinue={continueToRecap}
-      />
+      <div ref={actionPanelRef}>
+        <HoleActionPanel
+          summary={`${completedSteps}/${totalSteps} steps complete`}
+          statusSlot={
+            <MissionStatusPill
+              label={canContinueToRecap ? 'Ready to save' : 'In progress'}
+              tone={canContinueToRecap ? 'ready' : 'pending'}
+            />
+          }
+          buttonLabel="Save Hole & View Recap"
+          buttonIcon={<AppIcon className="button-icon" icon={ICONS.holeRecap} />}
+          disabled={!canContinueToRecap}
+          helperText={canContinueToRecap ? undefined : 'Complete required steps to save this hole.'}
+          onContinue={continueToRecap}
+        />
+      </div>
 
       {activeCardPreview && (
         <div
