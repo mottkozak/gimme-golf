@@ -97,13 +97,7 @@ const SPLASH_BACKGROUND_SOURCES = [
   `${import.meta.env.BASE_URL}splash_screen_app.png`,
   `${import.meta.env.BASE_URL}splash_screen_alt_app.png`,
 ] as const
-const SPLASH_LOGO_SOURCES = [
-  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Logo-app.png`,
-  `${import.meta.env.BASE_URL}Gimme-Golf-3D-Logo-app.png`,
-  `${import.meta.env.BASE_URL}Gimme-Golf-Narrow-Logo-app.png`,
-  `${import.meta.env.BASE_URL}Gimme-Golf-Narrow-Alt-Logo-app.png`,
-  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Alt-Logo-app.png`,
-] as const
+const SPLASH_BLANK_LOGO_SOURCE = `${import.meta.env.BASE_URL}Logo_blank-app.png`
 let cachedSplashBackgroundVariant: 0 | 1 | null = null
 
 function getSplashBackgroundVariant(): 0 | 1 {
@@ -333,7 +327,7 @@ function App() {
     return (
       <SplashScreen
         backgroundImageSrc={SPLASH_BACKGROUND_SOURCES[splashBackgroundVariant]}
-        logoSources={SPLASH_LOGO_SOURCES}
+        blankLogoSrc={SPLASH_BLANK_LOGO_SOURCE}
         durationMs={SPLASH_DURATION_MS}
         onFinish={onSplashFinish}
       />
