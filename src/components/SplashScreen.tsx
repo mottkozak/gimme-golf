@@ -1,6 +1,7 @@
+import type { CSSProperties } from 'react'
 import { useEffect, useState } from 'react'
 
-const LOGO_ROTATION_INTERVAL_MS = 140
+const LOGO_STEP_DURATION_MS = 280
 const EXIT_FADE_DURATION_MS = 260
 
 interface SplashScreenProps {
@@ -11,22 +12,8 @@ interface SplashScreenProps {
 }
 
 function SplashScreen({ backgroundImageSrc, logoSources, durationMs, onFinish }: SplashScreenProps) {
-  const [activeLogoIndex, setActiveLogoIndex] = useState(0)
   const [isExiting, setIsExiting] = useState(false)
-
-  useEffect(() => {
-    if (logoSources.length <= 1) {
-      return
-    }
-
-    const intervalId = window.setInterval(() => {
-      setActiveLogoIndex((currentValue) => (currentValue + 1) % logoSources.length)
-    }, LOGO_ROTATION_INTERVAL_MS)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [logoSources.length])
+  const cycleDurationMs = Math.max(logoSources.length, 1) * LOGO_STEP_DURATION_MS
 
   useEffect(() => {
     const exitDelayMs = Math.max(durationMs - EXIT_FADE_DURATION_MS, 0)
@@ -52,17 +39,26 @@ function SplashScreen({ backgroundImageSrc, logoSources, durationMs, onFinish }:
       aria-label="Loading Gimme Golf"
     >
       <div className="splash-screen__logo-stack" aria-hidden="true">
-        {logoSources.map((logoSource, logoIndex) => (
-          <img
-            key={logoSource}
-            className={`splash-screen__logo ${logoIndex === activeLogoIndex ? 'splash-screen__logo--active' : ''}`}
-            src={logoSource}
-            alt=""
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-          />
-        ))}
+        {logoSources.map((logoSource, logoIndex) => {
+          const animationStyle = {
+            '--splash-logo-cycle-duration': `${cycleDurationMs}ms`,
+            '--splash-logo-step-duration': `${LOGO_STEP_DURATION_MS}ms`,
+            '--splash-logo-index': String(logoIndex),
+          } as CSSProperties
+
+          return (
+            <img
+              key={logoSource}
+              className="splash-screen__logo"
+              src={logoSource}
+              alt=""
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              style={animationStyle}
+            />
+          )
+        })}
       </div>
     </div>
   )

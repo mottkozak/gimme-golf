@@ -134,15 +134,18 @@ body {
   }
 }
 
-@keyframes splash-logo-flicker {
-  0% {
-    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.3));
+@keyframes splash-logo-cycle {
+  0%,
+  8% {
+    opacity: 0;
   }
-  50% {
-    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.45));
+  15%,
+  34% {
+    opacity: 1;
   }
+  42%,
   100% {
-    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.3));
+    opacity: 0;
   }
 }
 
@@ -367,27 +370,45 @@ main {
 .splash-screen__logo-stack {
   position: relative;
   z-index: 1;
-  width: clamp(12rem, 74vw, 21rem);
-  aspect-ratio: 2660 / 1272;
-  animation: splash-logo-flicker 360ms steps(1, end) infinite;
+  width: min(88vw, 24rem);
+  height: clamp(5.8rem, 16vh, 9.8rem);
+}
+
+.splash-screen__logo-stack::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 84%;
+  height: 56%;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.34) 0%,
+    rgba(0, 0, 0, 0.14) 48%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
 }
 
 .splash-screen__logo {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 50%;
+  left: 50%;
+  width: auto;
   height: 100%;
-  object-fit: contain;
+  max-width: 100%;
   opacity: 0;
-  transform: scale(0.975);
-  transition:
-    opacity 90ms linear,
-    transform 90ms linear;
-}
-
-.splash-screen__logo--active {
-  opacity: 1;
-  transform: scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 1;
+  animation-name: splash-logo-cycle;
+  animation-duration: var(--splash-logo-cycle-duration, 1200ms);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: calc(var(--splash-logo-index, 0) * var(--splash-logo-step-duration, 280ms) * -1);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .app-shell__main--compact {
@@ -510,8 +531,18 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash-screen__logo-stack {
+  .splash-screen__logo {
     animation: none;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .splash-screen__logo:first-child {
+    opacity: 1;
+  }
+
+  .splash-screen__logo-stack {
+    filter: none;
   }
 }
 
