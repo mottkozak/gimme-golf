@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from 'react'
-import gimmeGolfMainLogo from '../assets/gimme-golf-main-logo.png'
+import gimmeGolfMainLogo from '../assets/gimme-golf-leaderboard-logo-main.png'
 import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
 import { trackRoundResumed } from '../logic/analytics.ts'
@@ -231,10 +231,16 @@ function App() {
       ? getBackTargetScreen(appState.activeScreen, appState.roundState.currentHoleIndex)
       : null
 
+  const usesCompactHeader = shouldShowGlobalHeader && !shouldShowWordmark
+
   return (
-    <div className={`app-shell ${isModePreviewActive ? 'app-shell--mode-preview' : ''}`}>
+    <div
+      className={`app-shell ${isModePreviewActive ? 'app-shell--mode-preview' : ''} ${
+        usesCompactHeader ? 'app-shell--compact-header' : ''
+      }`}
+    >
       {shouldShowGlobalHeader && (
-        <header className="app-shell__header">
+        <header className={`app-shell__header ${usesCompactHeader ? 'app-shell__header--compact' : ''}`}>
           {backTargetScreen ? (
             <button
               type="button"
@@ -254,12 +260,29 @@ function App() {
               alt="Gimme Golf"
               onError={(event) => {
                 const image = event.currentTarget
+                const fallbackStage = Number.parseInt(image.dataset.fallbackStage ?? '0', 10)
+                if (Number.isNaN(fallbackStage)) {
+                  image.dataset.fallbackStage = '0'
+                }
+
+                if (fallbackStage === 0) {
+                  image.dataset.fallbackStage = '1'
+                  image.src = `${import.meta.env.BASE_URL}gimme-golf-leaderboard-logo-main.png`
+                  return
+                }
+
+                if (fallbackStage === 1) {
+                  image.dataset.fallbackStage = '2'
+                  image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
+                  return
+                }
+
                 if (image.dataset.fallbackApplied === 'true') {
                   return
                 }
 
                 image.dataset.fallbackApplied = 'true'
-                image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
+                image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
               }}
             />
           </h1>

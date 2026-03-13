@@ -23,6 +23,7 @@ import {
 import { formatPlayerNames, getDisplayPlayerName } from './playerNames.ts'
 import { createRefMemoizedSelector } from './selectors.ts'
 import { resolveMajorityVoteWinnerId } from './votes.ts'
+import { resolveLandingModeIdFromConfig, type LandingModeId } from './landingModes.ts'
 
 const MOMENTUM_TIER_RANK: Record<MomentumTier, number> = {
   none: 0,
@@ -224,6 +225,95 @@ const SOLO_WINNER_BROADCAST_TEMPLATES = [
   '{winner} won it with Tin Cup bravery and none of the regret.',
 ]
 
+const CLASSIC_SOLO_WINNER_BROADCAST_TEMPLATES = [
+  '{winner} takes the hole.',
+  '{winner} claims the hole outright.',
+  '{winner} wins the hole clean.',
+  '{winner} posts the number that matters.',
+  '{winner} gets the job done and takes the hole.',
+  '{winner} comes out on top.',
+  '{winner} wins the hole with steady golf.',
+  '{winner} handles business and takes the hole.',
+  '{winner} stands alone on this one.',
+  '{winner} closes it out and takes the hole.',
+]
+
+const CHAOS_SOLO_WINNER_BROADCAST_TEMPLATES = [
+  '{winner} survived the chaos and stole the hole.',
+  '{winner} rode the turbulence and took the hole.',
+  '{winner} turned mayhem into points and won it.',
+  '{winner} came out of the blender with the hole.',
+  '{winner} won the hole through pure chaos control.',
+  '{winner} weathered the swings and took it.',
+  '{winner} thrived in the mess and grabbed the hole.',
+  '{winner} took the hole after a very questionable sequence.',
+  '{winner} turned a scramble into a headline and won it.',
+  '{winner} out-chaosed the chaos and took the hole.',
+]
+
+const PROPS_SOLO_WINNER_BROADCAST_TEMPLATES = [
+  '{winner} called the line and cashed the hole.',
+  '{winner} read it right and takes the hole.',
+  '{winner} trusted the forecast and won this one.',
+  '{winner} made the right call and claimed the hole.',
+  '{winner} played the percentages and took the hole.',
+  '{winner} picked the smart angle and won the hole.',
+  '{winner} won the hole on good reads and clean execution.',
+  '{winner} made the better prediction and took it.',
+  '{winner} saw it early and finished the job.',
+  '{winner} took the hole with strategy over noise.',
+]
+
+const POWER_UPS_SOLO_WINNER_BROADCAST_TEMPLATES = [
+  '{winner} hit turbo mode and took the hole.',
+  '{winner} fired the right boost and won this one.',
+  '{winner} dodged the curses and stole the hole.',
+  '{winner} played arcade golf and cashed the hole.',
+  '{winner} popped the right power-up and took it.',
+  '{winner} outlasted the curse storm and won the hole.',
+  '{winner} took the hole with power-up timing and nerve.',
+  '{winner} turned boosts into bragging rights and won it.',
+  '{winner} beat the curse energy and grabbed the hole.',
+  '{winner} went full arcade and closed it out.',
+]
+
+const CLASSIC_TIE_BROADCAST_TEMPLATES = [
+  '{players} halve the hole.',
+  '{players} finish all square on this one.',
+  '{players} post matching numbers and split the hole.',
+  '{players} finish level and share the hole.',
+  '{players} couldn’t be separated on this hole.',
+  '{players} split the hole with matching scores.',
+  '{players} match cards and split the honors.',
+]
+
+const CHAOS_TIE_BROADCAST_TEMPLATES = [
+  '{players} survived the chaos and split the hole.',
+  '{players} traded swings and finished all square.',
+  '{players} came through the chaos with matching numbers.',
+  '{players} tied this one in full turbulence.',
+  '{players} split the hole after pure wildcard golf.',
+  '{players} finished dead even through the mayhem.',
+]
+
+const PROPS_TIE_BROADCAST_TEMPLATES = [
+  '{players} made matching calls and split the hole.',
+  '{players} read it the same and finished all square.',
+  '{players} post matching numbers and share the result.',
+  '{players} split the hole after identical reads.',
+  '{players} tied this one with mirror-image strategy.',
+  '{players} matched outcomes and halved the hole.',
+]
+
+const POWER_UPS_TIE_BROADCAST_TEMPLATES = [
+  '{players} traded boosts and split the hole.',
+  '{players} canceled each other out and halved it.',
+  '{players} tied the hole after matching power plays.',
+  '{players} finished all square in full arcade mode.',
+  '{players} split the hole with equal boost energy.',
+  '{players} matched scores and shared the hole.',
+]
+
 const TWO_WAY_TIE_BROADCAST_TEMPLATES = [
   '{players} halve the hole.',
   '{players} split the hole.',
@@ -393,7 +483,30 @@ function selectBroadcastTemplate(
 function getTieTemplatesByWinnerCount(
   winnerCount: number,
   totalPlayers: number,
+  modeId: LandingModeId,
 ): readonly string[] {
+  if (modeId === 'classic') {
+    return CLASSIC_TIE_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'chaos') {
+    if (winnerCount === totalPlayers && winnerCount > 1) {
+      return [...CHAOS_TIE_BROADCAST_TEMPLATES, ...UNIVERSAL_ALL_TIED_BROADCAST_TEMPLATES]
+    }
+    return CHAOS_TIE_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'props') {
+    return PROPS_TIE_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'powerUps') {
+    if (winnerCount === totalPlayers && winnerCount > 1) {
+      return [...POWER_UPS_TIE_BROADCAST_TEMPLATES, ...UNIVERSAL_ALL_TIED_BROADCAST_TEMPLATES]
+    }
+    return POWER_UPS_TIE_BROADCAST_TEMPLATES
+  }
+
   const countSpecificTemplates: readonly string[] = (() => {
     switch (winnerCount) {
       case 2:
@@ -426,9 +539,10 @@ function createTieBroadcastLine(
   playerNames: string[],
   holeNumber: number,
   totalPlayers: number,
+  modeId: LandingModeId,
 ): string {
   const formattedNames = formatPlayerNames(playerNames)
-  const templates = getTieTemplatesByWinnerCount(playerNames.length, totalPlayers)
+  const templates = getTieTemplatesByWinnerCount(playerNames.length, totalPlayers, modeId)
   const template =
     selectBroadcastTemplate(templates, formattedNames, holeNumber) ??
     '{players} finish all square on this one.'
@@ -436,9 +550,34 @@ function createTieBroadcastLine(
   return interpolateBroadcastTemplate(template, { players: formattedNames })
 }
 
-function createWinnerBroadcastLine(playerName: string, holeNumber: number): string {
+function getWinnerTemplatesByMode(modeId: LandingModeId): readonly string[] {
+  if (modeId === 'classic') {
+    return CLASSIC_SOLO_WINNER_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'chaos') {
+    return CHAOS_SOLO_WINNER_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'props') {
+    return PROPS_SOLO_WINNER_BROADCAST_TEMPLATES
+  }
+
+  if (modeId === 'powerUps') {
+    return POWER_UPS_SOLO_WINNER_BROADCAST_TEMPLATES
+  }
+
+  return SOLO_WINNER_BROADCAST_TEMPLATES
+}
+
+function createWinnerBroadcastLine(
+  playerName: string,
+  holeNumber: number,
+  modeId: LandingModeId,
+): string {
+  const templates = getWinnerTemplatesByMode(modeId)
   const template =
-    selectBroadcastTemplate(SOLO_WINNER_BROADCAST_TEMPLATES, playerName, holeNumber) ??
+    selectBroadcastTemplate(templates, playerName, holeNumber) ??
     '{winner} takes the hole.'
 
   return interpolateBroadcastTemplate(template, { winner: playerName })
@@ -750,32 +889,23 @@ function buildFeaturedHoleRecap(
 }
 
 function createHighlightLine(
-  gameMode: GameMode,
+  modeId: LandingModeId,
   playerRows: HoleRecapPlayerRow[],
   publicCardRecapItems: PublicCardRecapItem[],
   gamePointHoleWinners: HoleWinnerSummary,
   holeNumber: number,
 ): string {
-  if (gameMode === 'powerUps') {
-    const usedCount = playerRows.filter((row) => row.powerUpUsed === true).length
-    if (usedCount === 0) {
-      return 'No power-ups were activated on this hole'
-    }
-
-    if (usedCount === 1) {
-      const usedPlayer = playerRows.find((row) => row.powerUpUsed === true)
-      return `${usedPlayer?.playerName ?? 'One player'} activated a power-up`
-    }
-
-    return `${getCountWord(usedCount)} players activated power-ups`
-  }
-
   if (gamePointHoleWinners.playerNames.length > 0) {
     if (gamePointHoleWinners.playerNames.length === 1) {
-      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber)
+      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber, modeId)
     }
 
-    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber, playerRows.length)
+    return createTieBroadcastLine(
+      gamePointHoleWinners.playerNames,
+      holeNumber,
+      playerRows.length,
+      modeId,
+    )
   }
 
   const momentumTierJumps = playerRows
@@ -972,6 +1102,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
 
   const publicCardRecapItems = buildPublicCardRecapItems(roundState)
   const featuredHoleRecap = buildFeaturedHoleRecap(featuredHoleType, playerRowsWithWinnerFlags)
+  const landingModeId = resolveLandingModeIdFromConfig(roundState.config)
 
   const leaderSnapshot: LeaderSnapshotSummary = {
     real: getWinnerSummaryByMetric(
@@ -996,7 +1127,7 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
     holeNumber: currentHole.holeNumber,
     holePar: currentHole.par,
     highlightLine: createHighlightLine(
-      roundState.config.gameMode,
+      landingModeId,
       playerRowsWithWinnerFlags,
       publicCardRecapItems,
       gamePointHoleWinners,
