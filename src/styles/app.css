@@ -226,6 +226,10 @@ main {
   flex: 1;
 }
 
+.app-shell__main--compact {
+  position: relative;
+}
+
 .app-shell {
   max-width: 560px;
   margin: 0 auto;
@@ -316,10 +320,15 @@ main {
   overflow: hidden;
 }
 
-.app-shell__header--compact .app-shell__history-button {
-  position: relative;
-  top: 1.75rem;
+.app-shell__history-button--inline {
+  position: absolute;
+  top: 0.55rem;
+  left: 0;
   z-index: 2;
+}
+
+.app-shell--compact-header .screen > .screen__header {
+  padding-left: 3.9rem;
 }
 
 .app-shell__progress-chip {

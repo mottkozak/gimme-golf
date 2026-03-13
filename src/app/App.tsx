@@ -232,6 +232,8 @@ function App() {
       : null
 
   const usesCompactHeader = shouldShowGlobalHeader && !shouldShowWordmark
+  const shouldRenderGlobalHeader = shouldShowGlobalHeader && !usesCompactHeader
+  const shouldRenderInlineBackButton = usesCompactHeader && Boolean(backTargetScreen)
 
   return (
     <div
@@ -239,7 +241,7 @@ function App() {
         usesCompactHeader ? 'app-shell--compact-header' : ''
       }`}
     >
-      {shouldShowGlobalHeader && (
+      {shouldRenderGlobalHeader && (
         <header className={`app-shell__header ${usesCompactHeader ? 'app-shell__header--compact' : ''}`}>
           {backTargetScreen ? (
             <button
@@ -296,7 +298,19 @@ function App() {
         </header>
       )}
 
-      <main>{content}</main>
+      <main className={`app-shell__main ${usesCompactHeader ? 'app-shell__main--compact' : ''}`}>
+        {shouldRenderInlineBackButton && backTargetScreen && (
+          <button
+            type="button"
+            className="app-shell__history-button app-shell__history-button--inline"
+            aria-label={`Back to ${getScreenLabel(backTargetScreen)}`}
+            onClick={() => onNavigate(backTargetScreen)}
+          >
+            <AppIcon className="app-shell__history-button-icon" icon="arrow_back" />
+          </button>
+        )}
+        {content}
+      </main>
       {appState.roundSaveWarning && appState.activeScreen !== 'home' && (
         <aside className="app-save-warning" role="status" aria-live="polite">
           {appState.roundSaveWarning}
