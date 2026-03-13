@@ -318,7 +318,7 @@ main {
 
 .app-shell__header--compact .app-shell__history-button {
   position: relative;
-  top: 1rem;
+  top: 1.75rem;
   z-index: 2;
 }
 
