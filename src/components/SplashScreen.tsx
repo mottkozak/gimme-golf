@@ -31,11 +31,11 @@ const SPLASH_LETTER_CELLS: readonly SplashLetterCell[] = [
   { character: 'M', column: 3, row: 1 },
   { character: 'M', column: 4, row: 1 },
   { character: 'E', column: 5, row: 1 },
-  { character: 'G', column: 1, row: 3 },
-  { character: 'O', column: 2, row: 3 },
-  { character: 'L', column: 3, row: 3 },
-  { character: 'F', column: 4, row: 3 },
-  { character: '.', column: 5, row: 3 },
+  { character: 'G', column: 1, row: 2 },
+  { character: 'O', column: 2, row: 2 },
+  { character: 'L', column: 3, row: 2 },
+  { character: 'F', column: 4, row: 2 },
+  { character: '.', column: 5, row: 2 },
 ] as const
 
 function pickRandomFontVariant(variants: readonly LetterFontVariant[]): LetterFontVariant {
