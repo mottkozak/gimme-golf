@@ -1,7 +1,7 @@
-import { useEffect, useReducer, useRef, useState } from 'react'
-import gimmeGolfMainLogo from '../assets/gimme-golf-leaderboard-logo-main.png'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
+import SplashScreen from '../components/SplashScreen.tsx'
 import { trackRoundResumed } from '../logic/analytics.ts'
 import { applyThemePreference, loadThemePreference } from '../logic/preferences.ts'
 import {
@@ -86,6 +86,50 @@ const SCREEN_TRANSITION_ORDER: Record<AppScreen, number> = {
   endRound: 6,
 }
 
+const SPLASH_VARIANT_STORAGE_KEY = 'gimme-golf-splash-variant-v1'
+const SPLASH_DURATION_MS = 3_600
+const APP_WORDMARK_SOURCE = `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Logo-app.png`
+const APP_WORDMARK_FALLBACK_SOURCES = [
+  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Logo.png`,
+  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Alt-Logo.png`,
+] as const
+const SPLASH_BACKGROUND_SOURCES = [
+  `${import.meta.env.BASE_URL}splash_screen_app.png`,
+  `${import.meta.env.BASE_URL}splash_screen_alt_app.png`,
+] as const
+const SPLASH_LOGO_SOURCES = [
+  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Logo-app.png`,
+  `${import.meta.env.BASE_URL}Gimme-Golf-3D-Logo-app.png`,
+  `${import.meta.env.BASE_URL}Gimme-Golf-Narrow-Logo-app.png`,
+  `${import.meta.env.BASE_URL}Gimme-Golf-Narrow-Alt-Logo-app.png`,
+  `${import.meta.env.BASE_URL}Gimme-Golf-Bold-Alt-Logo-app.png`,
+] as const
+let cachedSplashBackgroundVariant: 0 | 1 | null = null
+
+function getSplashBackgroundVariant(): 0 | 1 {
+  if (cachedSplashBackgroundVariant !== null) {
+    return cachedSplashBackgroundVariant
+  }
+
+  if (typeof window === 'undefined') {
+    return 0
+  }
+
+  try {
+    const nextVariantValue = window.localStorage.getItem(SPLASH_VARIANT_STORAGE_KEY)
+    const currentVariant: 0 | 1 = nextVariantValue === '1' ? 1 : 0
+    window.localStorage.setItem(
+      SPLASH_VARIANT_STORAGE_KEY,
+      currentVariant === 0 ? '1' : '0',
+    )
+    cachedSplashBackgroundVariant = currentVariant
+    return currentVariant
+  } catch {
+    cachedSplashBackgroundVariant = 0
+    return 0
+  }
+}
+
 function getScreenTransitionDirection(
   previousScreen: AppScreen,
   nextScreen: AppScreen,
@@ -121,6 +165,8 @@ function App() {
   const [screenTransitionRevision, setScreenTransitionRevision] = useState(0)
   const [shouldAnimateScreenTransition, setShouldAnimateScreenTransition] = useState(false)
   const previousScreenRef = useRef<AppScreen>(appState.activeScreen)
+  const [isSplashVisible, setIsSplashVisible] = useState(true)
+  const [splashBackgroundVariant] = useState<0 | 1>(() => getSplashBackgroundVariant())
 
   useEffect(() => {
     if (!appState.shouldPersistRoundState) {
@@ -279,6 +325,20 @@ function App() {
   const usesCompactHeader = shouldShowGlobalHeader && !shouldShowWordmark
   const shouldRenderGlobalHeader = shouldShowGlobalHeader && !usesCompactHeader
   const shouldRenderInlineBackButton = usesCompactHeader && Boolean(backTargetScreen)
+  const onSplashFinish = useCallback(() => {
+    setIsSplashVisible(false)
+  }, [])
+
+  if (isSplashVisible) {
+    return (
+      <SplashScreen
+        backgroundImageSrc={SPLASH_BACKGROUND_SOURCES[splashBackgroundVariant]}
+        logoSources={SPLASH_LOGO_SOURCES}
+        durationMs={SPLASH_DURATION_MS}
+        onFinish={onSplashFinish}
+      />
+    )
+  }
 
   return (
     <div
@@ -303,24 +363,17 @@ function App() {
           <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>
             <img
               className="app-wordmark__image"
-              src={gimmeGolfMainLogo}
+              src={APP_WORDMARK_SOURCE}
               alt="Gimme Golf"
               onError={(event) => {
                 const image = event.currentTarget
                 const fallbackStage = Number.parseInt(image.dataset.fallbackStage ?? '0', 10)
-                if (Number.isNaN(fallbackStage)) {
-                  image.dataset.fallbackStage = '0'
-                }
+                const safeFallbackStage = Number.isNaN(fallbackStage) ? 0 : fallbackStage
+                const fallbackSource = APP_WORDMARK_FALLBACK_SOURCES[safeFallbackStage]
 
-                if (fallbackStage === 0) {
-                  image.dataset.fallbackStage = '1'
-                  image.src = `${import.meta.env.BASE_URL}gimme-golf-leaderboard-logo-main.png`
-                  return
-                }
-
-                if (fallbackStage === 1) {
-                  image.dataset.fallbackStage = '2'
-                  image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
+                if (fallbackSource) {
+                  image.dataset.fallbackStage = String(safeFallbackStage + 1)
+                  image.src = fallbackSource
                   return
                 }
 

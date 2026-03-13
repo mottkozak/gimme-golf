@@ -134,6 +134,18 @@ body {
   }
 }
 
+@keyframes splash-logo-flicker {
+  0% {
+    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.45));
+  }
+  100% {
+    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.3));
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .screen > .screen__header,
   .screen > .panel,
@@ -324,6 +336,60 @@ main {
   flex: 1;
 }
 
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.1rem, 4vw, 2.4rem);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  opacity: 1;
+  transition: opacity 260ms ease;
+}
+
+.splash-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.38)),
+    linear-gradient(170deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
+}
+
+.splash-screen--exit {
+  opacity: 0;
+}
+
+.splash-screen__logo-stack {
+  position: relative;
+  z-index: 1;
+  width: clamp(12rem, 74vw, 21rem);
+  aspect-ratio: 2660 / 1272;
+  animation: splash-logo-flicker 360ms steps(1, end) infinite;
+}
+
+.splash-screen__logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.975);
+  transition:
+    opacity 90ms linear,
+    transform 90ms linear;
+}
+
+.splash-screen__logo--active {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .app-shell__main--compact {
   position: relative;
 }
@@ -408,7 +474,7 @@ main {
 
 .app-wordmark__image {
   display: block;
-  width: clamp(8.8rem, 43vw, 13.6rem);
+  width: clamp(7.5rem, 39vw, 11.8rem);
   max-width: 100%;
   height: auto;
 }
@@ -440,6 +506,12 @@ main {
 
   .app-shell__screen-frame--backward {
     animation: screen-enter-backward var(--motion-screen) cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen__logo-stack {
+    animation: none;
   }
 }
 
