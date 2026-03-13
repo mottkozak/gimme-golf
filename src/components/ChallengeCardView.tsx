@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { PersonalCard } from '../types/cards.ts'
 import BadgeChip from './BadgeChip.tsx'
 
@@ -7,6 +8,7 @@ interface ChallengeCardViewProps {
   offerKind?: 'safe' | 'hard' | 'single'
   offerDetail?: string
   onSelect?: () => void
+  entryOrder?: number
 }
 
 function getOfferKindLabel(offerKind: ChallengeCardViewProps['offerKind']): string | null {
@@ -29,7 +31,14 @@ function toLabel(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function ChallengeCardView({ card, selected, offerKind, offerDetail, onSelect }: ChallengeCardViewProps) {
+function ChallengeCardView({
+  card,
+  selected,
+  offerKind,
+  offerDetail,
+  onSelect,
+  entryOrder,
+}: ChallengeCardViewProps) {
   const offerKindLabel = getOfferKindLabel(offerKind)
   const isSelectable = typeof onSelect === 'function'
   const pointsLabel = `${card.points >= 0 ? '+' : ''}${card.points} pts`
@@ -41,12 +50,19 @@ function ChallengeCardView({ card, selected, offerKind, offerDetail, onSelect }:
         : offerKind === 'single'
           ? 'auto'
           : 'default'
+  const entryStyle =
+    typeof entryOrder === 'number'
+      ? ({
+          '--deal-order': String(entryOrder),
+        } as CSSProperties)
+      : undefined
 
   return (
     <article
       className={`panel challenge-card mission-card ${selected ? 'selected' : ''} ${
         isSelectable ? 'challenge-card--selectable' : ''
-      } offer-${offerKind ?? 'none'}`}
+      } ${typeof entryOrder === 'number' ? 'challenge-card--deal-in' : ''} offer-${offerKind ?? 'none'}`}
+      style={entryStyle}
       role={isSelectable ? 'button' : undefined}
       tabIndex={isSelectable ? 0 : undefined}
       aria-pressed={isSelectable ? selected : undefined}

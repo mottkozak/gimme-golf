@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import {
   formatGolfScoreToPar,
   getGolfScoreToneClass,
@@ -10,6 +10,16 @@ import type { LeaderboardEntry } from '../types/game.ts'
 interface LeaderboardMomentumValue {
   streak: number
   tierLabel: string
+}
+
+const LEADERBOARD_ROW_MOVE_DURATION_MS = 420
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false
+  }
+
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 interface LeaderboardTableProps {
@@ -37,9 +47,59 @@ function LeaderboardTable({
   headerBadge,
   compactLegend = false,
 }: LeaderboardTableProps) {
+  const rowElementByPlayerIdRef = useRef<Record<string, HTMLTableRowElement | null>>({})
+  const rowTopByPlayerIdRef = useRef<Record<string, number>>({})
   const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
   const shouldShowGolfScore = Boolean(golfScoreToParByPlayerId)
   const formatSignedPoints = (value: number): string => `${value > 0 ? '+' : ''}${value}`
+
+  useLayoutEffect(() => {
+    const nextTopByPlayerId: Record<string, number> = {}
+
+    for (const row of rows) {
+      const rowElement = rowElementByPlayerIdRef.current[row.playerId]
+      if (!rowElement) {
+        continue
+      }
+
+      const nextTop = rowElement.getBoundingClientRect().top
+      nextTopByPlayerId[row.playerId] = nextTop
+
+      if (prefersReducedMotion()) {
+        rowElement.style.transform = ''
+        rowElement.style.transition = ''
+        continue
+      }
+
+      const previousTop = rowTopByPlayerIdRef.current[row.playerId]
+      if (typeof previousTop !== 'number') {
+        continue
+      }
+
+      const deltaY = previousTop - nextTop
+      if (Math.abs(deltaY) < 1) {
+        continue
+      }
+
+      rowElement.style.transition = 'transform 0ms'
+      rowElement.style.transform = `translateY(${deltaY}px)`
+
+      window.requestAnimationFrame(() => {
+        rowElement.style.transition = `transform ${LEADERBOARD_ROW_MOVE_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+        rowElement.style.transform = 'translateY(0)'
+
+        window.setTimeout(() => {
+          if (rowElementByPlayerIdRef.current[row.playerId] !== rowElement) {
+            return
+          }
+
+          rowElement.style.transition = ''
+        }, LEADERBOARD_ROW_MOVE_DURATION_MS)
+      })
+    }
+
+    rowTopByPlayerIdRef.current = nextTopByPlayerId
+  }, [rows])
 
   const renderSortButton = (label: string, mode: LeaderboardSortMode) => {
     if (!onSortChange) {
@@ -87,6 +147,9 @@ function LeaderboardTable({
               <tr
                 key={row.playerId}
                 className={`leaderboard-table__row ${index === 0 ? 'leaderboard-table__row--leader' : ''}`}
+                ref={(element) => {
+                  rowElementByPlayerIdRef.current[row.playerId] = element
+                }}
               >
                 <td className="leaderboard-table__cell leaderboard-table__cell--rank">{index + 1}</td>
                 <td className="leaderboard-table__cell leaderboard-table__cell--player">{row.playerName}</td>

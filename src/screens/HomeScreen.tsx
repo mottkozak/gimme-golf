@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
@@ -43,6 +44,20 @@ interface HomeScreenProps extends ScreenProps {
   onModeDetailOpenChange: (isOpen: boolean) => void
 }
 
+function getViewTransitionStyle(transitionName: string): CSSProperties {
+  return {
+    viewTransitionName: transitionName,
+  } as CSSProperties
+}
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false
+  }
+
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 function HomeScreen({
   roundState,
   hasSavedRound,
@@ -84,6 +99,17 @@ function HomeScreen({
   const saveStatusLabel = isRoundSavePending
     ? 'Saving latest updates locally...'
     : formatSavedRoundLabel(savedRoundUpdatedAtMs)
+
+  const runModeViewTransition = (updateCallback: () => void) => {
+    if (prefersReducedMotion() || typeof document.startViewTransition !== 'function') {
+      updateCallback()
+      return
+    }
+
+    document.startViewTransition(() => {
+      updateCallback()
+    })
+  }
 
   const launchModeFlow = (modeId: LandingModeId) => {
     trackHomeAction({
@@ -130,9 +156,11 @@ function HomeScreen({
 
   const openModeDetails = (modeId: LandingModeId) => {
     setResumeError(null)
-    setSelectedModeId(modeId)
-    onModeDetailOpenChange(true)
-    setActiveModeId(modeId)
+    runModeViewTransition(() => {
+      setSelectedModeId(modeId)
+      onModeDetailOpenChange(true)
+      setActiveModeId(modeId)
+    })
   }
 
   const activeMode = activeModeId ? getLandingModeById(activeModeId) : null
@@ -144,10 +172,14 @@ function HomeScreen({
         mode={activeMode}
         hasSavedRoundProgress={hasSavedRoundProgress}
         onBack={() => {
-          onModeDetailOpenChange(false)
-          setActiveModeId(null)
+          runModeViewTransition(() => {
+            onModeDetailOpenChange(false)
+            setActiveModeId(null)
+          })
         }}
         onPlay={() => playMode(activeMode.id)}
+        sharedCardTransitionStyle={getViewTransitionStyle(`mode-card-${activeMode.id}`)}
+        sharedIconTransitionStyle={getViewTransitionStyle(`mode-icon-${activeMode.id}`)}
       />
     )
   }
@@ -192,9 +224,13 @@ function HomeScreen({
               }`}
               onClick={() => openModeDetails(mode.id)}
               aria-label={`${mode.name}. ${mode.tagline}`}
+              style={getViewTransitionStyle(`mode-card-${mode.id}`)}
             >
               <span className="mode-card__icon-column">
-                <span className="mode-card__icon-wrap">
+                <span
+                  className="mode-card__icon-wrap"
+                  style={getViewTransitionStyle(`mode-icon-${mode.id}`)}
+                >
                   <AppIcon className="mode-card__icon" icon={mode.icon} />
                 </span>
               </span>

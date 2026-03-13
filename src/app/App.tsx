@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import gimmeGolfMainLogo from '../assets/gimme-golf-leaderboard-logo-main.png'
 import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
@@ -75,6 +75,31 @@ function getScreenLabel(screen: AppScreen): string {
   return 'Home'
 }
 
+const SCREEN_TRANSITION_ORDER: Record<AppScreen, number> = {
+  home: 0,
+  profile: 1,
+  settings: 1,
+  roundSetup: 2,
+  holePlay: 3,
+  holeResults: 4,
+  leaderboard: 5,
+  endRound: 6,
+}
+
+function getScreenTransitionDirection(
+  previousScreen: AppScreen,
+  nextScreen: AppScreen,
+): 'forward' | 'backward' {
+  const previousOrder = SCREEN_TRANSITION_ORDER[previousScreen]
+  const nextOrder = SCREEN_TRANSITION_ORDER[nextScreen]
+
+  if (nextOrder === previousOrder) {
+    return 'forward'
+  }
+
+  return nextOrder > previousOrder ? 'forward' : 'backward'
+}
+
 function App() {
   const [onboardingCompletionStatus, setOnboardingCompletionStatus] = useState(() =>
     loadOnboardingCompletionStatus(),
@@ -90,6 +115,12 @@ function App() {
         initialRoundSnapshot.savedAtMs,
       ),
   )
+  const [screenTransitionDirection, setScreenTransitionDirection] = useState<'forward' | 'backward'>(
+    'forward',
+  )
+  const [screenTransitionRevision, setScreenTransitionRevision] = useState(0)
+  const [shouldAnimateScreenTransition, setShouldAnimateScreenTransition] = useState(false)
+  const previousScreenRef = useRef<AppScreen>(appState.activeScreen)
 
   useEffect(() => {
     if (!appState.shouldPersistRoundState) {
@@ -118,6 +149,20 @@ function App() {
 
     clearRoundState()
     dispatch({ type: 'clear_saved_round_flag' })
+  }, [appState.activeScreen])
+
+  useEffect(() => {
+    const previousScreen = previousScreenRef.current
+    if (previousScreen === appState.activeScreen) {
+      return
+    }
+
+    setScreenTransitionDirection(
+      getScreenTransitionDirection(previousScreen, appState.activeScreen),
+    )
+    setScreenTransitionRevision((currentValue) => currentValue + 1)
+    setShouldAnimateScreenTransition(true)
+    previousScreenRef.current = appState.activeScreen
   }, [appState.activeScreen])
 
   const onUpdateRoundState: ScreenProps['onUpdateRoundState'] = (updater) => {
@@ -309,7 +354,16 @@ function App() {
             <AppIcon className="app-shell__history-button-icon" icon="arrow_back" />
           </button>
         )}
-        {content}
+        <div
+          key={`${appState.activeScreen}-${screenTransitionRevision}`}
+          className={`app-shell__screen-frame ${
+            shouldAnimateScreenTransition
+              ? `app-shell__screen-frame--${screenTransitionDirection}`
+              : ''
+          }`}
+        >
+          {content}
+        </div>
       </main>
       {appState.roundSaveWarning && appState.activeScreen !== 'home' && (
         <aside className="app-save-warning" role="status" aria-live="polite">

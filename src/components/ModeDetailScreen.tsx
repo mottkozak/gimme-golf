@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import AppIcon from './AppIcon.tsx'
 import ChallengeCardView from './ChallengeCardView.tsx'
 import PowerUpCard from './PowerUpCard.tsx'
@@ -13,6 +13,8 @@ interface ModeDetailScreenProps {
   hasSavedRoundProgress: boolean
   onBack: () => void
   onPlay: () => void
+  sharedCardTransitionStyle?: CSSProperties
+  sharedIconTransitionStyle?: CSSProperties
 }
 
 const SAMPLE_CLASSIC_CARD: PersonalCard | null =
@@ -113,6 +115,8 @@ function ModeDetailScreen({
   hasSavedRoundProgress,
   onBack,
   onPlay,
+  sharedCardTransitionStyle,
+  sharedIconTransitionStyle,
 }: ModeDetailScreenProps) {
   const modeSampleCard = getModeSampleCard(mode.id)
 
@@ -128,8 +132,12 @@ function ModeDetailScreen({
           <AppIcon className="mode-spotlight__back-icon" icon="arrow_back" />
         </button>
 
-        <section className="mode-spotlight__hero" aria-label={`${mode.name} mode details`}>
-          <div className="mode-spotlight__emblem" aria-hidden="true">
+        <section
+          className="mode-spotlight__hero mode-spotlight__hero--shared"
+          aria-label={`${mode.name} mode details`}
+          style={sharedCardTransitionStyle}
+        >
+          <div className="mode-spotlight__emblem" aria-hidden="true" style={sharedIconTransitionStyle}>
             <AppIcon className="mode-spotlight__icon" icon={mode.icon} />
           </div>
           {mode.isPremium && <span className="chip mode-spotlight__premium-chip">Premium</span>}

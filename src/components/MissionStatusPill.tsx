@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react'
+
 type MissionStatusTone = 'ready' | 'pending' | 'neutral'
 
 interface MissionStatusPillProps {
-  label: string
+  label: ReactNode
   tone: MissionStatusTone
 }
 

@@ -404,7 +404,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
           <p className="muted hole-cards-helper">{missionHelperCopy}</p>
 
           <section className="stack-sm hole-draft-list">
-            {roundState.players.map((player) => {
+            {roundState.players.map((player, playerIndex) => {
               const dealtCards = currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []
               const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
               const isPlayerReady =
@@ -423,15 +423,16 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                     statusLabel={canSelectCards ? (isPlayerReady ? 'Ready' : 'Pending') : undefined}
                   >
                     <div className="stack-xs hole-draft-options">
-                      {dealtCards.map((card) => {
+                      {dealtCards.map((card, cardIndex) => {
                         return (
                           <ChallengeCardView
-                            key={card.id}
+                            key={`${currentHole.holeNumber}-${player.id}-${card.id}-${cardIndex}`}
                             card={card}
                             selected={selectedCardId === card.id}
                             onSelect={
                               canSelectCards ? () => selectCard(player.id, card.id) : undefined
                             }
+                            entryOrder={playerIndex * 2 + cardIndex}
                           />
                         )
                       })}
@@ -453,8 +454,12 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
               emptyMessage="No public cards for this hole."
               helperText="Preview only. Public cards are resolved on Hole Results."
             >
-              {currentHoleCards.publicCards.map((card) => (
-                <PublicCardView key={card.id} card={card} />
+              {currentHoleCards.publicCards.map((card, cardIndex) => (
+                <PublicCardView
+                  key={`${currentHole.holeNumber}-${card.id}-${cardIndex}`}
+                  card={card}
+                  entryOrder={roundState.players.length * 2 + cardIndex}
+                />
               ))}
             </HolePublicCardSection>
           )}
