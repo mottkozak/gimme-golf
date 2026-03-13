@@ -770,6 +770,14 @@ function createHighlightLine(
     return `${getCountWord(usedCount)} players activated power-ups`
   }
 
+  if (gamePointHoleWinners.playerNames.length > 0) {
+    if (gamePointHoleWinners.playerNames.length === 1) {
+      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber)
+    }
+
+    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber, playerRows.length)
+  }
+
   const momentumTierJumps = playerRows
     .filter(
       (row) =>
@@ -866,14 +874,6 @@ function createHighlightLine(
 
   if (successfulPlayers.length === 0) {
     return 'Nobody survived the hole cleanly'
-  }
-
-  if (gamePointHoleWinners.playerNames.length > 0) {
-    if (gamePointHoleWinners.playerNames.length === 1) {
-      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber)
-    }
-
-    return createTieBroadcastLine(gamePointHoleWinners.playerNames, holeNumber, playerRows.length)
   }
 
   return 'Hole complete'

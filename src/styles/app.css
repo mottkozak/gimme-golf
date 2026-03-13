@@ -1815,6 +1815,15 @@ main {
   box-shadow: 0 14px 24px -24px color-mix(in srgb, var(--mode-border) 74%, transparent);
 }
 
+.mode-spotlight__power-preview {
+  width: 100%;
+}
+
+.mode-spotlight__sample-curse {
+  margin: 0;
+  box-shadow: 0 14px 24px -24px color-mix(in srgb, var(--mode-border) 74%, transparent);
+}
+
 .mode-spotlight__meta {
   margin: 0;
   max-width: 34ch;

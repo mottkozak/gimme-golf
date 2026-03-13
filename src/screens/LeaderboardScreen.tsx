@@ -29,22 +29,6 @@ function formatSignedPoints(value: number): string {
   return `${value > 0 ? '+' : ''}${value}`
 }
 
-function formatDifficultyLabel(value: string | null): string {
-  if (!value) {
-    return 'N/A'
-  }
-
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
-}
-
-function formatCardTypeLabel(value: string | null): string {
-  if (!value) {
-    return 'Personal'
-  }
-
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
-}
-
 function getMissionSummaryFlavor(status: 'success' | 'failed', holeNumber: number, playerName: string): string {
   const successLines = [
     `${playerName} cashed it in with calm tempo.`,
@@ -360,9 +344,6 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                               <RecapStatusChip tone="total">
                                 Reward {formatSignedPoints(row.selectedCardPoints)} pts
                               </RecapStatusChip>
-                              <RecapStatusChip tone="subtle">
-                                {formatCardTypeLabel(row.selectedCardType)}
-                              </RecapStatusChip>
                             </>
                           ) : (
                             <RecapStatusChip tone="subtle">No Card</RecapStatusChip>
@@ -407,14 +388,8 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                               {row.selectedCardDescription ?? 'No description available'}
                             </p>
                             <div className="recap-outcome-mission-card__badges">
-                              <RecapStatusChip tone="snapshot">
-                                {formatDifficultyLabel(row.selectedCardDifficulty)} difficulty
-                              </RecapStatusChip>
                               <RecapStatusChip tone="total">
                                 Reward {formatSignedPoints(row.selectedCardPoints)} pts
-                              </RecapStatusChip>
-                              <RecapStatusChip tone="subtle">
-                                {formatCardTypeLabel(row.selectedCardType)} card
                               </RecapStatusChip>
                             </div>
                             <p className={`recap-outcome-mission-card__callout ${missionCalloutToneClass}`}>

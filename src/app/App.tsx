@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useState } from 'react'
+import gimmeGolfMainLogo from '../assets/gimme-golf-main-logo.png'
 import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
 import { trackRoundResumed } from '../logic/analytics.ts'
@@ -245,8 +246,17 @@ function App() {
           <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>
             <img
               className="app-wordmark__image"
-              src="/gimme-golf-main-logo.png"
+              src={gimmeGolfMainLogo}
               alt="Gimme Golf"
+              onError={(event) => {
+                const image = event.currentTarget
+                if (image.dataset.fallbackApplied === 'true') {
+                  return
+                }
+
+                image.dataset.fallbackApplied = 'true'
+                image.src = `${import.meta.env.BASE_URL}gimme-golf-main-logo.png`
+              }}
             />
           </h1>
           {shouldShowProgressChip ? (

@@ -4,7 +4,7 @@ import ChallengeCardView from './ChallengeCardView.tsx'
 import PowerUpCard from './PowerUpCard.tsx'
 import PublicCardView from './PublicCardView.tsx'
 import { PERSONAL_CARDS, PUBLIC_CARDS } from '../data/cards.ts'
-import { POWER_UPS } from '../data/powerUps.ts'
+import { CURSE_CARDS, POWER_UPS } from '../data/powerUps.ts'
 import type { LandingModeDefinition, LandingModeId } from '../logic/landingModes.ts'
 import type { PersonalCard, PublicCard } from '../types/cards.ts'
 
@@ -24,6 +24,7 @@ const SAMPLE_CHAOS_CARD: PublicCard | null =
 const SAMPLE_PROP_CARD: PublicCard | null =
   PUBLIC_CARDS.find((card) => card.cardType === 'prop') ?? SAMPLE_CHAOS_CARD
 const SAMPLE_POWER_UP = POWER_UPS[0] ?? null
+const SAMPLE_CURSE = CURSE_CARDS[0] ?? null
 
 interface ModeSampleCard {
   label: string
@@ -75,19 +76,34 @@ function getModeSampleCard(modeId: LandingModeId): ModeSampleCard | null {
     }
   }
 
-  if (!SAMPLE_POWER_UP) {
+  if (!SAMPLE_POWER_UP && !SAMPLE_CURSE) {
     return null
   }
 
   return {
-    label: 'Example premium power-up card',
+    label: 'Example premium power-up and curse cards',
     card: (
-      <PowerUpCard
-        playerName="Sample Player"
-        powerUp={SAMPLE_POWER_UP}
-        used={false}
-        onUse={() => undefined}
-      />
+      <div className="mode-spotlight__power-preview stack-xs">
+        {SAMPLE_POWER_UP && (
+          <PowerUpCard
+            playerName="Sample Player"
+            powerUp={SAMPLE_POWER_UP}
+            used={false}
+            onUse={() => undefined}
+          />
+        )}
+        {SAMPLE_CURSE && (
+          <section className="panel inset stack-xs mode-spotlight__sample-curse">
+            <div className="row-between">
+              <strong>Curse</strong>
+              <span className="chip">{SAMPLE_CURSE.category}</span>
+            </div>
+            <h3 className="power-up-title">{SAMPLE_CURSE.title}</h3>
+            <p>{SAMPLE_CURSE.description}</p>
+            <p className="muted">Restriction applies for this hole only.</p>
+          </section>
+        )}
+      </div>
     ),
   }
 }
