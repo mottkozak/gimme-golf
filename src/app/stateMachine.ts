@@ -35,9 +35,9 @@ const SCREEN_TRANSITIONS: Record<AppScreen, ReadonlySet<AppScreen>> = {
   profile: new Set(['home', 'profile', 'settings']),
   settings: new Set(['home', 'profile', 'settings']),
   roundSetup: new Set(['home', 'roundSetup', 'holePlay']),
-  holePlay: new Set(['home', 'holePlay', 'holeResults']),
-  holeResults: new Set(['home', 'holeResults', 'leaderboard']),
-  leaderboard: new Set(['home', 'holePlay', 'leaderboard', 'endRound']),
+  holePlay: new Set(['home', 'roundSetup', 'holePlay', 'holeResults', 'leaderboard']),
+  holeResults: new Set(['home', 'holePlay', 'holeResults', 'leaderboard']),
+  leaderboard: new Set(['home', 'holePlay', 'holeResults', 'leaderboard', 'endRound']),
   endRound: new Set(['home', 'endRound']),
 }
 
@@ -212,6 +212,18 @@ function canTransitionWithRoundState(
 
   if (currentScreen === 'holePlay' && nextScreen === 'holeResults') {
     return isHolePreparedForPlay(roundState, currentHoleIndex)
+  }
+
+  if (currentScreen === 'holePlay' && nextScreen === 'roundSetup') {
+    return currentHoleIndex === 0
+  }
+
+  if (currentScreen === 'holePlay' && nextScreen === 'leaderboard') {
+    if (currentHoleIndex === 0) {
+      return false
+    }
+
+    return isHoleComplete(roundState, currentHoleIndex - 1)
   }
 
   if (currentScreen === 'holeResults' && nextScreen === 'leaderboard') {

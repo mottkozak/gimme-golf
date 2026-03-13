@@ -25,6 +25,8 @@ import type { ScreenProps } from './types.ts'
 
 function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const trackedHoleIndexRef = useRef<number | null>(null)
+  const playerModuleRefById = useRef<Record<string, HTMLDivElement | null>>({})
+  const actionPanelRef = useRef<HTMLDivElement | null>(null)
   const currentHoleIndex = roundState.currentHoleIndex
   const currentHole = roundState.holes[currentHoleIndex]
   const currentHoleCards = roundState.holeCards[currentHoleIndex]
@@ -162,6 +164,26 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
     updateCurrentHole((currentState) => prepareCurrentHoleForPlay(currentState))
   }
 
+  const scrollToNextSelectionTarget = (nextPlayerId: string | null) => {
+    window.requestAnimationFrame(() => {
+      if (nextPlayerId) {
+        const nextPlayerElement = playerModuleRefById.current[nextPlayerId]
+        nextPlayerElement?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        })
+        return
+      }
+
+      actionPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      })
+    })
+  }
+
   const selectCard = (playerId: string, cardId: string) => {
     trackCardSelected(roundState, currentHole.holeNumber, playerId, cardId)
     updateCurrentHole((currentState) => {
@@ -181,6 +203,33 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
         holeCards,
       }
     })
+
+    if (!canSelectCards) {
+      return
+    }
+
+    const currentPlayerSelectionIndex = playersRequiringSelection.findIndex(
+      (player) => player.id === playerId,
+    )
+    const orderedPlayersToCheck =
+      currentPlayerSelectionIndex >= 0
+        ? [
+            ...playersRequiringSelection.slice(currentPlayerSelectionIndex + 1),
+            ...playersRequiringSelection.slice(0, currentPlayerSelectionIndex),
+          ]
+        : playersRequiringSelection
+
+    const nextSelectedCardIdByPlayerId = {
+      ...currentHoleCards.selectedCardIdByPlayerId,
+      [playerId]: cardId,
+    }
+    const nextPendingPlayerId =
+      orderedPlayersToCheck.find((player) => {
+        const selectedCardId = nextSelectedCardIdByPlayerId[player.id]
+        return typeof selectedCardId !== 'string' || selectedCardId.length === 0
+      })?.id ?? null
+
+    scrollToNextSelectionTarget(nextPendingPlayerId)
   }
 
   const markPowerUpUsed = (playerId: string) => {
@@ -362,31 +411,37 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                 typeof selectedCardId === 'string' && selectedCardId.length > 0
 
               return (
-                <GolferMissionModule
+                <div
                   key={player.id}
-                  golferName={playerNameById[player.id]}
-                  statusTone={canSelectCards ? (isPlayerReady ? 'ready' : 'pending') : undefined}
-                  statusLabel={canSelectCards ? (isPlayerReady ? 'Ready' : 'Pending') : undefined}
+                  ref={(element) => {
+                    playerModuleRefById.current[player.id] = element
+                  }}
                 >
-                  <div className="stack-xs hole-draft-options">
-                    {dealtCards.map((card) => {
-                      return (
-                        <ChallengeCardView
-                          key={card.id}
-                          card={card}
-                          selected={selectedCardId === card.id}
-                          onSelect={
-                            canSelectCards ? () => selectCard(player.id, card.id) : undefined
-                          }
-                        />
-                      )
-                    })}
+                  <GolferMissionModule
+                    golferName={playerNameById[player.id]}
+                    statusTone={canSelectCards ? (isPlayerReady ? 'ready' : 'pending') : undefined}
+                    statusLabel={canSelectCards ? (isPlayerReady ? 'Ready' : 'Pending') : undefined}
+                  >
+                    <div className="stack-xs hole-draft-options">
+                      {dealtCards.map((card) => {
+                        return (
+                          <ChallengeCardView
+                            key={card.id}
+                            card={card}
+                            selected={selectedCardId === card.id}
+                            onSelect={
+                              canSelectCards ? () => selectCard(player.id, card.id) : undefined
+                            }
+                          />
+                        )
+                      })}
 
-                    {dealtCards.length === 0 && (
-                      <p className="muted">No missions available from enabled packs for this golfer.</p>
-                    )}
-                  </div>
-                </GolferMissionModule>
+                      {dealtCards.length === 0 && (
+                        <p className="muted">No missions available from enabled packs for this golfer.</p>
+                      )}
+                    </div>
+                  </GolferMissionModule>
+                </div>
               )
             })}
           </section>
@@ -404,13 +459,15 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
             </HolePublicCardSection>
           )}
 
-          <HoleActionPanel
-            summary={readinessSummary}
-            buttonLabel="Go To Hole Results"
-            disabled={!allPlayersHaveSelection}
-            helperText={!allPlayersHaveSelection ? 'Pick one mission for each golfer before continuing.' : undefined}
-            onContinue={continueToResults}
-          />
+          <div ref={actionPanelRef}>
+            <HoleActionPanel
+              summary={readinessSummary}
+              buttonLabel="Go To Hole Results"
+              disabled={!allPlayersHaveSelection}
+              helperText={!allPlayersHaveSelection ? 'Pick one mission for each golfer before continuing.' : undefined}
+              onContinue={continueToResults}
+            />
+          </div>
         </>
       )}
     </section>

@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useState } from 'react'
+import AppIcon from '../components/AppIcon.tsx'
 import OnboardingTutorial from '../components/OnboardingTutorial.tsx'
 import { trackRoundResumed } from '../logic/analytics.ts'
 import { applyThemePreference, loadThemePreference } from '../logic/preferences.ts'
@@ -20,6 +21,58 @@ import type { ScreenProps } from '../screens/types.ts'
 import { clearRoundState, loadRoundStateSnapshot, saveRoundState } from '../logic/storage.ts'
 import type { AppScreen } from './router.tsx'
 import { createInitialAppState, getResumeScreen, reduceAppState } from './stateMachine.ts'
+
+function getBackTargetScreen(
+  activeScreen: AppScreen,
+  currentHoleIndex: number,
+): AppScreen | null {
+  if (activeScreen === 'profile' || activeScreen === 'settings' || activeScreen === 'roundSetup') {
+    return 'home'
+  }
+
+  if (activeScreen === 'holePlay') {
+    return currentHoleIndex > 0 ? 'leaderboard' : 'roundSetup'
+  }
+
+  if (activeScreen === 'holeResults') {
+    return 'holePlay'
+  }
+
+  if (activeScreen === 'leaderboard') {
+    return 'holeResults'
+  }
+
+  if (activeScreen === 'endRound') {
+    return 'home'
+  }
+
+  return null
+}
+
+function getScreenLabel(screen: AppScreen): string {
+  if (screen === 'home') {
+    return 'Home'
+  }
+  if (screen === 'profile') {
+    return 'Profile'
+  }
+  if (screen === 'settings') {
+    return 'Settings'
+  }
+  if (screen === 'roundSetup') {
+    return 'Round Config'
+  }
+  if (screen === 'holePlay') {
+    return 'Hole Setup'
+  }
+  if (screen === 'holeResults') {
+    return 'Hole Results'
+  }
+  if (screen === 'leaderboard') {
+    return 'Hole Recap'
+  }
+  return 'Home'
+}
 
 function App() {
   const [onboardingCompletionStatus, setOnboardingCompletionStatus] = useState(() =>
@@ -168,12 +221,27 @@ function App() {
   const shouldShowGlobalHeader = !(appState.activeScreen === 'home' && isModeDetailOpen)
   const shouldShowWordmark = !(appState.activeScreen === 'home' && isModeDetailOpen)
   const isModePreviewActive = appState.activeScreen === 'home' && isModeDetailOpen
+  const backTargetScreen =
+    shouldShowGlobalHeader && !isModePreviewActive
+      ? getBackTargetScreen(appState.activeScreen, appState.roundState.currentHoleIndex)
+      : null
 
   return (
     <div className={`app-shell ${isModePreviewActive ? 'app-shell--mode-preview' : ''}`}>
       {shouldShowGlobalHeader && (
         <header className="app-shell__header">
-          <span className="app-shell__header-spacer" aria-hidden="true" />
+          {backTargetScreen ? (
+            <button
+              type="button"
+              className="app-shell__history-button"
+              aria-label={`Back to ${getScreenLabel(backTargetScreen)}`}
+              onClick={() => onNavigate(backTargetScreen)}
+            >
+              <AppIcon className="app-shell__history-button-icon" icon="arrow_back" />
+            </button>
+          ) : (
+            <span className="app-shell__header-spacer" aria-hidden="true" />
+          )}
           <h1 className={`app-wordmark ${shouldShowWordmark ? '' : 'app-wordmark--hidden'}`}>Gimme Golf</h1>
           {shouldShowProgressChip ? (
             <span className="chip app-shell__progress-chip">

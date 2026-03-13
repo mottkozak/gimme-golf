@@ -39,6 +39,10 @@ const MANUAL_STROKE_MIN = 13
 
 type EffectOption = NonNullable<NonNullable<PublicCard['interaction']>['effectOptions']>[number]
 
+function toTitleCase(value: string): string {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+}
+
 function parseStrokeInput(rawValue: string): number | null {
   const digitsOnly = rawValue.replace(/[^\d]/g, '')
   if (!digitsOnly) {
@@ -98,6 +102,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     playerName: string
     card: PersonalCard
   } | null>(null)
+  const [challengeOverviewExpanded, setChallengeOverviewExpanded] = useState(false)
   const [publicSectionExpanded, setPublicSectionExpanded] = useState(false)
   const [manualStrokeInputByPlayerId, setManualStrokeInputByPlayerId] = useState<
     Record<string, boolean>
@@ -557,6 +562,35 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     (hasPublicStep && publicStepComplete ? 1 : 0)
 
   const publicCanExpand = strokesStepComplete
+  const challengeOverviewRows = roundState.players.map((player) => {
+    const selectedCardId = currentHoleCards.selectedCardIdByPlayerId[player.id]
+    const selectedCard = (currentHoleCards.dealtPersonalCardsByPlayerId[player.id] ?? []).find(
+      (card) => card.id === selectedCardId,
+    )
+    const missionStatus = currentResult.missionStatusByPlayerId[player.id]
+    const statusLabel =
+      missionStatus === 'success'
+        ? 'Completed'
+        : missionStatus === 'failed'
+          ? 'Failed'
+          : 'Pending'
+    const statusClassName =
+      missionStatus === 'success'
+        ? 'status-success'
+        : missionStatus === 'failed'
+          ? 'status-failed'
+          : 'status-pending'
+
+    return {
+      playerId: player.id,
+      playerName: playerNameById[player.id],
+      selectedCard,
+      statusLabel,
+      statusClassName,
+    }
+  })
+  const challengeAssignedCount = challengeOverviewRows.filter((row) => Boolean(row.selectedCard)).length
+  const hasChallengeOverview = !isPowerUpsMode && challengeAssignedCount > 0
 
   const continueToRecap = () => {
     if (!canContinueToRecap) {
@@ -641,6 +675,78 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
           Enter scores and set each golfer&apos;s challenge result on their card.
         </p>
       </section>
+
+      {hasChallengeOverview && (
+        <section className="panel stack-xs hole-results-step-panel hole-results-step-panel--mission">
+          <div className="row-between hole-results-step-header">
+            <strong>Current Challenges</strong>
+            <MissionStatusPill
+              label={`${challengeAssignedCount}/${roundState.players.length} assigned`}
+              tone="ready"
+            />
+          </div>
+          <div className="row-between hole-results-step-actions">
+            <p className="muted">Review each golfer&apos;s selected card before entering outcomes.</p>
+            <button
+              type="button"
+              className={`hole-results-toggle-button ${
+                challengeOverviewExpanded ? 'hole-results-toggle-button--active' : ''
+              }`}
+              onClick={() => setChallengeOverviewExpanded((current) => !current)}
+              aria-expanded={challengeOverviewExpanded}
+              aria-controls="challenge-overview-section"
+            >
+              {challengeOverviewExpanded ? 'Hide' : 'Show'}
+            </button>
+          </div>
+
+          {challengeOverviewExpanded && (
+            <section
+              id="challenge-overview-section"
+              className="hole-results-challenge-overview"
+              aria-label="Current challenge cards"
+            >
+              <ul className="list-reset hole-results-challenge-overview-list">
+                {challengeOverviewRows.map((row) => (
+                  <li key={row.playerId} className="hole-results-challenge-overview-item">
+                    <div className="row-between setup-row-wrap">
+                      <strong className="hole-results-challenge-overview-player">{row.playerName}</strong>
+                      {row.selectedCard ? (
+                        <span className={`chip hole-results-challenge-status ${row.statusClassName}`}>
+                          {row.statusLabel}
+                        </span>
+                      ) : (
+                        <span className="chip hole-results-challenge-status status-pending">No card</span>
+                      )}
+                    </div>
+
+                    {row.selectedCard ? (
+                      <>
+                        <p className="hole-results-challenge-overview-title">
+                          {row.selectedCard.code} - {row.selectedCard.name}
+                        </p>
+                        <p className="muted">{row.selectedCard.description}</p>
+                        <div className="button-row row-wrap hole-results-challenge-overview-meta">
+                          <BadgeChip tone="subtle">
+                            {toTitleCase(row.selectedCard.difficulty)} difficulty
+                          </BadgeChip>
+                          <BadgeChip tone="subtle">{toTitleCase(row.selectedCard.cardType)} card</BadgeChip>
+                          <BadgeChip tone="reward">
+                            Reward {row.selectedCard.points >= 0 ? '+' : ''}
+                            {row.selectedCard.points} pts
+                          </BadgeChip>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="muted">No mission selected for this golfer.</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </section>
+      )}
 
       <section className="stack-sm hole-results-player-list">
         {roundState.players.map((player) => {

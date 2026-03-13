@@ -811,9 +811,7 @@ main {
 }
 
 .setup-cta {
-  position: sticky;
-  bottom: var(--space-2);
-  z-index: 5;
+  position: relative;
   border-width: 2px;
   border-color: color-mix(in srgb, var(--accent) 52%, var(--border-subtle));
   background:
@@ -1166,9 +1164,7 @@ main {
 }
 
 .hole-action-panel {
-  position: sticky;
-  bottom: var(--space-2);
-  z-index: 7;
+  position: relative;
   border-radius: var(--radius-lg);
   border: 1.5px solid color-mix(in srgb, var(--hole-mission-border-strong) 60%, var(--border-subtle));
   background:
@@ -4399,9 +4395,7 @@ main {
 }
 
 .end-cta-bar {
-  position: sticky;
-  bottom: var(--space-2);
-  z-index: 8;
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-2);
@@ -4753,6 +4747,54 @@ main {
 .hole-results-toggle-button--active:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--results-ready-border) 72%, var(--border-subtle));
   background: color-mix(in srgb, var(--results-ready-bg) 82%, #ffffff 18%);
+}
+
+.hole-results-challenge-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hole-results-challenge-overview-item {
+  border: 1.5px solid var(--results-inset-border);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+}
+
+.hole-results-challenge-overview-player {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.06;
+}
+
+.hole-results-challenge-status {
+  min-height: 28px;
+  padding: 0.1rem 0.56rem;
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hole-results-challenge-overview-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.32;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.hole-results-challenge-overview-meta {
+  gap: 0.32rem;
 }
 
 .hole-results-screen--editorial .mission-status-pill {
