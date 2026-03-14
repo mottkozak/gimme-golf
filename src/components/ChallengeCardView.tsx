@@ -99,11 +99,14 @@ function ChallengeCardView({
       <header className="row-between setup-row-wrap">
         <strong>{card.name}</strong>
         <div className="button-row challenge-card__meta">
-          {selected && (
-            <BadgeChip tone="selected" className="challenge-card__selected-chip">
-              ✓ Selected
-            </BadgeChip>
-          )}
+          <BadgeChip
+            tone="selected"
+            className={`challenge-card__selected-chip ${
+              selected ? '' : 'challenge-card__selected-chip--placeholder'
+            }`}
+          >
+            ✓ Selected
+          </BadgeChip>
           <BadgeChip tone="reward" className="challenge-card__points-chip">
             {pointsLabel}
           </BadgeChip>

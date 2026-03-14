@@ -1287,12 +1287,14 @@ main {
   box-shadow: none;
 }
 
-.hole-play-screen--missions .mission-card strong {
+.hole-play-screen--missions .mission-card strong,
+.hole-play-screen--missions .public-preview-card strong {
   font-family: var(--font-display);
   font-size: 1.28rem;
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: 0.004em;
+  color: #111111;
 }
 
 .hole-play-screen--missions .challenge-card__meta {
@@ -1314,66 +1316,67 @@ main {
   gap: 0.36rem;
 }
 
+.hole-play-screen--missions .public-preview-card .public-card__description {
+  line-height: 1.4;
+  font-size: 0.94rem;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
 .hole-play-screen--missions .mission-card,
 .hole-play-screen--missions .public-preview-card {
   --card-category-accent: color-mix(in srgb, var(--hole-mission-border-strong) 58%, var(--border-subtle));
-  --card-category-surface: color-mix(in srgb, var(--hole-mission-surface-muted) 14%, transparent);
+  --card-category-surface: color-mix(in srgb, var(--hole-mission-surface-muted) 48%, #ffffff 52%);
+  min-height: 12rem;
 }
 
 .card-category--common {
   --card-category-accent: #2f8f72;
+  --card-category-surface: #9dddc7;
 }
 
 .card-category--skill {
   --card-category-accent: #3276ce;
+  --card-category-surface: #9fc2ec;
 }
 
 .card-category--risk {
-  --card-category-accent: #c45745;
+  --card-category-accent: #bc5242;
+  --card-category-surface: #efb0a4;
 }
 
 .card-category--curse {
   --card-category-accent: #7f4f9a;
+  --card-category-surface: #c7abda;
 }
 
 .card-category--style {
   --card-category-accent: #a35ec4;
+  --card-category-surface: #d9b8ea;
 }
 
 .card-category--hybrid {
   --card-category-accent: #b78637;
+  --card-category-surface: #e2c89c;
 }
 
 .card-category--novelty {
   --card-category-accent: #c95a95;
+  --card-category-surface: #eaa9cc;
 }
 
 .card-category--chaos {
   --card-category-accent: #c4623b;
+  --card-category-surface: #ebb497;
 }
 
 .card-category--prop {
   --card-category-accent: #2d8c96;
+  --card-category-surface: #9ed3d7;
 }
 
 .hole-play-screen--missions .mission-card.card-category,
 .hole-play-screen--missions .public-preview-card.card-category {
   position: relative;
-  overflow: hidden;
-}
-
-.hole-play-screen--missions .mission-card.card-category::before,
-.hole-play-screen--missions .public-preview-card.card-category::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 0.3rem;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card-category-accent) 80%, #ffffff 20%),
-    color-mix(in srgb, var(--card-category-accent) 72%, #000000 28%)
-  );
-  pointer-events: none;
 }
 
 .hole-play-screen--missions .mission-card.card-category {
@@ -1381,8 +1384,8 @@ main {
   background:
     linear-gradient(
       142deg,
-      color-mix(in srgb, var(--card-category-surface) 42%, transparent),
-      color-mix(in srgb, var(--mission-card-bg) 94%, #ffffff 6%)
+      color-mix(in srgb, var(--card-category-surface) 18%, transparent),
+      color-mix(in srgb, var(--mission-card-bg) 96%, #ffffff 4%)
     ),
     var(--mission-card-bg);
 }
@@ -1392,8 +1395,8 @@ main {
   background:
     linear-gradient(
       142deg,
-      color-mix(in srgb, var(--card-category-surface) 36%, transparent),
-      color-mix(in srgb, var(--mission-public-bg) 90%, #ffffff 10%)
+      color-mix(in srgb, var(--card-category-surface) 16%, transparent),
+      color-mix(in srgb, var(--mission-public-bg) 94%, #ffffff 6%)
     ),
     var(--mission-public-bg);
 }
@@ -1418,6 +1421,17 @@ main {
 .hole-play-screen--missions .challenge-card--selectable:hover {
   border-color: color-mix(in srgb, var(--hole-mission-border-strong) 54%, var(--border-subtle));
   background: color-mix(in srgb, var(--mission-card-bg) 76%, var(--mission-card-selected-bg) 24%);
+}
+
+.hole-play-screen--missions .challenge-card--selectable.card-category:hover {
+  border-color: color-mix(in srgb, var(--card-category-accent) 62%, var(--mission-card-border));
+  background:
+    linear-gradient(
+      142deg,
+      color-mix(in srgb, var(--card-category-surface) 24%, transparent),
+      color-mix(in srgb, var(--mission-card-bg) 92%, #ffffff 8%)
+    ),
+    var(--mission-card-bg);
 }
 
 .hole-play-screen--missions .challenge-card--selectable:focus-visible {
@@ -1501,6 +1515,11 @@ main {
   border-color: color-mix(in srgb, var(--text-secondary) 52%, var(--hole-mission-chip-border));
   background: color-mix(in srgb, var(--text-secondary) 14%, #ffffff 86%);
   color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-primary));
+}
+
+.challenge-card__selected-chip--placeholder {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .hole-public-section {
