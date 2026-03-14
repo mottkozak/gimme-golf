@@ -18,31 +18,33 @@ interface OnboardingTutorialProps {
 const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'home',
-    title: 'Home: Quick Round or Full Setup',
-    description: 'Quick Round jumps straight into the recommended Quick Start mode.',
-    detail: 'Use Full Setup when you want to review players or choose a different mode first.',
+    title: 'Home: Pick Your Mode',
+    description: 'Choose Classic, Showtime, Wildcard, Forecast, or Arcade from the mode cards.',
+    detail:
+      'Classic is the easiest first round. Continue resumes a saved round, while choosing another mode starts a fresh setup.',
     icon: ICONS.teeOff,
   },
   {
     id: 'setup',
-    title: 'Round Setup: Players, Mode, and Packs',
-    description: 'Quick Start is the best first-round mode for mixed-skill groups.',
+    title: 'Round Config: Course + Golfers',
+    description: 'Set hole count, course style, and golfers, then press Play Round.',
     detail:
-      'Dynamic Difficulty helps balance skill gaps, each golfer chooses 1 of 2 mission cards, and public/featured extras stay optional.',
+      'Use the Change button anytime to swap modes before teeing off.',
     icon: ICONS.roundSetup,
   },
   {
     id: 'play',
-    title: 'Hole Play: Deal and Confirm Readiness',
-    description: 'At each hole, deal cards or assign power-ups based on your selected mode.',
-    detail: 'Once everyone is ready, continue to results to lock in what happened on that hole.',
+    title: 'Hole Setup: Deal and Choose',
+    description: 'Set par/tags, deal cards, then each golfer picks one mission (or use power-ups in Arcade mode).',
+    detail:
+      'Card category is color-coded for quick scanning, and difficulty chips are Easy=green, Medium=orange, Hard=red.',
     icon: ICONS.holePlay,
   },
   {
     id: 'results',
-    title: 'Hole Results: Score and Resolve',
-    description: 'Enter strokes for each player, then resolve missions and public card outcomes.',
-    detail: 'Save to update standings and move cleanly to the next hole.',
+    title: 'Hole Results + Recap',
+    description: 'Enter strokes, resolve mission/public outcomes, then Save to update standings.',
+    detail: 'Move to the next hole, and use recap cards/leaderboard to quickly see who gained points and why.',
     icon: ICONS.holeResults,
   },
 ] as const

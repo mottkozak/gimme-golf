@@ -1314,6 +1314,90 @@ main {
   gap: 0.36rem;
 }
 
+.hole-play-screen--missions .mission-card,
+.hole-play-screen--missions .public-preview-card {
+  --card-category-accent: color-mix(in srgb, var(--hole-mission-border-strong) 58%, var(--border-subtle));
+  --card-category-surface: color-mix(in srgb, var(--hole-mission-surface-muted) 14%, transparent);
+}
+
+.card-category--common {
+  --card-category-accent: #2f8f72;
+}
+
+.card-category--skill {
+  --card-category-accent: #3276ce;
+}
+
+.card-category--risk {
+  --card-category-accent: #c45745;
+}
+
+.card-category--curse {
+  --card-category-accent: #7f4f9a;
+}
+
+.card-category--style {
+  --card-category-accent: #a35ec4;
+}
+
+.card-category--hybrid {
+  --card-category-accent: #b78637;
+}
+
+.card-category--novelty {
+  --card-category-accent: #c95a95;
+}
+
+.card-category--chaos {
+  --card-category-accent: #c4623b;
+}
+
+.card-category--prop {
+  --card-category-accent: #2d8c96;
+}
+
+.hole-play-screen--missions .mission-card.card-category,
+.hole-play-screen--missions .public-preview-card.card-category {
+  position: relative;
+  overflow: hidden;
+}
+
+.hole-play-screen--missions .mission-card.card-category::before,
+.hole-play-screen--missions .public-preview-card.card-category::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.3rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card-category-accent) 80%, #ffffff 20%),
+    color-mix(in srgb, var(--card-category-accent) 72%, #000000 28%)
+  );
+  pointer-events: none;
+}
+
+.hole-play-screen--missions .mission-card.card-category {
+  border-color: color-mix(in srgb, var(--card-category-accent) 52%, var(--mission-card-border));
+  background:
+    linear-gradient(
+      142deg,
+      color-mix(in srgb, var(--card-category-surface) 42%, transparent),
+      color-mix(in srgb, var(--mission-card-bg) 94%, #ffffff 6%)
+    ),
+    var(--mission-card-bg);
+}
+
+.hole-play-screen--missions .public-preview-card.card-category {
+  border-color: color-mix(in srgb, var(--card-category-accent) 52%, var(--mission-public-border));
+  background:
+    linear-gradient(
+      142deg,
+      color-mix(in srgb, var(--card-category-surface) 36%, transparent),
+      color-mix(in srgb, var(--mission-public-bg) 90%, #ffffff 10%)
+    ),
+    var(--mission-public-bg);
+}
+
 .hole-play-screen--missions .mission-card.selected {
   border-color: var(--mission-card-selected-border);
   background:
@@ -1325,6 +1409,10 @@ main {
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--mission-card-selected-border) 38%, transparent),
     var(--shadow-soft);
+}
+
+.hole-play-screen--missions .mission-card.card-category.selected {
+  border-color: color-mix(in srgb, var(--card-category-accent) 58%, var(--mission-card-selected-border));
 }
 
 .hole-play-screen--missions .challenge-card--selectable:hover {
@@ -1376,6 +1464,43 @@ main {
   border-color: color-mix(in srgb, var(--mission-public-border) 62%, var(--border-subtle));
   background: color-mix(in srgb, var(--mission-public-bg) 74%, #ffffff 26%);
   color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__type-chip,
+.hole-play-screen--missions .badge-chip.public-card__type-chip {
+  border-color: color-mix(in srgb, var(--card-category-accent) 62%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, var(--card-category-accent) 16%, #ffffff 84%);
+  color: color-mix(in srgb, var(--card-category-accent) 76%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--easy {
+  border-color: color-mix(in srgb, #209556 68%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #209556 16%, #ffffff 84%);
+  color: color-mix(in srgb, #209556 86%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--medium {
+  border-color: color-mix(in srgb, #c07b24 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #c07b24 16%, #ffffff 84%);
+  color: color-mix(in srgb, #a8661c 90%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--hard {
+  border-color: color-mix(in srgb, #c04e43 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #c04e43 16%, #ffffff 84%);
+  color: color-mix(in srgb, #b23f36 90%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--neutral {
+  border-color: color-mix(in srgb, var(--text-secondary) 52%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, var(--text-secondary) 14%, #ffffff 86%);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-primary));
 }
 
 .hole-public-section {

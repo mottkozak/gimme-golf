@@ -32,6 +32,14 @@ function toLabel(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function getCardTypeLabel(cardType: PersonalCard['cardType']): string {
+  if (cardType === 'common') {
+    return 'Classic'
+  }
+
+  return toLabel(cardType)
+}
+
 function ChallengeCardView({
   card,
   selected,
@@ -70,7 +78,7 @@ function ChallengeCardView({
         isSelectable ? 'challenge-card--selectable' : ''
       } ${hasEntryAnimation ? 'challenge-card--deal-in' : ''} ${
         hasEntryAnimation && isInViewport ? 'is-in-view' : ''
-      } offer-${offerKind ?? 'none'}`}
+      } offer-${offerKind ?? 'none'} card-category card-category--${card.cardType}`}
       style={entryStyle}
       ref={hasEntryAnimation ? setInViewportRef : undefined}
       role={isSelectable ? 'button' : undefined}
@@ -104,7 +112,12 @@ function ChallengeCardView({
       <p className="challenge-card__description">{card.description}</p>
       {offerDetail && <p className="muted challenge-card__offer-detail">{offerDetail}</p>}
       <div className="challenge-card__badges">
-        <BadgeChip tone="subtle">{toLabel(card.cardType)}</BadgeChip>
+        <BadgeChip
+          tone="subtle"
+          className={`challenge-card__type-chip challenge-card__type-chip--${card.cardType}`}
+        >
+          {getCardTypeLabel(card.cardType)}
+        </BadgeChip>
         {offerKindLabel && (
           <BadgeChip
             tone={offerChipTone}
@@ -113,7 +126,12 @@ function ChallengeCardView({
             {offerKindLabel}
           </BadgeChip>
         )}
-        <BadgeChip tone="subtle">{toLabel(card.difficulty)}</BadgeChip>
+        <BadgeChip
+          tone="subtle"
+          className={`challenge-card__difficulty-chip challenge-card__difficulty-chip--${card.difficulty}`}
+        >
+          {toLabel(card.difficulty)}
+        </BadgeChip>
       </div>
     </article>
   )
