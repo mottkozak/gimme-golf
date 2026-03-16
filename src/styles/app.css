@@ -314,6 +314,7 @@ strong {
 .public-card > header strong {
   font-family: var(--font-ui);
   font-size: 1rem;
+  text-align: left;
   font-weight: 700;
   letter-spacing: 0.002em;
   color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
@@ -1328,6 +1329,7 @@ main {
   padding: var(--space-3);
   gap: 0.62rem;
   box-shadow: none;
+  text-align: left;
 }
 
 .hole-play-screen--missions .public-preview-card {
@@ -1354,18 +1356,21 @@ main {
 .hole-play-screen--missions .public-preview-card .public-card__description {
   line-height: 1.4;
   font-size: 0.94rem;
+  text-align: left;
 }
 
 .hole-play-screen--missions .mission-card .challenge-card__meta-line,
 .hole-play-screen--missions .public-preview-card .public-card__meta-line {
   margin-top: 0.04rem;
   font-size: 0.8rem;
+  text-align: left;
 }
 
 .hole-play-screen--missions .mission-card .challenge-card__offer-detail {
   margin-top: 0.04rem;
   font-size: 0.8rem;
   color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+  text-align: left;
 }
 
 .hole-play-screen--missions .mission-card .challenge-card__badges {
@@ -4125,6 +4130,7 @@ main {
 .public-card {
   border: 1px solid var(--border-subtle);
   background: var(--bg-panel);
+  text-align: left;
 }
 
 .challenge-card {
@@ -4180,11 +4186,13 @@ main {
 .challenge-card__description {
   margin: 0;
   line-height: 1.34;
+  text-align: left;
 }
 
 .challenge-card__offer-detail {
   margin: -0.1rem 0 0;
   font-size: 0.8rem;
+  text-align: left;
 }
 
 .challenge-card__badges {
@@ -4225,6 +4233,7 @@ main {
   margin: 0;
   line-height: 1.35;
   color: color-mix(in srgb, var(--text-primary) 86%, var(--text-secondary));
+  text-align: left;
 }
 
 .power-up-card {
