@@ -18,6 +18,16 @@ interface ModeDetailScreenProps {
 
 const MODE_SAMPLE_CARD_COUNT = 3
 
+/** Ordered sample card codes per mode for the mode detail preview. */
+const SAMPLE_CARD_CODES = {
+  classic: ['COM-003', 'SKL-004', 'RSK-007'] as const,
+  novelty: ['NOV-023', 'NOV-001', 'NOV-002'] as const, // One-Club Wizard, One-Hand Wonder, Opposite-Hand Escape
+  chaos: ['CHA-005', 'CHA-002', 'CHA-013'] as const, // Sabotage Token, Longest Drive Bonus, Long Putt Special
+  props: ['PRP-007', 'PRP-019', 'PRP-003'] as const, // Trouble Hole, Fairway Sweep, Green Hit (Player Pick)
+  powerUps: ['PWR-002', 'PWR-034', 'PWR-019'] as const, // Backboard, Hand Wedge, Power Drive
+  curses: ['CUR-002', 'CUR-018', 'CUR-003'] as const, // Three-Club Limit, No Favorite Club, Back Tee Penalty
+} as const
+
 interface ModeSampleCard {
   id: string
   card: ReactNode
@@ -26,6 +36,19 @@ interface ModeSampleCard {
 interface ModeSampleStrip {
   label: string
   cards: ModeSampleCard[]
+}
+
+function pickCardsByCode<T extends { code: string; id: string }>(
+  pool: T[],
+  codes: readonly string[],
+): T[] {
+  const byCode = new Map(pool.map((c) => [c.code, c]))
+  const result: T[] = []
+  for (const code of codes) {
+    const card = byCode.get(code)
+    if (card) result.push(card)
+  }
+  return result
 }
 
 function takeCardsWithFallback<T extends { id: string }>(
@@ -63,15 +86,16 @@ function takeCardsWithFallback<T extends { id: string }>(
 
 function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   if (modeId === 'classic') {
-    const sampleCards = takeCardsWithFallback(
-      PERSONAL_CARDS.filter((card) => card.packId === 'classic'),
-      PERSONAL_CARDS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
+    const byCode = pickCardsByCode(PERSONAL_CARDS, SAMPLE_CARD_CODES.classic)
+    const sampleCards = byCode.length >= MODE_SAMPLE_CARD_COUNT
+      ? byCode
+      : takeCardsWithFallback(
+          PERSONAL_CARDS.filter((card) => card.packId === 'classic'),
+          PERSONAL_CARDS,
+          MODE_SAMPLE_CARD_COUNT,
+        )
 
-    if (sampleCards.length === 0) {
-      return []
-    }
+    if (sampleCards.length === 0) return []
 
     return [
       {
@@ -92,15 +116,16 @@ function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   }
 
   if (modeId === 'novelty') {
-    const sampleCards = takeCardsWithFallback(
-      PERSONAL_CARDS.filter((card) => card.packId === 'novelty'),
-      PERSONAL_CARDS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
+    const byCode = pickCardsByCode(PERSONAL_CARDS, SAMPLE_CARD_CODES.novelty)
+    const sampleCards = byCode.length >= MODE_SAMPLE_CARD_COUNT
+      ? byCode
+      : takeCardsWithFallback(
+          PERSONAL_CARDS.filter((card) => card.packId === 'novelty'),
+          PERSONAL_CARDS,
+          MODE_SAMPLE_CARD_COUNT,
+        )
 
-    if (sampleCards.length === 0) {
-      return []
-    }
+    if (sampleCards.length === 0) return []
 
     return [
       {
@@ -121,15 +146,16 @@ function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   }
 
   if (modeId === 'chaos') {
-    const sampleCards = takeCardsWithFallback(
-      PUBLIC_CARDS.filter((card) => card.cardType === 'chaos'),
-      PUBLIC_CARDS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
+    const byCode = pickCardsByCode(PUBLIC_CARDS, SAMPLE_CARD_CODES.chaos)
+    const sampleCards = byCode.length >= MODE_SAMPLE_CARD_COUNT
+      ? byCode
+      : takeCardsWithFallback(
+          PUBLIC_CARDS.filter((card) => card.cardType === 'chaos'),
+          PUBLIC_CARDS,
+          MODE_SAMPLE_CARD_COUNT,
+        )
 
-    if (sampleCards.length === 0) {
-      return []
-    }
+    if (sampleCards.length === 0) return []
 
     return [
       {
@@ -143,15 +169,16 @@ function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   }
 
   if (modeId === 'props') {
-    const sampleCards = takeCardsWithFallback(
-      PUBLIC_CARDS.filter((card) => card.cardType === 'prop'),
-      PUBLIC_CARDS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
+    const byCode = pickCardsByCode(PUBLIC_CARDS, SAMPLE_CARD_CODES.props)
+    const sampleCards = byCode.length >= MODE_SAMPLE_CARD_COUNT
+      ? byCode
+      : takeCardsWithFallback(
+          PUBLIC_CARDS.filter((card) => card.cardType === 'prop'),
+          PUBLIC_CARDS,
+          MODE_SAMPLE_CARD_COUNT,
+        )
 
-    if (sampleCards.length === 0) {
-      return []
-    }
+    if (sampleCards.length === 0) return []
 
     return [
       {
@@ -165,16 +192,24 @@ function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   }
 
   if (modeId === 'powerUps') {
-    const samplePowerUps = takeCardsWithFallback(
-      POWER_UPS.filter((powerUp) => powerUp.isActive),
-      POWER_UPS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
-    const sampleCurses = takeCardsWithFallback(
-      CURSE_CARDS.filter((curse) => curse.isActive),
-      CURSE_CARDS,
-      MODE_SAMPLE_CARD_COUNT,
-    )
+    const byCodePowerUps = pickCardsByCode(POWER_UPS, SAMPLE_CARD_CODES.powerUps)
+    const byCodeCurses = pickCardsByCode(CURSE_CARDS, SAMPLE_CARD_CODES.curses)
+    const samplePowerUps =
+      byCodePowerUps.length >= MODE_SAMPLE_CARD_COUNT
+        ? byCodePowerUps
+        : takeCardsWithFallback(
+            POWER_UPS.filter((p) => p.isActive),
+            POWER_UPS,
+            MODE_SAMPLE_CARD_COUNT,
+          )
+    const sampleCurses =
+      byCodeCurses.length >= MODE_SAMPLE_CARD_COUNT
+        ? byCodeCurses
+        : takeCardsWithFallback(
+            CURSE_CARDS.filter((c) => c.isActive),
+            CURSE_CARDS,
+            MODE_SAMPLE_CARD_COUNT,
+          )
 
     const strips: ModeSampleStrip[] = []
 
