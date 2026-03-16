@@ -22,6 +22,7 @@ import {
   normalizePublicCardResolutions,
   resolvePublicCardPointDeltas,
 } from '../logic/publicCardResolution.ts'
+import { adaptChallengeTextToSkillLevel } from '../logic/challengeText.ts'
 import { getDisplayPlayerName } from '../logic/playerNames.ts'
 import { getAssignedCurse, getAssignedPowerUp } from '../logic/powerUps.ts'
 import {
@@ -246,6 +247,7 @@ function getEffectOptions(card: PublicCard): [EffectOption, EffectOption] {
 function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [activeCardPreview, setActiveCardPreview] = useState<{
     playerName: string
+    expectedScore18: number
     card: PersonalCard
   } | null>(null)
   const [challengeOverviewExpanded, setChallengeOverviewExpanded] = useState(false)
@@ -891,6 +893,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
     return {
       playerId: player.id,
       playerName: playerNameById[player.id],
+      expectedScore18: player.expectedScore18,
       selectedCard,
       statusLabel,
       statusClassName,
@@ -1032,7 +1035,12 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                         <p className="hole-results-challenge-overview-title">
                           {row.selectedCard.code} - {row.selectedCard.name}
                         </p>
-                        <p className="muted">{row.selectedCard.description}</p>
+                        <p className="muted">
+                          {adaptChallengeTextToSkillLevel(
+                            row.selectedCard.description,
+                            row.expectedScore18,
+                          )}
+                        </p>
                         <div className="button-row row-wrap hole-results-challenge-overview-meta">
                           <BadgeChip tone="subtle">
                             {toTitleCase(row.selectedCard.difficulty)} difficulty
@@ -1094,6 +1102,7 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                         onClick={() =>
                           setActiveCardPreview({
                             playerName: playerNameById[player.id],
+                            expectedScore18: player.expectedScore18,
                             card: selectedCard,
                           })
                         }
@@ -1528,8 +1537,18 @@ function HoleResultsScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
             <p className="muted">
               {activeCardPreview.playerName} | {activeCardPreview.card.code}
             </p>
-            <p>{activeCardPreview.card.description}</p>
-            <p className="muted">{activeCardPreview.card.rulesText}</p>
+            <p>
+              {adaptChallengeTextToSkillLevel(
+                activeCardPreview.card.description,
+                activeCardPreview.expectedScore18,
+              )}
+            </p>
+            <p className="muted">
+              {adaptChallengeTextToSkillLevel(
+                activeCardPreview.card.rulesText,
+                activeCardPreview.expectedScore18,
+              )}
+            </p>
             <p className="hole-card-preview__reward">
               Reward: {activeCardPreview.card.points > 0 ? '+' : ''}
               {activeCardPreview.card.points} points on success

@@ -1,4 +1,4 @@
-import type { PersonalCard, PublicCard } from '../types/cards.ts'
+import type { HoleTag, PersonalCard, PublicCard } from '../types/cards.ts'
 import type {
   HoleCardsState,
   HoleDefinition,
@@ -33,6 +33,8 @@ const WEIGHTED_SELECTION_POOL_SIZE = 6
 const PERSONAL_RECENT_WINDOW_SIZE = 3
 const PER_PLAYER_RECENT_WINDOW_SIZE = 4
 const PUBLIC_RECENT_WINDOW_SIZE = 3
+const PERSONAL_TAG_RELEVANCE_BONUS = 6
+const PUBLIC_TAG_RELEVANCE_BONUS = 2
 
 function toUniqueIds(ids: string[]): string[] {
   return Array.from(new Set(ids))
@@ -193,6 +195,14 @@ function getChallengeIndex(card: PersonalCard): number {
   return card.points * 10 + DIFFICULTY_RANK[card.difficulty]
 }
 
+function hasTagRelevance(requiredTags: HoleTag[], holeTags: HoleTag[]): boolean {
+  if (requiredTags.length === 0 || holeTags.length === 0) {
+    return false
+  }
+
+  return requiredTags.some((requiredTag) => holeTags.includes(requiredTag))
+}
+
 function shouldUseHighUpsideHardTarget(
   player: Player,
   hole: HoleDefinition,
@@ -285,16 +295,19 @@ function scoreCardForOffer(
   const difficultyScore = tuning.difficultyWeights[card.difficulty] * 6
   const pointScore = scoreDistanceToPreferredPoints(card.points, preferredPoints) * 5
   const challengeIndex = getChallengeIndex(card)
+  const tagRelevanceBonus = hasTagRelevance(card.requiredTags, hole.tags)
+    ? PERSONAL_TAG_RELEVANCE_BONUS
+    : 0
 
   if (offerKind === 'safe') {
-    return difficultyScore + pointScore - challengeIndex
+    return difficultyScore + pointScore - challengeIndex + tagRelevanceBonus
   }
 
   if (offerKind === 'hard') {
-    return difficultyScore + pointScore + challengeIndex
+    return difficultyScore + pointScore + challengeIndex + tagRelevanceBonus
   }
 
-  return difficultyScore + pointScore + Math.round(challengeIndex / 2)
+  return difficultyScore + pointScore + Math.round(challengeIndex / 2) + tagRelevanceBonus
 }
 
 interface RankedPersonalCard {
@@ -776,20 +789,21 @@ export function dealPersonalCardsForHole(
   }
 }
 
-function getPublicCardWeight(card: PublicCard): number {
+function getPublicCardWeight(card: PublicCard, holeTags: HoleTag[]): number {
   const impactWeight = Math.max(1, 4 - Math.min(3, Math.abs(card.points)))
   const signWeight = card.points < 0 ? 4 : card.points === 0 ? 2 : 1
-  return impactWeight + signWeight
+  const tagWeight = hasTagRelevance(card.requiredTags, holeTags) ? PUBLIC_TAG_RELEVANCE_BONUS : 0
+  return impactWeight + signWeight + tagWeight
 }
 
-function pickWeightedPublicCard(cards: PublicCard[]): PublicCard | null {
+function pickWeightedPublicCard(cards: PublicCard[], holeTags: HoleTag[]): PublicCard | null {
   if (cards.length === 0) {
     return null
   }
 
   const weightedCards = cards.map((card) => ({
     card,
-    weight: getPublicCardWeight(card),
+    weight: getPublicCardWeight(card, holeTags),
   }))
   const totalWeight = weightedCards.reduce((total, entry) => total + entry.weight, 0)
   let roll = Math.random() * totalWeight
@@ -809,6 +823,7 @@ function pickPublicCardWithMemory(
   usedPublicCardIds: Set<string>,
   selectedCardIds: Set<string>,
   recentPublicCardIds: Set<string>,
+  holeTags: HoleTag[],
   preferredSign: 'positive' | 'negative' | 'any' = 'any',
 ): PublicCard | null {
   const availableCards = candidates.filter((card) => !selectedCardIds.has(card.id))
@@ -836,7 +851,7 @@ function pickPublicCardWithMemory(
         : fresh.length > 0
           ? fresh
           : basePool
-  const selectedCard = pickWeightedPublicCard(candidatePool)
+  const selectedCard = pickWeightedPublicCard(candidatePool, holeTags)
 
   if (!selectedCard) {
     return null
@@ -873,24 +888,28 @@ export function dealPublicCardsForHole(
         usedPublicCardIds,
         selectedCardIds,
         recentPublicCardIds,
+        hole.tags,
       ) ??
       pickPublicCardWithMemory(
         fullEligibleDeck.filter((card) => card.cardType === 'chaos'),
         usedPublicCardIds,
         selectedCardIds,
         recentPublicCardIds,
+        hole.tags,
       ) ??
       pickPublicCardWithMemory(
         filteredDeck.filter((card) => card.cardType === 'prop'),
         usedPublicCardIds,
         selectedCardIds,
         recentPublicCardIds,
+        hole.tags,
       ) ??
       pickPublicCardWithMemory(
         fullEligibleDeck.filter((card) => card.cardType === 'prop'),
         usedPublicCardIds,
         selectedCardIds,
         recentPublicCardIds,
+        hole.tags,
       )
 
     if (featuredChaosCard) {
@@ -904,6 +923,7 @@ export function dealPublicCardsForHole(
       usedPublicCardIds,
       selectedCardIds,
       recentPublicCardIds,
+      hole.tags,
       'negative',
     )
     if (chaosCard) {
@@ -919,6 +939,7 @@ export function dealPublicCardsForHole(
       usedPublicCardIds,
       selectedCardIds,
       recentPublicCardIds,
+      hole.tags,
       propSignPreference,
     )
     if (propCard && !cards.some((card) => card.id === propCard.id)) {

@@ -23,21 +23,6 @@ function matchesHole(cardPars: number[], holePar: number): boolean {
   return cardPars.includes(holePar)
 }
 
-function preferTagMatchedCards<T extends Pick<CardBase, 'requiredTags'>>(
-  cards: T[],
-  holeTags: HoleTag[],
-): T[] {
-  if (holeTags.length === 0) {
-    return cards
-  }
-
-  const tagMatched = cards.filter((card) =>
-    card.requiredTags.some((tag) => holeTags.includes(tag)),
-  )
-
-  return tagMatched.length > 0 ? tagMatched : cards
-}
-
 export function filterCardsByEnabledPacks<T extends Pick<CardBase, 'packId'>>(
   cards: T[],
   enabledPackIds: CardPackId[],
@@ -70,9 +55,8 @@ export function filterPersonalCardsForHole(
     (card) => PERSONAL_CARD_TYPES.has(card.cardType) && card.isPublic === false,
   )
   const matches = filterEligibleCardsByHoleContext(personalCards, holePar, holeTags)
-  const preferred = preferTagMatchedCards(matches, holeTags)
 
-  return preferred.length > 0 ? preferred : personalCards
+  return matches.length > 0 ? matches : personalCards
 }
 
 export function filterPublicCardsForHole(
@@ -84,7 +68,6 @@ export function filterPublicCardsForHole(
     (card) => PUBLIC_CARD_TYPES.has(card.cardType) && card.isPublic === true,
   )
   const matches = filterEligibleCardsByHoleContext(publicCards, holePar, holeTags)
-  const preferred = preferTagMatchedCards(matches, holeTags)
 
-  return preferred.length > 0 ? preferred : publicCards
+  return matches.length > 0 ? matches : publicCards
 }

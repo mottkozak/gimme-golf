@@ -429,6 +429,7 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                             key={`${currentHole.holeNumber}-${player.id}-${card.id}-${cardIndex}`}
                             card={card}
                             selected={selectedCardId === card.id}
+                            expectedScore18={player.expectedScore18}
                             onSelect={
                               canSelectCards ? () => selectCard(player.id, card.id) : undefined
                             }

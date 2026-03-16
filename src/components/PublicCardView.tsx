@@ -5,6 +5,7 @@ import BadgeChip from './BadgeChip.tsx'
 
 interface PublicCardViewProps {
   card: PublicCard
+  showTypeChip?: boolean
   entryOrder?: number
 }
 
@@ -20,7 +21,7 @@ function getCardTypeLabel(cardType: PublicCard['cardType']): string {
   return toLabel(cardType)
 }
 
-function PublicCardView({ card, entryOrder }: PublicCardViewProps) {
+function PublicCardView({ card, showTypeChip = true, entryOrder }: PublicCardViewProps) {
   const [setInViewportRef, isInViewport] = useInViewport<HTMLElement>({
     once: true,
     threshold: 0.24,
@@ -45,12 +46,14 @@ function PublicCardView({ card, entryOrder }: PublicCardViewProps) {
       <header className="row-between setup-row-wrap public-card__header">
         <strong>{card.name}</strong>
         <div className="button-row">
-          <BadgeChip
-            tone="subtle"
-            className={`public-card__type-chip public-card__type-chip--${card.cardType}`}
-          >
-            {getCardTypeLabel(card.cardType)}
-          </BadgeChip>
+          {showTypeChip && (
+            <BadgeChip
+              tone="subtle"
+              className={`public-card__type-chip public-card__type-chip--${card.cardType}`}
+            >
+              {getCardTypeLabel(card.cardType)}
+            </BadgeChip>
+          )}
           {card.points !== 0 && (
             <BadgeChip tone="reward" className="public-card__points-chip">
               {card.points >= 0 ? '+' : ''}

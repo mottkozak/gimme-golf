@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import useInViewport from '../hooks/useInViewport.ts'
+import { adaptChallengeTextToSkillLevel } from '../logic/challengeText.ts'
 import type { PersonalCard } from '../types/cards.ts'
 import BadgeChip from './BadgeChip.tsx'
 
@@ -8,6 +9,9 @@ interface ChallengeCardViewProps {
   selected: boolean
   offerKind?: 'safe' | 'hard' | 'single'
   offerDetail?: string
+  expectedScore18?: number
+  showSupplementaryBadges?: boolean
+  showMetadataLine?: boolean
   onSelect?: () => void
   entryOrder?: number
 }
@@ -45,6 +49,9 @@ function ChallengeCardView({
   selected,
   offerKind,
   offerDetail,
+  expectedScore18,
+  showSupplementaryBadges = true,
+  showMetadataLine = false,
   onSelect,
   entryOrder,
 }: ChallengeCardViewProps) {
@@ -65,6 +72,13 @@ function ChallengeCardView({
         : offerKind === 'single'
           ? 'auto'
           : 'default'
+  const cardDescription =
+    typeof expectedScore18 === 'number'
+      ? adaptChallengeTextToSkillLevel(card.description, expectedScore18)
+      : card.description
+  const metadataLine = [toLabel(card.difficulty), getCardTypeLabel(card.cardType), offerKindLabel]
+    .filter((value): value is string => Boolean(value))
+    .join(' • ')
   const entryStyle =
     typeof entryOrder === 'number'
       ? ({
@@ -109,30 +123,35 @@ function ChallengeCardView({
           </BadgeChip>
         </div>
       </header>
-      <p className="challenge-card__description">{card.description}</p>
+      <p className="challenge-card__description">{cardDescription}</p>
+      {showMetadataLine && metadataLine.length > 0 && (
+        <p className="challenge-card__meta-line muted">{metadataLine}</p>
+      )}
       {offerDetail && <p className="muted challenge-card__offer-detail">{offerDetail}</p>}
-      <div className="challenge-card__badges">
-        <BadgeChip
-          tone="subtle"
-          className={`challenge-card__type-chip challenge-card__type-chip--${card.cardType}`}
-        >
-          {getCardTypeLabel(card.cardType)}
-        </BadgeChip>
-        {offerKindLabel && (
+      {showSupplementaryBadges && (
+        <div className="challenge-card__badges">
           <BadgeChip
-            tone={offerChipTone}
-            className={`challenge-card__offer-chip challenge-card__offer-chip--${offerKind}`}
+            tone="subtle"
+            className={`challenge-card__type-chip challenge-card__type-chip--${card.cardType}`}
           >
-            {offerKindLabel}
+            {getCardTypeLabel(card.cardType)}
           </BadgeChip>
-        )}
-        <BadgeChip
-          tone="subtle"
-          className={`challenge-card__difficulty-chip challenge-card__difficulty-chip--${card.difficulty}`}
-        >
-          {toLabel(card.difficulty)}
-        </BadgeChip>
-      </div>
+          {offerKindLabel && (
+            <BadgeChip
+              tone={offerChipTone}
+              className={`challenge-card__offer-chip challenge-card__offer-chip--${offerKind}`}
+            >
+              {offerKindLabel}
+            </BadgeChip>
+          )}
+          <BadgeChip
+            tone="subtle"
+            className={`challenge-card__difficulty-chip challenge-card__difficulty-chip--${card.difficulty}`}
+          >
+            {toLabel(card.difficulty)}
+          </BadgeChip>
+        </div>
+      )}
     </article>
   )
 }

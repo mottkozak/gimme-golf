@@ -507,11 +507,12 @@ main {
   margin: 0;
   justify-self: center;
   line-height: 0;
+  opacity: 0.86;
 }
 
 .app-wordmark__image {
   display: block;
-  width: clamp(7.5rem, 39vw, 11.8rem);
+  width: clamp(4.6rem, 20vw, 6.7rem);
   max-width: 100%;
   height: auto;
 }
@@ -2206,7 +2207,7 @@ main {
 }
 
 .mode-spotlight__sample {
-  width: min(100%, 31rem);
+  width: min(100%, 33rem);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -2224,8 +2225,36 @@ main {
   color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
 }
 
+.mode-spotlight__sample-scroll {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.34rem;
+}
+
+.mode-spotlight__sample-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.mode-spotlight__sample-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mode-border) 42%, var(--border-subtle));
+}
+
+.mode-spotlight__sample-scroll::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mode-panel) 70%, transparent);
+}
+
+.mode-spotlight__sample-item {
+  flex: 0 0 min(21.8rem, 85vw);
+  scroll-snap-align: start;
+}
+
 .mode-spotlight__sample-card {
   width: 100%;
+  min-height: 100%;
 }
 
 .mode-spotlight__sample-card .challenge-card,
