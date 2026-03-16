@@ -2156,10 +2156,10 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   gap: 0.82rem;
-  text-align: center;
+  text-align: left;
   padding-block: var(--space-2) var(--space-3);
   contain: paint;
 }
@@ -2193,6 +2193,7 @@ main {
   line-height: 0.9;
   letter-spacing: var(--mode-title-tracking);
   color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+  text-align: left;
 }
 
 .mode-spotlight__emblem {
@@ -2247,7 +2248,7 @@ main {
   width: clamp(5.6rem, 18vw, 7.2rem);
   height: clamp(5.6rem, 18vw, 7.2rem);
   font-size: clamp(5.6rem, 18vw, 7.2rem);
-  margin: 0 auto;
+  margin: 0;
   color: color-mix(in srgb, var(--text-primary) 88%, var(--mode-emblem-accent));
 }
 
@@ -2258,6 +2259,7 @@ main {
   line-height: 1.26;
   max-width: 28ch;
   color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+  text-align: left;
 }
 
 .mode-spotlight__description {
@@ -2266,6 +2268,7 @@ main {
   font-size: 0.95rem;
   line-height: 1.44;
   color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
+  text-align: left;
 }
 
 .mode-spotlight__sample {
