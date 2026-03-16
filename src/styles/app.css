@@ -337,7 +337,11 @@ main {
   background-position: center;
   background-size: cover;
   opacity: 1;
-  transition: opacity 420ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(1);
+  transition:
+    opacity 380ms cubic-bezier(0.55, 0.06, 0.68, 0.19),
+    transform 380ms cubic-bezier(0.55, 0.06, 0.68, 0.19),
+    filter 380ms ease-out;
 }
 
 .splash-screen::before {
@@ -347,18 +351,30 @@ main {
   background:
     radial-gradient(circle at center, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.38)),
     linear-gradient(170deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
+  transition: opacity 280ms ease-in;
 }
 
 .splash-screen--exit {
   opacity: 0;
+  transform: scale(1.08);
+  filter: brightness(1.15) saturate(0.92);
   pointer-events: none;
+}
+
+.splash-screen--exit::before {
+  opacity: 0;
 }
 
 .splash-screen__logo-stack {
   position: relative;
   z-index: 1;
-  width: min(33vw, 14rem);
+  width: min(41.25vw, 17.5rem);
   aspect-ratio: 2660 / 1272;
+  transition: transform 380ms cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+.splash-screen--exit .splash-screen__logo-stack {
+  transform: scale(0.88);
 }
 
 .splash-screen__blank-logo {
@@ -388,7 +404,7 @@ main {
   min-width: 58%;
   min-height: 58%;
   color: #f3eee0;
-  font-size: clamp(0.9rem, 2.8vw, 1.7rem);
+  font-size: clamp(1.125rem, 3.5vw, 2.125rem);
   line-height: 0.84;
   letter-spacing: 0.015em;
   text-shadow:
@@ -436,12 +452,14 @@ main {
   width: 100%;
 }
 
-@keyframes app-shell-fade-in {
+@keyframes app-shell-action-enter {
   from {
     opacity: 0;
+    transform: scale(0.94) translateY(18px);
   }
   to {
     opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -457,12 +475,14 @@ main {
 
 .app-shell--post-splash {
   opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .app-shell--post-splash {
     opacity: 0;
-    animation: app-shell-fade-in 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform: scale(0.94) translateY(18px);
+    animation: app-shell-action-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 }
 
