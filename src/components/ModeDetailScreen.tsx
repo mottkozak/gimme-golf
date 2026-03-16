@@ -61,7 +61,7 @@ function takeCardsWithFallback<T extends { id: string }>(
   return selectedCards
 }
 
-function getModeSampleCardStrip(modeId: LandingModeId): ModeSampleStrip | null {
+function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   if (modeId === 'classic') {
     const sampleCards = takeCardsWithFallback(
       PERSONAL_CARDS.filter((card) => card.packId === 'classic'),
@@ -70,23 +70,25 @@ function getModeSampleCardStrip(modeId: LandingModeId): ModeSampleStrip | null {
     )
 
     if (sampleCards.length === 0) {
-      return null
+      return []
     }
 
-    return {
-      label: 'Example mission challenges',
-      cards: sampleCards.map((card) => ({
-        id: card.id,
-        card: (
-          <ChallengeCardView
-            card={card}
-            selected={false}
-            offerKind="single"
-            showSupplementaryBadges={false}
-          />
-        ),
-      })),
-    }
+    return [
+      {
+        label: 'Example mission challenges',
+        cards: sampleCards.map((card) => ({
+          id: card.id,
+          card: (
+            <ChallengeCardView
+              card={card}
+              selected={false}
+              offerKind="single"
+              showSupplementaryBadges={false}
+            />
+          ),
+        })),
+      },
+    ]
   }
 
   if (modeId === 'novelty') {
@@ -97,23 +99,25 @@ function getModeSampleCardStrip(modeId: LandingModeId): ModeSampleStrip | null {
     )
 
     if (sampleCards.length === 0) {
-      return null
+      return []
     }
 
-    return {
-      label: 'Example Showtime challenges',
-      cards: sampleCards.map((card) => ({
-        id: card.id,
-        card: (
-          <ChallengeCardView
-            card={card}
-            selected={false}
-            offerKind="single"
-            showSupplementaryBadges={false}
-          />
-        ),
-      })),
-    }
+    return [
+      {
+        label: 'Example Showtime challenges',
+        cards: sampleCards.map((card) => ({
+          id: card.id,
+          card: (
+            <ChallengeCardView
+              card={card}
+              selected={false}
+              offerKind="single"
+              showSupplementaryBadges={false}
+            />
+          ),
+        })),
+      },
+    ]
   }
 
   if (modeId === 'chaos') {
@@ -124,16 +128,18 @@ function getModeSampleCardStrip(modeId: LandingModeId): ModeSampleStrip | null {
     )
 
     if (sampleCards.length === 0) {
-      return null
+      return []
     }
 
-    return {
-      label: 'Example Wildcard cards',
-      cards: sampleCards.map((card) => ({
-        id: card.id,
-        card: <PublicCardView card={card} showTypeChip={false} />,
-      })),
-    }
+    return [
+      {
+        label: 'Example Wildcard cards',
+        cards: sampleCards.map((card) => ({
+          id: card.id,
+          card: <PublicCardView card={card} showTypeChip={false} />,
+        })),
+      },
+    ]
   }
 
   if (modeId === 'props') {
@@ -144,66 +150,71 @@ function getModeSampleCardStrip(modeId: LandingModeId): ModeSampleStrip | null {
     )
 
     if (sampleCards.length === 0) {
-      return null
+      return []
     }
 
-    return {
-      label: 'Example Forecast cards',
-      cards: sampleCards.map((card) => ({
-        id: card.id,
-        card: <PublicCardView card={card} showTypeChip={false} />,
-      })),
+    return [
+      {
+        label: 'Example Forecast cards',
+        cards: sampleCards.map((card) => ({
+          id: card.id,
+          card: <PublicCardView card={card} showTypeChip={false} />,
+        })),
+      },
+    ]
+  }
+
+  if (modeId === 'powerUps') {
+    const samplePowerUps = takeCardsWithFallback(
+      POWER_UPS.filter((powerUp) => powerUp.isActive),
+      POWER_UPS,
+      MODE_SAMPLE_CARD_COUNT,
+    )
+    const sampleCurses = takeCardsWithFallback(
+      CURSE_CARDS.filter((curse) => curse.isActive),
+      CURSE_CARDS,
+      MODE_SAMPLE_CARD_COUNT,
+    )
+
+    const strips: ModeSampleStrip[] = []
+
+    if (samplePowerUps.length > 0) {
+      strips.push({
+        label: 'Example power-ups',
+        cards: samplePowerUps.map((powerUp) => ({
+          id: powerUp.id,
+          card: (
+            <PowerUpCard
+              powerUp={powerUp}
+              showPlayerName={false}
+              showCategoryChips={false}
+              showUseButton={false}
+            />
+          ),
+        })),
+      })
     }
+
+    if (sampleCurses.length > 0) {
+      strips.push({
+        label: 'Example curses',
+        cards: sampleCurses.map((curse) => ({
+          id: curse.id,
+          card: (
+            <section className="panel inset stack-xs mode-spotlight__sample-curse">
+              <h3 className="power-up-title">{curse.title}</h3>
+              <p>{curse.description}</p>
+              <p className="muted">Curse applies for this hole only.</p>
+            </section>
+          ),
+        })),
+      })
+    }
+
+    return strips
   }
 
-  const samplePowerUps = takeCardsWithFallback(
-    POWER_UPS.filter((powerUp) => powerUp.isActive),
-    POWER_UPS,
-    2,
-  )
-  const sampleCurses = takeCardsWithFallback(
-    CURSE_CARDS.filter((curse) => curse.isActive),
-    CURSE_CARDS,
-    1,
-  )
-
-  if (samplePowerUps.length === 0 && sampleCurses.length === 0) {
-    return null
-  }
-
-  const sampleCards: ModeSampleCard[] = []
-
-  for (const powerUp of samplePowerUps) {
-    sampleCards.push({
-      id: powerUp.id,
-      card: (
-        <PowerUpCard
-          powerUp={powerUp}
-          showPlayerName={false}
-          showCategoryChips={false}
-          showUseButton={false}
-        />
-      ),
-    })
-  }
-
-  for (const curse of sampleCurses) {
-    sampleCards.push({
-      id: curse.id,
-      card: (
-        <section className="panel inset stack-xs mode-spotlight__sample-curse">
-          <h3 className="power-up-title">{curse.title}</h3>
-          <p>{curse.description}</p>
-          <p className="muted">Curse applies for this hole only.</p>
-        </section>
-      ),
-    })
-  }
-
-  return {
-    label: 'Example Arcade cards',
-    cards: sampleCards.slice(0, MODE_SAMPLE_CARD_COUNT),
-  }
+  return []
 }
 
 function ModeDetailScreen({
@@ -214,7 +225,7 @@ function ModeDetailScreen({
   sharedCardTransitionStyle,
   sharedIconTransitionStyle,
 }: ModeDetailScreenProps) {
-  const modeSampleCardStrip = getModeSampleCardStrip(mode.id)
+  const modeSampleCardStrips = getModeSampleCardStrips(mode.id)
 
   return (
     <section className={`screen mode-detail-screen mode-tone--${mode.toneClassName}`}>
@@ -242,18 +253,22 @@ function ModeDetailScreen({
           <p className="mode-spotlight__description">{mode.description}</p>
         </section>
 
-        {modeSampleCardStrip && (
-          <section className="mode-spotlight__sample" aria-label={`${mode.name} sample cards`}>
-            <p className="mode-spotlight__sample-label">{modeSampleCardStrip.label}</p>
-            <div className="mode-spotlight__sample-scroll" role="list" aria-label={`${mode.name} examples`}>
-              {modeSampleCardStrip.cards.map((sampleCard) => (
+        {modeSampleCardStrips.map((strip) => (
+          <section
+            key={strip.label}
+            className="mode-spotlight__sample"
+            aria-label={`${mode.name} ${strip.label}`}
+          >
+            <p className="mode-spotlight__sample-label">{strip.label}</p>
+            <div className="mode-spotlight__sample-scroll" role="list" aria-label={`${strip.label} examples`}>
+              {strip.cards.map((sampleCard) => (
                 <article key={sampleCard.id} className="mode-spotlight__sample-item" role="listitem">
                   <div className="mode-spotlight__sample-card">{sampleCard.card}</div>
                 </article>
               ))}
             </div>
           </section>
-        )}
+        ))}
 
         {hasSavedRoundProgress && (
           <section className="mode-spotlight__callout" role="status" aria-live="polite">
