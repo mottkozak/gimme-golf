@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const LETTER_REFRESH_INTERVAL_MS = 320
-const EXIT_FADE_DURATION_MS = 260
+const EXIT_FADE_DURATION_MS = 420
 const LETTERS_PER_ROW = 5
 const SMALL_UPDATE_COUNT = 1
 const LARGE_UPDATE_COUNT = 3

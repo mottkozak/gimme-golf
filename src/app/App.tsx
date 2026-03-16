@@ -336,7 +336,7 @@ function App() {
 
   return (
     <div
-      className={`app-shell ${isModePreviewActive ? 'app-shell--mode-preview' : ''} ${
+      className={`app-shell app-shell--post-splash ${isModePreviewActive ? 'app-shell--mode-preview' : ''} ${
         usesCompactHeader ? 'app-shell--compact-header' : ''
       }`}
     >
