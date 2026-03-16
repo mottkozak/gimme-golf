@@ -430,6 +430,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                             card={card}
                             selected={selectedCardId === card.id}
                             expectedScore18={player.expectedScore18}
+                            showSupplementaryBadges={false}
+                            showMetadataLine={true}
                             onSelect={
                               canSelectCards ? () => selectCard(player.id, card.id) : undefined
                             }
@@ -459,6 +461,8 @@ function HolePlayScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenPr
                 <PublicCardView
                   key={`${currentHole.holeNumber}-${card.id}-${cardIndex}`}
                   card={card}
+                  showTypeChip={false}
+                  showMetadataLine={true}
                   entryOrder={roundState.players.length * 2 + cardIndex}
                 />
               ))}

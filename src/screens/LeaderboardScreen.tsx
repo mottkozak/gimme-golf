@@ -405,31 +405,38 @@ function LeaderboardScreen({ roundState, onNavigate, onUpdateRoundState }: Scree
                 <h3>Public Card Impact</h3>
                 <RecapStatusChip tone="count">{recapData.publicCardRecapItems.length} cards</RecapStatusChip>
               </div>
-              {recapData.publicCardRecapItems.map((item) => (
-                <RecapPublicImpactCard
-                  key={item.cardId}
-                  title={`${item.cardCode} ${item.cardName}`}
-                  modeLabel={<RecapStatusChip tone="snapshot">{item.modeLabel}</RecapStatusChip>}
-                  summaryLine={item.summaryLine}
-                >
-                  {item.impactRows.length === 0 ? (
-                    <p className="muted">No points moved on this card.</p>
-                  ) : (
-                    <div className="stack-xs">
-                      {item.impactRows.map((impactRow) => (
-                        <div key={impactRow.playerId} className="row-between recap-impact-row">
-                          <span>{impactRow.playerName}</span>
-                          <strong
-                            className={impactRow.delta >= 0 ? 'recap-impact-plus' : 'recap-impact-minus'}
-                          >
-                            {formatSignedPoints(impactRow.delta)}
-                          </strong>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </RecapPublicImpactCard>
-              ))}
+              {recapData.publicCardRecapItems.map((item) => {
+                const publicCard = roundState.holeCards[roundState.currentHoleIndex].publicCards.find(
+                  (c) => c.id === item.cardId,
+                )
+                return (
+                  <RecapPublicImpactCard
+                    key={item.cardId}
+                    title={`${item.cardCode} ${item.cardName}`}
+                    modeLabel={<RecapStatusChip tone="snapshot">{item.modeLabel}</RecapStatusChip>}
+                    summaryLine={item.summaryLine}
+                    description={publicCard?.description}
+                    rulesText={publicCard?.rulesText}
+                  >
+                    {item.impactRows.length === 0 ? (
+                      <p className="muted">No points moved on this card.</p>
+                    ) : (
+                      <div className="stack-xs">
+                        {item.impactRows.map((impactRow) => (
+                          <div key={impactRow.playerId} className="row-between recap-impact-row">
+                            <span>{impactRow.playerName}</span>
+                            <strong
+                              className={impactRow.delta >= 0 ? 'recap-impact-plus' : 'recap-impact-minus'}
+                            >
+                              {formatSignedPoints(impactRow.delta)}
+                            </strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </RecapPublicImpactCard>
+                )
+              })}
             </section>
           )}
 

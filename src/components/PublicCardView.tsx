@@ -6,6 +6,7 @@ import BadgeChip from './BadgeChip.tsx'
 interface PublicCardViewProps {
   card: PublicCard
   showTypeChip?: boolean
+  showMetadataLine?: boolean
   entryOrder?: number
 }
 
@@ -21,7 +22,12 @@ function getCardTypeLabel(cardType: PublicCard['cardType']): string {
   return toLabel(cardType)
 }
 
-function PublicCardView({ card, showTypeChip = true, entryOrder }: PublicCardViewProps) {
+function PublicCardView({
+  card,
+  showTypeChip = true,
+  showMetadataLine = false,
+  entryOrder,
+}: PublicCardViewProps) {
   const [setInViewportRef, isInViewport] = useInViewport<HTMLElement>({
     once: true,
     threshold: 0.24,
@@ -34,16 +40,17 @@ function PublicCardView({ card, showTypeChip = true, entryOrder }: PublicCardVie
           '--deal-order': String(entryOrder),
         } as CSSProperties)
       : undefined
+  const typeLabel = getCardTypeLabel(card.cardType)
 
   return (
     <article
-      className={`panel public-card public-card--compact public-preview-card card-category card-category--${card.cardType} ${
+      className={`panel public-card public-card--compact public-preview-card mission-card card-category card-category--${card.cardType} ${
         hasEntryAnimation ? 'public-preview-card--deal-in' : ''
       } ${hasEntryAnimation && isInViewport ? 'is-in-view' : ''}`}
       ref={hasEntryAnimation ? setInViewportRef : undefined}
       style={entryStyle}
     >
-      <header className="row-between setup-row-wrap public-card__header">
+      <header className="row-between setup-row-wrap public-card__header challenge-card__meta">
         <strong>{card.name}</strong>
         <div className="button-row">
           {showTypeChip && (
@@ -51,7 +58,7 @@ function PublicCardView({ card, showTypeChip = true, entryOrder }: PublicCardVie
               tone="subtle"
               className={`public-card__type-chip public-card__type-chip--${card.cardType}`}
             >
-              {getCardTypeLabel(card.cardType)}
+              {typeLabel}
             </BadgeChip>
           )}
           {card.points !== 0 && (
@@ -62,7 +69,10 @@ function PublicCardView({ card, showTypeChip = true, entryOrder }: PublicCardVie
           )}
         </div>
       </header>
-      <p className="public-card__description">{card.description}</p>
+      <p className="public-card__description challenge-card__description">{card.description}</p>
+      {showMetadataLine && typeLabel && (
+        <p className="public-card__meta-line challenge-card__meta-line muted">{typeLabel}</p>
+      )}
     </article>
   )
 }

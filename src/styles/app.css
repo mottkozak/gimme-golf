@@ -1279,7 +1279,8 @@ main {
   border-left: 2px solid color-mix(in srgb, var(--hole-mission-border) 52%, transparent);
 }
 
-.hole-play-screen--missions .mission-card {
+.hole-play-screen--missions .mission-card,
+.hole-play-screen--missions .public-preview-card {
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--mission-card-border);
   background: var(--mission-card-bg);
@@ -1288,7 +1289,13 @@ main {
   box-shadow: none;
 }
 
-.hole-play-screen--missions .mission-card strong {
+.hole-play-screen--missions .public-preview-card {
+  border-color: var(--mission-public-border);
+  background: var(--mission-public-bg);
+}
+
+.hole-play-screen--missions .mission-card strong,
+.hole-play-screen--missions .public-preview-card strong {
   font-family: var(--font-display);
   font-size: 1.28rem;
   font-weight: 600;
@@ -1300,9 +1307,18 @@ main {
   gap: 0.3rem;
 }
 
-.hole-play-screen--missions .mission-card .challenge-card__description {
+.hole-play-screen--missions .mission-card .challenge-card__description,
+.hole-play-screen--missions .mission-card .public-card__description,
+.hole-play-screen--missions .public-preview-card .challenge-card__description,
+.hole-play-screen--missions .public-preview-card .public-card__description {
   line-height: 1.4;
   font-size: 0.94rem;
+}
+
+.hole-play-screen--missions .mission-card .challenge-card__meta-line,
+.hole-play-screen--missions .public-preview-card .public-card__meta-line {
+  margin-top: 0.04rem;
+  font-size: 0.8rem;
 }
 
 .hole-play-screen--missions .mission-card .challenge-card__offer-detail {
@@ -3853,6 +3869,72 @@ main {
 
 .recap-public-impact-card {
   border-color: color-mix(in srgb, var(--hole-recap-border) 48%, var(--recap-panel-inset-border));
+}
+
+.recap-public-impact-card--expandable {
+  padding: 0;
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.74rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: background-color 160ms ease;
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__summary::-webkit-details-marker {
+  display: none;
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__summary:hover {
+  background: color-mix(in srgb, var(--hole-recap-paper) 34%, transparent);
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__summary-line {
+  margin: 0;
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__toggle-hint {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__hint--open {
+  display: none;
+}
+
+.recap-public-impact-card--expandable[open] .recap-public-impact-card__hint--closed {
+  display: none;
+}
+
+.recap-public-impact-card--expandable[open] .recap-public-impact-card__hint--open {
+  display: inline;
+}
+
+.recap-public-impact-card--expandable .recap-public-impact-card__body {
+  padding: 0 0.74rem 0.74rem;
+  border-top: 1px dashed color-mix(in srgb, var(--recap-panel-inset-border) 70%, transparent);
+}
+
+.recap-public-impact-card__details {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed color-mix(in srgb, var(--recap-panel-inset-border) 70%, transparent);
+}
+
+.recap-public-impact-card__description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.36;
+}
+
+.recap-public-impact-card__rules {
+  margin: 0.36rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.32;
 }
 
 .recap-status-chip {
