@@ -1,8 +1,35 @@
 import type { RoundState } from '../types/game.ts'
+import { mirrorStorageDelete, mirrorStorageWrite } from '../platform/nativeMirrorStorage.ts'
+import {
+  readStorageItem,
+  removeStorageItem,
+  removeStorageItemResult,
+  type StorageOperationError,
+  writeStorageItemResult,
+} from '../platform/storage.ts'
+import { reportTelemetryEvent } from '../platform/telemetry.ts'
 
-export const ACTIVE_ROUND_STORAGE_KEY = 'gimme-golf-active-round-v1'
+const ROUND_SCHEMA_VERSION = 2
+export const LEGACY_ACTIVE_ROUND_STORAGE_KEY = 'gimme-golf-active-round-v1'
+export const ACTIVE_ROUND_STORAGE_JOURNAL_KEY = 'gimme-golf-active-round-v2-journal'
+export const ACTIVE_ROUND_STORAGE_BACKUP_KEY = 'gimme-golf-active-round-v2-backup'
 
-interface PersistedRoundStateEnvelope {
+export const ACTIVE_ROUND_STORAGE_KEY = 'gimme-golf-active-round-v2'
+export const ACTIVE_ROUND_STORAGE_MIGRATION_KEYS = [
+  ACTIVE_ROUND_STORAGE_KEY,
+  ACTIVE_ROUND_STORAGE_JOURNAL_KEY,
+  ACTIVE_ROUND_STORAGE_BACKUP_KEY,
+  LEGACY_ACTIVE_ROUND_STORAGE_KEY,
+] as const
+
+interface PersistedRoundStateEnvelopeV2 {
+  schemaVersion: typeof ROUND_SCHEMA_VERSION
+  roundState: RoundState
+  savedAtMs: number
+  writeId: string
+}
+
+interface PersistedRoundStateEnvelopeV1 {
   roundState: RoundState
   savedAtMs: number
 }
@@ -10,6 +37,40 @@ interface PersistedRoundStateEnvelope {
 export interface RoundStateSnapshot {
   roundState: RoundState | null
   savedAtMs: number | null
+  recoveryReason: RoundStateRecoveryReason | null
+}
+
+export type RoundStateRecoveryReason =
+  | 'recovered_from_journal'
+  | 'recovered_from_backup'
+  | 'migrated_legacy_v1'
+
+export type PersistRoundStateErrorCode =
+  | 'serialize_failed'
+  | 'journal_write_failed'
+  | 'backup_write_failed'
+  | 'primary_write_failed'
+  | 'journal_cleanup_failed'
+
+export interface PersistRoundStateError {
+  code: PersistRoundStateErrorCode
+  cause?: unknown
+  storageError?: StorageOperationError
+}
+
+export type PersistRoundStateResult =
+  | {
+      ok: true
+      savedAtMs: number
+    }
+  | {
+      ok: false
+      error: PersistRoundStateError
+    }
+
+interface PersistedRoundCandidate {
+  key: string
+  envelope: PersistedRoundStateEnvelopeV2
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -88,6 +149,7 @@ function isRoundStateLike(value: unknown): value is RoundState {
     isRecord(value.totalsByPlayerId) &&
     typeof value.currentHoleIndex === 'number' &&
     typeof config.toggles.dynamicDifficulty === 'boolean' &&
+    isBooleanOrUndefined(config.toggles.catchUpMode) &&
     isBooleanOrUndefined(config.toggles.momentumBonuses) &&
     typeof config.toggles.drawTwoPickOne === 'boolean' &&
     typeof config.toggles.autoAssignOne === 'boolean' &&
@@ -98,12 +160,24 @@ function isRoundStateLike(value: unknown): value is RoundState {
   )
 }
 
-function isPersistedRoundStateEnvelope(value: unknown): value is PersistedRoundStateEnvelope {
+function isPersistedRoundStateEnvelopeV1(value: unknown): value is PersistedRoundStateEnvelopeV1 {
   return (
     isRecord(value) &&
     isRoundStateLike(value.roundState) &&
     typeof value.savedAtMs === 'number' &&
     Number.isFinite(value.savedAtMs)
+  )
+}
+
+function isPersistedRoundStateEnvelopeV2(value: unknown): value is PersistedRoundStateEnvelopeV2 {
+  return (
+    isRecord(value) &&
+    value.schemaVersion === ROUND_SCHEMA_VERSION &&
+    isRoundStateLike(value.roundState) &&
+    typeof value.savedAtMs === 'number' &&
+    Number.isFinite(value.savedAtMs) &&
+    typeof value.writeId === 'string' &&
+    value.writeId.length > 0
   )
 }
 
@@ -153,56 +227,362 @@ function clampCurrentHoleIndex(roundState: RoundState): RoundState {
   }
 }
 
-export function saveRoundState(roundState: RoundState): number | null {
-  const savedAtMs = Date.now()
-
-  try {
-    const nextEnvelope: PersistedRoundStateEnvelope = {
-      roundState,
-      savedAtMs,
-    }
-    localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, JSON.stringify(nextEnvelope))
-    return savedAtMs
-  } catch {
-    return null
+function buildEnvelope(roundState: RoundState, savedAtMs = Date.now()): PersistedRoundStateEnvelopeV2 {
+  return {
+    schemaVersion: ROUND_SCHEMA_VERSION,
+    roundState,
+    savedAtMs,
+    writeId: `${savedAtMs}-${Math.random().toString(36).slice(2, 10)}`,
   }
 }
 
-export function loadRoundStateSnapshot(): RoundStateSnapshot {
-  const rawValue = localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY)
-
-  if (!rawValue) {
+function serializeEnvelope(
+  envelope: PersistedRoundStateEnvelopeV2,
+): { ok: true; value: string } | { ok: false; error: PersistRoundStateError } {
+  try {
     return {
-      roundState: null,
-      savedAtMs: null,
+      ok: true,
+      value: JSON.stringify(envelope),
     }
+  } catch (error) {
+    const serializationError: PersistRoundStateError = {
+      code: 'serialize_failed',
+      cause: error,
+    }
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'error',
+      message: 'Failed to serialize round envelope',
+      error,
+    })
+    return {
+      ok: false,
+      error: serializationError,
+    }
+  }
+}
+
+function parseEnvelopeFromRaw(rawValue: string | null): PersistedRoundStateEnvelopeV2 | null {
+  if (!rawValue) {
+    return null
   }
 
   try {
     const parsedValue = JSON.parse(rawValue)
-    const parsedEnvelope = isPersistedRoundStateEnvelope(parsedValue) ? parsedValue : null
-    const roundStateCandidate =
-      parsedEnvelope?.roundState ?? (isRoundStateLike(parsedValue) ? parsedValue : null)
+    if (isPersistedRoundStateEnvelopeV2(parsedValue)) {
+      return parsedValue
+    }
 
-    if (!roundStateCandidate || !hasStructurallyValidRoundState(roundStateCandidate)) {
-      clearRoundState()
+    return null
+  } catch (error) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Ignoring malformed persisted round payload',
+      error,
+    })
+    return null
+  }
+}
+
+function parseLegacyRound(rawValue: string | null): PersistedRoundStateEnvelopeV2 | null {
+  if (!rawValue) {
+    return null
+  }
+
+  try {
+    const parsedValue = JSON.parse(rawValue)
+    if (isPersistedRoundStateEnvelopeV1(parsedValue)) {
+      return buildEnvelope(parsedValue.roundState, Math.round(parsedValue.savedAtMs))
+    }
+
+    if (isRoundStateLike(parsedValue)) {
+      return buildEnvelope(parsedValue)
+    }
+
+    return null
+  } catch (error) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Legacy round payload could not be parsed',
+      error,
+    })
+    return null
+  }
+}
+
+function selectLatestCandidate(candidates: PersistedRoundCandidate[]): PersistedRoundCandidate | null {
+  if (candidates.length === 0) {
+    return null
+  }
+
+  return candidates
+    .slice()
+    .sort((left, right) => right.envelope.savedAtMs - left.envelope.savedAtMs)[0] ?? null
+}
+
+function persistPrimaryEnvelope(
+  envelope: PersistedRoundStateEnvelopeV2,
+): PersistRoundStateResult {
+  const serializationResult = serializeEnvelope(envelope)
+  if (!serializationResult.ok) {
+    return {
+      ok: false,
+      error: serializationResult.error,
+    }
+  }
+
+  const serializedEnvelope = serializationResult.value
+  const existingPrimary = readStorageItem(ACTIVE_ROUND_STORAGE_KEY)
+
+  const journalWrite = writeStorageItemResult(ACTIVE_ROUND_STORAGE_JOURNAL_KEY, serializedEnvelope)
+  if (!journalWrite.ok) {
+    return {
+      ok: false,
+      error: {
+        code: 'journal_write_failed',
+        storageError: journalWrite.error,
+      },
+    }
+  }
+  mirrorStorageWrite(ACTIVE_ROUND_STORAGE_JOURNAL_KEY, serializedEnvelope)
+
+  if (existingPrimary !== null) {
+    const backupWrite = writeStorageItemResult(ACTIVE_ROUND_STORAGE_BACKUP_KEY, existingPrimary)
+    if (!backupWrite.ok) {
+      reportTelemetryEvent({
+        scope: 'round_persistence',
+        level: 'warn',
+        message: 'Primary backup write failed before replacing round snapshot',
+        data: {
+          code: backupWrite.error.code,
+        },
+        error: backupWrite.error.cause,
+      })
       return {
-        roundState: null,
-        savedAtMs: null,
+        ok: false,
+        error: {
+          code: 'backup_write_failed',
+          storageError: backupWrite.error,
+        },
       }
     }
+    mirrorStorageWrite(ACTIVE_ROUND_STORAGE_BACKUP_KEY, existingPrimary)
+  }
 
+  const primaryWrite = writeStorageItemResult(ACTIVE_ROUND_STORAGE_KEY, serializedEnvelope)
+  if (!primaryWrite.ok) {
     return {
-      roundState: clampCurrentHoleIndex(roundStateCandidate),
-      savedAtMs: parsedEnvelope ? Math.round(parsedEnvelope.savedAtMs) : null,
+      ok: false,
+      error: {
+        code: 'primary_write_failed',
+        storageError: primaryWrite.error,
+      },
     }
-  } catch {
+  }
+  mirrorStorageWrite(ACTIVE_ROUND_STORAGE_KEY, serializedEnvelope)
+
+  const journalClear = removeStorageItemResult(ACTIVE_ROUND_STORAGE_JOURNAL_KEY)
+  if (!journalClear.ok) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Primary write succeeded but journal cleanup failed',
+      data: {
+        code: journalClear.error.code,
+      },
+      error: journalClear.error.cause,
+    })
+    return {
+      ok: false,
+      error: {
+        code: 'journal_cleanup_failed',
+        storageError: journalClear.error,
+      },
+    }
+  }
+
+  mirrorStorageDelete(ACTIVE_ROUND_STORAGE_JOURNAL_KEY)
+
+  return {
+    ok: true,
+    savedAtMs: envelope.savedAtMs,
+  }
+}
+
+function migrateLegacySnapshot(
+  legacyEnvelope: PersistedRoundStateEnvelopeV2,
+): RoundStateSnapshot {
+  const migrationPersistResult = persistPrimaryEnvelope(legacyEnvelope)
+  if (!migrationPersistResult.ok) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Failed to persist migrated legacy round snapshot',
+      data: {
+        code: migrationPersistResult.error.code,
+      },
+      error: migrationPersistResult.error.cause ?? migrationPersistResult.error.storageError?.cause,
+    })
+  }
+
+  removeStorageItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+  mirrorStorageDelete(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+
+  return {
+    roundState: clampCurrentHoleIndex(legacyEnvelope.roundState),
+    savedAtMs: legacyEnvelope.savedAtMs,
+    recoveryReason: 'migrated_legacy_v1',
+  }
+}
+
+function loadVersionedSnapshot(): RoundStateSnapshot | null {
+  const primaryCandidate = parseEnvelopeFromRaw(readStorageItem(ACTIVE_ROUND_STORAGE_KEY))
+  const journalCandidate = parseEnvelopeFromRaw(readStorageItem(ACTIVE_ROUND_STORAGE_JOURNAL_KEY))
+  const backupCandidate = parseEnvelopeFromRaw(readStorageItem(ACTIVE_ROUND_STORAGE_BACKUP_KEY))
+
+  const parsedCandidates: PersistedRoundCandidate[] = []
+  if (primaryCandidate) {
+    parsedCandidates.push({
+      key: ACTIVE_ROUND_STORAGE_KEY,
+      envelope: primaryCandidate,
+    })
+  }
+  if (journalCandidate) {
+    parsedCandidates.push({
+      key: ACTIVE_ROUND_STORAGE_JOURNAL_KEY,
+      envelope: journalCandidate,
+    })
+  }
+  if (backupCandidate) {
+    parsedCandidates.push({
+      key: ACTIVE_ROUND_STORAGE_BACKUP_KEY,
+      envelope: backupCandidate,
+    })
+  }
+
+  const latestCandidate = selectLatestCandidate(parsedCandidates)
+  if (!latestCandidate) {
+    return null
+  }
+
+  const candidateRoundState = latestCandidate.envelope.roundState
+  if (!hasStructurallyValidRoundState(candidateRoundState)) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Persisted round candidate failed structural validation and was cleared',
+      data: {
+        key: latestCandidate.key,
+      },
+    })
     clearRoundState()
+    removeStorageItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+    mirrorStorageDelete(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
     return {
       roundState: null,
       savedAtMs: null,
+      recoveryReason: null,
     }
   }
+
+  if (latestCandidate.key !== ACTIVE_ROUND_STORAGE_KEY) {
+    const recoveryPersistResult = persistPrimaryEnvelope(latestCandidate.envelope)
+    if (!recoveryPersistResult.ok) {
+      reportTelemetryEvent({
+        scope: 'round_persistence',
+        level: 'warn',
+        message: 'Failed to persist recovered round candidate to primary storage',
+        data: {
+          sourceKey: latestCandidate.key,
+          code: recoveryPersistResult.error.code,
+        },
+        error:
+          recoveryPersistResult.error.cause ?? recoveryPersistResult.error.storageError?.cause,
+      })
+    }
+
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Recovered round snapshot from non-primary source',
+      data: {
+        sourceKey: latestCandidate.key,
+      },
+    })
+  }
+
+  return {
+    roundState: clampCurrentHoleIndex(candidateRoundState),
+    savedAtMs: Math.round(latestCandidate.envelope.savedAtMs),
+    recoveryReason:
+      latestCandidate.key === ACTIVE_ROUND_STORAGE_JOURNAL_KEY
+        ? 'recovered_from_journal'
+        : latestCandidate.key === ACTIVE_ROUND_STORAGE_BACKUP_KEY
+          ? 'recovered_from_backup'
+          : null,
+  }
+}
+
+export function saveRoundStateResult(roundState: RoundState): PersistRoundStateResult {
+  const envelope = buildEnvelope(roundState)
+  return persistPrimaryEnvelope(envelope)
+}
+
+export function saveRoundState(roundState: RoundState): number | null {
+  const result = saveRoundStateResult(roundState)
+  if (!result.ok) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Round state save failed',
+      data: {
+        code: result.error.code,
+      },
+      error: result.error.cause ?? result.error.storageError?.cause,
+    })
+    return null
+  }
+
+  return result.savedAtMs
+}
+
+export function loadRoundStateSnapshot(): RoundStateSnapshot {
+  const versionedSnapshot = loadVersionedSnapshot()
+  if (versionedSnapshot) {
+    return versionedSnapshot
+  }
+
+  const legacyEnvelope = parseLegacyRound(
+    readStorageItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY),
+  )
+
+  if (!legacyEnvelope) {
+    return {
+      roundState: null,
+      savedAtMs: null,
+      recoveryReason: null,
+    }
+  }
+
+  if (!hasStructurallyValidRoundState(legacyEnvelope.roundState)) {
+    reportTelemetryEvent({
+      scope: 'round_persistence',
+      level: 'warn',
+      message: 'Legacy persisted round failed structural validation and was cleared',
+    })
+    clearRoundState()
+    removeStorageItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+    mirrorStorageDelete(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+    return {
+      roundState: null,
+      savedAtMs: null,
+      recoveryReason: null,
+    }
+  }
+
+  return migrateLegacySnapshot(legacyEnvelope)
 }
 
 export function loadRoundState(): RoundState | null {
@@ -210,5 +590,13 @@ export function loadRoundState(): RoundState | null {
 }
 
 export function clearRoundState(): void {
-  localStorage.removeItem(ACTIVE_ROUND_STORAGE_KEY)
+  removeStorageItem(ACTIVE_ROUND_STORAGE_KEY)
+  removeStorageItem(ACTIVE_ROUND_STORAGE_JOURNAL_KEY)
+  removeStorageItem(ACTIVE_ROUND_STORAGE_BACKUP_KEY)
+  removeStorageItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
+
+  mirrorStorageDelete(ACTIVE_ROUND_STORAGE_KEY)
+  mirrorStorageDelete(ACTIVE_ROUND_STORAGE_JOURNAL_KEY)
+  mirrorStorageDelete(ACTIVE_ROUND_STORAGE_BACKUP_KEY)
+  mirrorStorageDelete(LEGACY_ACTIVE_ROUND_STORAGE_KEY)
 }

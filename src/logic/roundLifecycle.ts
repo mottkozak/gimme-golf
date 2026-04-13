@@ -29,6 +29,7 @@ const DEFAULT_ROUND_CONFIG: RoundConfig = {
   },
   toggles: {
     dynamicDifficulty: DEFAULT_PRESET_SETTINGS.toggles.dynamicDifficulty,
+    catchUpMode: DEFAULT_PRESET_SETTINGS.toggles.catchUpMode,
     momentumBonuses: DEFAULT_PRESET_SETTINGS.toggles.momentumBonuses,
     drawTwoPickOne: DEFAULT_PRESET_SETTINGS.toggles.drawTwoPickOne,
     autoAssignOne: DEFAULT_PRESET_SETTINGS.toggles.autoAssignOne,

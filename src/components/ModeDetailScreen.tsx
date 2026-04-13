@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useCallback, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import AppIcon from './AppIcon.tsx'
 import ChallengeCardView from './ChallengeCardView.tsx'
 import PowerUpCard from './PowerUpCard.tsx'
@@ -252,6 +252,8 @@ function getModeSampleCardStrips(modeId: LandingModeId): ModeSampleStrip[] {
   return []
 }
 
+const SWIPE_BACK_THRESHOLD_PX = 80
+
 function ModeDetailScreen({
   mode,
   hasSavedRoundProgress,
@@ -261,9 +263,52 @@ function ModeDetailScreen({
   sharedIconTransitionStyle,
 }: ModeDetailScreenProps) {
   const modeSampleCardStrips = getModeSampleCardStrips(mode.id)
+  const [sampleIndices, setSampleIndices] = useState<number[]>(() =>
+    modeSampleCardStrips.map(() => 0),
+  )
+
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const touchLast = useRef<{ x: number; y: number } | null>(null)
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      const t = e.targetTouches[0]
+      if (!t) return
+      touchStart.current = { x: t.clientX, y: t.clientY }
+      touchLast.current = { x: t.clientX, y: t.clientY }
+    },
+    [],
+  )
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const t = e.targetTouches[0]
+    if (!t || !touchLast.current) return
+    touchLast.current = { x: t.clientX, y: t.clientY }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    const start = touchStart.current
+    const last = touchLast.current
+    touchStart.current = null
+    touchLast.current = null
+    if (!start || !last) return
+    const deltaX = last.x - start.x
+    const deltaY = last.y - start.y
+    const absX = Math.abs(deltaX)
+    const absY = Math.abs(deltaY)
+    if (deltaX > SWIPE_BACK_THRESHOLD_PX && absX > absY) {
+      onBack()
+    }
+  }, [onBack])
 
   return (
-    <section className={`screen mode-detail-screen mode-tone--${mode.toneClassName}`}>
+    <section
+      className={`screen mode-detail-screen mode-tone--${mode.toneClassName}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+    >
       <article className="mode-spotlight">
         <button
           type="button"
@@ -274,56 +319,120 @@ function ModeDetailScreen({
           <AppIcon className="mode-spotlight__back-icon" icon="arrow_back" />
         </button>
 
-        <section
-          className="mode-spotlight__hero mode-spotlight__hero--shared"
-          aria-label={`${mode.name} mode details`}
-          style={sharedCardTransitionStyle}
-        >
-          <div className="mode-spotlight__emblem" aria-hidden="true" style={sharedIconTransitionStyle}>
-            <AppIcon className="mode-spotlight__icon" icon={mode.icon} />
-          </div>
-          {mode.isPremium && <span className="chip mode-spotlight__premium-chip">Premium</span>}
-          <h2 className="mode-spotlight__title">{mode.name}</h2>
-          <p className="mode-spotlight__summary">{mode.tagline}</p>
-          <p className="mode-spotlight__description">{mode.description}</p>
-        </section>
-
-        {modeSampleCardStrips.map((strip) => (
+        <div className="mode-spotlight__body">
           <section
-            key={strip.label}
-            className="mode-spotlight__sample"
-            aria-label={`${mode.name} ${strip.label}`}
+            className="mode-spotlight__hero mode-spotlight__hero--shared"
+            aria-label={`${mode.name} mode details`}
+            style={sharedCardTransitionStyle}
           >
-            <p className="mode-spotlight__sample-label">{strip.label}</p>
-            <div className="mode-spotlight__sample-scroll" role="list" aria-label={`${strip.label} examples`}>
-              {strip.cards.map((sampleCard) => (
-                <article key={sampleCard.id} className="mode-spotlight__sample-item" role="listitem">
-                  <div className="mode-spotlight__sample-card">{sampleCard.card}</div>
-                </article>
-              ))}
+            <div className="mode-spotlight__emblem" aria-hidden="true" style={sharedIconTransitionStyle}>
+              <AppIcon className="mode-spotlight__icon" icon={mode.icon} />
             </div>
+            {mode.isPremium && <span className="chip mode-spotlight__premium-chip">Premium</span>}
+            <h2 className="mode-spotlight__title">{mode.name}</h2>
+            <p className="mode-spotlight__summary">{mode.tagline}</p>
+            <p className="mode-spotlight__description">{mode.description}</p>
           </section>
-        ))}
 
-        {hasSavedRoundProgress && (
-          <section className="mode-spotlight__callout" role="status" aria-live="polite">
-            <p className="label">Saved Round In Progress</p>
-            <p>
-              Starting {mode.name} opens a new setup and replaces in-progress local hole data.
-            </p>
+          {modeSampleCardStrips.map((strip, stripIndex) => {
+          const currentIndex = sampleIndices[stripIndex] ?? 0
+          const setCurrentIndex = (idx: number) => {
+            setSampleIndices((prev) => {
+              const next = [...prev]
+              next[stripIndex] = Math.max(0, Math.min(idx, strip.cards.length - 1))
+              return next
+            })
+          }
+          const currentCard = strip.cards[currentIndex]
+          const canGoPrev = currentIndex > 0
+          const canGoNext = currentIndex < strip.cards.length - 1
+          return (
+            <section
+              key={strip.label}
+              className="mode-spotlight__sample"
+              aria-label={`${mode.name} ${strip.label}`}
+            >
+              <p className="mode-spotlight__sample-label">{strip.label}</p>
+              <div
+                className="mode-spotlight__sample-carousel"
+                role="group"
+                aria-label={`${strip.label} examples`}
+              >
+                <div className="mode-spotlight__sample-carousel-row">
+                  <button
+                    type="button"
+                    className="mode-spotlight__sample-arrow"
+                    aria-label="Previous example"
+                    disabled={!canGoPrev}
+                    onClick={() => setCurrentIndex(currentIndex - 1)}
+                  >
+                    <AppIcon icon="chevron_left" />
+                  </button>
+                  <article
+                    key={currentCard?.id}
+                    className="mode-spotlight__sample-item mode-spotlight__sample-item--single"
+                    role="listitem"
+                  >
+                    <div className="mode-spotlight__sample-card">
+                      {currentCard?.card}
+                    </div>
+                  </article>
+                  <button
+                    type="button"
+                    className="mode-spotlight__sample-arrow"
+                    aria-label="Next example"
+                    disabled={!canGoNext}
+                    onClick={() => setCurrentIndex(currentIndex + 1)}
+                  >
+                    <AppIcon icon="chevron_right" />
+                  </button>
+                </div>
+                {strip.cards.length > 1 && (
+                  <div
+                    className="mode-spotlight__sample-dots"
+                    role="tablist"
+                    aria-label="Example cards"
+                  >
+                    {strip.cards.map((_, dotIndex) => (
+                      <button
+                        key={dotIndex}
+                        type="button"
+                        role="tab"
+                        aria-selected={dotIndex === currentIndex}
+                        aria-label={`Example ${dotIndex + 1} of ${strip.cards.length}`}
+                        className={`mode-spotlight__sample-dot ${
+                          dotIndex === currentIndex ? 'mode-spotlight__sample-dot--active' : ''
+                        }`}
+                        onClick={() => setCurrentIndex(dotIndex)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          )
+        })}
+
+          {hasSavedRoundProgress && (
+            <section className="mode-spotlight__callout" role="status" aria-live="polite">
+              <p className="label">Saved Round In Progress</p>
+              <p>
+                Starting {mode.name} opens a new setup and replaces in-progress local hole data.
+              </p>
+            </section>
+          )}
+
+          <section className="mode-spotlight__footer">
+            <button
+              type="button"
+              className="mode-spotlight__cta"
+              onClick={onPlay}
+            >
+              {mode.ctaLabel}
+              <AppIcon className="button-icon" icon="play_arrow" />
+            </button>
           </section>
-        )}
-
-        <section className="mode-spotlight__footer">
-          <button
-            type="button"
-            className="mode-spotlight__cta"
-            onClick={onPlay}
-          >
-            {mode.ctaLabel}
-            <AppIcon className="button-icon" icon="play_arrow" />
-          </button>
-        </section>
+        </div>
       </article>
     </section>
   )

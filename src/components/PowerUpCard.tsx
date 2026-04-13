@@ -1,8 +1,13 @@
+import { useState } from 'react'
+import type { ChallengeLayout } from '../logic/account.ts'
 import type { PowerUp } from '../data/powerUps.ts'
 
 interface PowerUpCardProps {
   playerName?: string
   powerUp: PowerUp
+  layout?: ChallengeLayout
+  illustrativeImageSrc?: string | null
+  illustrativeImageAlt?: string
   used?: boolean
   onUse?: () => void
   showPlayerName?: boolean
@@ -13,6 +18,9 @@ interface PowerUpCardProps {
 function PowerUpCard({
   playerName,
   powerUp,
+  layout = 'compact',
+  illustrativeImageSrc,
+  illustrativeImageAlt,
   used = false,
   onUse,
   showPlayerName = true,
@@ -22,9 +30,30 @@ function PowerUpCard({
   const effectivePlayerName = playerName?.trim() || 'Player'
   const onUsePowerUp = onUse ?? (() => undefined)
   const shouldRenderHeader = showPlayerName || showCategoryChips
+  const [failedIllustrativeImageSrc, setFailedIllustrativeImageSrc] = useState<string | null>(null)
+  const hasIllustrativeImage =
+    layout === 'illustrative' &&
+    typeof illustrativeImageSrc === 'string' &&
+    illustrativeImageSrc.length > 0 &&
+    illustrativeImageSrc !== failedIllustrativeImageSrc
 
   return (
-    <article className={`panel power-up-card stack-xs ${used ? 'power-up-card--used' : ''}`}>
+    <article
+      className={`panel power-up-card stack-xs ${used ? 'power-up-card--used' : ''} ${
+        layout === 'illustrative' ? 'power-up-card--illustrative' : 'power-up-card--compact'
+      }`}
+    >
+      {hasIllustrativeImage && (
+        <figure className="power-up-card__illustration-frame">
+          <img
+            className="power-up-card__illustration"
+            src={illustrativeImageSrc}
+            alt={illustrativeImageAlt ?? `${powerUp.title} card`}
+            loading="lazy"
+            onError={() => setFailedIllustrativeImageSrc(illustrativeImageSrc)}
+          />
+        </figure>
+      )}
       {shouldRenderHeader && (
         <div className="row-between">
           {showPlayerName ? <strong>{effectivePlayerName}</strong> : <span aria-hidden="true" />}

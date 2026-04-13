@@ -24,6 +24,7 @@ function createRoundStateFixture(): RoundState {
       },
       toggles: {
         dynamicDifficulty: true,
+        catchUpMode: true,
         momentumBonuses: true,
         drawTwoPickOne: true,
         autoAssignOne: false,
@@ -67,8 +68,11 @@ test('buildRoundRecapPayload returns winner names and top 3 leaderboard rows', (
   const recapPayload = buildRoundRecapPayload(roundState)
 
   assert.equal(recapPayload.winnerNames, 'Player 2 & Alex')
+  assert.equal(recapPayload.shareTheme, 'champion')
+  assert.equal(recapPayload.themeTitle, 'Champion Recap')
   assert.equal(recapPayload.holeCount, 9)
   assert.equal(recapPayload.gameModeLabel, 'Cards')
+  assert.equal(recapPayload.bestMomentLine.includes('Winner spotlight'), true)
   assert.equal(recapPayload.topLeaderboardRows.length, 3)
   assert.deepEqual(
     recapPayload.topLeaderboardRows.map((row) => row.playerName),
@@ -83,12 +87,35 @@ test('buildRoundRecapPayload returns winner names and top 3 leaderboard rows', (
 test('formatRoundRecapText serializes recap payload with URL and signed points', () => {
   const recapPayload = buildRoundRecapPayload(createRoundStateFixture())
 
-  const recapText = formatRoundRecapText(recapPayload, 'https://example.com/gimme-golf')
+  const recapText = formatRoundRecapText(recapPayload, {
+    ios: 'https://apps.apple.com/app/id1234567890',
+    android: 'https://play.google.com/store/apps/details?id=com.example.gimmegolf',
+  })
 
-  assert.equal(recapText.includes('Gimme Golf Round Recap'), true)
-  assert.equal(recapText.includes('Winner: Player 2 & Alex'), true)
-  assert.equal(recapText.includes('Mode: Cards | Holes: 9'), true)
+  assert.equal(recapText.includes('Gimme Golf Champion Recap'), true)
+  assert.equal(recapText.includes('Podium Winner: Player 2 & Alex'), true)
+  assert.equal(recapText.includes('Round Moment: Winner spotlight: Player 2 & Alex'), true)
+  assert.equal(recapText.includes('Format: Cards | Holes: 9'), true)
   assert.equal(recapText.includes('1. Player 2 - Adjusted 67 | Points +9'), true)
   assert.equal(recapText.includes('3. Casey - Adjusted 75 | Points -1'), true)
-  assert.equal(recapText.includes('Play the app: https://example.com/gimme-golf'), true)
+  assert.equal(recapText.includes('Download Gimme Golf:'), true)
+  assert.equal(recapText.includes('App Store (iOS): https://apps.apple.com/app/id1234567890'), true)
+  assert.equal(
+    recapText.includes('Google Play (Android): https://play.google.com/store/apps/details?id=com.example.gimmegolf'),
+    true,
+  )
+})
+
+test('buildRoundRecapPayload supports chaos and comeback themes', () => {
+  const roundState = createRoundStateFixture()
+
+  const chaosPayload = buildRoundRecapPayload(roundState, { theme: 'chaos' })
+  const comebackPayload = buildRoundRecapPayload(roundState, { theme: 'comeback' })
+
+  assert.equal(chaosPayload.shareTheme, 'chaos')
+  assert.equal(chaosPayload.themeTitle, 'Chaos Recap')
+  assert.equal(chaosPayload.bestMomentLine.includes('chaos'), true)
+  assert.equal(comebackPayload.shareTheme, 'comeback')
+  assert.equal(comebackPayload.themeTitle, 'Comeback Recap')
+  assert.equal(comebackPayload.bestMomentLine.length > 0, true)
 })

@@ -1,0 +1,27 @@
+/* Mobile screen-specific slices extracted from app.css for phased modularization. */
+
+.home-screen {
+  padding-bottom: calc(8.5rem + var(--safe-area-bottom));
+}
+
+.home-floating-dock {
+  bottom: var(--safe-area-bottom);
+  transition: opacity var(--motion-fast), transform var(--motion-fast);
+}
+
+.end-share-toast {
+  bottom: calc(var(--space-2) + 5.2rem + var(--safe-area-bottom));
+}
+
+@media (min-width: 420px) {
+  .end-share-toast {
+    bottom: calc(var(--space-2) + 3.8rem + var(--safe-area-bottom));
+  }
+}
+
+.mode-detail-screen {
+  padding: calc(var(--space-5) + 0.3rem + var(--safe-area-top))
+    calc(var(--space-4) + var(--safe-area-right))
+    calc(var(--space-6) + 5.3rem + var(--safe-area-bottom))
+    calc(var(--space-4) + var(--safe-area-left));
+}

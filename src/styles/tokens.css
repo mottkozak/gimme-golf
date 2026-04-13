@@ -18,6 +18,7 @@
   --color-forest-soft: #d9e8df;
   --color-rose-dust: #d78d95;
   --color-blush: #efd4d9;
+  --color-blush-strong: var(--color-rose-dust);
   --color-lavender: #d7c2e7;
   --color-sage: #c2d5c4;
   --color-butter: #eddcaf;
@@ -29,6 +30,7 @@
   --surface-panel: var(--color-panel);
   --surface-panel-muted: var(--color-panel-soft);
   --surface-elevated: #fffaf4;
+  --surface-alt: #f2e8db;
   --surface-info: #e9eef3;
   --surface-success: #e5f0ea;
   --surface-warning: #f4ead6;
@@ -45,9 +47,9 @@
   --text-info: #4a617c;
 
   /* Semantic actions */
-  --accent: #2e7d5a;
-  --accent-strong: #225f43;
-  --accent-soft: color-mix(in srgb, #2e7d5a 18%, var(--surface-panel));
+  --accent: var(--hole-action-bg);
+  --accent-strong: var(--hole-action-bg);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface-panel));
   --info: #6380a1;
   --warning: #be9254;
   --danger: #b56570;
@@ -81,7 +83,7 @@
   --hole-mission-selected-border: #6f9278;
   --hole-public-preview-bg: #edf1f4;
   --hole-public-preview-border: #8a9aab;
-  --hole-action-bg: #243f36;
+  --hole-action-bg: #004e36;
   --hole-action-text: #f7efe4;
   --hole-action-disabled-bg: #d8d0c4;
   --hole-action-disabled-text: #6d665f;
@@ -138,6 +140,10 @@
   --space-6: 2rem;
   --space-7: 2.6rem;
 
+  /* Mobile ergonomics */
+  --touch-target-min: 44px;
+  --touch-target-min-android: 48px;
+
   --shadow-soft:
     0 1px 0 rgba(47, 41, 38, 0.06),
     0 8px 20px -18px rgba(47, 41, 38, 0.28);
@@ -166,104 +172,7 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-
-    --surface-app: #1a1715;
-    --surface-panel: #25211e;
-    --surface-panel-muted: #2d2723;
-    --surface-elevated: #2a2421;
-
-    --text-primary: #f8f0e7;
-    --text-secondary: #ccbeb1;
-    --text-muted: #b7a798;
-
-    --accent: #5aa881;
-    --accent-strong: #9bd1b7;
-    --accent-soft: color-mix(in srgb, #5aa881 24%, #2a2421);
-
-    --info: #88a9cb;
-    --warning: #d3b17a;
-    --danger: #ce8f98;
-    --novelty: #bca0d2;
-
-    --surface-info: #2a3138;
-    --surface-success: #253228;
-    --surface-warning: #3a3227;
-    --surface-danger: #3a2a2d;
-
-    --text-success: #8ec0a7;
-    --text-warning: #ebcb94;
-    --text-danger: #e7b0b7;
-    --text-info: #a7c2e0;
-
-    --color-border-ink: #7a6e66;
-    --border-subtle: color-mix(in srgb, var(--color-border-ink) 44%, #000000 56%);
-
-    --mode-classic-bg: #675741;
-    --mode-classic-border: #ab916b;
-    --mode-novelty-bg: #5d4e5f;
-    --mode-novelty-border: #a889a3;
-    --mode-chaos-bg: #664743;
-    --mode-chaos-border: #ad7d73;
-    --mode-props-bg: #4d583f;
-    --mode-props-border: #95a27a;
-    --mode-power-bg: #4e495f;
-    --mode-power-border: #9d92b7;
-
-    --hole-mission-paper: #26211d;
-    --hole-mission-surface: #302924;
-    --hole-mission-surface-muted: #382f29;
-    --hole-mission-border: #7b6f66;
-    --hole-mission-border-strong: #7ea28b;
-    --hole-mission-ready-bg: #2f4036;
-    --hole-mission-ready-border: #85aa93;
-    --hole-mission-pending-bg: #3a3d37;
-    --hole-mission-pending-border: #9ba99b;
-    --hole-mission-chip-bg: #3a322c;
-    --hole-mission-chip-border: #7e7066;
-    --hole-mission-selected-bg: #334237;
-    --hole-mission-selected-border: #86a88f;
-    --hole-public-preview-bg: #30373e;
-    --hole-public-preview-border: #8ea2b7;
-    --hole-action-bg: #192922;
-    --hole-action-text: #f5eee3;
-    --hole-action-disabled-bg: #4a443e;
-    --hole-action-disabled-text: #cbc2b5;
-
-    --hole-results-paper: #2b2521;
-    --hole-results-surface: #342c26;
-    --hole-results-surface-muted: #3b312a;
-    --hole-results-border: #7e7167;
-    --hole-results-border-strong: #85a890;
-    --hole-results-ready-bg: #314138;
-    --hole-results-ready-border: #89ad94;
-    --hole-results-pending-bg: #3d4039;
-    --hole-results-pending-border: #9ca99c;
-    --hole-results-chip-bg: #3a312a;
-    --hole-results-chip-border: #807265;
-    --hole-results-target-bg: #332b25;
-    --hole-results-target-border: #8f7f70;
-
-    --hole-recap-paper: #2c2520;
-    --hole-recap-surface: #352c26;
-    --hole-recap-surface-muted: #3d322b;
-    --hole-recap-border: #7e7065;
-    --hole-recap-border-strong: #84a78f;
-    --hole-recap-hero-bg: #3a3128;
-    --hole-recap-hero-border: #8b7a66;
-    --hole-recap-chip-bg: #3c322b;
-    --hole-recap-chip-border: #807264;
-    --hole-recap-table-head-bg: #3a3028;
-    --hole-recap-table-row-leader-bg: #314037;
-    --hole-recap-breakdown-bg: #322920;
-
-    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.45);
-    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.35);
-    --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 34%, transparent);
-  }
-}
+/* Theme is set only via data-theme (Light/Dark in Settings). System preference is ignored. */
 
 :root[data-theme='light'] {
   color-scheme: light;
@@ -272,14 +181,15 @@
   --surface-panel: var(--color-panel);
   --surface-panel-muted: var(--color-panel-soft);
   --surface-elevated: #fffaf4;
+  --surface-alt: #f2e8db;
 
   --text-primary: var(--color-ink);
   --text-secondary: var(--color-ink-muted);
   --text-muted: color-mix(in srgb, var(--color-ink-muted) 80%, var(--surface-panel));
 
-  --accent: #2e7d5a;
-  --accent-strong: #225f43;
-  --accent-soft: color-mix(in srgb, #2e7d5a 18%, var(--surface-panel));
+  --accent: var(--hole-action-bg);
+  --accent-strong: var(--hole-action-bg);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, var(--surface-panel));
 
   --info: #6380a1;
   --warning: #be9254;
@@ -325,7 +235,7 @@
   --hole-mission-selected-border: #6f9278;
   --hole-public-preview-bg: #edf1f4;
   --hole-public-preview-border: #8a9aab;
-  --hole-action-bg: #243f36;
+  --hole-action-bg: #004e36;
   --hole-action-text: #f7efe4;
   --hole-action-disabled-bg: #d8d0c4;
   --hole-action-disabled-text: #6d665f;
@@ -373,14 +283,15 @@
   --surface-panel: #25211e;
   --surface-panel-muted: #2d2723;
   --surface-elevated: #2a2421;
+  --surface-alt: #342e2a;
 
   --text-primary: #f8f0e7;
   --text-secondary: #ccbeb1;
   --text-muted: #b7a798;
 
-  --accent: #5aa881;
-  --accent-strong: #9bd1b7;
-  --accent-soft: color-mix(in srgb, #5aa881 24%, #2a2421);
+  --accent: var(--hole-action-bg);
+  --accent-strong: var(--hole-action-bg);
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, #2a2421);
 
   --info: #88a9cb;
   --warning: #d3b17a;
@@ -426,7 +337,7 @@
   --hole-mission-selected-border: #86a88f;
   --hole-public-preview-bg: #30373e;
   --hole-public-preview-border: #8ea2b7;
-  --hole-action-bg: #192922;
+  --hole-action-bg: #004e36;
   --hole-action-text: #f5eee3;
   --hole-action-disabled-bg: #4a443e;
   --hole-action-disabled-text: #cbc2b5;

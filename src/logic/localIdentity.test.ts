@@ -53,6 +53,7 @@ function createRoundStateFixture(completedAtMs: number): RoundState {
       },
       toggles: {
         dynamicDifficulty: true,
+        catchUpMode: true,
         momentumBonuses: false,
         drawTwoPickOne: false,
         autoAssignOne: true,
@@ -122,6 +123,21 @@ test('local identity dedupes repeat writes for the same completed round', () => 
 
   assert.equal(snapshot.roundHistory.length, 1)
   assert.equal(getPlayerProfileByName(snapshot, 'Alex')?.roundsPlayed, 1)
+})
+
+test('local identity records co-winners when adjusted score is tied', () => {
+  installLocalStorageMock()
+  clearLocalIdentityState()
+
+  const roundState = createRoundStateFixture(1_701_000_000_000)
+  roundState.totalsByPlayerId = {
+    p1: { realScore: 71, gamePoints: 2, adjustedScore: 66 },
+    p2: { realScore: 71, gamePoints: 5, adjustedScore: 66 },
+    p3: { realScore: 74, gamePoints: 8, adjustedScore: 66 },
+  }
+
+  const snapshot = recordCompletedRoundIdentity(roundState)
+  assert.equal(snapshot.roundHistory[0]?.winnerNames, 'Bailey, Alex & Casey')
 })
 
 test('player identity badge prioritizes award streaks and then consistency', () => {

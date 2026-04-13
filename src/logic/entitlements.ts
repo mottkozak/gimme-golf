@@ -1,4 +1,5 @@
 import type { CardPackId } from '../types/cards.ts'
+import { readStorageItem, removeStorageItem, writeStorageItem } from '../platform/storage.ts'
 
 const ENTITLEMENT_STORAGE_KEY = 'gimme-golf-entitlements-v1'
 
@@ -16,14 +17,6 @@ export interface PackEntitlement {
 const DEFAULT_ENTITLEMENT_STATE: EntitlementState = {
   premiumPacksActive: false,
   unlockedPremiumTiers: [],
-}
-
-function getStorage(): Storage | null {
-  if (typeof globalThis.localStorage === 'undefined') {
-    return null
-  }
-
-  return globalThis.localStorage
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -46,12 +39,7 @@ function normalizeEntitlementState(candidateState: unknown): EntitlementState {
 }
 
 export function loadEntitlementState(): EntitlementState {
-  const storage = getStorage()
-  if (!storage) {
-    return DEFAULT_ENTITLEMENT_STATE
-  }
-
-  const rawValue = storage.getItem(ENTITLEMENT_STORAGE_KEY)
+  const rawValue = readStorageItem(ENTITLEMENT_STORAGE_KEY)
   if (!rawValue) {
     return DEFAULT_ENTITLEMENT_STATE
   }
@@ -64,12 +52,7 @@ export function loadEntitlementState(): EntitlementState {
 }
 
 export function saveEntitlementState(nextState: EntitlementState): void {
-  const storage = getStorage()
-  if (!storage) {
-    return
-  }
-
-  storage.setItem(
+  writeStorageItem(
     ENTITLEMENT_STORAGE_KEY,
     JSON.stringify(normalizeEntitlementState(nextState)),
   )
@@ -96,12 +79,7 @@ export function grantPremiumTier(premiumTier: string): void {
 }
 
 export function clearEntitlementState(): void {
-  const storage = getStorage()
-  if (!storage) {
-    return
-  }
-
-  storage.removeItem(ENTITLEMENT_STORAGE_KEY)
+  removeStorageItem(ENTITLEMENT_STORAGE_KEY)
 }
 
 export function getPackEntitlement(packId: CardPackId, premiumTier: string | null): PackEntitlement {

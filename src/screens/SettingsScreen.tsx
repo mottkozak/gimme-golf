@@ -1,59 +1,56 @@
 import { useState } from 'react'
 import { ICONS } from '../app/icons.ts'
 import AppIcon from '../components/AppIcon.tsx'
-import ToggleRow from '../components/ToggleRow.tsx'
+import { setStatusBarStyle } from '../capacitor.ts'
+import { hapticLightImpact, hapticSelection, hapticSuccess, hapticWarning } from '../capacitor/haptics.ts'
+import { getBillingUrl, getPrivacyPolicyUrl, getTermsOfUseUrl } from '../config/appLinks.ts'
+import {
+  clearAccountProfile,
+} from '../logic/account.ts'
 import { clearLocalIdentityState } from '../logic/localIdentity.ts'
 import {
   applyThemePreference,
   clearPreferences,
-  loadNotificationsPreference,
-  loadThemePreference,
-  saveNotificationsPreference,
-  saveThemePreference,
-  type ThemePreference,
 } from '../logic/preferences.ts'
-import type { ScreenProps } from './types.ts'
+import type { ScreenProps } from '../app/screenContracts.ts'
 
 function SettingsScreen({ onNavigate, onAbandonRound }: ScreenProps) {
-  const [theme, setTheme] = useState<ThemePreference>(() => loadThemePreference())
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() =>
-    loadNotificationsPreference(),
-  )
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null)
 
-  const setThemePreference = (nextTheme: ThemePreference) => {
-    setTheme(nextTheme)
-    saveThemePreference(nextTheme)
-    applyThemePreference(nextTheme)
-  }
-
-  const setNotifications = (enabled: boolean) => {
-    setNotificationsEnabled(enabled)
-    saveNotificationsPreference(enabled)
-  }
-
-  const openPlaceholderPolicy = (label: string) => {
-    setSettingsMessage(`${label} will open here soon.`)
+  const openExternalLink = (label: string, url: string) => {
+    hapticSelection()
+    const linkTarget = window.open(url, '_blank', 'noopener,noreferrer')
+    if (!linkTarget) {
+      setSettingsMessage(`Unable to open ${label}.`)
+      hapticWarning()
+    }
   }
 
   const cancelSavedRound = () => {
+    hapticLightImpact()
     onAbandonRound()
     setSettingsMessage('Saved round cancelled.')
+    hapticSuccess()
   }
 
   const deleteAccount = () => {
+    hapticSelection()
     const shouldDelete = window.confirm(
       'Delete local account data, profile activity, and saved round on this device?',
     )
     if (!shouldDelete) {
+      hapticWarning()
       return
     }
 
     clearLocalIdentityState()
+    clearAccountProfile()
     clearPreferences()
     applyThemePreference('light')
+    setStatusBarStyle('light')
     onAbandonRound()
     setSettingsMessage('Local account data deleted.')
+    hapticWarning()
     onNavigate('home')
   }
 
@@ -68,51 +65,39 @@ function SettingsScreen({ onNavigate, onAbandonRound }: ScreenProps) {
       </header>
 
       <section className="panel stack-xs">
-        <p className="label">Appearance</p>
-        <div className="segmented-control" role="group" aria-label="Theme selection">
-          <button
-            type="button"
-            className={`segmented-control__button ${
-              theme === 'light' ? 'segmented-control__button--active' : ''
-            }`}
-            onClick={() => setThemePreference('light')}
-          >
-            Light
-          </button>
-          <button
-            type="button"
-            className={`segmented-control__button ${
-              theme === 'dark' ? 'segmented-control__button--active' : ''
-            }`}
-            onClick={() => setThemePreference('dark')}
-          >
-            Dark
-          </button>
-        </div>
-      </section>
-
-      <section className="panel stack-xs">
-        <p className="label">Notifications</p>
-        <ToggleRow
-          label="Round reminders"
-          description="Enable push-style reminders once notifications ship."
-          checked={notificationsEnabled}
-          onChange={setNotifications}
-        />
+        <p className="label">Challenge Card Style</p>
+        <p>
+          <strong>Illustrative</strong>
+        </p>
+        <p className="muted">
+          Card layout is currently locked to Illustrative so full artwork is shown when assets are
+          available.
+        </p>
       </section>
 
       <section className="panel stack-xs">
         <p className="label">Legal & Billing</p>
-        <button type="button" className="settings-link-row" onClick={() => openPlaceholderPolicy('Privacy Policy')}>
+        <button
+          type="button"
+          className="settings-link-row"
+          data-requires-network="true"
+          onClick={() => openExternalLink('Privacy Policy', getPrivacyPolicyUrl())}
+        >
           Privacy Policy
         </button>
-        <button type="button" className="settings-link-row" onClick={() => openPlaceholderPolicy('Terms of Use')}>
+        <button
+          type="button"
+          className="settings-link-row"
+          data-requires-network="true"
+          onClick={() => openExternalLink('Terms of Use', getTermsOfUseUrl())}
+        >
           Terms of Use
         </button>
         <button
           type="button"
           className="settings-link-row"
-          onClick={() => openPlaceholderPolicy('Subscriptions & Purchases')}
+          data-requires-network="true"
+          onClick={() => openExternalLink('Subscriptions & Purchases', getBillingUrl())}
         >
           Subscriptions / Purchases
         </button>

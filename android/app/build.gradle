@@ -1,0 +1,113 @@
+import java.util.Properties
+
+apply plugin: 'com.android.application'
+
+def resolveProperty = { String propertyName ->
+    def fromGradle = project.findProperty(propertyName)
+    if (fromGradle != null && fromGradle.toString().trim().length() > 0) {
+        return fromGradle.toString().trim()
+    }
+
+    def fromEnvironment = System.getenv(propertyName)
+    if (fromEnvironment != null && fromEnvironment.trim().length() > 0) {
+        return fromEnvironment.trim()
+    }
+
+    return null
+}
+
+def resolveIntegerProperty = { String propertyName, int fallbackValue ->
+    def rawValue = resolveProperty(propertyName)
+    if (rawValue == null) {
+        return fallbackValue
+    }
+
+    try {
+        return Integer.parseInt(rawValue)
+    } catch (Exception ignored) {
+        return fallbackValue
+    }
+}
+
+def versionCodeValue = resolveIntegerProperty('ANDROID_VERSION_CODE', 1)
+def versionNameValue = resolveProperty('ANDROID_VERSION_NAME') ?: '1.0.0'
+
+def releaseStoreFilePath = resolveProperty('GG_ANDROID_STORE_FILE')
+def releaseStorePassword = resolveProperty('GG_ANDROID_STORE_PASSWORD')
+def releaseKeyAlias = resolveProperty('GG_ANDROID_KEY_ALIAS')
+def releaseKeyPassword = resolveProperty('GG_ANDROID_KEY_PASSWORD')
+def hasReleaseSigning = releaseStoreFilePath && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
+android {
+    namespace = 'com.gimmegolf.app'
+    compileSdk = rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId 'com.gimmegolf.app'
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode versionCodeValue
+        versionName versionNameValue
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        aaptOptions {
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(releaseStoreFilePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch (Exception ignored) {
+    logger.info('google-services.json not found, google-services plugin not applied.')
+}

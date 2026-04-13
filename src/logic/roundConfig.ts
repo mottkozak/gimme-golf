@@ -66,6 +66,10 @@ export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
     typeof presetConfig.toggles.momentumBonuses === 'boolean'
       ? presetConfig.toggles.momentumBonuses
       : true
+  const catchUpMode =
+    gameMode === 'cards' && typeof presetConfig.toggles.catchUpMode === 'boolean'
+      ? presetConfig.toggles.catchUpMode
+      : gameMode === 'cards'
   const hasChaosPack = enabledPackIds.includes('chaos')
   const hasPropsPack = enabledPackIds.includes('props')
   const featuredHoles = normalizeFeaturedHolesConfig(
@@ -87,6 +91,7 @@ export function normalizeRoundConfig(config: RoundConfig): RoundConfig {
     featuredHoles: featuredHolesForMode,
     toggles: {
       ...presetConfig.toggles,
+      catchUpMode,
       momentumBonuses,
       drawTwoPickOne: gameMode === 'cards',
       autoAssignOne,

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { normalizeExpectedScore } from '../logic/roundSetup.ts'
 import type { Player } from '../types/game.ts'
 
@@ -28,6 +28,16 @@ function PlayerSetupRow({
   const [expectedScoreInput, setExpectedScoreInput] = useState(() =>
     String(player.expectedScore18),
   )
+  const expectedScoreInputRef = useRef<HTMLInputElement | null>(null)
+
+  const keepFieldVisible = (element: HTMLElement) => {
+    window.requestAnimationFrame(() => {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    })
+  }
 
   const parseExpectedScore = (rawValue: string): number | null => {
     const digitsOnly = rawValue.replace(/[^\d]/g, '')
@@ -63,6 +73,14 @@ function PlayerSetupRow({
               onUpdateName('')
             }
             event.currentTarget.select()
+            keepFieldVisible(event.currentTarget)
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+              return
+            }
+            event.preventDefault()
+            expectedScoreInputRef.current?.focus()
           }}
           placeholder={fallbackName}
         />
@@ -81,6 +99,7 @@ function PlayerSetupRow({
           type="text"
           inputMode="numeric"
           value={expectedScoreInput}
+          ref={expectedScoreInputRef}
           onChange={(event) => {
             setExpectedScoreInput(event.target.value.replace(/[^\d]/g, ''))
           }}
@@ -95,7 +114,10 @@ function PlayerSetupRow({
             onUpdateExpectedScore(normalizedScore)
             setExpectedScoreInput(String(normalizedScore))
           }}
-          onFocus={(event) => event.currentTarget.select()}
+          onFocus={(event) => {
+            event.currentTarget.select()
+            keepFieldVisible(event.currentTarget)
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.currentTarget.blur()

@@ -1,0 +1,21 @@
+/* Shared component slices extracted from app.css for phased modularization. */
+
+.modal-backdrop {
+  padding: calc(var(--space-4) + var(--safe-area-top))
+    calc(var(--space-4) + var(--safe-area-right))
+    calc(var(--space-4) + var(--safe-area-bottom))
+    calc(var(--space-4) + var(--safe-area-left));
+}
+
+.chip-button,
+.table-sort-button,
+.recap-leaderboard-card .table-sort-button,
+.hole-score-module__mission-toggle .segmented-control__button,
+.hole-score-adjust-button,
+.hole-score-manual-toggle,
+.hole-score-reset-button,
+.hole-score-manual-field input,
+.hole-result-toggle-group .segmented-control__button,
+.hole-public-target-button {
+  min-height: var(--touch-target-min);
+}

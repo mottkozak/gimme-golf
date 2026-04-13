@@ -49,10 +49,14 @@ function assignPowerUpsFromPool(
     const powerUp = shuffled[playerIndex % shuffled.length]
     assignedPowerUpIdByPlayerId[player.id] = powerUp?.id ?? null
   })
+  const usedPowerUpByPlayerId: HolePowerUpState['usedPowerUpByPlayerId'] = Object.fromEntries(
+    players.map((player) => [player.id, Boolean(assignedPowerUpIdByPlayerId[player.id])]),
+  )
 
   return {
     ...createEmptyHolePowerUpState(players, holeNumber),
     assignedPowerUpIdByPlayerId,
+    usedPowerUpByPlayerId,
   }
 }
 
@@ -137,8 +141,15 @@ export function assignPowerUpsForHoleWithCurses(
 ): HolePowerUpState {
   const positiveAssignments = assignPowerUpsFromPool(players, holeNumber, positivePowerUpPool)
   const roundLeaderIds = getRoundLeaderIds(players, holeResults, currentHoleIndex)
+  const maxLeadersEligibleForCurses = Math.floor(players.length / 2)
 
   if (roundLeaderIds.length === 0 || cursePool.length === 0) {
+    return positiveAssignments
+  }
+
+  // Apply curses only when the lead is held by a minority (or exactly half in even groups).
+  // If the lead is too crowded, keep the hole as all-positive to avoid blanket punishment.
+  if (roundLeaderIds.length > maxLeadersEligibleForCurses) {
     return positiveAssignments
   }
 
@@ -149,18 +160,23 @@ export function assignPowerUpsForHoleWithCurses(
   const assignedCurseIdByPlayerId: HolePowerUpState['assignedCurseIdByPlayerId'] = {
     ...positiveAssignments.assignedCurseIdByPlayerId,
   }
+  const usedPowerUpByPlayerId: HolePowerUpState['usedPowerUpByPlayerId'] = {
+    ...positiveAssignments.usedPowerUpByPlayerId,
+  }
 
   roundLeaderIds.forEach((playerId, playerIndex) => {
     const curse = shuffledCurses[playerIndex % shuffledCurses.length]
     assignedCurseIdByPlayerId[playerId] = curse?.id ?? null
     // Curse replaces the positive card for that hole.
     assignedPowerUpIdByPlayerId[playerId] = null
+    usedPowerUpByPlayerId[playerId] = false
   })
 
   return {
     ...positiveAssignments,
     assignedPowerUpIdByPlayerId,
     assignedCurseIdByPlayerId,
+    usedPowerUpByPlayerId,
   }
 }
 

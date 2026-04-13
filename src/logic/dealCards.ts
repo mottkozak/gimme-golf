@@ -4,11 +4,13 @@ import type {
   HoleDefinition,
   PersonalCardOfferState,
   Player,
+  PlayerTotals,
   RoundDeckMemory,
   RoundConfig,
 } from '../types/game.ts'
 import {
   DYNAMIC_OFFER_TUNING,
+  type CatchUpPointRangeContext,
   getOfferPointRange,
   getSkillBandForExpectedScore,
   STATIC_OFFER_TUNING,
@@ -241,6 +243,52 @@ function getPreferredPointsForOffer(
   return Array.from(new Set([5, ...basePoints]))
 }
 
+function getChallengeIndexWeight(
+  player: Player,
+  offerKind: PersonalOfferKind,
+  dynamicDifficultyEnabled: boolean,
+): number {
+  if (!dynamicDifficultyEnabled) {
+    if (offerKind === 'safe') {
+      return -1
+    }
+
+    if (offerKind === 'hard') {
+      return 1
+    }
+
+    return 0.5
+  }
+
+  const skillBand = getSkillBandForExpectedScore(player.expectedScore18)
+
+  if (offerKind === 'safe') {
+    return -1
+  }
+
+  if (offerKind === 'hard') {
+    if (skillBand === 'advanced') {
+      return 1
+    }
+
+    if (skillBand === 'intermediate') {
+      return 0.35
+    }
+
+    return -0.65
+  }
+
+  if (skillBand === 'advanced') {
+    return 0.55
+  }
+
+  if (skillBand === 'intermediate') {
+    return 0.2
+  }
+
+  return -0.4
+}
+
 function getPointDistanceFromRange(points: number, minPoints: number, maxPoints: number): number {
   if (points < minPoints) {
     return minPoints - points
@@ -253,17 +301,37 @@ function getPointDistanceFromRange(points: number, minPoints: number, maxPoints:
   return 0
 }
 
+function createCatchUpPointRangeContext(
+  player: Player,
+  roundConfig: RoundConfig,
+  totalsByPlayerId: Record<string, PlayerTotals> | undefined,
+): CatchUpPointRangeContext | undefined {
+  if (!roundConfig.toggles.catchUpMode || !totalsByPlayerId) {
+    return undefined
+  }
+
+  return {
+    enabled: true,
+    playerId: player.id,
+    totalsByPlayerId,
+  }
+}
+
 function filterCardsForOfferPointRange(
   cards: PersonalCard[],
   player: Player,
+  roundConfig: RoundConfig,
+  totalsByPlayerId: Record<string, PlayerTotals> | undefined,
   offerKind: PersonalOfferKind,
   dynamicDifficultyEnabled: boolean,
 ): PersonalCard[] {
-  if (!dynamicDifficultyEnabled) {
-    return cards
-  }
-
-  const pointRange = getOfferPointRange(player.expectedScore18, dynamicDifficultyEnabled, offerKind)
+  const catchUpContext = createCatchUpPointRangeContext(player, roundConfig, totalsByPlayerId)
+  const pointRange = getOfferPointRange(
+    player.expectedScore18,
+    dynamicDifficultyEnabled,
+    offerKind,
+    catchUpContext,
+  )
   const cardsInsideRange = cards.filter(
     (card) => card.points >= pointRange.minPoints && card.points <= pointRange.maxPoints,
   )
@@ -295,19 +363,14 @@ function scoreCardForOffer(
   const difficultyScore = tuning.difficultyWeights[card.difficulty] * 6
   const pointScore = scoreDistanceToPreferredPoints(card.points, preferredPoints) * 5
   const challengeIndex = getChallengeIndex(card)
+  const challengeIndexScore = Math.round(
+    challengeIndex * getChallengeIndexWeight(player, offerKind, dynamicDifficultyEnabled),
+  )
   const tagRelevanceBonus = hasTagRelevance(card.requiredTags, hole.tags)
     ? PERSONAL_TAG_RELEVANCE_BONUS
     : 0
 
-  if (offerKind === 'safe') {
-    return difficultyScore + pointScore - challengeIndex + tagRelevanceBonus
-  }
-
-  if (offerKind === 'hard') {
-    return difficultyScore + pointScore + challengeIndex + tagRelevanceBonus
-  }
-
-  return difficultyScore + pointScore + Math.round(challengeIndex / 2) + tagRelevanceBonus
+  return difficultyScore + pointScore + challengeIndexScore + tagRelevanceBonus
 }
 
 interface RankedPersonalCard {
@@ -416,6 +479,8 @@ function chooseSafeAndHardCardsForPlayer(
   cards: PersonalCard[],
   player: Player,
   hole: HoleDefinition,
+  roundConfig: RoundConfig,
+  totalsByPlayerId: Record<string, PlayerTotals> | undefined,
   dynamicDifficultyEnabled: boolean,
   usedPersonalCardIds: Set<string>,
   recentPersonalCardIds: Set<string>,
@@ -430,6 +495,8 @@ function chooseSafeAndHardCardsForPlayer(
       1,
     ),
     player,
+    roundConfig,
+    totalsByPlayerId,
     'safe',
     dynamicDifficultyEnabled,
   )
@@ -456,6 +523,8 @@ function chooseSafeAndHardCardsForPlayer(
       1,
     ),
     player,
+    roundConfig,
+    totalsByPlayerId,
     'hard',
     dynamicDifficultyEnabled,
   )
@@ -497,6 +566,8 @@ function chooseSingleCardForPlayer(
   cards: PersonalCard[],
   player: Player,
   hole: HoleDefinition,
+  roundConfig: RoundConfig,
+  totalsByPlayerId: Record<string, PlayerTotals> | undefined,
   dynamicDifficultyEnabled: boolean,
   usedPersonalCardIds: Set<string>,
   recentPersonalCardIds: Set<string>,
@@ -511,6 +582,8 @@ function chooseSingleCardForPlayer(
       1,
     ),
     player,
+    roundConfig,
+    totalsByPlayerId,
     'single',
     dynamicDifficultyEnabled,
   )
@@ -545,6 +618,8 @@ function chooseNoMercyCardsForPlayer(
   cards: PersonalCard[],
   player: Player,
   hole: HoleDefinition,
+  roundConfig: RoundConfig,
+  totalsByPlayerId: Record<string, PlayerTotals> | undefined,
   dynamicDifficultyEnabled: boolean,
   usedPersonalCardIds: Set<string>,
   recentPersonalCardIds: Set<string>,
@@ -559,6 +634,8 @@ function chooseNoMercyCardsForPlayer(
       1,
     ),
     player,
+    roundConfig,
+    totalsByPlayerId,
     'hard',
     dynamicDifficultyEnabled,
   )
@@ -586,6 +663,8 @@ function chooseNoMercyCardsForPlayer(
       1,
     ),
     player,
+    roundConfig,
+    totalsByPlayerId,
     'hard',
     dynamicDifficultyEnabled,
   )
@@ -686,6 +765,7 @@ export function createDealtHoleCardsState(
   publicDeck: PublicCard[],
   deckMemory: RoundDeckMemory | undefined,
   priorHoleCards: HoleCardsState[] = [],
+  totalsByPlayerId?: Record<string, PlayerTotals>,
 ): HoleCardsState {
   const personalDealResult = dealPersonalCardsForHole(
     players,
@@ -694,6 +774,7 @@ export function createDealtHoleCardsState(
     personalDeck,
     deckMemory,
     priorHoleCards,
+    totalsByPlayerId,
   )
   const selectedCardIdByPlayerId = Object.fromEntries(
     players.map((player) => {
@@ -723,6 +804,7 @@ export function dealPersonalCardsForHole(
   deck: PersonalCard[],
   deckMemory: RoundDeckMemory | undefined,
   priorHoleCards: HoleCardsState[] = [],
+  totalsByPlayerId?: Record<string, PlayerTotals>,
 ): PersonalDealResult {
   const normalizedDeckMemory = normalizeRoundDeckMemory(deckMemory)
   const usedPersonalCardIds = new Set(normalizedDeckMemory.usedPersonalCardIds)
@@ -745,6 +827,8 @@ export function dealPersonalCardsForHole(
         eligibleDeck,
         player,
         hole,
+        roundConfig,
+        totalsByPlayerId,
         roundConfig.toggles.dynamicDifficulty,
         usedPersonalCardIds,
         recentPersonalCardIds,
@@ -760,6 +844,8 @@ export function dealPersonalCardsForHole(
         eligibleDeck,
         player,
         hole,
+        roundConfig,
+        totalsByPlayerId,
         roundConfig.toggles.dynamicDifficulty,
         usedPersonalCardIds,
         recentPersonalCardIds,
@@ -774,6 +860,8 @@ export function dealPersonalCardsForHole(
       eligibleDeck,
       player,
       hole,
+      roundConfig,
+      totalsByPlayerId,
       roundConfig.toggles.dynamicDifficulty,
       usedPersonalCardIds,
       recentPersonalCardIds,

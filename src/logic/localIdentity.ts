@@ -1,7 +1,8 @@
 import type { AwardId } from '../data/awards.ts'
+import { readStorageItem, removeStorageItem, writeStorageItem } from '../platform/storage.ts'
 import type { RoundState } from '../types/game.ts'
 import { computeRoundAwards } from './awards.ts'
-import { buildLeaderboardEntries } from './leaderboard.ts'
+import { buildLeaderboardEntries, getAdjustedScoreLeaders } from './leaderboard.ts'
 import { resolveLandingModeIdFromConfig, type LandingModeId } from './landingModes.ts'
 import { formatPlayerNames, getDisplayPlayerName } from './playerNames.ts'
 
@@ -172,16 +173,13 @@ function getRoundWinners(
     roundState.totalsByPlayerId,
     'adjustedScore',
   )
-  const winningAdjustedScore = leaderboardRows[0]?.adjustedScore
-
-  if (typeof winningAdjustedScore !== 'number') {
+  const winners = getAdjustedScoreLeaders(leaderboardRows)
+  if (winners.length === 0) {
     return {
       winnerNames: '-',
       winnerPlayerIdSet: new Set<string>(),
     }
   }
-
-  const winners = leaderboardRows.filter((row) => row.adjustedScore === winningAdjustedScore)
 
   return {
     winnerNames: formatPlayerNames(winners.map((row) => row.playerName)),
@@ -367,19 +365,19 @@ function saveLocalIdentityState(state: LocalIdentityState): void {
       favoriteCardCountsById: state.favoriteCardCountsById,
     }
 
-    localStorage.setItem(LOCAL_IDENTITY_STORAGE_KEY, JSON.stringify(persistedState))
+    writeStorageItem(LOCAL_IDENTITY_STORAGE_KEY, JSON.stringify(persistedState))
   } catch {
     // Keep identity optional; failures should not block round flow.
   }
 }
 
 export function loadLocalIdentityState(): LocalIdentityState {
-  try {
-    const rawValue = localStorage.getItem(LOCAL_IDENTITY_STORAGE_KEY)
-    if (!rawValue) {
-      return createEmptyLocalIdentityState()
-    }
+  const rawValue = readStorageItem(LOCAL_IDENTITY_STORAGE_KEY)
+  if (!rawValue) {
+    return createEmptyLocalIdentityState()
+  }
 
+  try {
     return sanitizeIdentityState(JSON.parse(rawValue))
   } catch {
     return createEmptyLocalIdentityState()
@@ -387,7 +385,7 @@ export function loadLocalIdentityState(): LocalIdentityState {
 }
 
 export function clearLocalIdentityState(): void {
-  localStorage.removeItem(LOCAL_IDENTITY_STORAGE_KEY)
+  removeStorageItem(LOCAL_IDENTITY_STORAGE_KEY)
 }
 
 export function getPlayerProfileByName(

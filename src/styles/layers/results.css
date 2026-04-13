@@ -1,0 +1,1683 @@
+.hole-results-screen {
+  gap: var(--space-4);
+}
+
+.hole-results-screen--editorial {
+  --results-header-bg: color-mix(in srgb, var(--hole-results-paper) 86%, var(--surface-panel));
+  --results-panel-bg: color-mix(in srgb, var(--hole-results-surface) 80%, var(--surface-panel));
+  --results-panel-border: color-mix(in srgb, var(--hole-results-border) 54%, var(--border-subtle));
+  --results-inset-bg: color-mix(in srgb, var(--hole-results-surface-muted) 84%, #ffffff 16%);
+  --results-inset-border: color-mix(in srgb, var(--hole-results-border) 46%, var(--border-subtle));
+  --results-ready-bg: color-mix(in srgb, var(--hole-results-ready-bg) 84%, #ffffff 16%);
+  --results-ready-border: color-mix(in srgb, var(--hole-results-ready-border) 60%, var(--border-subtle));
+  --results-pending-bg: color-mix(in srgb, var(--hole-results-pending-bg) 82%, #ffffff 18%);
+  --results-pending-border: color-mix(in srgb, var(--hole-results-pending-border) 56%, var(--border-subtle));
+  --results-chip-bg: color-mix(in srgb, var(--hole-results-chip-bg) 88%, #ffffff 12%);
+  --results-chip-border: color-mix(in srgb, var(--hole-results-chip-border) 58%, var(--border-subtle));
+  --results-target-bg: color-mix(in srgb, var(--hole-results-target-bg) 82%, #ffffff 18%);
+  --results-target-border: color-mix(in srgb, var(--hole-results-target-border) 58%, var(--border-subtle));
+}
+
+.hole-results-header {
+  gap: var(--space-2);
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hole-results-screen > .screen__header {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hole-results-header--editorial {
+  padding: var(--space-4) var(--space-5);
+  border: 1.5px solid var(--results-panel-border);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--results-header-bg) 78%, var(--color-butter) 22%),
+      color-mix(in srgb, var(--results-header-bg) 90%, var(--color-blush) 10%)
+    );
+  box-shadow: var(--shadow-card);
+}
+
+.hole-results-header--editorial .screen-title {
+  gap: 0.68rem;
+}
+
+.hole-results-header--editorial .screen-title h2 {
+  font-size: clamp(1.96rem, 7vw, 2.54rem);
+}
+
+.hole-results-header--editorial .screen-title__icon {
+  width: 1.74rem;
+  height: 1.74rem;
+  font-size: 1.7rem;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--hole-results-border) 40%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-panel-bg) 70%, #ffffff 30%);
+  color: color-mix(in srgb, var(--accent-strong) 78%, var(--text-primary));
+}
+
+.hole-results-header .muted {
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.hole-results-header__title-row {
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.hole-results-progress-chip {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 60%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 70%, var(--surface-panel));
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-results-progress-text {
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: 0.9rem;
+}
+
+.hole-results-entry-copy {
+  gap: var(--space-2);
+}
+
+.hole-results-entry-copy .muted {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.hole-results-player-list {
+  gap: var(--space-4);
+}
+
+.hole-results-jump-nav {
+  margin-top: calc(var(--space-2) * -1);
+  gap: 0.4rem;
+}
+
+.hole-results-jump-nav .hole-results-toggle-button {
+  min-height: 36px;
+  padding: 0.34rem 0.66rem;
+}
+
+.hole-results-entry-panel,
+.hole-results-step-panel {
+  border-radius: var(--radius-lg);
+  border-width: 1.5px;
+  border-style: solid;
+  padding: var(--space-4);
+  gap: var(--space-3);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-panel-bg) 94%, var(--hole-results-paper) 6%)
+    );
+}
+
+.hole-results-entry-panel {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 56%, var(--results-panel-border));
+}
+
+.hole-results-step-panel {
+  border-color: var(--results-panel-border);
+}
+
+.hole-results-step-panel--mission {
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 84%, var(--hole-results-ready-bg) 16%),
+      color-mix(in srgb, var(--results-panel-bg) 92%, #ffffff 8%)
+    );
+}
+
+.hole-results-step-panel--public {
+  background:
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--results-panel-bg) 82%, var(--surface-info) 18%),
+      color-mix(in srgb, var(--results-panel-bg) 92%, #ffffff 8%)
+    );
+}
+
+.hole-results-step-header {
+  align-items: flex-start;
+}
+
+.hole-results-step-header > strong {
+  font-family: var(--font-display);
+  font-size: 1.42rem;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1.08;
+}
+
+.hole-results-step-actions {
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.hole-results-step-actions .muted {
+  font-size: 0.84rem;
+  line-height: 1.36;
+}
+
+.hole-results-toggle-button {
+  min-height: 36px;
+  padding: 0.3rem 0.62rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-inset-border);
+  background: var(--results-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-size: 0.74rem;
+  font-weight: 760;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.hole-results-toggle-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 52%, var(--results-inset-border));
+  background: color-mix(in srgb, var(--results-chip-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-results-toggle-button--active,
+.hole-results-toggle-button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 72%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 82%, #ffffff 18%);
+}
+
+.hole-results-challenge-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hole-results-challenge-overview-item {
+  border: 1.5px solid var(--results-inset-border);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+}
+
+.hole-results-challenge-overview-player {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.06;
+}
+
+.hole-results-challenge-status {
+  min-height: 28px;
+  padding: 0.1rem 0.56rem;
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hole-results-challenge-overview-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.32;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.hole-results-challenge-overview-meta {
+  gap: 0.32rem;
+}
+
+.hole-results-screen--editorial .mission-status-pill {
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  min-height: 30px;
+  padding: 0.16rem 0.62rem;
+  font-size: 0.74rem;
+}
+
+.hole-results-screen--editorial .mission-status-pill--ready {
+  border-color: var(--results-ready-border);
+  background: var(--results-ready-bg);
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .mission-status-pill--pending {
+  border-color: var(--results-pending-border);
+  background: var(--results-pending-bg);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
+}
+
+.hole-score-module {
+  border-radius: calc(var(--radius-lg) + 2px);
+  border: 1.5px solid color-mix(in srgb, var(--hole-results-border) 58%, var(--results-inset-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-3);
+  box-shadow: none;
+}
+
+.hole-score-module__header {
+  align-items: flex-start;
+}
+
+.hole-score-module__name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6.8vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.02;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.hole-score-module__status {
+  flex: 0 0 auto;
+}
+
+.hole-score-module__section-label {
+  margin: calc(var(--space-1) * -1) 0 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-primary));
+}
+
+.hole-score-value {
+  font-family: var(--font-numeric);
+  font-weight: 760;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hole-score-value--flash-increase {
+    animation: score-flash-increase 520ms ease both;
+  }
+
+  .hole-score-value--flash-decrease {
+    animation: score-flash-decrease 520ms ease both;
+  }
+}
+
+.hole-score-module__mission {
+  display: flex;
+  align-items: flex-start;
+}
+
+.hole-score-module__mission-inline {
+  width: 100%;
+  gap: var(--space-2);
+}
+
+.hole-score-module__mission-chip,
+.hole-score-module__mission-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.44rem;
+  min-height: 56px;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-chip-border);
+  background: var(--results-chip-bg);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-size: 0.9rem;
+  font-weight: 760;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+
+.hole-score-module__mission-chip {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.hole-score-module__mission-chip-icon {
+  width: 1.04rem;
+  height: 1.04rem;
+  font-size: 1.04rem;
+  opacity: 0.76;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.hole-score-module__mission-chip:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 50%, var(--results-chip-border));
+  background: color-mix(in srgb, var(--results-chip-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-score-module__mission-toggle {
+  width: 100%;
+  max-width: none;
+  padding: 0.22rem;
+  border-color: color-mix(in srgb, var(--results-target-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-target-bg) 84%, #ffffff 16%);
+  gap: 0.22rem;
+}
+
+.hole-score-module__mission-toggle .segmented-control__button {
+  min-height: 64px;
+  border-radius: calc(var(--radius-sm) - 3px);
+  font-size: 1.1rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--failed:not(.segmented-control__button--active) {
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 90%, #ffffff 10%);
+}
+
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--completed:not(.segmented-control__button--active) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 56%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 90%, #ffffff 10%);
+}
+
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--failed {
+  color: color-mix(in srgb, var(--text-danger) 84%, var(--text-primary));
+}
+
+.hole-score-module__mission-toggle .hole-score-module__mission-toggle-button--completed {
+  color: color-mix(in srgb, var(--text-success) 84%, var(--text-primary));
+}
+
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--failed.segmented-control__button--active,
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--failed.segmented-control__button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 80%, var(--border-subtle));
+  background: color-mix(in srgb, var(--danger) 84%, #ffffff 16%);
+  color: var(--text-on-primary);
+}
+
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--completed.segmented-control__button--active,
+.hole-score-module__mission-toggle
+  .hole-score-module__mission-toggle-button--completed.segmented-control__button--active:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 84%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-action-bg) 86%, #ffffff 14%);
+  color: var(--text-on-primary);
+}
+
+.hole-score-module__helper {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.36;
+}
+
+.hole-score-module__controls {
+  gap: var(--space-2);
+}
+
+.hole-score-module__footer {
+  margin-top: var(--space-1);
+}
+
+.hole-score-module__summary-row {
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.hole-score-module__personal-par {
+  margin: 0;
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.hole-score-module__hole-score {
+  margin: 0;
+  font-family: var(--font-numeric);
+  font-size: 1rem;
+  font-weight: 760;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.hole-score-module__hole-score-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.hole-score-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hole-score-wheel-shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hole-score-wheel-shell__viewport {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.hole-score-wheel-shell__arrow {
+  width: 2.2rem;
+  min-height: 2.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--results-inset-bg) 56%, transparent);
+  color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
+  box-shadow: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hole-score-wheel-shell__arrow:hover:not(:disabled) {
+  border: 0;
+  background: color-mix(in srgb, var(--results-inset-bg) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--text-primary) 74%, var(--accent-strong));
+  box-shadow: none;
+}
+
+.hole-score-wheel-shell__arrow-icon {
+  width: 0.92rem;
+  height: 0.92rem;
+  font-size: 0.92rem;
+}
+
+.hole-score-strokes-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--results-inset-border);
+  background: color-mix(in srgb, var(--results-inset-bg) 82%, #ffffff 18%);
+  padding: 0.7rem 0.74rem 0.74rem;
+}
+
+.hole-score-strokes-picker__label {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-primary));
+}
+
+.hole-score-strokes-picker__viewport {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.hole-score-strokes-picker__track {
+  position: relative;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--results-target-border) 38%, transparent);
+  overflow: hidden;
+}
+
+.hole-score-strokes-picker__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hole-action-bg) 42%, var(--results-ready-border) 58%);
+  box-sizing: border-box;
+}
+
+.hole-score-button-group--wheel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  padding: 0.18rem max(0.45rem, calc(50% - 1.35rem)) 0.32rem;
+  gap: 0.52rem;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hole-score-button-group--wheel .hole-score-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  scroll-snap-stop: normal;
+  width: 3.35rem;
+  height: 3.35rem;
+  min-width: 3.35rem;
+  min-height: 3.35rem;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 1.78rem;
+  font-weight: 800;
+  background: color-mix(in srgb, #ffffff 92%, var(--results-target-bg) 8%);
+}
+
+.hole-score-button-group--wheel .hole-score-button--manual {
+  width: auto;
+  min-width: 3.35rem;
+  padding-inline: 0.55rem;
+  font-size: 0.95rem;
+}
+
+.hole-score-button-group--wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.hole-score-button-group--high {
+  margin-top: 0.1rem;
+}
+
+.hole-score-button {
+  min-width: 4.15rem;
+  min-height: 4.15rem;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-target-border);
+  background: var(--results-target-bg);
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+  font-family: var(--font-numeric);
+  font-size: 1.74rem;
+  line-height: 1;
+  font-weight: 760;
+  box-shadow: none;
+}
+
+.hole-score-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 54%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 78%, var(--results-ready-bg) 22%);
+}
+
+.hole-score-button--selected,
+.hole-score-button--selected:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 88%, var(--results-ready-border));
+  background: var(--hole-action-bg);
+  color: var(--hole-action-text);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+    0 8px 16px -14px color-mix(in srgb, var(--hole-action-bg) 68%, transparent);
+}
+
+.hole-score-button--manual {
+  min-width: 4.85rem;
+  padding-inline: 0.8rem;
+  font-size: 1.2rem;
+}
+
+.hole-card-preview__reward {
+  margin: 0;
+  font-weight: 760;
+  color: color-mix(in srgb, var(--text-success) 90%, var(--accent-strong));
+}
+
+.hole-score-adjust-row {
+  gap: 0.36rem;
+  flex-wrap: wrap;
+}
+
+.hole-score-adjust-button,
+.hole-score-manual-toggle,
+.hole-score-reset-button {
+  min-height: var(--touch-target-min);
+  padding: 0.2rem 0.62rem;
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  font-size: 0.76rem;
+  letter-spacing: 0.012em;
+  box-shadow: none;
+}
+
+.hole-score-manual-toggle {
+  align-self: flex-start;
+}
+
+.hole-score-manual-entry {
+  padding: 0.56rem 0.62rem;
+  border: 1.5px solid var(--results-inset-border);
+  border-radius: var(--radius-sm);
+  background: var(--results-inset-bg);
+}
+
+.hole-score-manual-field {
+  align-items: center;
+}
+
+.hole-score-manual-field .label {
+  font-size: 0.73rem;
+}
+
+.hole-score-manual-field input {
+  width: 5.8rem;
+  min-height: var(--touch-target-min);
+  text-align: center;
+  font-family: var(--font-numeric);
+}
+
+.hole-results-resolution-list {
+  gap: 0.6rem;
+}
+
+.hole-public-resolution-card {
+  text-align: left;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--results-inset-border);
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--results-inset-bg) 94%, var(--results-panel-bg) 6%)
+    );
+  padding: var(--space-3);
+  gap: 0.58rem;
+  box-shadow: none;
+}
+
+.hole-result-toggle-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.32rem;
+  padding: 0.24rem;
+  border-radius: var(--radius-sm);
+  border-color: var(--results-target-border);
+  background: var(--results-target-bg);
+}
+
+.hole-result-toggle-group .segmented-control__button {
+  min-height: var(--touch-target-min);
+}
+
+.hole-public-resolution-card__meta {
+  gap: 0.34rem;
+}
+
+.hole-public-resolution-card__controls {
+  gap: 0.54rem;
+}
+
+.hole-results-public-field {
+  gap: 0.34rem;
+}
+
+.hole-results-public-field .label {
+  font-size: 0.74rem;
+}
+
+.hole-results-public-field .muted {
+  font-size: 0.82rem;
+}
+
+.hole-public-target-button {
+  min-height: var(--touch-target-min);
+  padding: 0.26rem 0.66rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--results-target-border);
+  background: var(--results-target-bg);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.hole-public-target-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 52%, var(--results-target-border));
+  background: color-mix(in srgb, var(--results-target-bg) 74%, var(--results-ready-bg) 26%);
+}
+
+.hole-public-target-button--selected,
+.hole-public-target-button--selected:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--results-ready-border) 82%, var(--border-subtle));
+  background: color-mix(in srgb, var(--results-ready-bg) 82%, #ffffff 18%);
+  color: color-mix(in srgb, var(--text-success) 88%, var(--accent-strong));
+}
+
+.hole-results-public-summary-card {
+  border-color: color-mix(in srgb, var(--results-ready-border) 44%, var(--results-panel-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-ready-bg) 56%, #ffffff 44%),
+      color-mix(in srgb, var(--results-inset-bg) 82%, var(--results-ready-bg) 18%)
+    );
+}
+
+.hole-results-public-summary {
+  gap: 0.34rem;
+}
+
+.hole-results-public-summary-row {
+  font-family: var(--font-numeric);
+  font-size: 0.97rem;
+}
+
+.hole-results-trust-note {
+  border-color: color-mix(in srgb, var(--results-panel-border) 84%, transparent);
+  background: color-mix(in srgb, var(--results-inset-bg) 86%, #ffffff 14%);
+}
+
+.hole-results-screen--editorial .badge-chip {
+  background: var(--results-chip-bg);
+  border-color: var(--results-chip-border);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .badge-chip--subtle {
+  background: color-mix(in srgb, var(--results-chip-bg) 74%, var(--results-panel-bg) 26%);
+}
+
+.hole-results-screen--editorial .badge-chip--reward {
+  border-color: color-mix(in srgb, var(--results-ready-border) 62%, var(--results-chip-border));
+  background: color-mix(in srgb, var(--results-ready-bg) 72%, #ffffff 28%);
+  color: color-mix(in srgb, var(--text-success) 82%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .badge-chip--count {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 62%, var(--results-panel-border));
+  background: color-mix(in srgb, var(--results-ready-bg) 68%, var(--results-panel-bg));
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-results-screen--editorial .hole-action-panel {
+  border-color: color-mix(in srgb, var(--hole-results-border-strong) 58%, var(--results-panel-border));
+  background:
+    linear-gradient(
+      154deg,
+      color-mix(in srgb, var(--results-panel-bg) 84%, var(--hole-results-ready-bg) 16%),
+      color-mix(in srgb, var(--results-panel-bg) 94%, #ffffff 6%)
+    );
+}
+
+.hole-results-screen--editorial .hole-action-panel__summary {
+  font-size: 1rem;
+}
+
+.hole-results-screen--editorial .hole-action-panel__button {
+  min-height: 62px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  padding: calc(var(--space-4) + env(safe-area-inset-top, 0px))
+    calc(var(--space-4) + env(safe-area-inset-right, 0px))
+    calc(var(--space-4) + env(safe-area-inset-bottom, 0px))
+    calc(var(--space-4) + env(safe-area-inset-left, 0px));
+  background: rgba(20, 24, 20, 0.52);
+  -webkit-backdrop-filter: blur(8px) saturate(115%);
+  backdrop-filter: blur(8px) saturate(115%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  z-index: 120;
+}
+
+.app-shell--keyboard-visible .modal-backdrop {
+  align-items: flex-start;
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px) + var(--keyboard-inset));
+}
+
+body:has(.app-shell--keyboard-visible) .modal-backdrop {
+  align-items: flex-start;
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px) + var(--keyboard-inset));
+}
+
+.modal-card {
+  width: min(460px, 100%);
+  max-height: calc(
+    100dvh - (env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + var(--space-4) * 2)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-shell--keyboard-visible .modal-card {
+  max-height: calc(100dvh - var(--keyboard-inset) - (var(--space-4) * 2));
+}
+
+body:has(.app-shell--keyboard-visible) .modal-card {
+  max-height: calc(100dvh - var(--keyboard-inset) - (var(--space-4) * 2));
+}
+
+.onboarding-modal {
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-subtle));
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      color-mix(in srgb, var(--bg-panel) 92%, transparent)
+    ),
+    var(--bg-panel);
+}
+
+.home-confirm-modal {
+  --confirm-bg: color-mix(in srgb, var(--surface-panel) 90%, var(--mode-classic-bg));
+  --confirm-border: color-mix(in srgb, var(--mode-classic-border) 50%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 60%, var(--mode-classic-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-classic-border) 44%, transparent);
+  border-width: 1.5px;
+  border-color: var(--confirm-border);
+  border-radius: var(--radius-lg);
+  background: var(--confirm-bg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+}
+
+.home-confirm-modal.mode-tone--classic {
+  --confirm-bg: color-mix(in srgb, var(--mode-classic-bg) 34%, var(--surface-panel));
+  --confirm-border: color-mix(in srgb, var(--mode-classic-border) 58%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-classic-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-classic-border) 44%, transparent);
+}
+
+.home-confirm-modal.mode-tone--novelty {
+  --confirm-bg: color-mix(in srgb, var(--mode-novelty-bg) 34%, var(--surface-panel));
+  --confirm-border: color-mix(in srgb, var(--mode-novelty-border) 56%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-novelty-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-novelty-border) 44%, transparent);
+}
+
+.home-confirm-modal.mode-tone--chaos {
+  --confirm-bg: color-mix(in srgb, var(--mode-chaos-bg) 32%, var(--surface-panel));
+  --confirm-border: color-mix(in srgb, var(--mode-chaos-border) 56%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-chaos-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-chaos-border) 44%, transparent);
+}
+
+.home-confirm-modal.mode-tone--props {
+  --confirm-bg: color-mix(in srgb, var(--mode-props-bg) 35%, var(--surface-panel));
+  --confirm-border: color-mix(in srgb, var(--mode-props-border) 56%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-props-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-props-border) 44%, transparent);
+}
+
+.home-confirm-modal.mode-tone--power-ups {
+  --confirm-bg: color-mix(in srgb, var(--mode-power-bg) 35%, var(--surface-panel));
+  --confirm-border: color-mix(in srgb, var(--mode-power-border) 54%, var(--border-subtle));
+  --confirm-icon-bg: color-mix(in srgb, #ffffff 62%, var(--mode-power-bg));
+  --confirm-icon-border: color-mix(in srgb, var(--mode-power-border) 44%, transparent);
+}
+
+.home-confirm-modal__header .label {
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.home-confirm-modal__header h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 1.9rem);
+  line-height: 1.06;
+}
+
+.home-confirm-modal__mode {
+  border: 1.5px solid color-mix(in srgb, var(--confirm-border) 76%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--confirm-bg) 72%, #ffffff 28%);
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.home-confirm-modal__icon-wrap {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--confirm-icon-border);
+  background: var(--confirm-icon-bg);
+}
+
+.home-confirm-modal__icon {
+  width: 1.74rem;
+  height: 1.74rem;
+  font-size: 1.74rem;
+}
+
+.home-confirm-modal__mode-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.home-confirm-modal__mode-copy {
+  margin: 0;
+  font-size: 0.91rem;
+  font-weight: 600;
+  line-height: 1.36;
+  color: color-mix(in srgb, var(--text-primary) 84%, var(--accent-strong));
+}
+
+.home-confirm-modal__description {
+  margin: 0;
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+}
+
+.home-confirm-modal__footnote {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.home-confirm-modal__actions {
+  margin-top: var(--space-2);
+}
+
+.home-confirm-modal__actions > button {
+  min-height: 54px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+}
+
+.home-confirm-modal__actions > button:first-child {
+  background: color-mix(in srgb, var(--surface-panel) 82%, #ffffff 18%);
+  border-color: color-mix(in srgb, var(--color-border) 42%, transparent);
+}
+
+.home-confirm-modal__actions > button:first-child:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--surface-panel) 76%, #ffffff 24%);
+}
+
+.home-confirm-modal__actions > .button-primary {
+  border-color: color-mix(in srgb, #232327 78%, var(--confirm-border));
+  background: #232327;
+  color: #f7efe5;
+  font-weight: 700;
+}
+
+.home-confirm-modal__actions > .button-primary:hover:not(:disabled) {
+  border-color: color-mix(in srgb, #232327 82%, #ffffff 18%);
+  background: color-mix(in srgb, #232327 88%, #ffffff 12%);
+}
+
+.auth-gate__header .screen-title {
+  gap: 0.5rem;
+}
+
+.auth-gate__header .screen-title h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5.5vw, 2.28rem);
+  font-weight: 700;
+  line-height: 1.08;
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.auth-gate__header .muted {
+  max-width: 58ch;
+  font-size: 0.95rem;
+  line-height: 1.42;
+}
+
+.onboarding-modal__header {
+  align-items: flex-start;
+}
+
+.onboarding-modal__step-chip {
+  font-family: var(--font-numeric);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.onboarding-modal__step-title {
+  font-family: var(--font-display);
+  font-size: 1.34rem;
+  font-weight: 600;
+  line-height: 1.16;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.onboarding-modal__step-title .step-title__icon {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--accent-strong) 72%, var(--text-primary));
+}
+
+.onboarding-modal__content > .muted,
+.onboarding-modal__content > p.muted {
+  font-size: 0.9rem;
+  line-height: 1.42;
+  color: var(--text-secondary);
+}
+
+.onboarding-modal__content .field .label {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.onboarding-modal__content .field input {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+}
+
+.onboarding-modal__content .field--inline input[type='checkbox'] {
+  width: 1rem;
+  min-height: 1rem;
+  height: 1rem;
+  padding: 0;
+}
+
+.auth-gate-option-list .settings-link-row strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.auth-gate-option-list .settings-link-row .muted {
+  font-size: 0.88rem;
+  line-height: 1.36;
+}
+
+.onboarding-modal__content > p {
+  line-height: 1.42;
+}
+
+.onboarding-preview {
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xs);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent-soft) 44%, var(--surface-panel));
+}
+
+.onboarding-preview .label {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.onboarding-preview__rows {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.onboarding-preview__choice {
+  margin-top: 0.12rem;
+  padding: 0.45rem 0.52rem;
+  border-radius: var(--radius-xs);
+  border: 1px dashed color-mix(in srgb, var(--accent) 26%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-panel) 82%, #ffffff 18%);
+}
+
+.onboarding-preview__choice-golfer {
+  margin: 0 0 0.24rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
+}
+
+.onboarding-preview__choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.onboarding-preview__choice-card {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.46rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-panel-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.onboarding-preview__choice-arrow {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.onboarding-preview__choice-result {
+  margin: 0.28rem 0 0;
+  font-size: 0.73rem;
+  color: color-mix(in srgb, var(--text-primary) 82%, var(--accent-strong));
+}
+
+.onboarding-preview__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.onboarding-preview__golfer {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+}
+
+.onboarding-preview__score-bubble,
+.onboarding-preview__challenge-bubble,
+.onboarding-preview__recap-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+  color: var(--text-primary);
+}
+
+.onboarding-preview__score-bubble {
+  min-width: 2.1rem;
+  justify-content: center;
+  padding: 0.14rem 0.5rem;
+  font-family: var(--font-numeric);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.onboarding-preview__challenge-bubble {
+  padding: 0.14rem 0.58rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.onboarding-preview__challenge-bubble--success {
+  border-color: color-mix(in srgb, var(--text-success) 42%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-success) 78%, var(--surface-panel));
+  color: var(--text-success);
+}
+
+.onboarding-preview__challenge-bubble--failed {
+  border-color: color-mix(in srgb, var(--text-danger) 40%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-danger) 74%, var(--surface-panel));
+  color: var(--text-danger);
+}
+
+.onboarding-preview__recap-pill {
+  width: fit-content;
+  padding: 0.18rem 0.62rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 80%, var(--accent-strong));
+}
+
+.auth-gate-intro-list {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--color-border));
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-panel));
+}
+
+.auth-gate-intro-list p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.38;
+}
+
+.auth-gate-welcome-logo {
+  display: block;
+  width: min(260px, 78%);
+  height: auto;
+  margin: 0 auto 4px;
+}
+
+.auth-gate-welcome-tagline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.24rem, 5.2vw, 1.62rem);
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.auth-gate-intro-link {
+  width: 100%;
+}
+
+.gameplay-overview-modal {
+  width: min(620px, 100%);
+  max-height: calc(100dvh - (var(--space-4) * 2));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gameplay-overview-modal .onboarding-modal__step-title {
+  font-size: 1.42rem;
+  font-weight: 700;
+}
+
+.gameplay-overview-modal .onboarding-modal__content {
+  gap: var(--space-3);
+}
+
+.gameplay-overview-modal__points {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 6px;
+}
+
+.gameplay-overview-modal__points li {
+  font-size: 0.9rem;
+  line-height: 1.36;
+}
+
+.gameplay-overview-modal__example {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--color-border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-panel));
+}
+
+.gameplay-overview-modal .chip {
+  border-color: color-mix(in srgb, var(--accent) 66%, var(--border-subtle));
+  background: color-mix(in srgb, var(--accent) 24%, #ffffff 76%);
+  color: color-mix(in srgb, var(--accent-strong) 82%, var(--text-primary));
+  font-weight: 800;
+}
+
+.gameplay-overview-modal__card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.gameplay-overview-modal__mini-card {
+  padding: 10px 12px;
+}
+
+.gameplay-overview-modal__mini-card > p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.34;
+}
+
+.gameplay-overview-modal__score-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.gameplay-overview-modal__score-grid > p {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.gameplay-overview-modal__score-header {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.gameplay-overview-modal__score-strong {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--accent-strong) 72%, var(--text-primary));
+}
+
+.gameplay-overview-modal__recap-sample {
+  padding: 10px 12px;
+}
+
+.gameplay-overview-modal__recap-sample p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.38;
+}
+
+.gameplay-overview-modal__recap-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gameplay-overview-modal__recap-sample .leaderboard-table {
+  min-width: 0;
+}
+
+.gameplay-overview-modal__recap-sample .leaderboard-table__th,
+.gameplay-overview-modal__recap-sample .leaderboard-table__cell {
+  padding: 0.45rem 0.42rem;
+  font-size: 0.79rem;
+}
+
+.gameplay-overview-modal__flow-sample {
+  padding: 10px 12px;
+}
+
+.gameplay-overview-modal__flow-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.gameplay-overview-modal__flow-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.gameplay-overview-modal__flow-name {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.gameplay-overview-modal__strokes-picker {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.gameplay-overview-modal__flow-sample .hole-score-button-group--wheel {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+  padding-bottom: 0.24rem;
+}
+
+.gameplay-overview-modal__flow-sample .hole-score-button {
+  min-height: 38px;
+  min-width: 2.35rem;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  font-size: 0.96rem;
+}
+
+.gameplay-overview-modal__flow-sample .hole-score-button--manual {
+  min-width: 3rem;
+  width: auto;
+  padding-inline: 0.48rem;
+}
+
+.gameplay-overview-modal__flow-sample .hole-result-toggle-group {
+  width: 100%;
+  max-width: 100%;
+}
+
+.onboarding-modal__skip {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.onboarding-modal__skip:hover:not(:disabled),
+.onboarding-modal__skip:focus-visible {
+  color: color-mix(in srgb, var(--text-primary) 72%, var(--text-secondary));
+  text-decoration: underline;
+}
+
+.onboarding-modal__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.onboarding-modal__actions > button {
+  width: 100%;
+}
+
+.onboarding-modal__actions > button:not(.button-primary) {
+  border-color: color-mix(in srgb, var(--color-border) 46%, transparent);
+  background: color-mix(in srgb, var(--surface-panel) 84%, #ffffff 16%);
+  color: color-mix(in srgb, var(--text-primary) 78%, var(--text-secondary));
+}
+
+.onboarding-modal__actions > button:not(.button-primary):hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--color-border));
+  background: color-mix(in srgb, var(--surface-panel) 80%, #ffffff 20%);
+}
+
+.auth-gate {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: calc(var(--space-5) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px))
+    calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) calc(var(--space-4) + env(safe-area-inset-left, 0px));
+  justify-content: center;
+  overflow-y: auto;
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.28)),
+    linear-gradient(170deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.22)),
+    var(--auth-gate-bg-image, none),
+    var(--auth-gate-bg-image-fallback, none);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.auth-gate-card {
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.auth-gate-card > .label:first-child {
+  font-family: var(--font-display);
+  font-size: 1.14rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.auth-gate-option-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.auth-gate-option-list .settings-link-row {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.auth-gate-option--active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-panel));
+  box-shadow: 0 6px 14px -12px color-mix(in srgb, var(--accent) 52%, transparent);
+  transform: scale(1.02);
+  transition: transform 120ms ease, box-shadow 160ms ease;
+}
+
+.auth-layout-preview {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--color-border) 44%, transparent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-panel) 86%, #ffffff 14%);
+}
+
+.auth-layout-preview-stack {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.auth-layout-preview__label {
+  margin: 0;
+  padding: 0.5rem 0.6rem 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.auth-layout-preview__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.auth-layout-preview__image--full {
+  max-height: none;
+  object-fit: contain;
+}
+
+.auth-layout-preview__compact {
+  padding: 0.45rem 0.55rem 0;
+}
+
+.auth-layout-preview__compact .challenge-card {
+  margin: 0;
+}
+
+.auth-layout-preview figcaption {
+  padding: 0.44rem 0.6rem 0.54rem;
+  font-size: 0.8rem;
+}
+
+.segmented-control__button--active {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px -12px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.footer-controls {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .hole-score-wheel-shell {
+    gap: 0.34rem;
+  }
+
+  .hole-score-wheel-shell__arrow {
+    width: 2rem;
+    min-height: 2rem;
+  }
+
+  .hole-score-button {
+    min-width: 3.55rem;
+    min-height: 3.55rem;
+    font-size: 1.5rem;
+  }
+
+  .hole-score-button--manual {
+    min-width: 4.25rem;
+    font-size: 1.04rem;
+  }
+
+  .hole-score-button-group--wheel .hole-score-button {
+    width: 2.48rem;
+    height: 2.48rem;
+    min-width: 2.48rem;
+    min-height: 2.48rem;
+    font-size: 0.98rem;
+  }
+
+  .hole-score-button-group--wheel .hole-score-button--manual {
+    min-width: 3.1rem;
+    font-size: 0.88rem;
+  }
+
+  .hole-score-button-group--wheel {
+    padding-inline: max(0.4rem, calc(50% - 1.24rem));
+  }
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    max-width: 900px;
+  }
+
+  .app-shell--mode-preview {
+    max-width: none;
+  }
+
+  .screen-nav {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .end-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .end-round-highlights-grid,
+  .end-round-major-awards-grid,
+  .end-round-hole-highlights__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gameplay-overview-modal__card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hole-summary-player-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .recap-driver-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

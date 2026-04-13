@@ -50,6 +50,7 @@ test('normalizeRoundConfig keeps Power Ups as lightweight standalone mode', () =
     },
     toggles: {
       dynamicDifficulty: true,
+      catchUpMode: true,
       momentumBonuses: true,
       drawTwoPickOne: true,
       autoAssignOne: false,
@@ -65,6 +66,7 @@ test('normalizeRoundConfig keeps Power Ups as lightweight standalone mode', () =
   assert.equal(normalized.featuredHoles.enabled, false)
   assert.equal(normalized.toggles.drawTwoPickOne, false)
   assert.equal(normalized.toggles.autoAssignOne, true)
+  assert.equal(normalized.toggles.catchUpMode, false)
   assert.equal(normalized.toggles.enableChaosCards, false)
   assert.equal(normalized.toggles.enablePropCards, false)
 })
@@ -88,6 +90,7 @@ test('normalizeRoundConfig filters locked premium packs when premium mode is act
     },
     toggles: {
       dynamicDifficulty: true,
+      catchUpMode: true,
       momentumBonuses: true,
       drawTwoPickOne: true,
       autoAssignOne: false,
@@ -117,6 +120,7 @@ test('normalizeRoundConfig enforces two-card choice for card mode rounds', () =>
     },
     toggles: {
       dynamicDifficulty: true,
+      catchUpMode: true,
       momentumBonuses: true,
       drawTwoPickOne: false,
       autoAssignOne: true,

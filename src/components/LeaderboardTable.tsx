@@ -33,6 +33,13 @@ interface LeaderboardTableProps {
   className?: string
   headerBadge?: ReactNode
   compactLegend?: boolean
+  evenParTotal?: number
+  metricVisibility?: {
+    adjustedScore?: boolean
+    realScore?: boolean
+    gamePoints?: boolean
+  }
+  legendText?: string
 }
 
 function LeaderboardTable({
@@ -46,12 +53,31 @@ function LeaderboardTable({
   className,
   headerBadge,
   compactLegend = false,
+  evenParTotal,
+  metricVisibility,
+  legendText,
 }: LeaderboardTableProps) {
   const rowElementByPlayerIdRef = useRef<Record<string, HTMLTableRowElement | null>>({})
   const rowTopByPlayerIdRef = useRef<Record<string, number>>({})
   const shouldShowMomentum = showMomentum ?? Boolean(momentumByPlayerId)
   const shouldShowGolfScore = Boolean(golfScoreToParByPlayerId)
-  const formatSignedPoints = (value: number): string => `${value > 0 ? '+' : ''}${value}`
+  const showAdjustedMetric = metricVisibility?.adjustedScore ?? true
+  const showRealMetric = metricVisibility?.realScore ?? true
+  const showGamePointsMetric = metricVisibility?.gamePoints ?? true
+  const formatRelativeToEven = (value: number): string => {
+    if (value === 0) {
+      return 'E'
+    }
+    return `${value > 0 ? '+' : ''}${value}`
+  }
+  const formatScoreWithEvenDelta = (score: number): string => {
+    if (typeof evenParTotal !== 'number' || !Number.isFinite(evenParTotal)) {
+      return String(score)
+    }
+
+    const deltaToEven = score - evenParTotal
+    return `${score} (${formatRelativeToEven(deltaToEven)})`
+  }
 
   useLayoutEffect(() => {
     const nextTopByPlayerId: Record<string, number> = {}
@@ -121,7 +147,7 @@ function LeaderboardTable({
     <div className={['panel', 'stack-xs', className ?? ''].filter(Boolean).join(' ')}>
       <div className="row-between">
         <strong>{title}</strong>
-        {headerBadge ?? <span className="chip">#{rows[0]?.playerName ?? '-'}</span>}
+        {headerBadge === undefined ? <span className="chip">#{rows[0]?.playerName ?? '-'}</span> : headerBadge}
       </div>
       <div className="leaderboard-scroll">
         <table className="leaderboard-table">
@@ -130,15 +156,21 @@ function LeaderboardTable({
               <th className="leaderboard-table__th leaderboard-table__th--rank">Rank</th>
               <th className="leaderboard-table__th leaderboard-table__th--player">Player</th>
               {shouldShowMomentum && <th className="leaderboard-table__th">Heat</th>}
-              <th className="leaderboard-table__th leaderboard-table__th--metric">
-                {renderSortButton('Real (strokes)', 'realScore')}
-              </th>
-              <th className="leaderboard-table__th leaderboard-table__th--metric">
-                {renderSortButton('Game Pts', 'gamePoints')}
-              </th>
-              <th className="leaderboard-table__th leaderboard-table__th--metric">
-                {renderSortButton('Adjusted', 'adjustedScore')}
-              </th>
+              {showAdjustedMetric && (
+                <th className="leaderboard-table__th leaderboard-table__th--metric">
+                  {renderSortButton('Adjusted', 'adjustedScore')}
+                </th>
+              )}
+              {showRealMetric && (
+                <th className="leaderboard-table__th leaderboard-table__th--metric">
+                  {renderSortButton('Actual', 'realScore')}
+                </th>
+              )}
+              {showGamePointsMetric && (
+                <th className="leaderboard-table__th leaderboard-table__th--metric">
+                  {renderSortButton('Game Pts', 'gamePoints')}
+                </th>
+              )}
               {shouldShowGolfScore && <th className="leaderboard-table__th leaderboard-table__th--metric">Golf</th>}
             </tr>
           </thead>
@@ -162,15 +194,21 @@ function LeaderboardTable({
                       : '-'}
                   </td>
                 )}
-                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
-                  {row.realScore}
-                </td>
-                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
-                  {formatSignedPoints(row.gamePoints)}
-                </td>
-                <td className="leaderboard-table__cell leaderboard-table__cell--metric">
-                  {row.adjustedScore}
-                </td>
+                {showAdjustedMetric && (
+                  <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                    {formatScoreWithEvenDelta(row.adjustedScore)}
+                  </td>
+                )}
+                {showRealMetric && (
+                  <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                    {formatScoreWithEvenDelta(row.realScore)}
+                  </td>
+                )}
+                {showGamePointsMetric && (
+                  <td className="leaderboard-table__cell leaderboard-table__cell--metric">
+                    {row.gamePoints}
+                  </td>
+                )}
                 {shouldShowGolfScore && (
                   <td
                     className={`leaderboard-table__cell leaderboard-table__cell--metric ${getGolfScoreToneClass(
@@ -186,10 +224,8 @@ function LeaderboardTable({
         </table>
       </div>
       <p className={`muted leaderboard-table__legend ${compactLegend ? 'leaderboard-table__legend--compact' : ''}`}>
-        Real is pure strokes. Game points come from side-game outcomes. Adjusted = real minus game
-        points. Golf is strokes vs played par ({' '}
-        <span className="score-positive">-X under</span> / <span className="score-neutral">Even</span> /{' '}
-        <span className="score-negative">+X over</span>).
+        {legendText ??
+          'Actual is pure strokes. Game points come from side-game outcomes. Adjusted = actual minus game points.'}
       </p>
     </div>
   )

@@ -31,6 +31,7 @@ export interface FeaturedHolesConfig {
 
 export interface RoundToggles {
   dynamicDifficulty: boolean
+  catchUpMode: boolean
   momentumBonuses: boolean
   drawTwoPickOne: boolean
   autoAssignOne: boolean

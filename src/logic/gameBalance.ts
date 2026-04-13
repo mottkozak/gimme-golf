@@ -1,4 +1,5 @@
 import type { PersonalCard } from '../types/cards.ts'
+import type { PlayerTotals } from '../types/game.ts'
 
 export type SkillBand = 'advanced' | 'intermediate' | 'developing'
 export type MomentumTier = 'none' | 'heater' | 'fire' | 'inferno'
@@ -31,6 +32,13 @@ export interface SkillBandOfferPointPolicy {
   safe: OfferPointRange
   hard: OfferPointRange
   single: OfferPointRange
+}
+
+export interface CatchUpPointRangeContext {
+  enabled: boolean
+  playerId: string
+  totalsByPlayerId: Record<string, PlayerTotals>
+  deficitThreshold?: number
 }
 
 export const SKILL_BAND_RULES: SkillBandRule[] = [
@@ -101,7 +109,7 @@ export const DYNAMIC_OFFER_TUNING: Record<SkillBand, SkillBandOfferTuning> = {
     },
     hard: {
       preferredPoints: [4, 5],
-      difficultyWeights: { easy: 1, medium: 4, hard: 4 },
+      difficultyWeights: { easy: 6, medium: 3, hard: 1 },
     },
     single: {
       preferredPoints: [3, 4, 5],
@@ -154,6 +162,15 @@ export const POINT_BALANCE_RULES = {
   },
 } as const
 
+const CATCH_UP_DEFICIT_THRESHOLD = 2
+const CATCH_UP_POINT_BONUS_BY_OFFER: Record<OfferPointRangeKey, OfferPointRange> = {
+  safe: { minPoints: 0, maxPoints: 1 },
+  hard: { minPoints: 1, maxPoints: 1 },
+  single: { minPoints: 1, maxPoints: 1 },
+}
+const OFFER_POINT_FLOOR = 1
+const OFFER_POINT_CEILING = 5
+
 export function getSkillBandForExpectedScore(expectedScore18: number): SkillBand {
   if (expectedScore18 < 72) {
     return 'advanced'
@@ -197,13 +214,63 @@ export function getOfferPointRange(
   expectedScore18: number,
   dynamicDifficultyEnabled: boolean,
   offerKind: OfferPointRangeKey,
+  catchUpContext?: CatchUpPointRangeContext,
 ): OfferPointRange {
-  if (!dynamicDifficultyEnabled) {
-    return STATIC_OFFER_POINT_POLICY[offerKind]
+  const basePolicy = dynamicDifficultyEnabled
+    ? DYNAMIC_OFFER_POINT_POLICY[getSkillBandForExpectedScore(expectedScore18)]
+    : STATIC_OFFER_POINT_POLICY
+  const baseRange = basePolicy[offerKind]
+
+  if (!shouldApplyCatchUpBoost(catchUpContext)) {
+    return baseRange
   }
 
-  const skillBand = getSkillBandForExpectedScore(expectedScore18)
-  return DYNAMIC_OFFER_POINT_POLICY[skillBand][offerKind]
+  const pointBonus = CATCH_UP_POINT_BONUS_BY_OFFER[offerKind]
+  return {
+    minPoints: clamp(baseRange.minPoints + pointBonus.minPoints, OFFER_POINT_FLOOR, OFFER_POINT_CEILING),
+    maxPoints: clamp(baseRange.maxPoints + pointBonus.maxPoints, OFFER_POINT_FLOOR, OFFER_POINT_CEILING),
+  }
+}
+
+export function getAdjustedScoreDeficitFromLeader(
+  playerId: string,
+  totalsByPlayerId: Record<string, PlayerTotals>,
+): number {
+  const leaderboardTotals = Object.values(totalsByPlayerId)
+  if (leaderboardTotals.length === 0) {
+    return 0
+  }
+
+  const playerAdjustedScore = totalsByPlayerId[playerId]?.adjustedScore
+  if (typeof playerAdjustedScore !== 'number') {
+    return 0
+  }
+
+  const leaderAdjustedScore = leaderboardTotals.reduce(
+    (lowestScore, totals) => Math.min(lowestScore, totals.adjustedScore),
+    Number.POSITIVE_INFINITY,
+  )
+  if (!Number.isFinite(leaderAdjustedScore)) {
+    return 0
+  }
+
+  return playerAdjustedScore - leaderAdjustedScore
+}
+
+function shouldApplyCatchUpBoost(catchUpContext: CatchUpPointRangeContext | undefined): boolean {
+  if (!catchUpContext?.enabled) {
+    return false
+  }
+
+  const deficitThreshold = catchUpContext.deficitThreshold ?? CATCH_UP_DEFICIT_THRESHOLD
+  return (
+    getAdjustedScoreDeficitFromLeader(catchUpContext.playerId, catchUpContext.totalsByPlayerId) >=
+    deficitThreshold
+  )
+}
+
+function clamp(value: number, minValue: number, maxValue: number): number {
+  return Math.min(maxValue, Math.max(minValue, value))
 }
 
 export function getSkillBandSummaryLine(

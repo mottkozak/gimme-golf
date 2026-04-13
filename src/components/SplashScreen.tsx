@@ -1,26 +1,34 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-const LETTER_REFRESH_INTERVAL_MS = 320
-const EXIT_FADE_DURATION_MS = 380
-const LETTERS_PER_ROW = 5
-const SMALL_UPDATE_COUNT = 1
-const LARGE_UPDATE_COUNT = 3
-const LARGE_UPDATE_EVERY_TICKS = 4
-const LETTER_FONT_VARIANTS = [
-  'bungee',
-  'bungee-inline',
+/** Delay before the letter fill animation starts (splash visible with static hollow logo). */
+const DELAY_BEFORE_ANIMATION_MS = 120
+/** Total time for the logo fill (all letters hollow → solid). */
+const LOGO_FILL_DURATION_MS = 900
+/** Pause with logo fully visible before starting transition to main screen. */
+const PAUSE_AFTER_FILL_MS = 120
+
+/** Time between advancing one letter one step (hollow → … → solid). Derived so last letter completes at LOGO_FILL_DURATION_MS. */
+const LETTER_STEP_INTERVAL_MS = Math.round(LOGO_FILL_DURATION_MS / 13)
+/** Delay before each letter starts its progression (cascade). Same as step so fill spans LOGO_FILL_DURATION_MS. */
+const LETTER_STAGGER_MS = LETTER_STEP_INTERVAL_MS
+const EXIT_FADE_DURATION_MS = 220
+
+/** Order: hollow / negative-space first → solid last. */
+const FONT_PROGRESSION = [
   'bungee-outline',
+  'bungee-inline',
   'bungee-shade',
+  'bungee',
 ] as const
 
-type LetterFontVariant = (typeof LETTER_FONT_VARIANTS)[number]
+type LetterFontVariant = (typeof FONT_PROGRESSION)[number]
 
 interface SplashScreenProps {
   backgroundImageSrc: string
   blankLogoSrc: string
-  durationMs: number
   onFinish: () => void
+  hold?: boolean
 }
 
 interface SplashLetterCell {
@@ -42,137 +50,19 @@ const SPLASH_LETTER_CELLS: readonly SplashLetterCell[] = [
   { character: '.', column: 5, row: 2 },
 ] as const
 
-function pickRandomFontVariant(variants: readonly LetterFontVariant[]): LetterFontVariant {
-  return variants[Math.floor(Math.random() * variants.length)] ?? LETTER_FONT_VARIANTS[0]
+const SOLID_STEP_INDEX = FONT_PROGRESSION.length - 1
+
+/** One step index per letter (0 = hollow, SOLID_STEP_INDEX = solid). All start at 0. */
+function createInitialLetterSteps(): number[] {
+  return Array.from({ length: SPLASH_LETTER_CELLS.length }, () => 0)
 }
 
-function shuffleIndices(values: number[]): number[] {
-  const nextValues = [...values]
-  for (let index = nextValues.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1))
-    const currentValue = nextValues[index]
-    nextValues[index] = nextValues[swapIndex] ?? currentValue
-    nextValues[swapIndex] = currentValue
-  }
-  return nextValues
+function stepIndexToVariant(step: number): LetterFontVariant {
+  const index = Math.min(Math.max(0, step), SOLID_STEP_INDEX)
+  return FONT_PROGRESSION[index] ?? FONT_PROGRESSION[0]
 }
 
-function getNeighborIndices(index: number): number[] {
-  const neighbors: number[] = []
-  const column = index % LETTERS_PER_ROW
-  const row = Math.floor(index / LETTERS_PER_ROW)
-
-  if (column > 0) {
-    neighbors.push(index - 1)
-  }
-
-  if (column < LETTERS_PER_ROW - 1) {
-    neighbors.push(index + 1)
-  }
-
-  const rowCount = Math.ceil(SPLASH_LETTER_CELLS.length / LETTERS_PER_ROW)
-  if (row > 0) {
-    neighbors.push(index - LETTERS_PER_ROW)
-  }
-  if (row < rowCount - 1) {
-    neighbors.push(index + LETTERS_PER_ROW)
-  }
-
-  return neighbors.filter((neighborIndex) => neighborIndex < SPLASH_LETTER_CELLS.length)
-}
-
-const LETTER_NEIGHBORS = SPLASH_LETTER_CELLS.map((_cell, index) => getNeighborIndices(index))
-
-function getAvailableVariants(
-  layout: readonly LetterFontVariant[],
-  index: number,
-  excludeCurrentValue: boolean,
-): LetterFontVariant[] {
-  const currentVariant = layout[index]
-  return LETTER_FONT_VARIANTS.filter((variant) => {
-    if (excludeCurrentValue && variant === currentVariant) {
-      return false
-    }
-    return LETTER_NEIGHBORS[index]?.every((neighborIndex) => layout[neighborIndex] !== variant)
-  })
-}
-
-function createInitialLetterFontLayout(): LetterFontVariant[] {
-  const nextLayout = new Array<LetterFontVariant>(SPLASH_LETTER_CELLS.length)
-
-  for (let index = 0; index < SPLASH_LETTER_CELLS.length; index += 1) {
-    const availableVariants = getAvailableVariants(nextLayout, index, false)
-    nextLayout[index] = pickRandomFontVariant(
-      availableVariants.length > 0 ? availableVariants : LETTER_FONT_VARIANTS,
-    )
-  }
-
-  return nextLayout
-}
-
-function getLetterIndexesForUpdate(changeCount: number): number[] {
-  const allIndexes = shuffleIndices(
-    Array.from({ length: SPLASH_LETTER_CELLS.length }, (_cell, index) => index),
-  )
-  const pickedIndexes: number[] = []
-
-  for (const candidateIndex of allIndexes) {
-    if (pickedIndexes.length >= changeCount) {
-      break
-    }
-
-    const hasAdjacentPickedIndex = pickedIndexes.some((pickedIndex) =>
-      LETTER_NEIGHBORS[pickedIndex]?.includes(candidateIndex),
-    )
-    if (!hasAdjacentPickedIndex) {
-      pickedIndexes.push(candidateIndex)
-    }
-  }
-
-  if (pickedIndexes.length < changeCount) {
-    for (const candidateIndex of allIndexes) {
-      if (pickedIndexes.includes(candidateIndex)) {
-        continue
-      }
-      pickedIndexes.push(candidateIndex)
-      if (pickedIndexes.length >= changeCount) {
-        break
-      }
-    }
-  }
-
-  return pickedIndexes
-}
-
-function evolveLetterFontLayout(
-  previousLayout: readonly LetterFontVariant[],
-  tickCount: number,
-): LetterFontVariant[] {
-  const nextLayout = [...previousLayout]
-  const changeCount =
-    tickCount % LARGE_UPDATE_EVERY_TICKS === 0 ? LARGE_UPDATE_COUNT : SMALL_UPDATE_COUNT
-  const changeIndexes = getLetterIndexesForUpdate(Math.min(changeCount, nextLayout.length))
-
-  for (const changeIndex of changeIndexes) {
-    const availableVariants = getAvailableVariants(nextLayout, changeIndex, true)
-    const fallbackVariants = LETTER_FONT_VARIANTS.filter(
-      (variant) => variant !== nextLayout[changeIndex],
-    )
-    nextLayout[changeIndex] = pickRandomFontVariant(
-      availableVariants.length > 0 ? availableVariants : fallbackVariants,
-    )
-  }
-
-  return nextLayout
-}
-
-function SplashScreen({ backgroundImageSrc, blankLogoSrc, durationMs, onFinish }: SplashScreenProps) {
-  const [isExiting, setIsExiting] = useState(false)
-  const [letterFonts, setLetterFonts] = useState<LetterFontVariant[]>(() =>
-    createInitialLetterFontLayout(),
-  )
-  const updateTickRef = useRef(0)
-
+function SplashScreen({ backgroundImageSrc, blankLogoSrc, onFinish, hold = false }: SplashScreenProps) {
   const prefersReducedMotion = useMemo(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
       return false
@@ -180,38 +70,60 @@ function SplashScreen({ backgroundImageSrc, blankLogoSrc, durationMs, onFinish }
 
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   }, [])
+  const [isExiting, setIsExiting] = useState(false)
+  const [letterSteps, setLetterSteps] = useState<number[]>(() =>
+    prefersReducedMotion
+      ? Array(SPLASH_LETTER_CELLS.length).fill(SOLID_STEP_INDEX)
+      : createInitialLetterSteps(),
+  )
+  const cascadeStartRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (prefersReducedMotion) {
       return
     }
 
-    const intervalId = window.setInterval(() => {
-      updateTickRef.current += 1
-      setLetterFonts((previousFonts) =>
-        evolveLetterFontLayout(previousFonts, updateTickRef.current),
+    cascadeStartRef.current = performance.now()
+    const tick = () => {
+      const start = cascadeStartRef.current
+      if (start === null) return
+      const elapsed = performance.now() - start
+      const animationElapsed = elapsed - DELAY_BEFORE_ANIMATION_MS
+      setLetterSteps(() =>
+        SPLASH_LETTER_CELLS.map((_, i) => {
+          const effectiveElapsed = animationElapsed - i * LETTER_STAGGER_MS
+          if (effectiveElapsed < 0) return 0
+          const step = Math.floor(effectiveElapsed / LETTER_STEP_INTERVAL_MS)
+          return Math.min(step, SOLID_STEP_INDEX)
+        }),
       )
-    }, LETTER_REFRESH_INTERVAL_MS)
-
-    return () => {
-      window.clearInterval(intervalId)
     }
+    tick()
+    const intervalId = window.setInterval(tick, LETTER_STEP_INTERVAL_MS / 2)
+    return () => window.clearInterval(intervalId)
   }, [prefersReducedMotion])
 
+  const letterFonts: LetterFontVariant[] = letterSteps.map(stepIndexToVariant)
+
   useEffect(() => {
-    const exitDelayMs = Math.max(durationMs - EXIT_FADE_DURATION_MS, 0)
+    if (hold) {
+      return
+    }
+
+    /* Start exit fade after delay + fill + pause; then call onFinish after fade completes. */
+    const exitStartMs = DELAY_BEFORE_ANIMATION_MS + LOGO_FILL_DURATION_MS + PAUSE_AFTER_FILL_MS
     const exitTimeoutId = window.setTimeout(() => {
       setIsExiting(true)
-    }, exitDelayMs)
+    }, exitStartMs)
     const finishTimeoutId = window.setTimeout(() => {
       onFinish()
-    }, durationMs)
+    }, exitStartMs + EXIT_FADE_DURATION_MS)
 
     return () => {
       window.clearTimeout(exitTimeoutId)
       window.clearTimeout(finishTimeoutId)
     }
-  }, [durationMs, onFinish])
+  }, [hold, onFinish])
 
   return (
     <div

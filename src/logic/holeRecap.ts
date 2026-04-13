@@ -108,6 +108,8 @@ export interface HoleRecapData {
   playerRows: HoleRecapPlayerRow[]
   publicCardRecapItems: PublicCardRecapItem[]
   gamePointHoleWinners: HoleWinnerSummary
+  /** Strokes minus hole game points on this hole; lowest wins (matches adjusted = real − points at hole scope). */
+  adjustedHoleWinners: HoleWinnerSummary
   bestRealScoreHoleWinners: HoleWinnerSummary
   leaderSnapshot: LeaderSnapshotSummary
 }
@@ -656,6 +658,27 @@ function getBestRealScoreHoleWinners(playerRows: HoleRecapPlayerRow[]): HoleWinn
   }
 }
 
+function getAdjustedHoleWinners(playerRows: HoleRecapPlayerRow[]): HoleWinnerSummary {
+  const validRows = playerRows.filter((row) => typeof row.strokes === 'number')
+  if (validRows.length === 0) {
+    return {
+      score: null,
+      playerIds: [],
+      playerNames: [],
+    }
+  }
+
+  const net = (row: HoleRecapPlayerRow) => (row.strokes as number) - row.holePoints
+  const bestNet = validRows.reduce((min, row) => Math.min(min, net(row)), net(validRows[0]!))
+  const winners = validRows.filter((row) => net(row) === bestNet)
+
+  return {
+    score: bestNet,
+    playerIds: winners.map((winner) => winner.playerId),
+    playerNames: winners.map((winner) => winner.playerName),
+  }
+}
+
 function getPublicModeLabel(mode: CanonicalPublicResolutionMode): string {
   switch (mode) {
     case 'yes_no_triggered':
@@ -892,16 +915,16 @@ function createHighlightLine(
   modeId: LandingModeId,
   playerRows: HoleRecapPlayerRow[],
   publicCardRecapItems: PublicCardRecapItem[],
-  gamePointHoleWinners: HoleWinnerSummary,
+  holeWinners: HoleWinnerSummary,
   holeNumber: number,
 ): string {
-  if (gamePointHoleWinners.playerNames.length > 0) {
-    if (gamePointHoleWinners.playerNames.length === 1) {
-      return createWinnerBroadcastLine(gamePointHoleWinners.playerNames[0], holeNumber, modeId)
+  if (holeWinners.playerNames.length > 0) {
+    if (holeWinners.playerNames.length === 1) {
+      return createWinnerBroadcastLine(holeWinners.playerNames[0], holeNumber, modeId)
     }
 
     return createTieBroadcastLine(
-      gamePointHoleWinners.playerNames,
+      holeWinners.playerNames,
       holeNumber,
       playerRows.length,
       modeId,
@@ -1092,8 +1115,13 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
     (player) => playerRows.find((row) => row.playerId === player.id)?.holePoints ?? 0,
     'max',
   )
+  const adjustedHoleWinners = getAdjustedHoleWinners(playerRows)
   const bestRealScoreHoleWinners = getBestRealScoreHoleWinners(playerRows)
-  const winnerIdSet = new Set(gamePointHoleWinners.playerIds)
+  const isPowerUpsMode = roundState.config.gameMode === 'powerUps'
+  const headlineHoleWinners = isPowerUpsMode ? bestRealScoreHoleWinners : gamePointHoleWinners
+  const winnerIdSet = new Set(
+    (isPowerUpsMode ? bestRealScoreHoleWinners : adjustedHoleWinners).playerIds,
+  )
 
   const playerRowsWithWinnerFlags = playerRows.map((row) => ({
     ...row,
@@ -1130,13 +1158,14 @@ function computeHoleRecapData(roundState: HoleRecapComputationState): HoleRecapD
       landingModeId,
       playerRowsWithWinnerFlags,
       publicCardRecapItems,
-      gamePointHoleWinners,
+      headlineHoleWinners,
       currentHole.holeNumber,
     ),
     featuredHoleRecap,
     playerRows: playerRowsWithWinnerFlags,
     publicCardRecapItems,
     gamePointHoleWinners,
+    adjustedHoleWinners,
     bestRealScoreHoleWinners,
     leaderSnapshot,
   }
@@ -1195,4 +1224,77 @@ export function formatWinnerSummary(summary: HoleWinnerSummary): string {
   }
 
   return `${formatPlayerNames(summary.playerNames)} (${summary.score})`
+}
+
+/** Supporting copy under Best Moment: per-winner strokes, hole points, and adjusted hole net. */
+export function formatAdjustedHoleWinnersSupportingLine(recapData: HoleRecapData): string {
+  if (recapData.gameMode === 'powerUps') {
+    const { bestRealScoreHoleWinners, playerRows } = recapData
+    if (bestRealScoreHoleWinners.score === null || bestRealScoreHoleWinners.playerIds.length === 0) {
+      return 'Hole score (actual): not yet - enter strokes on Hole Results to rank this hole by real score.'
+    }
+
+    const rowByPlayerId = new Map(playerRows.map((row) => [row.playerId, row]))
+    const parts: string[] = []
+
+    for (let index = 0; index < bestRealScoreHoleWinners.playerIds.length; index += 1) {
+      const playerId = bestRealScoreHoleWinners.playerIds[index]
+      if (!playerId) {
+        continue
+      }
+
+      const row = rowByPlayerId.get(playerId)
+      const displayName = row?.playerName ?? bestRealScoreHoleWinners.playerNames[index] ?? 'Golfer'
+      if (!row || typeof row.strokes !== 'number') {
+        parts.push(`${displayName} (strokes not entered yet)`)
+        continue
+      }
+
+      parts.push(`${displayName} (${row.strokes} actual strokes)`)
+    }
+
+    if (parts.length === 0) {
+      return 'Hole score (actual): not yet - enter strokes on Hole Results to rank this hole by real score.'
+    }
+
+    const label = bestRealScoreHoleWinners.playerIds.length === 1 ? 'Hole Winner' : 'Hole Winners'
+    return `${label}: ${parts.join(', ')}.`
+  }
+
+  const { adjustedHoleWinners, playerRows } = recapData
+  if (adjustedHoleWinners.score === null || adjustedHoleWinners.playerIds.length === 0) {
+    return 'Hole net (adjusted): not yet - enter strokes on Hole Results to rank this hole by net (strokes - hole points).'
+  }
+
+  const rowByPlayerId = new Map(playerRows.map((row) => [row.playerId, row]))
+  const parts: string[] = []
+
+  for (let index = 0; index < adjustedHoleWinners.playerIds.length; index += 1) {
+    const playerId = adjustedHoleWinners.playerIds[index]
+    if (!playerId) {
+      continue
+    }
+
+    const row = rowByPlayerId.get(playerId)
+    const displayName = row?.playerName ?? adjustedHoleWinners.playerNames[index] ?? 'Golfer'
+
+    if (!row || typeof row.strokes !== 'number') {
+      parts.push(`${displayName} (strokes not entered yet)`)
+      continue
+    }
+
+    const strokes = row.strokes
+    const holePoints = row.holePoints
+    const adjustedHoleNet = strokes - holePoints
+    parts.push(
+      `${displayName} (${strokes} real strokes - ${holePoints} hole points = ${adjustedHoleNet} adjusted score)`,
+    )
+  }
+
+  if (parts.length === 0) {
+    return 'Hole net (adjusted): not yet - enter strokes on Hole Results to rank this hole by net (strokes - hole points).'
+  }
+
+  const label = adjustedHoleWinners.playerIds.length === 1 ? 'Hole Winner' : 'Hole Winners'
+  return `${label}: ${parts.join(', ')}.`
 }
