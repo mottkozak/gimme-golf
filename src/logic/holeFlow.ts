@@ -51,6 +51,7 @@ export function prepareCurrentHoleForPlay(
       PUBLIC_CARDS,
       deckMemoryForDeal,
       priorHoleCards,
+      roundState.totalsByPlayerId,
     )
     holePowerUps[currentHoleIndex] = createEmptyHolePowerUpState(
       roundState.players,

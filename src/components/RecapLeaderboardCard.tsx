@@ -8,9 +8,17 @@ interface RecapLeaderboardCardProps {
   title: string
   rows: LeaderboardEntry[]
   sortMode: LeaderboardSortMode
-  onSortChange: (sortMode: LeaderboardSortMode) => void
+  onSortChange?: (sortMode: LeaderboardSortMode) => void
   golfScoreToParByPlayerId?: GolfScoreToParByPlayerId
   badge: ReactNode
+  evenParTotal?: number
+  className?: string
+  metricVisibility?: {
+    adjustedScore?: boolean
+    realScore?: boolean
+    gamePoints?: boolean
+  }
+  legendText?: string
 }
 
 function RecapLeaderboardCard({
@@ -20,6 +28,10 @@ function RecapLeaderboardCard({
   onSortChange,
   golfScoreToParByPlayerId,
   badge,
+  evenParTotal,
+  className,
+  metricVisibility,
+  legendText,
 }: RecapLeaderboardCardProps) {
   return (
     <LeaderboardTable
@@ -29,9 +41,12 @@ function RecapLeaderboardCard({
       onSortChange={onSortChange}
       golfScoreToParByPlayerId={golfScoreToParByPlayerId}
       showMomentum={false}
-      className="recap-leaderboard-card"
+      className={['recap-leaderboard-card', className ?? ''].filter(Boolean).join(' ')}
       headerBadge={badge}
       compactLegend
+      evenParTotal={evenParTotal}
+      metricVisibility={metricVisibility}
+      legendText={legendText}
     />
   )
 }

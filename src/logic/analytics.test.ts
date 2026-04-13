@@ -8,6 +8,8 @@ import {
   resetAnalyticsProvider,
   setAnalyticsProvider,
   trackAnalyticsEvent,
+  trackRoundCompleted,
+  trackRecapInteraction,
 } from './analytics.ts'
 import type { RoundState } from '../types/game.ts'
 
@@ -27,6 +29,7 @@ function createRoundStateFixture(): RoundState {
       },
       toggles: {
         dynamicDifficulty: true,
+        catchUpMode: true,
         momentumBonuses: false,
         drawTwoPickOne: false,
         autoAssignOne: true,
@@ -93,6 +96,53 @@ test('analytics provider receives typed events and can be swapped', () => {
   assert.equal(firstEvent?.name, 'home_action')
   assert.ok(firstEvent && firstEvent.name === 'home_action')
   assert.equal(firstEvent.payload.action, 'start_quick_round')
+
+  resetAnalyticsProvider()
+})
+
+test('recap interaction event captures delight interactions', () => {
+  const capturedEvents: AnyAnalyticsEvent[] = []
+
+  setAnalyticsProvider({
+    track: (event) => {
+      capturedEvents.push(event)
+    },
+  })
+
+  trackRecapInteraction(createRoundStateFixture(), 'share_theme_selected', 'chaos', 'chaos')
+
+  assert.equal(capturedEvents.length, 1)
+  const [event] = capturedEvents
+  assert.equal(event?.name, 'recap_interaction')
+  assert.ok(event && event.name === 'recap_interaction')
+  assert.equal(event.payload.interaction, 'share_theme_selected')
+  assert.equal(event.payload.detail, 'chaos')
+  assert.equal(event.payload.shareTheme, 'chaos')
+
+  resetAnalyticsProvider()
+})
+
+test('round completed winner lists everyone tied on lowest adjusted score', () => {
+  const capturedEvents: AnyAnalyticsEvent[] = []
+
+  setAnalyticsProvider({
+    track: (event) => {
+      capturedEvents.push(event)
+    },
+  })
+
+  const roundState = createRoundStateFixture()
+  roundState.totalsByPlayerId = {
+    p1: { realScore: 72, gamePoints: 1, adjustedScore: 68 },
+    p2: { realScore: 72, gamePoints: 5, adjustedScore: 68 },
+  }
+  trackRoundCompleted(roundState)
+
+  assert.equal(capturedEvents.length, 1)
+  const [event] = capturedEvents
+  assert.equal(event?.name, 'round_completed')
+  assert.ok(event && event.name === 'round_completed')
+  assert.equal(event.payload.winnerNames, 'Casey & Alex')
 
   resetAnalyticsProvider()
 })

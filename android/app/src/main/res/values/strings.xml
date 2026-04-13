@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gimme Golf</string>
+    <string name="title_activity_main">Gimme Golf</string>
+    <string name="package_name">com.gimmegolf.app</string>
+    <string name="custom_url_scheme">gimmegolf</string>
+</resources>

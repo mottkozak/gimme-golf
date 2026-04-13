@@ -166,3 +166,65 @@ test('calculateRoundTotalsByPlayerId reuses cached totals for identical referenc
 
   assert.strictEqual(first, second)
 })
+
+test('calculatePlayerHolePointBreakdown does not double-penalize negative mission cards', () => {
+  const players: Player[] = [{ id: 'p1', name: 'Alex', expectedScore18: 90 }]
+  const holes: HoleDefinition[] = [
+    {
+      holeNumber: 1,
+      par: 4,
+      tags: [],
+      featuredHoleType: null,
+    },
+  ]
+  const negativeCard = createPersonalCard({
+    id: 'card-neg',
+    code: 'NEG',
+    name: 'Negative Card',
+    points: -3,
+  })
+  const holeCards: HoleCardsState[] = [
+    {
+      holeNumber: 1,
+      dealtPersonalCardsByPlayerId: { p1: [negativeCard] },
+      selectedCardIdByPlayerId: { p1: negativeCard.id },
+      personalCardOfferByPlayerId: {
+        p1: { safeCardId: negativeCard.id, hardCardId: null },
+      },
+      publicCards: [],
+    },
+  ]
+  const holeResults: HoleResultState[] = [
+    {
+      holeNumber: 1,
+      strokesByPlayerId: { p1: 5 },
+      missionStatusByPlayerId: { p1: 'success' },
+      publicPointDeltaByPlayerId: { p1: -3 },
+      publicCardResolutionsByCardId: {},
+      publicCardResolutionNotes: '',
+    },
+  ]
+
+  const holeBreakdown = calculatePlayerHolePointBreakdown(
+    'p1',
+    0,
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    true,
+  )
+  const totals = calculateRoundTotalsByPlayerId(
+    players,
+    holes,
+    holeCards,
+    holeResults,
+    true,
+  )
+
+  assert.equal(holeBreakdown.baseMissionPoints, -3)
+  assert.equal(holeBreakdown.missionPoints, 0)
+  assert.equal(holeBreakdown.publicDelta, -3)
+  assert.equal(holeBreakdown.total, -3)
+  assert.equal(totals.p1.gamePoints, -3)
+})

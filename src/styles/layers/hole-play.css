@@ -1,0 +1,1161 @@
+.hole-play-screen {
+  gap: var(--space-4);
+}
+
+.hole-play-screen--missions {
+  --mission-panel-bg: color-mix(in srgb, var(--hole-mission-paper) 86%, var(--surface-panel));
+  --mission-panel-border: color-mix(in srgb, var(--hole-mission-border) 58%, var(--border-subtle));
+  --mission-module-bg: color-mix(in srgb, var(--hole-mission-surface) 78%, var(--surface-panel));
+  --mission-module-border: color-mix(in srgb, var(--hole-mission-border) 52%, var(--border-subtle));
+  --mission-inset-bg: color-mix(in srgb, var(--hole-mission-surface-muted) 82%, #ffffff 18%);
+  --mission-inset-border: color-mix(in srgb, var(--hole-mission-border) 42%, var(--border-subtle));
+  --mission-card-bg: color-mix(in srgb, var(--surface-panel) 90%, var(--hole-mission-surface-muted) 10%);
+  --mission-card-border: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  --mission-card-selected-bg: color-mix(in srgb, var(--hole-mission-selected-bg) 86%, #ffffff 14%);
+  --mission-card-selected-border: color-mix(in srgb, var(--hole-mission-selected-border) 60%, var(--border-subtle));
+  --mission-public-bg: color-mix(in srgb, var(--hole-public-preview-bg) 66%, var(--surface-panel));
+  --mission-public-border: color-mix(in srgb, var(--hole-public-preview-border) 52%, var(--border-subtle));
+}
+
+.hole-play-header {
+  gap: var(--space-2);
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hole-play-header--missions {
+  border: 1.5px solid var(--mission-panel-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  background:
+    linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--mission-panel-bg) 82%, var(--color-butter) 18%),
+      color-mix(in srgb, var(--mission-panel-bg) 90%, var(--color-blush) 10%)
+    );
+  box-shadow: var(--shadow-card);
+}
+
+.hole-play-header--missions .screen-title {
+  gap: 0.66rem;
+}
+
+.hole-play-header--missions .screen-title h2 {
+  font-size: clamp(2rem, 7vw, 2.62rem);
+}
+
+.hole-play-header--missions .screen-title__icon {
+  width: 1.72rem;
+  height: 1.72rem;
+  font-size: 1.68rem;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border) 34%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-panel-bg) 68%, #ffffff 32%);
+  color: color-mix(in srgb, var(--accent-strong) 76%, var(--text-primary));
+}
+
+.hole-play-header .muted {
+  font-size: 0.92rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--text-primary) 78%, var(--accent-strong));
+}
+
+.hole-play-header--illustrative-mission.hole-illustrative-selection__header {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hole-play-header--illustrative-mission.hole-illustrative-selection__header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.72rem, 7vw, 2.1rem);
+  line-height: 1.1;
+  width: 100%;
+}
+
+.hole-play-screen--missions .challenge-card--illustrative-hole-setup-minimal {
+  gap: 0.55rem;
+  min-height: 0;
+  padding-block: var(--space-3);
+}
+
+.hole-play-screen--missions .challenge-card--illustrative-hole-setup-minimal .challenge-card__meta-line {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.hole-play-intro {
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.hole-cards-helper {
+  margin: 0;
+  font-size: 0.91rem;
+  line-height: 1.44;
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.hole-info-card {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-inset-border);
+  background: var(--mission-inset-bg);
+  padding: var(--space-4);
+  box-shadow: none;
+}
+
+.hole-info-card--accent {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--mission-inset-bg) 84%, var(--hole-mission-selected-bg) 16%),
+      color-mix(in srgb, var(--mission-inset-bg) 90%, #ffffff 10%)
+    );
+}
+
+.hole-info-card__label {
+  letter-spacing: 0.09em;
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.hole-info-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hole-info-card__content > p {
+  margin: 0;
+}
+
+.hole-flow-note {
+  border-left: 2px solid color-mix(in srgb, var(--hole-mission-border-strong) 56%, transparent);
+}
+
+.hole-draft-list {
+  gap: var(--space-4);
+}
+
+.hole-illustrative-selection {
+  border-radius: calc(var(--radius-lg) + 2px);
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border-strong) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-panel-bg) 84%, #ffffff 16%);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-soft);
+}
+
+.hole-illustrative-selection__header {
+  align-items: center;
+  text-align: center;
+}
+
+.hole-illustrative-selection__header h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.72rem, 7vw, 2.1rem);
+}
+
+.hole-illustrative-selection__hole-line {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.12rem;
+}
+
+.hole-illustrative-selection__carousel-hint {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.hole-illustrative-selection__carousel-wrap {
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+  min-width: 0;
+}
+
+.hole-illustrative-selection__carousel-viewport {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding: 0.2rem max(0.65rem, calc(50% - min(41vw, 146px))) 1rem;
+  border-top: none;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.hole-illustrative-selection__carousel-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.hole-illustrative-selection__carousel-viewport:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--hole-mission-border-strong) 55%, var(--border-subtle));
+  outline-offset: 3px;
+}
+
+.hole-illustrative-selection__carousel-slide {
+  flex: 0 0 min(82vw, 292px);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  transform: scale(0.9);
+  opacity: 0.88;
+  transition:
+    transform 0.24s ease,
+    opacity 0.24s ease;
+  transform-origin: center center;
+}
+
+.hole-illustrative-selection__carousel-slide--focused {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.hole-illustrative-selection__carousel-slide .mission-card {
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * Per-golfer illustrative carousel (Hole Setup: Golfer Name): no outer card border/outline,
+ * no frame around the art, no rule between art and difficulty line — image and meta read as one unit.
+ */
+.hole-play-screen--missions .hole-illustrative-selection__carousel-viewport .challenge-card--illustrative-hole-setup-minimal.mission-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.hole-play-screen--missions .hole-illustrative-selection__carousel-viewport .challenge-card--illustrative-hole-setup-minimal.mission-card.card-category {
+  border: none;
+  background: transparent;
+}
+
+.hole-illustrative-selection__carousel-viewport .challenge-card__illustration-frame {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.hole-play-screen--missions .hole-illustrative-selection__carousel-viewport .challenge-card--illustrative-hole-setup-minimal .challenge-card__meta-line {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  border: none;
+}
+
+.hole-play-screen--missions .hole-illustrative-selection__carousel-viewport .challenge-card--selectable:hover {
+  border-color: transparent;
+  background: transparent;
+}
+
+.hole-play-screen--missions .hole-illustrative-selection__carousel-viewport .challenge-card--selectable:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-strong) 55%, var(--border-subtle));
+  outline-offset: 3px;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.hole-illustrative-selection__confirm {
+  width: 100%;
+  max-width: 360px;
+  justify-self: center;
+}
+
+.hole-golfer-module {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-module-border);
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--mission-module-bg) 88%, #ffffff 12%),
+      color-mix(in srgb, var(--mission-module-bg) 94%, var(--hole-mission-paper) 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-3);
+  box-shadow: var(--shadow-soft);
+}
+
+.hole-golfer-module__header {
+  align-items: flex-start;
+}
+
+.hole-golfer-module__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.hole-golfer-module__name {
+  font-family: var(--font-ui);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.12;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.hole-golfer-module__summary {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.34;
+}
+
+.hole-golfer-module__mission-stack {
+  gap: 0.68rem;
+}
+
+.mission-status-pill {
+  min-height: 30px;
+  padding: 0.16rem 0.62rem;
+  border-radius: var(--radius-pill);
+  border-width: 1.5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mission-status-pill--ready {
+  border-color: color-mix(in srgb, var(--hole-mission-ready-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-ready-bg) 84%, #ffffff 16%);
+  color: color-mix(in srgb, var(--text-success) 86%, var(--accent-strong));
+}
+
+.mission-status-pill--pending {
+  border-color: color-mix(in srgb, var(--hole-mission-pending-border) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-pending-bg) 82%, #ffffff 18%);
+  color: color-mix(in srgb, var(--text-secondary) 82%, var(--accent-strong));
+}
+
+.hole-draft-options {
+  gap: 0.62rem;
+}
+
+.hole-fairness-note {
+  border-left: 2px solid color-mix(in srgb, var(--hole-mission-border) 52%, transparent);
+}
+
+.hole-play-screen--missions .mission-card,
+.hole-play-screen--missions .public-preview-card {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--mission-card-border);
+  background: var(--mission-card-bg);
+  padding: var(--space-3);
+  gap: 0.62rem;
+  box-shadow: none;
+  text-align: left;
+}
+
+.hole-play-screen--missions .public-preview-card {
+  border-color: var(--mission-public-border);
+  background: var(--mission-public-bg);
+}
+
+.hole-play-screen--challenge-layout-illustrative .hole-draft-options {
+  gap: var(--space-3);
+}
+
+.hole-play-screen--challenge-layout-illustrative .mission-card,
+.hole-play-screen--challenge-layout-illustrative .public-preview-card {
+  min-height: 210px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border-width: 2px;
+  gap: 0.86rem;
+}
+
+.hole-play-screen--challenge-layout-illustrative .mission-card {
+  background:
+    linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--mission-card-bg) 88%, #ffffff 12%),
+      color-mix(in srgb, var(--mission-card-bg) 72%, var(--hole-mission-surface-muted) 28%)
+    );
+}
+
+.hole-play-screen--challenge-layout-illustrative .public-preview-card {
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--mission-public-bg) 86%, #ffffff 14%),
+      color-mix(in srgb, var(--mission-public-bg) 74%, var(--mission-panel-bg) 26%)
+    );
+}
+
+.hole-play-screen--challenge-layout-illustrative .mission-card strong,
+.hole-play-screen--challenge-layout-illustrative .public-preview-card strong {
+  font-size: 1.42rem;
+  line-height: 1.08;
+}
+
+.hole-play-screen--challenge-layout-illustrative .mission-card .challenge-card__description,
+.hole-play-screen--challenge-layout-illustrative .mission-card .public-card__description,
+.hole-play-screen--challenge-layout-illustrative .public-preview-card .challenge-card__description,
+.hole-play-screen--challenge-layout-illustrative .public-preview-card .public-card__description {
+  font-size: 1rem;
+  line-height: 1.46;
+}
+
+.hole-play-screen--challenge-layout-illustrative .mission-card .challenge-card__badges {
+  gap: 0.45rem;
+}
+
+.hole-play-screen--missions .challenge-card--illustrative {
+  gap: 0.72rem;
+}
+
+.hole-play-screen--missions .challenge-card__illustration-frame {
+  margin: 0;
+  border-radius: calc(var(--radius-sm) + 2px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--card-category-accent) 40%, var(--mission-card-border));
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-play-screen--missions .challenge-card__illustration {
+  width: 100%;
+  display: block;
+}
+
+.hole-play-screen--missions .public-card--illustrative {
+  gap: 0.72rem;
+}
+
+.hole-play-screen--missions .public-card__illustration-frame {
+  margin: 0;
+  border-radius: calc(var(--radius-sm) + 2px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--card-category-accent) 40%, var(--mission-public-border));
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-play-screen--missions .public-card__illustration {
+  width: 100%;
+  display: block;
+}
+
+.hole-play-screen--power-ups .power-up-card--illustrative {
+  gap: 0.72rem;
+}
+
+.hole-play-screen--power-ups .power-up-card__illustration-frame {
+  margin: 0;
+  border-radius: calc(var(--radius-sm) + 2px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--hole-mission-border) 46%, var(--border-subtle));
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-play-screen--power-ups .power-up-card__illustration {
+  width: 100%;
+  display: block;
+}
+
+.hole-play-screen--missions .mission-card strong,
+.hole-play-screen--missions .public-preview-card strong {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.004em;
+}
+
+.hole-play-screen--missions .challenge-card__meta {
+  gap: 0.3rem;
+}
+
+.hole-play-screen--missions .mission-card .challenge-card__description,
+.hole-play-screen--missions .mission-card .public-card__description,
+.hole-play-screen--missions .public-preview-card .challenge-card__description,
+.hole-play-screen--missions .public-preview-card .public-card__description {
+  line-height: 1.4;
+  font-size: 0.94rem;
+  text-align: left;
+}
+
+.hole-play-screen--missions .mission-card .challenge-card__meta-line,
+.hole-play-screen--missions .public-preview-card .public-card__meta-line {
+  margin-top: 0.04rem;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.hole-play-screen--missions .mission-card .challenge-card__offer-detail {
+  margin-top: 0.04rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+  text-align: left;
+}
+
+.hole-play-screen--missions .mission-card .challenge-card__badges {
+  gap: 0.36rem;
+}
+
+.hole-play-screen--missions .mission-card,
+.hole-play-screen--missions .public-preview-card {
+  --card-category-accent: color-mix(in srgb, var(--hole-mission-border-strong) 58%, var(--border-subtle));
+  --card-category-surface: color-mix(in srgb, var(--hole-mission-surface-muted) 14%, transparent);
+}
+
+.card-category--common {
+  --card-category-accent: #2f8f72;
+}
+
+.card-category--skill {
+  --card-category-accent: #3276ce;
+}
+
+.card-category--risk {
+  --card-category-accent: #c45745;
+}
+
+.card-category--curse {
+  --card-category-accent: #7f4f9a;
+}
+
+.card-category--style {
+  --card-category-accent: #a35ec4;
+}
+
+.card-category--hybrid {
+  --card-category-accent: #b78637;
+}
+
+.card-category--novelty {
+  --card-category-accent: #c95a95;
+}
+
+.card-category--chaos {
+  --card-category-accent: #c4623b;
+}
+
+.card-category--prop {
+  --card-category-accent: #2d8c96;
+}
+
+.hole-play-screen--missions .mission-card.card-category,
+.hole-play-screen--missions .public-preview-card.card-category {
+  position: relative;
+  overflow: hidden;
+}
+
+.hole-play-screen--missions .mission-card.card-category::before,
+.hole-play-screen--missions .public-preview-card.card-category::before {
+  content: none;
+  display: none;
+}
+
+.hole-play-screen--missions .mission-card.card-category {
+  border-color: color-mix(in srgb, var(--card-category-accent) 52%, var(--mission-card-border));
+  background:
+    linear-gradient(
+      142deg,
+      color-mix(in srgb, var(--card-category-surface) 42%, transparent),
+      color-mix(in srgb, var(--mission-card-bg) 94%, #ffffff 6%)
+    ),
+    var(--mission-card-bg);
+}
+
+.hole-play-screen--missions .public-preview-card.card-category {
+  border-color: color-mix(in srgb, var(--card-category-accent) 52%, var(--mission-public-border));
+  background:
+    linear-gradient(
+      142deg,
+      color-mix(in srgb, var(--card-category-surface) 36%, transparent),
+      color-mix(in srgb, var(--mission-public-bg) 90%, #ffffff 10%)
+    ),
+    var(--mission-public-bg);
+}
+
+.hole-play-screen--missions .mission-card.selected {
+  border-color: var(--mission-card-selected-border);
+  background:
+    linear-gradient(
+      156deg,
+      color-mix(in srgb, var(--mission-card-selected-bg) 84%, var(--color-butter) 16%),
+      color-mix(in srgb, var(--mission-card-selected-bg) 92%, var(--color-blush) 8%)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--mission-card-selected-border) 38%, transparent),
+    var(--shadow-soft);
+}
+
+.hole-play-screen--missions .mission-card.card-category.selected {
+  border-color: color-mix(in srgb, var(--card-category-accent) 58%, var(--mission-card-selected-border));
+}
+
+.hole-play-screen--missions .challenge-card--selectable:hover {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 54%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-card-bg) 76%, var(--mission-card-selected-bg) 24%);
+}
+
+.hole-play-screen--missions .challenge-card--selectable:focus-visible {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 70%, var(--border-subtle));
+  box-shadow: var(--shadow-focus);
+}
+
+.badge-chip {
+  background: color-mix(in srgb, var(--hole-mission-chip-bg) 90%, #ffffff 10%);
+  border-color: color-mix(in srgb, var(--hole-mission-chip-border) 54%, var(--border-subtle));
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.badge-chip--subtle {
+  background: color-mix(in srgb, var(--hole-mission-chip-bg) 84%, #ffffff 16%);
+}
+
+.badge-chip--reward {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 48%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-ready-bg) 72%, #ffffff 28%);
+  color: color-mix(in srgb, var(--text-primary) 86%, var(--accent-strong));
+  font-family: var(--font-numeric);
+}
+
+.badge-chip--selected {
+  border-color: color-mix(in srgb, var(--mission-card-selected-border) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-card-selected-bg) 80%, #ffffff 20%);
+  color: color-mix(in srgb, var(--text-primary) 90%, var(--accent-strong));
+}
+
+.badge-chip--safe {
+  border-color: color-mix(in srgb, var(--hole-mission-ready-border) 56%, var(--border-subtle));
+}
+
+.badge-chip--hard {
+  border-color: color-mix(in srgb, var(--warning) 54%, var(--border-subtle));
+}
+
+.badge-chip--auto {
+  border-color: color-mix(in srgb, var(--hole-mission-border) 56%, var(--border-subtle));
+}
+
+.badge-chip--count {
+  border-color: color-mix(in srgb, var(--mission-public-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-public-bg) 74%, #ffffff 26%);
+  color: color-mix(in srgb, var(--text-primary) 88%, var(--accent-strong));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__type-chip,
+.hole-play-screen--missions .badge-chip.public-card__type-chip {
+  border-color: color-mix(in srgb, var(--card-category-accent) 62%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, var(--card-category-accent) 16%, #ffffff 84%);
+  color: color-mix(in srgb, var(--card-category-accent) 76%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--easy {
+  border-color: color-mix(in srgb, #209556 68%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #209556 16%, #ffffff 84%);
+  color: color-mix(in srgb, #209556 86%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--medium {
+  border-color: color-mix(in srgb, #c07b24 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #c07b24 16%, #ffffff 84%);
+  color: color-mix(in srgb, #a8661c 90%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--hard {
+  border-color: color-mix(in srgb, #6B2D3C 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #6B2D3C 16%, #ffffff 84%);
+  color: color-mix(in srgb, #6B2D3C 90%, var(--text-primary));
+}
+
+.hole-play-screen--missions .badge-chip.challenge-card__difficulty-chip--neutral {
+  border-color: color-mix(in srgb, var(--text-secondary) 52%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, var(--text-secondary) 14%, #ffffff 86%);
+  color: color-mix(in srgb, var(--text-secondary) 88%, var(--text-primary));
+}
+
+.hole-play-screen--missions .mission-card.challenge-card--difficulty-easy > header strong {
+  color: #1a7d47;
+}
+
+.hole-play-screen--missions .mission-card.challenge-card--difficulty-medium > header strong {
+  color: #a8661c;
+}
+
+.hole-play-screen--missions .mission-card.challenge-card--difficulty-hard > header strong {
+  color: #6B2D3C;
+}
+
+.hole-play-screen--missions .challenge-card__points-chip--easy {
+  border-color: color-mix(in srgb, #209556 68%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #209556 16%, #ffffff 84%);
+  color: color-mix(in srgb, #209556 92%, var(--text-primary));
+}
+
+.hole-play-screen--missions .challenge-card__points-chip--medium {
+  border-color: color-mix(in srgb, #c07b24 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #c07b24 16%, #ffffff 84%);
+  color: color-mix(in srgb, #a8661c 94%, var(--text-primary));
+}
+
+.hole-play-screen--missions .challenge-card__points-chip--hard {
+  border-color: color-mix(in srgb, #6B2D3C 70%, var(--hole-mission-chip-border));
+  background: color-mix(in srgb, #6B2D3C 16%, #ffffff 84%);
+  color: color-mix(in srgb, #6B2D3C 94%, var(--text-primary));
+}
+
+.hole-public-section {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mission-public-border);
+  background:
+    linear-gradient(
+      152deg,
+      color-mix(in srgb, var(--mission-public-bg) 72%, #ffffff 28%),
+      color-mix(in srgb, var(--mission-public-bg) 86%, var(--mission-panel-bg) 14%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+.hole-public-section__header h3 {
+  font-size: 1.08rem;
+}
+
+.hole-public-section__list {
+  gap: 0.62rem;
+}
+
+.hole-public-section__helper {
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.hole-public-section .public-card,
+.hole-public-section .public-preview-card {
+  text-align: left;
+}
+
+.hole-public-section .public-card > header strong,
+.hole-public-section .public-card__description,
+.hole-public-section .public-card__meta-line {
+  text-align: left;
+}
+
+.public-preview-card {
+  border-radius: var(--radius-sm);
+  border: 1.5px solid color-mix(in srgb, var(--mission-public-border) 58%, var(--border-subtle));
+  background: color-mix(in srgb, var(--mission-public-bg) 62%, #ffffff 38%);
+  padding: var(--space-3);
+  gap: 0.5rem;
+}
+
+.public-preview-card strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .challenge-card--deal-in,
+  .public-preview-card--deal-in {
+    opacity: 0;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .challenge-card--deal-in.is-in-view {
+    transform-origin: 50% 14%;
+    animation-name: deal-card-enter;
+    animation-duration: var(--motion-deal);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--deal-order, 0) * 52ms);
+  }
+
+  .public-preview-card--deal-in.is-in-view {
+    transform-origin: 50% 34%;
+    animation-name: deal-card-enter-soft;
+    animation-duration: var(--motion-deal);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--deal-order, 0) * 52ms);
+  }
+}
+
+.hole-action-panel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border-strong) 60%, var(--border-subtle));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--mission-panel-bg) 84%, var(--hole-mission-selected-bg) 16%),
+      color-mix(in srgb, var(--mission-panel-bg) 94%, #ffffff 6%)
+    );
+  padding: var(--space-4);
+  gap: var(--space-2);
+}
+
+.hole-action-panel--ready {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 70%, var(--border-subtle));
+}
+
+.hole-action-panel__summary-row {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hole-action-panel__summary {
+  font-size: 1.03rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-primary) 92%, var(--accent-strong));
+}
+
+.hole-action-panel__button {
+  width: 100%;
+  min-height: 64px;
+  border-radius: 1.06rem;
+  border: 1.5px solid color-mix(in srgb, var(--hole-action-bg) 90%, var(--border-subtle));
+  background: var(--hole-action-bg);
+  color: var(--hole-action-text);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.008em;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+    0 10px 22px -16px color-mix(in srgb, var(--hole-action-bg) 64%, transparent);
+}
+
+.hole-action-panel__button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hole-action-bg) 88%, #ffffff 12%);
+  background: color-mix(in srgb, var(--hole-action-bg) 88%, #ffffff 12%);
+}
+
+.hole-action-panel__button:disabled {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--hole-action-disabled-bg) 68%, var(--border-subtle));
+  background: var(--hole-action-disabled-bg);
+  color: var(--hole-action-disabled-text);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hole-action-panel__button--ready-pulse {
+    animation: ready-cta-pulse 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+.hole-action-panel__helper {
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--text-secondary) 84%, var(--accent-strong));
+}
+
+.hole-setup-card {
+  padding: var(--space-4);
+  gap: var(--space-3);
+  border-radius: var(--radius-lg);
+  border-color: color-mix(in srgb, var(--hole-mission-border) 56%, var(--border-subtle));
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--hole-mission-surface) 70%, #ffffff 30%),
+      color-mix(in srgb, var(--hole-mission-surface-muted) 84%, var(--surface-panel) 16%)
+    );
+}
+
+.hole-setup-card--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-play-screen--missions .hole-setup-card--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hole-setup-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.hole-setup-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--text-secondary) 86%, var(--accent-strong));
+}
+
+.hole-setup-label--optional {
+  color: color-mix(in srgb, var(--text-secondary) 85%, var(--accent-strong));
+}
+
+.hole-setup-card .segmented-control {
+  padding: 0.28rem;
+  gap: 0.3rem;
+  border-color: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-paper) 78%, #ffffff 22%);
+}
+
+.hole-setup-card .segmented-control__button {
+  min-height: 46px;
+  padding: 0.5rem;
+  font-size: 0.98rem;
+}
+
+.hole-setup-tag-grid {
+  gap: 0.38rem;
+}
+
+.hole-setup-tag-pill {
+  min-height: 38px;
+  padding: 0.25rem 0.58rem;
+  border-color: color-mix(in srgb, var(--hole-mission-border) 44%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-paper) 74%, #ffffff 26%);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.hole-setup-tag-pill .tag-pill__icon {
+  width: 0.92rem;
+  height: 0.92rem;
+  font-size: 0.92rem;
+  opacity: 0.82;
+  filter: saturate(0.82);
+}
+
+.hole-setup-tag-pill.active {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 68%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-selected-bg) 74%, #ffffff 26%);
+  color: var(--accent-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hole-mission-border-strong) 42%, transparent);
+}
+
+.hole-setup-tag-pill.active .tag-pill__icon {
+  opacity: 1;
+  filter: saturate(1.12);
+}
+
+.hole-setup-tags-empty {
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+.hole-setup-deal-button {
+  width: 100%;
+  min-height: 62px;
+  padding: 0.88rem 1rem;
+  font-size: 1.04rem;
+  font-weight: 800;
+  border-radius: 1rem;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
+    0 10px 20px -14px color-mix(in srgb, var(--accent-strong) 56%, transparent);
+}
+
+.hole-missions-assigned-summary {
+  border-radius: calc(var(--radius-lg) + 6px);
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border) 62%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-paper) 88%, #ffffff 12%);
+  padding: var(--space-5);
+  gap: var(--space-4);
+  box-shadow: none;
+}
+
+.hole-missions-assigned-summary__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  line-height: 1.15;
+}
+
+.hole-missions-assigned-summary__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.hole-missions-assigned-summary__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.hole-missions-assigned-summary__player-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.hole-missions-assigned-summary .hole-missions-assigned-summary__player {
+  gap: var(--space-2);
+}
+
+.hole-missions-assigned-summary__mission-card {
+  appearance: none;
+  width: 100%;
+  border-radius: calc(var(--radius-lg) - 2px);
+  border: 1.5px solid color-mix(in srgb, var(--hole-mission-border) 64%, var(--border-subtle));
+  background: color-mix(in srgb, var(--surface-panel) 88%, var(--hole-mission-surface-muted) 12%);
+  text-align: left;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.hole-missions-assigned-summary__mission-card:hover {
+  border-color: color-mix(in srgb, var(--hole-mission-border-strong) 64%, var(--border-subtle));
+}
+
+.hole-missions-assigned-summary__mission-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--hole-mission-border-strong) 62%, var(--border-subtle));
+  outline-offset: 2px;
+}
+
+.hole-missions-assigned-summary__mission-header {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hole-missions-assigned-summary__mission-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.2rem;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  line-height: 1.12;
+}
+
+.hole-missions-assigned-summary__points-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.2rem;
+  padding: 0.36rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid color-mix(in srgb, var(--hole-mission-border-strong) 70%, var(--border-subtle));
+  background: color-mix(in srgb, var(--hole-mission-ready-bg) 86%, #ffffff 14%);
+  color: #ffffff !important;
+  font-family: var(--font-ui);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.12;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.hole-missions-assigned-summary__mission-description {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.32;
+  font-weight: 400;
+}
+
+.hole-missions-assigned-summary__personal-par {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.28;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-easy .hole-missions-assigned-summary__mission-title {
+  color: #1a7d47;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-easy .hole-missions-assigned-summary__points-chip {
+  background: #1a7d47;
+  border-color: #1a7d47;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-medium .hole-missions-assigned-summary__mission-title {
+  color: #a8661c;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-medium .hole-missions-assigned-summary__points-chip {
+  background: #a8661c;
+  border-color: #a8661c;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-hard .hole-missions-assigned-summary__mission-title {
+  color: #6B2D3C;
+}
+
+.hole-missions-assigned-summary__mission-card--difficulty-hard .hole-missions-assigned-summary__points-chip {
+  background: #6b2d3c;
+  border-color: #6b2d3c;
+}
+
+.hole-mission-preview-modal {
+  --hole-mission-preview-accent: #1f7d5a;
+  width: min(92vw, 560px);
+  max-height: min(92vh, 960px);
+  overflow: visible;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  position: relative;
+}
+
+.hole-mission-preview-modal--difficulty-medium {
+  --hole-mission-preview-accent: #bd672f;
+}
+
+.hole-mission-preview-modal--difficulty-hard {
+  --hole-mission-preview-accent: #6B2D3C;
+}
+
+.hole-mission-preview-modal__floating-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hole-mission-preview-modal__image-only-frame {
+  margin: 0;
+  border-radius: calc(var(--radius-lg) + 8px);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.hole-mission-preview-modal__image-only {
+  width: 100%;
+  display: block;
+  height: auto;
+}

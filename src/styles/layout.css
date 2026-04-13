@@ -1,0 +1,21 @@
+/* App-shell/layout slices extracted from app.css for phased modularization. */
+
+.app-shell__screen-frame:has(.hole-play-screen),
+.app-shell__screen-frame:has(.round-setup-screen),
+.app-shell__screen-frame:has(.hole-results-screen) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.app-shell--keyboard-visible .home-floating-dock,
+.app-shell--keyboard-visible .end-share-toast {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-shell--keyboard-visible .home-floating-dock {
+  transform: translate(-50%, calc(100% + var(--space-4)));
+}

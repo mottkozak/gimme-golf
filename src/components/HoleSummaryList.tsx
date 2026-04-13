@@ -13,6 +13,9 @@ interface HoleSummaryListProps {
   holeResults: HoleResultState[]
   momentumEnabled: boolean
   gameMode: GameMode
+  expandedHoleNumbers?: number[]
+  highlightedHoleNumber?: number | null
+  onHoleToggle?: (holeNumber: number, isOpen: boolean) => void
 }
 
 function formatSignedPoints(value: number): string {
@@ -38,7 +41,14 @@ function HoleSummaryList({
   holeResults,
   momentumEnabled,
   gameMode,
+  expandedHoleNumbers,
+  highlightedHoleNumber = null,
+  onHoleToggle,
 }: HoleSummaryListProps) {
+  const expandedHoleSet = useMemo(
+    () => new Set(expandedHoleNumbers ?? []),
+    [expandedHoleNumbers],
+  )
   const breakdownsByPlayerId = useMemo(
     () =>
       buildHolePointBreakdownsByPlayerId(
@@ -57,7 +67,12 @@ function HoleSummaryList({
         const holeResult = holeResults[holeIndex]
 
         return (
-          <details key={hole.holeNumber} className="panel hole-scorecard">
+          <details
+            key={hole.holeNumber}
+            className={`panel hole-scorecard ${highlightedHoleNumber === hole.holeNumber ? 'hole-scorecard--highlighted' : ''}`}
+            open={expandedHoleNumbers ? expandedHoleSet.has(hole.holeNumber) : undefined}
+            onToggle={(event) => onHoleToggle?.(hole.holeNumber, event.currentTarget.open)}
+          >
             <summary className="hole-scorecard__summary">
               <div className="row-between">
                 <strong>Hole {hole.holeNumber}</strong>

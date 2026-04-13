@@ -8,8 +8,7 @@ src/
   screens/
     HomeScreen.tsx
     RoundSetupScreen.tsx
-    HoleSetupScreen.tsx
-    HolePlayScreen.tsx
+    HolePlayScreen.tsx (setup + play flow)
     HoleResultsScreen.tsx
     LeaderboardScreen.tsx
     EndRoundScreen.tsx

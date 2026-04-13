@@ -1,0 +1,41 @@
+{
+  "features": {
+    "home": {
+      "owners": ["@frontend-home"],
+      "requiredTestFiles": [
+        "src/logic/landingModes.test.ts",
+        "src/logic/primaryFlowSmoke.test.ts",
+        "src/features/home/HomeScreen.component.test.tsx"
+      ]
+    },
+    "setup": {
+      "owners": ["@frontend-setup"],
+      "requiredTestFiles": [
+        "src/data/cardPacks.test.ts",
+        "src/logic/roundConfig.test.ts",
+        "src/features/setup/RoundSetupScreen.component.test.tsx"
+      ]
+    },
+    "hole-play": {
+      "owners": ["@frontend-hole-play"],
+      "requiredTestFiles": [
+        "src/logic/dealCards.test.ts",
+        "src/logic/powerUps.test.ts"
+      ]
+    },
+    "results": {
+      "owners": ["@frontend-results"],
+      "requiredTestFiles": [
+        "src/logic/publicCardResolution.test.ts",
+        "src/logic/roundProgress.test.ts"
+      ]
+    },
+    "recap": {
+      "owners": ["@frontend-recap"],
+      "requiredTestFiles": [
+        "src/logic/roundRecapViewModel.test.ts",
+        "src/logic/roundRecapShare.test.ts"
+      ]
+    }
+  }
+}

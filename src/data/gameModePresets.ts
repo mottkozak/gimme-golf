@@ -27,6 +27,7 @@ export interface GameModePresetSettings {
   enabledPackIds: CardPackId[]
   toggles: {
     dynamicDifficulty: boolean
+    catchUpMode: boolean
     momentumBonuses: boolean
     drawTwoPickOne: boolean
     autoAssignOne: boolean
@@ -102,6 +103,7 @@ function createCardPresetSettings(
     momentumBonuses?: boolean
     featuredEnabled?: boolean
     dynamicDifficulty?: boolean
+    catchUpMode?: boolean
     personalCardMode?: 'drawTwoPickOne' | 'autoAssignOne'
   },
 ): GameModePresetSettings {
@@ -113,6 +115,7 @@ function createCardPresetSettings(
     enabledPackIds,
     toggles: {
       dynamicDifficulty: options?.dynamicDifficulty ?? true,
+      catchUpMode: options?.catchUpMode ?? true,
       momentumBonuses: options?.momentumBonuses ?? true,
       drawTwoPickOne: personalCardMode === 'drawTwoPickOne',
       autoAssignOne: personalCardMode === 'autoAssignOne',
@@ -215,6 +218,7 @@ export const GAME_MODE_PRESET_CATALOG: GameModePresetDefinition[] = [
       enabledPackIds: [],
       toggles: {
         dynamicDifficulty: false,
+        catchUpMode: false,
         momentumBonuses: false,
         drawTwoPickOne: false,
         autoAssignOne: true,

@@ -1,5 +1,6 @@
 import { formatPlayerNames } from './playerNames.ts'
-import { buildLeaderboardEntries } from './leaderboard.ts'
+import { buildLeaderboardEntries, getAdjustedScoreLeaders } from './leaderboard.ts'
+import type { RecapShareTheme } from './roundRecapViewModel.ts'
 import type { AppScreen } from '../app/router.tsx'
 import type { GameModePresetId, RoundState } from '../types/game.ts'
 
@@ -31,6 +32,11 @@ type PublicResolutionAction =
   | 'affected_toggle'
   | 'effect_select'
 type RecapShareOutcome = 'shared' | 'copied' | 'downloaded' | 'cancelled' | 'error' | 'unsupported'
+type RecapInteractionName =
+  | 'recap_reveal_replayed'
+  | 'story_beat_opened'
+  | 'spotlight_flipped'
+  | 'share_theme_selected'
 
 export interface RoundAnalyticsContext {
   selectedMode: GameModePresetId
@@ -120,6 +126,12 @@ export interface AnalyticsEventPayloadByName {
   }
   recap_share_action: {
     outcome: RecapShareOutcome
+    round: RoundAnalyticsContext
+  }
+  recap_interaction: {
+    interaction: RecapInteractionName
+    detail: string
+    shareTheme?: RecapShareTheme
     round: RoundAnalyticsContext
   }
 }
@@ -319,15 +331,9 @@ export function trackRoundCompleted(roundState: RoundState): void {
     roundState.totalsByPlayerId,
     'adjustedScore',
   )
-  const winningAdjustedScore = leaderboardRows[0]?.adjustedScore
+  const leaders = getAdjustedScoreLeaders(leaderboardRows)
   const winnerNames =
-    typeof winningAdjustedScore === 'number'
-      ? formatPlayerNames(
-          leaderboardRows
-            .filter((row) => row.adjustedScore === winningAdjustedScore)
-            .map((row) => row.playerName),
-        )
-      : '-'
+    leaders.length > 0 ? formatPlayerNames(leaders.map((row) => row.playerName)) : '-'
 
   trackAnalyticsEvent('round_completed', {
     winnerNames,
@@ -362,6 +368,20 @@ export function trackSummaryScreenViewed(
 export function trackRecapShareAction(roundState: RoundState, outcome: RecapShareOutcome): void {
   trackAnalyticsEvent('recap_share_action', {
     outcome,
+    round: buildRoundAnalyticsContext(roundState),
+  })
+}
+
+export function trackRecapInteraction(
+  roundState: RoundState,
+  interaction: RecapInteractionName,
+  detail: string,
+  shareTheme?: RecapShareTheme,
+): void {
+  trackAnalyticsEvent('recap_interaction', {
+    interaction,
+    detail,
+    shareTheme,
     round: buildRoundAnalyticsContext(roundState),
   })
 }

@@ -1,5 +1,7 @@
 export type AppScreen =
   | 'home'
+  | 'multiplayerAccess'
+  | 'multiplayerLobby'
   | 'profile'
   | 'settings'
   | 'roundSetup'

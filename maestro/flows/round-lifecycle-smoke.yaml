@@ -1,0 +1,16 @@
+appId: com.gimmegolf.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Choose Game Mode"
+- tapOn: "Arcade"
+- tapOn: "Play Arcade"
+- assertVisible: "Round Config"
+- tapOn: "Play"
+- assertVisible: "Hole Setup: Power Ups"
+- tapOn: "Deal Hole 1 Power Ups"
+- tapOn: "Enter Hole Results"
+- assertVisible: "Hole Results"
+- tapOn: "3"
+- tapOn: "Save Hole & View Recap"
+- assertVisible: "Hole 1 Recap"

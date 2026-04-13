@@ -8,6 +8,7 @@ interface RecapPlayerOutcomeCardProps {
   children: ReactNode
   tone?: RecapPlayerOutcomeTone
   toggleLabel?: string
+  collapsible?: boolean
 }
 
 function RecapPlayerOutcomeCard({
@@ -16,7 +17,23 @@ function RecapPlayerOutcomeCard({
   children,
   tone = 'default',
   toggleLabel = 'Details',
+  collapsible = true,
 }: RecapPlayerOutcomeCardProps) {
+  if (!collapsible) {
+    return (
+      <article
+        className={`recap-item recap-player-outcome-card recap-player-outcome-card--${tone} recap-player-outcome-card--static`}
+      >
+        <div className="recap-player-outcome-card__summary">
+          <div className="row-between recap-player-outcome-card__summary-top">
+            <span className="recap-player-outcome-card__name">{playerName}</span>
+          </div>
+          <div className="recap-metrics recap-player-outcome-card__chips">{chips}</div>
+        </div>
+      </article>
+    )
+  }
+
   return (
     <details className={`recap-item recap-player-outcome-card recap-player-outcome-card--${tone}`}>
       <summary className="recap-player-outcome-card__summary">

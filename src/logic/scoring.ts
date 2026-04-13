@@ -160,7 +160,9 @@ function normalizeHolePowerUps(
   players: Player[],
   holes: RoundState['holes'],
   holePowerUps: HolePowerUpState[] | undefined,
+  gameMode: RoundState['config']['gameMode'],
 ): HolePowerUpState[] {
+  const isPowerUpsMode = gameMode === 'powerUps'
   return holes.map((hole, holeIndex) => {
     const existing = holePowerUps?.[holeIndex] ?? createEmptyHolePowerUpState(players, hole.holeNumber)
     return {
@@ -180,7 +182,9 @@ function normalizeHolePowerUps(
       usedPowerUpByPlayerId: Object.fromEntries(
         players.map((player) => [
           player.id,
-          existing.usedPowerUpByPlayerId?.[player.id] ?? false,
+          isPowerUpsMode
+            ? Boolean(existing.assignedPowerUpIdByPlayerId?.[player.id])
+            : existing.usedPowerUpByPlayerId?.[player.id] ?? false,
         ]),
       ),
     }
@@ -201,6 +205,7 @@ export function recalculateRoundTotals(roundState: RoundState): RoundState {
     roundState.players,
     roundState.holes,
     roundState.holePowerUps,
+    roundState.config.gameMode,
   )
   const normalizedHoleUxMetrics = normalizeHoleUxMetrics(
     roundState.holes,

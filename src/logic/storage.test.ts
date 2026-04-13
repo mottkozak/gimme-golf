@@ -4,7 +4,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNewRoundState } from './roundLifecycle.ts'
 import {
+  ACTIVE_ROUND_STORAGE_BACKUP_KEY,
+  ACTIVE_ROUND_STORAGE_JOURNAL_KEY,
   ACTIVE_ROUND_STORAGE_KEY,
+  LEGACY_ACTIVE_ROUND_STORAGE_KEY,
   clearRoundState,
   loadRoundState,
   loadRoundStateSnapshot,
@@ -43,6 +46,15 @@ function installLocalStorageMock(): LocalStorageLike {
   return mockStorage
 }
 
+function buildVersionedEnvelope(roundState: RoundState, savedAtMs: number): string {
+  return JSON.stringify({
+    schemaVersion: 2,
+    roundState,
+    savedAtMs,
+    writeId: `${savedAtMs}-test-write-id`,
+  })
+}
+
 test('storage: save and load snapshot keeps round state and save timestamp', () => {
   installLocalStorageMock()
   clearRoundState()
@@ -55,19 +67,23 @@ test('storage: save and load snapshot keeps round state and save timestamp', () 
   assert.ok(snapshot.roundState)
   assert.equal(snapshot.savedAtMs, savedAtMs)
   assert.equal(snapshot.roundState?.holes.length, roundState.holes.length)
+  assert.equal(snapshot.recoveryReason, null)
 })
 
-test('storage: load supports legacy raw round-state payload', () => {
+test('storage: load migrates legacy v1 payload and keeps saved state', () => {
   installLocalStorageMock()
   clearRoundState()
 
   const roundState = createNewRoundState()
-  localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, JSON.stringify(roundState))
+  localStorage.setItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY, JSON.stringify(roundState))
 
   const snapshot = loadRoundStateSnapshot()
   assert.ok(snapshot.roundState)
-  assert.equal(snapshot.savedAtMs, null)
+  assert.equal(snapshot.recoveryReason, 'migrated_legacy_v1')
   assert.equal(loadRoundState()?.currentHoleIndex, 0)
+
+  assert.equal(localStorage.getItem(LEGACY_ACTIVE_ROUND_STORAGE_KEY), null)
+  assert.ok(localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY))
 })
 
 test('storage: invalid structural data is cleared', () => {
@@ -81,10 +97,7 @@ test('storage: invalid structural data is cleared', () => {
 
   localStorage.setItem(
     ACTIVE_ROUND_STORAGE_KEY,
-    JSON.stringify({
-      roundState: invalidRoundState,
-      savedAtMs: Date.now(),
-    }),
+    buildVersionedEnvelope(invalidRoundState, Date.now()),
   )
 
   const snapshot = loadRoundStateSnapshot()
@@ -93,15 +106,37 @@ test('storage: invalid structural data is cleared', () => {
   assert.equal(localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY), null)
 })
 
-test('storage: malformed JSON is cleared safely', () => {
+test('storage: interrupted write is recovered from journal', () => {
   installLocalStorageMock()
   clearRoundState()
 
-  localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, '{"roundState":')
-  const snapshot = loadRoundStateSnapshot()
+  const roundState = createNewRoundState()
+  localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, '{"schemaVersion":2')
+  localStorage.setItem(
+    ACTIVE_ROUND_STORAGE_JOURNAL_KEY,
+    buildVersionedEnvelope(roundState, Date.now() + 10),
+  )
 
-  assert.equal(snapshot.roundState, null)
-  assert.equal(snapshot.savedAtMs, null)
-  assert.equal(localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY), null)
+  const snapshot = loadRoundStateSnapshot()
+  assert.ok(snapshot.roundState)
+  assert.equal(snapshot.recoveryReason, 'recovered_from_journal')
+  assert.ok(localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY))
 })
 
+test('storage: backup is used when primary and journal are invalid', () => {
+  installLocalStorageMock()
+  clearRoundState()
+
+  const roundState = createNewRoundState()
+  localStorage.setItem(ACTIVE_ROUND_STORAGE_KEY, '{"schemaVersion":2')
+  localStorage.setItem(ACTIVE_ROUND_STORAGE_JOURNAL_KEY, '{"schemaVersion":2')
+  localStorage.setItem(
+    ACTIVE_ROUND_STORAGE_BACKUP_KEY,
+    buildVersionedEnvelope(roundState, Date.now() + 20),
+  )
+
+  const snapshot = loadRoundStateSnapshot()
+  assert.ok(snapshot.roundState)
+  assert.equal(snapshot.recoveryReason, 'recovered_from_backup')
+  assert.ok(localStorage.getItem(ACTIVE_ROUND_STORAGE_KEY))
+})

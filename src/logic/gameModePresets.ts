@@ -14,6 +14,7 @@ function clonePresetSettings(settings: GameModePresetSettings): GameModePresetSe
     enabledPackIds: [...settings.enabledPackIds],
     toggles: {
       dynamicDifficulty: settings.toggles.dynamicDifficulty,
+      catchUpMode: settings.toggles.catchUpMode,
       momentumBonuses: settings.toggles.momentumBonuses,
       drawTwoPickOne: settings.toggles.drawTwoPickOne,
       autoAssignOne: settings.toggles.autoAssignOne,
@@ -54,6 +55,7 @@ function applyPresetSettings(
     toggles: {
       ...config.toggles,
       dynamicDifficulty: clonedSettings.toggles.dynamicDifficulty,
+      catchUpMode: clonedSettings.toggles.catchUpMode,
       momentumBonuses: clonedSettings.toggles.momentumBonuses,
       drawTwoPickOne: clonedSettings.toggles.drawTwoPickOne,
       autoAssignOne: clonedSettings.toggles.autoAssignOne,

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Restore mirrored round/preferences keys across device transfers/backups. -->
+    <include domain="sharedpref" path="CapacitorStorage.xml" />
+    <include domain="sharedpref" path="com.getcapacitor.plugins.preferences.xml" />
+</full-backup-content>

@@ -1,3 +1,4 @@
+import { readStorageItem, removeStorageItem, writeStorageItem } from '../platform/storage.ts'
 export const ONBOARDING_STORAGE_KEY = 'gimme-golf-onboarding-v1'
 
 export type OnboardingCompletionStatus = 'completed' | 'skipped'
@@ -25,11 +26,11 @@ function isPersistedOnboardingState(value: unknown): value is PersistedOnboardin
 
 export function saveOnboardingCompletionStatus(completionStatus: OnboardingCompletionStatus): void {
   const nextState: PersistedOnboardingState = { completionStatus }
-  localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(nextState))
+  writeStorageItem(ONBOARDING_STORAGE_KEY, JSON.stringify(nextState))
 }
 
 export function loadOnboardingCompletionStatus(): OnboardingCompletionStatus | null {
-  const rawValue = localStorage.getItem(ONBOARDING_STORAGE_KEY)
+  const rawValue = readStorageItem(ONBOARDING_STORAGE_KEY)
   if (!rawValue) {
     return null
   }
@@ -47,7 +48,7 @@ export function loadOnboardingCompletionStatus(): OnboardingCompletionStatus | n
 }
 
 export function clearOnboardingCompletionStatus(): void {
-  localStorage.removeItem(ONBOARDING_STORAGE_KEY)
+  removeStorageItem(ONBOARDING_STORAGE_KEY)
 }
 
 export function shouldShowOnboarding({

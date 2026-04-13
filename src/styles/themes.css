@@ -1,0 +1,11 @@
+/* Theme-oriented slices extracted from app.css for phased modularization. */
+
+:root[data-theme='dark'] .table-sort-button.active {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+:root[data-theme='dark'] .home-floating-dock {
+  border-color: var(--color-border);
+  background: color-mix(in srgb, var(--surface-elevated) 92%, transparent);
+}

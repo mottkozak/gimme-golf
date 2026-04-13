@@ -1,0 +1,7 @@
+appId: com.gimmegolf.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Choose Game Mode"
+- openLink: "gimmegolf://auth/callback#access_token=e2e-access-token&refresh_token=e2e-refresh-token"
+- assertVisible: "Choose Game Mode"

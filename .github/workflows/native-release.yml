@@ -1,0 +1,180 @@
+name: Native Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: Semantic version (for example 1.3.0)
+        required: true
+        default: '1.0.0'
+      build_number:
+        description: Monotonic build number
+        required: true
+        default: '1'
+
+jobs:
+  android-signed-release:
+    name: Android Signed Release (AAB)
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_VERSION_NAME: ${{ inputs.version_name }}
+      ANDROID_VERSION_CODE: ${{ inputs.build_number }}
+      GG_ANDROID_STORE_FILE: /tmp/android-release.keystore
+      GG_ANDROID_STORE_PASSWORD: ${{ secrets.GG_ANDROID_STORE_PASSWORD }}
+      GG_ANDROID_KEY_ALIAS: ${{ secrets.GG_ANDROID_KEY_ALIAS }}
+      GG_ANDROID_KEY_PASSWORD: ${{ secrets.GG_ANDROID_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Android native toolchain
+        run: npm run native:toolchain:gate:android
+
+      - name: Validate native preflight
+        run: npm run native:preflight
+
+      - name: Decode Android release keystore
+        run: |
+          echo "${{ secrets.GG_ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$GG_ANDROID_STORE_FILE"
+
+      - name: Build and sync mobile app
+        run: npm run build:mobile
+
+      - name: Build signed Android release bundle
+        run: npm run build:android:release
+
+      - name: Upload Android release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab-${{ inputs.version_name }}-${{ inputs.build_number }}
+          path: android/app/build/outputs/bundle/release/*.aab
+
+  ios-signed-release:
+    name: iOS Signed Release (IPA)
+    runs-on: macos-latest
+    env:
+      IOS_VERSION_NAME: ${{ inputs.version_name }}
+      IOS_BUILD_NUMBER: ${{ inputs.build_number }}
+      IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+      IOS_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+      IOS_EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate iOS native toolchain
+        run: npm run native:toolchain:gate:ios
+
+      - name: Validate native preflight
+        run: npm run native:preflight
+
+      - name: Prepare signing assets
+        run: |
+          CERT_PATH="$RUNNER_TEMP/dist-cert.p12"
+          PROFILE_PATH="$RUNNER_TEMP/dist.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/release-signing.keychain-db"
+
+          echo "${{ secrets.IOS_DIST_CERT_P12_BASE64 }}" | base64 --decode > "$CERT_PATH"
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$IOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /dev/stdin <<< "$(security cms -D -i "$PROFILE_PATH")")
+          PROFILE_BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' /dev/stdin <<< "$(security cms -D -i "$PROFILE_PATH")")
+
+          echo "IOS_PROFILE_PATH=$PROFILE_PATH" >> "$GITHUB_ENV"
+          echo "IOS_PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "IOS_PROFILE_APP_IDENTIFIER=$PROFILE_BUNDLE_ID" >> "$GITHUB_ENV"
+          echo "IOS_KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+      - name: Build and sync mobile app
+        run: npm run build:mobile
+
+      - name: Archive iOS app
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            MARKETING_VERSION="$IOS_VERSION_NAME" \
+            CURRENT_PROJECT_VERSION="$IOS_BUILD_NUMBER" \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROFILE_NAME" \
+            CODE_SIGN_STYLE=Manual \
+            OTHER_CODE_SIGN_FLAGS="--keychain $IOS_KEYCHAIN_PATH" \
+            archive
+
+      - name: Create export options
+        run: |
+          EXPORT_METHOD="${IOS_EXPORT_METHOD:-app-store}"
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>${EXPORT_METHOD}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>teamID</key>
+            <string>${IOS_TEAM_ID}</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.gimmegolf.app</key>
+              <string>${IOS_PROFILE_NAME}</string>
+            </dict>
+            <key>compileBitcode</key>
+            <false/>
+            <key>destination</key>
+            <string>export</string>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Export signed IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportPath "$RUNNER_TEMP/ipa" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Upload iOS release IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-ipa-${{ inputs.version_name }}-${{ inputs.build_number }}
+          path: ${{ runner.temp }}/ipa/*.ipa

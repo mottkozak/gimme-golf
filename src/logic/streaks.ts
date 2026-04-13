@@ -263,10 +263,7 @@ function computeHolePointBreakdownsByPlayerId(
       }
 
       const rawStackedBonus =
-        playerBreakdown.featuredBonusPoints +
-        playerBreakdown.momentumBonus +
-        playerBreakdown.publicDelta +
-        playerBreakdown.rivalryBonus
+        playerBreakdown.momentumBonus + playerBreakdown.publicDelta + playerBreakdown.rivalryBonus
       const clampedStackedBonus = clamp(
         rawStackedBonus,
         POINT_BALANCE_RULES.stackedBonusCap.min,
@@ -275,7 +272,9 @@ function computeHolePointBreakdownsByPlayerId(
       const balanceCapAdjustment = clampedStackedBonus - rawStackedBonus
 
       playerBreakdown.balanceCapAdjustment = balanceCapAdjustment
-      playerBreakdown.total = playerBreakdown.baseMissionPoints + clampedStackedBonus
+      // Use normalized mission points (not raw base points) so negative-value missions
+      // do not bypass featured/balance normalization and over-penalize a hole.
+      playerBreakdown.total = playerBreakdown.missionPoints + clampedStackedBonus
       pendingTotalsByPlayerId[player.id] = playerBreakdown.total
     }
 

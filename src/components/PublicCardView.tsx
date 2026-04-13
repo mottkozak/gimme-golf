@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import useInViewport from '../hooks/useInViewport.ts'
+import type { ChallengeLayout } from '../logic/account.ts'
 import type { PublicCard } from '../types/cards.ts'
 import BadgeChip from './BadgeChip.tsx'
 
@@ -7,6 +8,9 @@ interface PublicCardViewProps {
   card: PublicCard
   showTypeChip?: boolean
   showMetadataLine?: boolean
+  layout?: ChallengeLayout
+  illustrativeImageSrc?: string | null
+  illustrativeImageAlt?: string
   entryOrder?: number
 }
 
@@ -26,6 +30,9 @@ function PublicCardView({
   card,
   showTypeChip = true,
   showMetadataLine = false,
+  layout = 'compact',
+  illustrativeImageSrc,
+  illustrativeImageAlt,
   entryOrder,
 }: PublicCardViewProps) {
   const [setInViewportRef, isInViewport] = useInViewport<HTMLElement>({
@@ -41,15 +48,34 @@ function PublicCardView({
         } as CSSProperties)
       : undefined
   const typeLabel = getCardTypeLabel(card.cardType)
+  const [failedIllustrativeImageSrc, setFailedIllustrativeImageSrc] = useState<string | null>(null)
+  const hasIllustrativeImage =
+    layout === 'illustrative' &&
+    typeof illustrativeImageSrc === 'string' &&
+    illustrativeImageSrc.length > 0 &&
+    illustrativeImageSrc !== failedIllustrativeImageSrc
 
   return (
     <article
-      className={`panel public-card public-card--compact public-preview-card mission-card card-category card-category--${card.cardType} ${
+      className={`panel public-card ${
+        layout === 'illustrative' ? 'public-card--illustrative' : 'public-card--compact'
+      } public-preview-card mission-card card-category card-category--${card.cardType} ${
         hasEntryAnimation ? 'public-preview-card--deal-in' : ''
       } ${hasEntryAnimation && isInViewport ? 'is-in-view' : ''}`}
       ref={hasEntryAnimation ? setInViewportRef : undefined}
       style={entryStyle}
     >
+      {hasIllustrativeImage && (
+        <figure className="public-card__illustration-frame">
+          <img
+            className="public-card__illustration"
+            src={illustrativeImageSrc}
+            alt={illustrativeImageAlt ?? `${card.name} public card`}
+            loading="lazy"
+            onError={() => setFailedIllustrativeImageSrc(illustrativeImageSrc)}
+          />
+        </figure>
+      )}
       <header className="row-between setup-row-wrap public-card__header challenge-card__meta">
         <strong>{card.name}</strong>
         <div className="button-row">
