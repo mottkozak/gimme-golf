@@ -61,19 +61,8 @@ function SettingsScreen({ onNavigate, onAbandonRound }: ScreenProps) {
           <AppIcon className="screen-title__icon" icon={ICONS.settings} />
           <h2>Settings</h2>
         </div>
-        <p className="muted">Preferences, legal links, subscriptions, and account controls.</p>
+        <p className="muted">Legal links, subscriptions, and account controls.</p>
       </header>
-
-      <section className="panel stack-xs">
-        <p className="label">Challenge Card Style</p>
-        <p>
-          <strong>Illustrative</strong>
-        </p>
-        <p className="muted">
-          Card layout is currently locked to Illustrative so full artwork is shown when assets are
-          available.
-        </p>
-      </section>
 
       <section className="panel stack-xs">
         <p className="label">Legal & Billing</p>

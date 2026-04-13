@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ICONS } from '../../app/icons.ts'
 import AppIcon from '../../components/AppIcon.tsx'
 import PlayerSetupRow from '../../components/PlayerSetupRow.tsx'
-import SegmentedControl from '../../components/SegmentedControl.tsx'
 import {
   hapticError,
   hapticLightImpact,
@@ -17,11 +16,7 @@ import {
   isEdgeSwipeBackGesture,
   shouldCaptureEdgeSwipeBackStart,
 } from '../../logic/edgeSwipeBack.ts'
-import {
-  loadAccountProfile,
-  saveAccountProfile,
-  type ChallengeLayout,
-} from '../../logic/account.ts'
+import { loadAccountProfile } from '../../logic/account.ts'
 import {
   clearActiveMultiplayerSession,
   createMultiplayerRound,
@@ -33,11 +28,6 @@ import {
   saveActiveMultiplayerSession,
   type MultiplayerRoundSession,
 } from '../../logic/multiplayer.ts'
-import { CHALLENGE_LAYOUT_OPTIONS } from '../../logic/authOnboarding.ts'
-import {
-  loadChallengeLayoutPreference,
-  saveChallengeLayoutPreference,
-} from '../../logic/preferences.ts'
 import {
   createDraftId,
   dedupeNames,
@@ -78,9 +68,6 @@ function trackSetupStartedDeferred(roundState: RoundState): void {
 
 function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: ScreenProps) {
   const [localIdentityState] = useState(() => loadLocalIdentityState())
-  const [challengeLayout, setChallengeLayout] = useState<ChallengeLayout>(() =>
-    loadChallengeLayoutPreference(),
-  )
   const [setupPlayMode, setSetupPlayMode] = useState<SetupPlayMode>(() =>
     loadActiveMultiplayerSession() ? 'multiplayer' : 'local',
   )
@@ -232,19 +219,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
         holes: applyCourseStyle(draft.holes, draft.config.holeCount, courseStyle),
       }
     })
-  }
-
-  const setChallengeLayoutPreference = (layout: ChallengeLayout) => {
-    hapticSelection()
-    setChallengeLayout(layout)
-    saveChallengeLayoutPreference(layout)
-    const profile = loadAccountProfile()
-    if (profile) {
-      saveAccountProfile({
-        ...profile,
-        challengeLayout: layout,
-      })
-    }
   }
 
   const addPlayer = () => {
@@ -693,28 +667,6 @@ function RoundSetupScreen({ roundState, onNavigate, onUpdateRoundState }: Screen
               Standard
             </button>
           </div>
-        </div>
-      </section>
-
-      <section className="panel stack-sm setup-step setup-step--style">
-        <header className="setup-step__header">
-          <h3 className="step-title">
-            <AppIcon className="step-title__icon" icon={ICONS.dealCards} />
-            Style
-          </h3>
-        </header>
-
-        <div className="setup-control-group">
-          <span className="label setup-control-label">Challenge cards</span>
-          <SegmentedControl
-            ariaLabel="Challenge card layout"
-            selectedId={challengeLayout}
-            options={CHALLENGE_LAYOUT_OPTIONS.map((option) => ({
-              id: option.id,
-              label: option.label,
-            }))}
-            onSelect={(nextId) => setChallengeLayoutPreference(nextId as ChallengeLayout)}
-          />
         </div>
       </section>
 
